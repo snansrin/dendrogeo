@@ -1802,26 +1802,21 @@ Object.assign(DG_I18N_EN,{
 });
 
 Object.assign(DG_I18N_EN,{
-  "Rehberli canlı harita turunu başlatın": "Start the guided live-map tour",
+  "Kaydedilmiş Göksu Parkı turunu başlatın": "Start the saved Goksu Park tour",
   "Yöntem ve veri kaynakları": "Methods and data sources",
-  "Göksu Parkı · Ankara, Türkiye · geçici tur, kayıt değiştirmez": "Goksu Park · Ankara, Türkiye · temporary tour; no records are changed",
-  "Göksu Parkı · rehberli canlı harita": "Goksu Park · guided live map",
-  "Gerçek harita ve OSM verisi kullanılır. Tarama geçici önizleme üretir; analiz ancak siz başlatırsınız, kalıcı karar için ayrıca Kabul et ve kaydet gerekir.": "This tour uses the live map and OSM data. Scanning creates a temporary preview; you start the analysis, and a separate Accept and save action is required to keep a decision.",
-  "1 · Park Analizi Modu": "1 · Park analysis mode",
-  "Önce harita araçlarındaki Park Analizi Modu düğmesine dokunun.": "First, tap Park analysis mode in the map tools.",
-  "2 · Göksu Parkı’nı seçin": "2 · Select Goksu Park",
-  "Ok işareti parkın içini gösteriyor. Göksu Parkı sınırı içindeki bir noktaya dokunun; sınır OSM’den aranacaktır.": "The arrow marks the park. Tap inside Goksu Park; its boundary will be queried from OSM.",
-  "3 · Yüzey analizini başlatın": "3 · Start the surface analysis",
-  "Göksu Parkı bulundu. Haritadaki Yüzey Örtüsü Analizi düğmesine dokunarak gerçek raster ve OSM kanıtlarını getirin.": "Goksu Park was found. Tap Surface cover analysis on the map to load the actual raster and OSM evidence.",
-  "4 · Sonucu inceleyin": "4 · Explore the result",
-  "Tarama başladı. Tamamlanma süresi parkın büyüklüğüne ve dış veri servislerinin yanıtına bağlıdır. Sonuç geldiğinde sınıf düğmeleri, OSM nesneleri, fırça, sınır araçları ve göreli NDVI’yı deneyin.": "The scan has started. Completion time depends on park size and external data services. When results appear, explore class controls, OSM features, the brush, boundary tools, and relative NDVI.",
-  "Park henüz algılanmadı. Haritayı Göksu Parkı sınırı içinden seçip yeniden deneyin.": "The park has not been detected yet. Select a point inside Goksu Park on the map and try again.",
-  "Park kartını veya yüzey analizi düğmesini bekliyor…": "Waiting for the park card or surface analysis button…",
-  "Devam": "Continue",
-  "Turu kapat": "End tour",
-  "Ana sayfaya dön": "Return to landing page",
-  "Adım {step} / 4": "Step {step} / 4",
-  "Rehberli harita turu": "Guided map tour"
+  "Göksu Parkı · kayıtlı örnek": "Goksu Park · saved example",
+  "1 · Park geometrisini inceleyin": "1 · Explore the park geometry",
+  "Bu görünüm, Göksu Parkı için kaydedilmiş park sınırını gösterir. Sınıf düğmeleriyle harita geometrisini keşfedebilirsiniz.": "This view shows the saved boundary of Goksu Park. Use the class controls to explore its mapped geometry.",
+  "2 · Kayıtlı yüzey analizini inceleyin": "2 · Explore the saved surface analysis",
+  "Bu görünüm, Göksu Parkı’nın kabul edilmiş yüzey analizini ve sınıf alanlarını gösterir. Yeni tarama başlatılmaz ve hiçbir kayıt değiştirilmez.": "This view shows Goksu Park’s accepted surface analysis and class areas. No new scan is started and no records are changed.",
+  "Tanıtım yalnızca sitede yayımlanan örnek kaydı kullanır; oturum açmaz, canlı harita veya dış veri servisi başlatmaz.": "This demonstration uses only the example record published on this site. It does not sign in, start the live map, or contact external data services.",
+  "Önceki": "Previous",
+  "Kayıtlı analizi göster": "Show saved analysis",
+  "Turu tamamla": "Finish tour",
+  "Turu kapat": "Close tour",
+  "Adım {step} / 2": "Step {step} / 2",
+  "Göksu Parkı örnek turu": "Goksu Park example tour"
 });
 
-Object.assign(DG_I18N_EN,{"OSM’de ölçülmüş width/est_width veya şerit bilgisi varsa yol genişliği bunlardan alınır; yoksa yol sınıfına dayalı tahmin kullanılır ve ölçülmüş uydu sınırı olarak sunulmaz.":"When OSM provides measured width/est_width or lane data, road width uses those tags; otherwise it uses a road-class estimate and is not presented as a measured satellite boundary."});
+Object.assign(DG_I18N_EN,{"Yol genişlikleri, OSM’de bulunan ölçü bilgileri veya yol türüne dayalı tahminlerle değerlendirilir; uydu görüntüsünden bağımsız olarak ölçülmüş kabul edilmez.":"Road widths are assessed using measurements available in OSM or estimates based on road type; they are not treated as independently measured from satellite imagery."});
+Object.assign(DG_I18N_EN,{"Göksu Parkı · Ankara, Türkiye · kaydedilmiş park ve yüzey analizi":"Goksu Park · Ankara, Türkiye · saved park geometry and surface analysis"});

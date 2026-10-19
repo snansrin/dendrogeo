@@ -10120,6 +10120,43 @@
           "sha256": "a724c5180ecdb31b92f053a0e49aa61f5e800b68ec74f52f88ca83905f386c6f"
         }
       ]
+    },
+    {
+      "date": "2026-10-19",
+      "scope": "User-authorized modularization: replace the guided live-map workflow with a landing-only tour of the saved Göksu geometry and accepted surface analysis. Do not invoke authentication, live map, park detection or external analysis services; simplify public road-width methodology copy.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "3c55752a1e62a8b8cc036f33323deb6c62a256e17f96e6ed5aa6d5efeb0845f8",
+          "sha256": "d4d8b8b7a72f62d239b125d8e16b182cf8c07a6c1bae0526e2e6d1d8f8ea769a"
+        },
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "c214ee1683555ffed9adc1c5fc49f27597d0548269e1d4542c31d84d1a9f19b3",
+          "sha256": "96da8c49db3b8f078af15d143bd1606732177a90eac7f1e1ac9a04d618d7566e"
+        },
+        {
+          "path": "src/ui/guided-map-demo.js",
+          "previous_sha256": "fc9ce962fdc07f82b6361cf10dab5459651c0c7972c1affcd2bb3d5aedc4cd9f",
+          "sha256": "ea5d53e81d12f5dc2a8c598bc7aa61353e0b8ed40dc6af80d06ae0d1f45b402a"
+        },
+        {
+          "path": "src/ui/guided-map-demo-adapter.js",
+          "previous_sha256": "f3bb6d852c81fcbc03576a88fcadc51a8b091684000b97ff55cc01462424f62a",
+          "sha256": "835f7110689a37b267bc0ceea25dc2802b1d7ab2d681c8ce38201c68d9e6748c"
+        },
+        {
+          "path": "css/guided-map-demo.css",
+          "previous_sha256": "d40e52583716231472b23c0f3d6e4e7bc96fb7a4667d0d2594bc5a26481c024f",
+          "sha256": "b00b8c4c010858457270f1285e0ebb41c1e2bdec4e735fe29444943478474cbc"
+        },
+        {
+          "path": "scripts/landing-showcase-smoke.mjs",
+          "previous_sha256": "26a5014b139c55256878b738684c0f8f73df3cd8bed1e716fae5d44a3d38bc57",
+          "sha256": "22957e5245e6234346ec908bf4e6d9a268aafcab1b627c88e791aa36efcdda72"
+        }
+      ]
     }
   ]
 }

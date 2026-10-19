@@ -7,9 +7,4 @@
 .dg-guided-demo-note{max-width:86ch;margin:8px 0 0;padding:9px 11px;border-radius:9px;background:var(--tint);color:var(--mut);font-size:.72rem;line-height:1.55}
 .dg-guided-demo-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px}
 .dg-guided-demo-wait{color:var(--mut);font-size:.72rem;line-height:1.4}
-.dg-guided-demo-focus{outline:4px solid var(--amber)!important;outline-offset:3px!important;box-shadow:0 0 0 8px color-mix(in srgb,var(--amber) 24%,transparent)!important;z-index:650}
-#map.dg-guided-demo-focus{overflow:hidden}
-#map.dg-guided-demo-focus::after{content:"↓  Göksu Parkı · buraya dokunun";position:absolute;z-index:700;top:50%;left:50%;transform:translate(-50%,-50%);max-width:calc(100% - 36px);padding:10px 13px;border:1px solid var(--amber);border-radius:999px;background:var(--surface);color:var(--ink);font:600 .78rem/1.4 var(--f-ui);white-space:nowrap;box-shadow:0 4px 18px rgba(0,0,0,.2);pointer-events:none;animation:dg-demo-pulse 1.5s ease-in-out infinite}
-@keyframes dg-demo-pulse{50%{box-shadow:0 4px 24px rgba(0,0,0,.25),0 0 0 8px color-mix(in srgb,var(--amber) 16%,transparent)}}
-@media(max-width:600px){.dg-guided-demo{margin:6px 0 10px;padding:13px 13px}.dg-guided-demo h3{font-size:1.02rem}.dg-guided-demo-copy{font-size:.78rem}.dg-guided-demo-actions{align-items:flex-start;flex-direction:column}.dg-guided-demo-actions button{width:100%}.dg-guided-demo-wait{min-height:30px;display:flex;align-items:center}#map.dg-guided-demo-focus::after{white-space:normal;text-align:center}}
-@media(prefers-reduced-motion:reduce){#map.dg-guided-demo-focus::after{animation:none}}
+@media(max-width:600px){.dg-guided-demo{margin:6px 0 10px;padding:13px 13px}.dg-guided-demo h3{font-size:1.02rem}.dg-guided-demo-copy{font-size:.78rem}.dg-guided-demo-actions{align-items:center;gap:8px}.dg-guided-demo-actions button{max-width:100%;white-space:normal}}
