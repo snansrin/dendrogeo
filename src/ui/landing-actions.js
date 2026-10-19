@@ -6,7 +6,6 @@
     "nav-toggle":()=>root.dgNavToggle(),
     "toggle-language":()=>root.dgToggleLang(),
     "show-auth":element=>root.showAuth(element.dataset.dgAuthMode||undefined),
-    "guided-demo":()=>root.DG_GUIDED_MAP_DEMO?.start(),
     "google-sign-in":()=>root.dgGoogleSignIn(),
     "auth-tab":element=>root.authTab(element.dataset.dgAuthMode),
     login:()=>root.doLogin(),

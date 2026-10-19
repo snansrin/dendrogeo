@@ -15,6 +15,8 @@ Kullanıcı talimatıyla çalışan çekirdek `docs/core-foundation-lock.json` i
 
 ## Denetim
 
+19 Ekim 2026: Kullanıcı isteğiyle landing turu tamamen kaldırıldı. Turun üç sunum dosyasının son SHA-256 değerleri, yetkili silme kaydında saklanır; denetim bu dosyaların bulunmadığını da doğrular. Önceki kilit kayıtları ve analiz motorlarının koruması sürer. Landing, park ve yüzey analizini, OSM nesne sınıflandırmasını ve sınır araçlarını kısa teknik açıklamalarla tanıtır.
+
 - `npm run check:core-foundation`: kaynak hash'leri, manifest özeti ve yetkili değişiklik zinciri.
 - `npm run check:modules`: yükleme sırası, offline kayıt ve kritik araçların kilitte bulunması.
 - `npm run check`: kaynak, hesaplama ve mevcut regresyon testleri; CI'da da çalışır.

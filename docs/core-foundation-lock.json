@@ -10157,6 +10157,70 @@
           "sha256": "be14e810f4143063fd9cbe696cac8a246ec90e7d34b51535e26c2ad7ae09be73"
         }
       ]
+    },
+    {
+      "date": "2026-10-19",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: completely remove the landing guided tour and its presentation modules; replace its entry point with concise technical descriptions of park analysis, surface analysis, OSM geometry classification and boundary editing. Preserve analysis engines, allometry, species, accepted records and existing interactive landing scenes.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "d4d8b8b7a72f62d239b125d8e16b182cf8c07a6c1bae0526e2e6d1d8f8ea769a",
+          "sha256": "f064b61d069784825e0f81b73bac9330a4454cca3ceee7403510cf3584c9d946"
+        },
+        {
+          "path": "partials/boot.html",
+          "previous_sha256": "a431d475f6cbeead60290a2ad8abd217822f9b959a50e8e2819448b591f91819",
+          "sha256": "713b937c654f8013fc5d8f6a343e96fa6fce66d82eefbf17bfb8d7115f4d85ac"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "4a64efa602926a37021071c7a0c93c32344570f4bc26bcdfc2be86cce7c74c9d",
+          "sha256": "ba632857d403faf45bc3d26c5fdfa422a2048e5e0bcb1cef49b40f4c19e9be84"
+        },
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "96da8c49db3b8f078af15d143bd1606732177a90eac7f1e1ac9a04d618d7566e",
+          "sha256": "9c4834a8969837ddabba8d1f3fdf1ad5443804d7444d4331c5a7c299d64ce415"
+        },
+        {
+          "path": "scripts/landing-showcase-smoke.mjs",
+          "previous_sha256": "be14e810f4143063fd9cbe696cac8a246ec90e7d34b51535e26c2ad7ae09be73",
+          "sha256": "8125e4101cea3c4b0fdd4aca0600f63627ed18faadd3d4f4d056ca207d54878d"
+        },
+        {
+          "path": "src/ui/landing-actions.js",
+          "previous_sha256": "2a97ccf06fbb02af03009c73820943ee37e887f1fa9120ac6c8aeb58a5704778",
+          "sha256": "40a933ac60170adb08572a58b58788ff182ced1ab4fef59098276210ea7c3ba5"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "e042fb4b3b5ed4301b5ef6343f76b07a262569c165ba32e209c2d477135bfc08",
+          "sha256": "e062d9e032451384eb17654d5143e30c99db6bb27cacd389c0e55b7aaad48b89"
+        },
+        {
+          "path": "docs/SCIENTIFIC-CORE-FREEZE.md",
+          "previous_sha256": "d776690312f51341416ae1e83e5b91042e5e319cdac2bb7aec6c57f560d61174",
+          "sha256": "5e3a9343f608727429d2090aa62db140e978395ff06dc90f7c4e01a9093fb8cb"
+        }
+      ],
+      "removed_protected_files": [
+        {
+          "path": "css/guided-map-demo.css",
+          "previous_sha256": "b00b8c4c010858457270f1285e0ebb41c1e2bdec4e735fe29444943478474cbc",
+          "removed_sha256": "b00b8c4c010858457270f1285e0ebb41c1e2bdec4e735fe29444943478474cbc"
+        },
+        {
+          "path": "src/ui/guided-map-demo-adapter.js",
+          "previous_sha256": "835f7110689a37b267bc0ceea25dc2802b1d7ab2d681c8ce38201c68d9e6748c",
+          "removed_sha256": "835f7110689a37b267bc0ceea25dc2802b1d7ab2d681c8ce38201c68d9e6748c"
+        },
+        {
+          "path": "src/ui/guided-map-demo.js",
+          "previous_sha256": "ea5d53e81d12f5dc2a8c598bc7aa61353e0b8ed40dc6af80d06ae0d1f45b402a",
+          "removed_sha256": "ea5d53e81d12f5dc2a8c598bc7aa61353e0b8ed40dc6af80d06ae0d1f45b402a"
+        }
+      ]
     }
   ]
 }

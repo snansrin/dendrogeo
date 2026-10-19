@@ -6,7 +6,7 @@ import{loadChromium}from'./lib/playwright-runtime.mjs';
 const server=await serveFixture(),chromium=await loadChromium(),engine=process.env.DG_UI_BROWSER==='webkit'?(await import('playwright-core')).webkit:chromium,browser=await engine.launch({headless:true});
 const output=process.env.DG_LANDING_OUTPUT;if(output)mkdirSync(output,{recursive:true});
 try{for(const width of[360,390,430,1440]){
- const page=await browser.newPage({viewport:{width,height:1100},serviceWorkers:'block',reducedMotion:'reduce'}),errors=[],tourRequests=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',request=>{const url=request.url();if(/overpass-api|planetarycomputer|earthengine|supabase[.]co.*(auth|rest.v1.(parks|surface_reviews|park_geometries))/i.test(url))tourRequests.push(url);});await isolateAccount(page,false);
+ const page=await browser.newPage({viewport:{width,height:1100},serviceWorkers:'block',reducedMotion:'reduce'}),errors=[];page.on('pageerror',e=>errors.push(e.message));await isolateAccount(page,false);
  await page.goto(server.url,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.getElementById('dgStartupScreen').hidden);await page.locator('[data-dg-showcase]').waitFor();
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
  const field=await page.evaluate(()=>{const scene=document.querySelector('[data-showcase-name="tree"]'),art=scene.querySelector('.hero-art'),labels=art.querySelector('.dg-tree-readouts'),walker=art.querySelector('.walkerA'),height=[...labels.querySelectorAll('foreignObject')].find(node=>node.textContent.includes('Ağaç boyu'));return{sameSvg:labels.ownerSVGElement===walker.ownerSVGElement,labelsBehind:!!(labels.compareDocumentPosition(walker)&Node.DOCUMENT_POSITION_FOLLOWING),ratio:art.clientWidth/scene.clientWidth,heightX:Number(height?.getAttribute('x')),heightY:Number(height?.getAttribute('y'))};});
@@ -28,18 +28,9 @@ try{for(const width of[360,390,430,1440]){
   const violations=await page.evaluate(async selector=>(await axe.run(document.querySelector(selector),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})).violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)})),'[data-landing-scene="'+mode+'"]');assert.deepEqual(violations,[],mode+' accessibility');
   if(output)await host.screenshot({path:output+'/'+mode+'-'+width+'.png'});
  }
- await page.locator('[data-showcase-index="1"]').click();
- await page.locator('[data-dg-landing-action="guided-demo"]').click();
- await page.locator('.dg-guided-demo [data-tour-next]').waitFor();
- assert.match(await page.locator('.dg-guided-demo').innerText(),/kaydedilmiş park sınırını/i);
- assert.equal(await page.locator('#shell').evaluate(node=>getComputedStyle(node).display==='none'),true,'guided tour must not enter the live application');
- assert.equal(await page.locator('[data-showcase-index="1"]').getAttribute('aria-pressed'),'true');
- await page.locator('.dg-guided-demo [data-tour-next]').click();
- assert.match(await page.locator('.dg-guided-demo').innerText(),/kabul edilmiş yüzey analizini/i);
- assert.equal(await page.locator('#shell').evaluate(node=>getComputedStyle(node).display==='none'),true,'saved analysis preview must not enter the live application');
- assert.equal(await page.locator('[data-showcase-index="2"]').getAttribute('aria-pressed'),'true');
- assert.deepEqual(tourRequests,[],'saved tour must not invoke login, park lookup, or external analysis services');
- await page.locator('.dg-guided-demo [data-tour-close]').click();
+ assert.equal(await page.locator('[data-dg-landing-action="guided-demo"]').count(),0,'landing must not include a guided tour action');
+ assert.equal(await page.locator('.dg-guided-demo').count(),0,'landing must not render a guided tour panel');
+ assert.equal(await page.locator('[data-showcase-name="map"] .dg-showcase-copy').innerText().then(text=>/park analizi|yüzey analizi|nesne sınıflandırması|sınır düzenleme/i.test(text)),true,'landing must describe the technical capabilities');
  await page.evaluate(()=>dgSetLang('en'));await page.waitForFunction(()=>document.querySelector('[data-landing-scene="map"] [data-scene-pick="water"]').textContent==='Water');assert.equal(await page.locator('.dg-tree-readouts [data-i18n="Ağaç boyu"]').textContent(),'Tree height');assert.equal(await page.locator('[data-landing-scene="map"] [data-scene-class="water"]').getAttribute('aria-label'),'Water');await page.evaluate(()=>dgSetLang('tr'));
  assert.deepEqual(errors,[]);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);console.log(JSON.stringify({engine:engine.name(),width,fullWidthScene:true,studentsForeground:true,spatialPicking:true,zoomReset:true,sketchUndo:true,accessibility:true}));await page.close();
 }}finally{await browser.close();await server.close();}

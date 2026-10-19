@@ -1802,20 +1802,21 @@ Object.assign(DG_I18N_EN,{
 });
 
 Object.assign(DG_I18N_EN,{
-  "Kaydedilmiş Göksu Parkı turunu başlatın": "Start the saved Goksu Park tour",
   "Yöntem ve veri kaynakları": "Methods and data sources",
-  "Göksu Parkı · kayıtlı örnek": "Goksu Park · saved example",
-  "1 · Park geometrisini inceleyin": "1 · Explore the park geometry",
-  "Bu görünüm, Göksu Parkı için kaydedilmiş park sınırını gösterir. Sınıf düğmeleriyle harita geometrisini keşfedebilirsiniz.": "This view shows the saved boundary of Goksu Park. Use the class controls to explore its mapped geometry.",
-  "2 · Kayıtlı yüzey analizini inceleyin": "2 · Explore the saved surface analysis",
-  "Bu görünüm, Göksu Parkı’nın kabul edilmiş yüzey analizini ve sınıf alanlarını gösterir. Yeni tarama başlatılmaz ve hiçbir kayıt değiştirilmez.": "This view shows Goksu Park’s accepted surface analysis and class areas. No new scan is started and no records are changed.",
-  "Tanıtım yalnızca sitede yayımlanan örnek kaydı kullanır; oturum açmaz, canlı harita veya dış veri servisi başlatmaz.": "This demonstration uses only the example record published on this site. It does not sign in, start the live map, or contact external data services.",
-  "Önceki": "Previous",
-  "Kayıtlı analizi göster": "Show saved analysis",
-  "Turu tamamla": "Finish tour",
-  "Turu kapat": "Close tour",
-  "Adım {step} / 2": "Step {step} / 2",
-  "Göksu Parkı örnek turu": "Goksu Park example tour"
+  "Park yüzeyini yeşil alan, sert zemin, bina, su ve çıplak zemin sınıflarıyla inceleyin. Her sınıfın alanı ve park içindeki oranı gösterilir. Raster veriler, OSM nesne geometrileri ve kullanıcı düzeltmeleri ayrı izlenir; kabul edilen sonuç kaydedilir.": "Explore the park surface as green space, hard surface, buildings, water, and bare ground. The area and share of each class are displayed. Raster data, OSM object geometries, and user corrections are tracked separately; the accepted result is saved.",
+  "Beş yüzey sınıfı · alan ve oran · kayıtlı sonuç": "Five surface classes · area and share · saved result",
+  "PARK ANALİZİ VE MEKÂNSAL VERİLER": "PARK ANALYSIS AND SPATIAL DATA",
+  "PARK ANALİZİ · MEKÂNSAL VERİLER": "PARK ANALYSIS · SPATIAL DATA",
+  "Göksu Parkı · Ankara · kaydedilmiş park geometrisi ve yüzey sınıfları": "Goksu Park · Ankara · saved park geometry and surface classes",
+  "Park verilerini harita üzerinde inceleyin.": "Explore park data on the map.",
+  "Park analizi.": "Park analysis.",
+  "OpenStreetMap verilerindeki park geometrileri bulunur ve haritada gösterilir.": "Park geometries in OpenStreetMap data are located and displayed on the map.",
+  "Yüzey analizi.": "Surface analysis.",
+  "ESA WorldCover raster hücreleri ile Sentinel‑2 göreli NDVI kanıtları park alanı içinde değerlendirilir.": "ESA WorldCover raster cells and Sentinel‑2 relative NDVI evidence are assessed within the park boundary.",
+  "Nesne sınıflandırması.": "Object classification.",
+  "OpenStreetMap etiketli bina, yol ve su geometrileri türlerine göre ayrıştırılır.": "OpenStreetMap-tagged building, road, and water geometries are classified by type.",
+  "Sınır düzenleme.": "Boundary editing.",
+  "Çizim araçlarıyla park ve yüzey geometrileri harita üzerinde düzenlenebilir.": "Park and surface geometries can be edited on the map with drawing tools."
 });
 
 Object.assign(DG_I18N_EN,{"Yol genişlikleri, OSM’de bulunan ölçü bilgileri veya yol türüne dayalı tahminlerle değerlendirilir; uydu görüntüsünden bağımsız olarak ölçülmüş kabul edilmez.":"Road widths are assessed using measurements available in OSM or estimates based on road type; they are not treated as independently measured from satellite imagery."});

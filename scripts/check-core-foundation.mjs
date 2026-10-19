@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import {createHash} from 'node:crypto';
-import {readFileSync} from 'node:fs';
+import {existsSync,readFileSync} from 'node:fs';
 import {dirname,join,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const ROOT=join(dirname(fileURLToPath(import.meta.url)),'..');
 const MANIFEST_PATH=join(ROOT,'docs/core-foundation-lock.json');
-const MANIFEST_SHA256="dbd13935c3b022b5ac9764d49f1bd6081ea15f9a6f36f256a029956cc6ceb541";
+const MANIFEST_SHA256="7fd302f12615d3207ebb9a750a2429247da00de4ac951119498b09081c4da246";
 const EXPECTED_BASELINE='867c7566645b43cf7a5a7caf56bac6c44c39ef79';
 const EXPECTED_POLICY='FROZEN_EXISTING_FILES_ADD_ONLY';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -34,6 +34,7 @@ export function verifyCoreFoundation(root=ROOT){
   for(const path of Object.keys(files))if(!categoryFiles.has(path))errors.push(`Kategoriye bağlı olmayan kilit dosyası: ${path}`);
   for(const path of categoryFiles)if(!Object.hasOwn(files,path))errors.push(`Hash’i olmayan çekirdek dosyası: ${path}`);
   const authorizedHashes=new Map();
+  const authorizedRemovals=new Set();
   for(const migration of manifest.authorized_modularizations||[]){
     const migrationFiles=Array.isArray(migration?.files)?migration.files:[];
     if(!migration||(!migration.scope&&!migration.request)||!migration.date||(!Array.isArray(migration.files)&&!Array.isArray(migration.added_protected_files))){errors.push('Yetkili modüler geçiş kaydı eksik alan içeriyor.');continue;}
@@ -51,10 +52,22 @@ export function verifyCoreFoundation(root=ROOT){
         if(previous_sha256!==previous)errors.push(`Yetkili geçiş zinciri kırık: ${path} önceki SHA eşleşmiyor.`);
       }
       if(!/^[a-f0-9]{64}$/.test(sha256||''))errors.push(`Yetkili geçiş SHA biçimi geçersiz: ${path}`);
-      else authorizedHashes.set(path,sha256);
+      else{authorizedHashes.set(path,sha256);authorizedRemovals.delete(path);}
+    }
+    for(const removal of Array.isArray(migration?.removed_protected_files)?migration.removed_protected_files:[]){
+      const {path,previous_sha256,removed_sha256}=removal||{};
+      if(migration.audit_chain!=='sha256-v1'){errors.push('Korunan dosya silme kaydı SHA-256 zincirinde olmalıdır.');continue;}
+      if(!path||!Object.hasOwn(files,path)){errors.push(`Silme kaydı kilitli olmayan dosya yolu içeriyor: ${path||'(eksik)'}`);continue;}
+      const previous=authorizedHashes.get(path)||files[path];
+      if(previous_sha256!==previous||removed_sha256!==previous)errors.push(`Yetkili silme zinciri kırık: ${path} önceki SHA eşleşmiyor.`);
+      else authorizedRemovals.add(path);
     }
   }
   for(const [path,expected] of Object.entries(files)){
+    if(authorizedRemovals.has(path)){
+      if(existsSync(join(root,path)))errors.push(`${path} yetkili kaldırma kaydına rağmen hâlâ mevcut.`);
+      continue;
+    }
     try{
       const actual=hash(readFileSync(join(root,path)));
       const approved=authorizedHashes.get(path)||expected;
