@@ -27,6 +27,56 @@ main{padding:54px 0 70px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.08;ma
 <link rel="stylesheet" href="../css/appearance.css">
 <link rel="stylesheet" href="../assets/public-pages/style.css">
 <!-- /dg-public-theme -->
+<!-- dg-site-identity -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://dendrogeo.org/aydinlatma/#webpage",
+      "url": "https://dendrogeo.org/aydinlatma/",
+      "name": "KVKK Aydınlatma Metni | DendroGeo",
+      "description": "DendroGeo için 6698 sayılı KVKK m.10 aydınlatma metni: veri sorumlusu, işlenen veri kategorileri, amaçlar ve hukuki sebepler, yurt dışı aktarım, saklama süresi, m.11 hakları ve başvuru yolu.",
+      "inLanguage": "tr-TR",
+      "isPartOf": {
+        "@id": "https://dendrogeo.org/#website"
+      },
+      "publisher": {
+        "@id": "https://dendrogeo.org/#organization"
+      },
+      "breadcrumb": {
+        "@id": "https://dendrogeo.org/aydinlatma/#breadcrumb"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://dendrogeo.org/aydinlatma/#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "DendroGeo",
+          "item": "https://dendrogeo.org/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "KVKK Aydınlatma Metni",
+          "item": "https://dendrogeo.org/aydinlatma/"
+        }
+      ]
+    }
+  ]
+}
+</script>
+<!-- /dg-site-identity -->
+<!-- dg-site-traffic -->
+<script src="../src/config/site-traffic-config.js?v=e2325c41" defer></script>
+<script src="../src/domain/visitors/traffic-categories.js?v=9411d299" defer></script>
+<script src="../src/adapters/visitors/send-site-metric.js?v=52e4d0bc" defer></script>
+<script src="../src/bootstrap/site-traffic.js?v=910c8e7a" defer></script>
+<!-- /dg-site-traffic -->
 </head><body class="dg-page">
 <header class="top"><div class="wrap nav"><a class="brand" href="../">🌲 DendroGeo</a>
 <nav class="links" aria-label="Ana navigasyon"><a href="../">Ana Sayfa</a><a href="../agac-envanteri/">Ağaç Envanteri</a><a href="../karbon-hesaplama/">Karbon</a><a href="../arazi-ortusu/">Arazi Örtüsü</a><a href="../yontem/">Yöntem</a><a href="../kunye/">Künye</a></nav></div></header>
@@ -50,7 +100,7 @@ main{padding:54px 0 70px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.08;ma
 <tr><td>Kullanıcı işlem bilgisi</td><td>Ölçüm kayıtları, onay durumu, kim/ne zaman onayladı (denetim izi)</td><td>Uygulama kullanımı</td></tr>
 <tr><td>İşlem güvenliği</td><td>Oturum belirteci, kayıt/oturum zaman damgaları</td><td>Kimlik doğrulama altyapısı</td></tr>
 </tbody></table>
-<p><b>İşlenmeyen veriler:</b> T.C. kimlik numarası, finansal veri, biyometrik veri, sağlık verisi, siyasi/dini bilgi. IP adresi uygulama tarafından ayrıca <b>kaydedilmez ve profillenmez</b>; ziyaret sayacı yalnız tarih damgası tutar.</p>
+<p><b>İşlenmeyen veriler:</b> T.C. kimlik numarası, finansal veri, biyometrik veri, sağlık verisi, siyasi/dini bilgi. IP adresi uygulama tarafından ayrıca <b>kaydedilmez ve profillenmez</b>; mevcut ziyaret sayacı yalnız tarih damgası tutar. Yeni kullanım özetleri; sayfa kategorisi, genel yönlendirme kaynağı, cihaz grubu ve mevcutsa yaklaşık ülkeyi kimliksiz günlük toplamlar halinde en fazla 400 gün saklar. Hesap/oturum kimliği, IP, tam yönlendiren adres veya ziyaretçi parmak izi bu özetlere alınmaz. IP adresi yaklaşık ülkeyi belirlemek için sunucuda geçici olarak işlenir; saklanmaz ve üçüncü taraf bir sorgu servisine gönderilmez. Eşleştirme, yerel <a href="https://db-ip.com">DB-IP</a> ülke verisiyle yapılır; VPN veya proxy yaklaşık ülkeyi etkileyebilir. Do Not Track ve Global Privacy Control tercihlerinde yeni kullanım özeti gönderilmez.</p>
 
 <h2>3. İşleme amaçları ve hukuki sebepler (KVKK m.5)</h2>
 <table><thead><tr><th scope="col">Amaç</th><th scope="col">Hukuki sebep</th></tr></thead><tbody>

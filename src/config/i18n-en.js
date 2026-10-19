@@ -1821,3 +1821,41 @@ Object.assign(DG_I18N_EN,{
 
 Object.assign(DG_I18N_EN,{"Yol genişlikleri, OSM’de bulunan ölçü bilgileri veya yol türüne dayalı tahminlerle değerlendirilir; uydu görüntüsünden bağımsız olarak ölçülmüş kabul edilmez.":"Road widths are assessed using measurements available in OSM or estimates based on road type; they are not treated as independently measured from satellite imagery."});
 Object.assign(DG_I18N_EN,{"Göksu Parkı · Ankara, Türkiye · kaydedilmiş park ve yüzey analizi":"Goksu Park · Ankara, Türkiye · saved park geometry and surface analysis"});
+
+Object.assign(DG_I18N_EN,{
+  "Kullanım özeti": "Usage overview",
+  "Anonim günlük toplamlar · ayrıntılı veri bu sürümle toplanmaya başlar.": "Anonymous daily totals · detailed data collection starts with this release.",
+  "Tarih aralığı": "Date range",
+  "Son 30 gün": "Last 30 days",
+  "Kullanım özeti hazırlanıyor…": "Preparing usage overview…",
+  "Bu aralıkta veri yok.": "No data in this period.",
+  "Doğrudan / kaynak bilinmiyor": "Direct / referrer unavailable",
+  "Arama motoru": "Search engine",
+  "Yapay zekâ asistanı": "AI assistant",
+  "Sosyal medya": "Social media",
+  "Başka site": "Referring site",
+  "Site içi bağlantı": "Internal site link",
+  "Telefon": "Phone",
+  "Bilgisayar": "Computer",
+  "Tablet": "Tablet",
+  "Bilinmiyor": "Unknown",
+  "İngilizce ana sayfa": "English homepage",
+  "İngilizce yöntem": "English methods",
+  "Künye ve İletişim": "Credits and contact",
+  "Sayfa görüntüleme": "Page views",
+  "Herkese açık sayfaların açılış sayısı": "Number of public-page loads",
+  "Çalışma ekranı açılışı": "Workspace screen opens",
+  "Uygulama içindeki ekran açılışları": "Screen openings within the application",
+  "Yüzey analizi isteği": "Surface analysis requests",
+  "Analiz düğmesine basılma sayısı": "Number of analysis-button activations",
+  "Bu değerler olay sayılarıdır; tekil kişi veya dönüşüm oranı değildir.": "These are event counts, not unique people or conversion rates.",
+  "Nereden geliyorlar?": "Traffic sources",
+  "Cihaz dağılımı": "Device distribution",
+  "görüntüleme": "page views recorded",
+  "Altyapıdan alınabilen yaklaşık ülke gösterilir; belirlenemeyenler bilinmiyor olarak sayılır.": "Approximate country is shown when available from the infrastructure; unavailable countries are counted as unknown.",
+  "Görüntülenen sayfalar": "Viewed pages",
+  "IP, hesap kimliği, tam yönlendiren adres ve ziyaretçi profili saklanmaz. Saat dilimi: Europe/Istanbul.": "No IP, account ID, full referrer URL, or visitor profile is stored. Time zone: Europe/Istanbul.",
+  "Kullanım özeti alınamadı. Yenile ile tekrar deneyin.": "Usage overview could not be loaded. Use Refresh to try again."
+});
+
+Object.assign(DG_I18N_EN,{"Ağ konumuna dayalı yaklaşık ülke; VPN ve proxy sonucu değiştirebilir.":"Approximate country based on network location; VPNs and proxies may affect the result."});

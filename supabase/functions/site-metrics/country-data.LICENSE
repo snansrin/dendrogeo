@@ -1,0 +1,10 @@
+DB-IP IP to Country Lite, October 2026
+Copyright DB-IP.com. Licensed under Creative Commons Attribution 4.0 International.
+License: https://creativecommons.org/licenses/by/4.0/
+Source: https://db-ip.com/db/download/ip-to-country-lite
+Download: https://download.db-ip.com/free/dbip-country-lite-2026-10.csv.gz
+Attribution: IP Geolocation by DB-IP — https://db-ip.com
+
+The source CSV ranges were converted to a sorted binary lookup table and gzip/base64
+encoded by DendroGeo. No accuracy enhancements or individual visitor records were added.
+This third-party dataset retains CC BY 4.0; the site's general data license does not replace it.

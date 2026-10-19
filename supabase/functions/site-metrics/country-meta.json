@@ -1,0 +1,11 @@
+{
+  "release": "2026-10",
+  "source": "https://download.db-ip.com/free/dbip-country-lite-2026-10.csv.gz",
+  "license": "CC BY 4.0",
+  "attribution": "IP Geolocation by DB-IP — https://db-ip.com",
+  "source_sha256": "097426b8ddae89157d444a59ac1847e873f7943c32d52becc4371c8b0273af80",
+  "sha256": "47862aa756d89a8ce2c6cfd28e94623f7d0d612008b2054e7cfd7ab275f2e44e",
+  "encoding": "gzip-base64",
+  "ipv4_records": 362122,
+  "ipv6_records": 348712
+}

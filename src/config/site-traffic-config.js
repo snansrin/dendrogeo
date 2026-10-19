@@ -1,0 +1,2 @@
+/* Generated from the existing public backend configuration; no account token. */
+window.DG_SITE_TRAFFIC_CONFIG=Object.freeze({"url":"https://xjbpounwdxrhelmixvqm.supabase.co/functions/v1/site-metrics","key":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqYnBvdW53ZHhyaGVsbWl4dnFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMDA1NzIsImV4cCI6MjEwMzY3NjU3Mn0.Q5b4ys1TkyhMffGaN9bR9A3nr4L4-8G5UBJY4iC4Dkk"});

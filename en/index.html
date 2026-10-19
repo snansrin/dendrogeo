@@ -36,6 +36,56 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--mut);font-siz
 <link rel="stylesheet" href="../css/appearance.css">
 <link rel="stylesheet" href="../assets/public-pages/style.css">
 <!-- /dg-public-theme -->
+<!-- dg-site-identity -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://dendrogeo.org/en/#webpage",
+      "url": "https://dendrogeo.org/en/",
+      "name": "DendroGeo — Global Tree Inventory & Carbon Data System (English)",
+      "description": "DendroGeo: field-measured individual tree inventory, allometric carbon stock (Chave et al. 2014) and 10 m land-cover analysis for urban parks, with full QA/QC disclosure and reproducible scientific reports (DGR).",
+      "inLanguage": "en-US",
+      "isPartOf": {
+        "@id": "https://dendrogeo.org/#website"
+      },
+      "publisher": {
+        "@id": "https://dendrogeo.org/#organization"
+      },
+      "breadcrumb": {
+        "@id": "https://dendrogeo.org/en/#breadcrumb"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://dendrogeo.org/en/#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "DendroGeo",
+          "item": "https://dendrogeo.org/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "DendroGeo — Global Tree Inventory & Carbon Data System (English)",
+          "item": "https://dendrogeo.org/en/"
+        }
+      ]
+    }
+  ]
+}
+</script>
+<!-- /dg-site-identity -->
+<!-- dg-site-traffic -->
+<script src="../src/config/site-traffic-config.js?v=e2325c41" defer></script>
+<script src="../src/domain/visitors/traffic-categories.js?v=9411d299" defer></script>
+<script src="../src/adapters/visitors/send-site-metric.js?v=52e4d0bc" defer></script>
+<script src="../src/bootstrap/site-traffic.js?v=910c8e7a" defer></script>
+<!-- /dg-site-traffic -->
 </head>
 <body class="dg-page">
 <header class="top"><div class="wrap nav"><a class="brand" href="../">🌲 DendroGeo</a>

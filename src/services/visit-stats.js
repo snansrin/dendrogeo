@@ -116,6 +116,7 @@ const DG_VISITOR_LIVE_VISIT_COUNTS_STORE=window.DG_VISITOR_LIVE_VISIT_COUNTS_STO
 const DG_VISITOR_SESSION_EVENTS=window.DG_VISITOR_SESSION_EVENTS_APPLICATION.create();
 /* Sekme değişince çağrılır (shell go()): gezinme zincirine yazar. */
 function dgPresenceView(v){
+ try{window.DG_SITE_TRAFFIC?.workspace(v);}catch(error){}
  if(window.DG_RECORD_VISITOR_PRESENCE_VIEW)return window.DG_RECORD_VISITOR_PRESENCE_VIEW.record(v,DG_VISITOR_SESSION_EVENTS,dgPresencePing);
  try{
   if(!DG_VISITOR_SESSION_EVENTS.recordView(v))return;
@@ -197,6 +198,7 @@ async function loadVisitors(){
  dgVisTickStart();
 }
 async function dgVisCounts(){
+ void window.DG_VISITOR_ANALYTICS_PANEL?.load();
  return window.DG_LOAD_OWNER_VISITOR_COUNTS.execute(dgVisAllowed,{load:()=>DG_VISITOR_LIVE_VISIT_COUNTS_STORE.load(sb),update:(id,value)=>DG_VISITOR_ADMIN_COUNTS_UI.update(document,id,value)});
 }
 function dgVisAllowed(){return typeof PROFILE!=="undefined"&&PROFILE?.role==="owner";}

@@ -35,6 +35,7 @@ const MAX_RUNTIME = 400;     // ?v=NNN sürümlü script/style kopyaları
 
 const CORE_ASSETS = [
     // Runtime modules are generated from the page and lazy-loader source lists.
+    '/css/visitor-analytics.css',
     '/assets/public-pages/style.css',
     '/assets/public-pages/report-reader.css',
     '/assets/public-pages/appearance.js',
@@ -724,6 +725,10 @@ const CORE_ASSETS = [
     '/src/application/dashboard/load-world-dashboard.js',
     '/src/application/dashboard/load-shell-view-data.js',
     '/src/services/dash.js',
+    '/src/config/site-traffic-config.js',
+    '/src/domain/visitors/traffic-categories.js',
+    '/src/adapters/visitors/send-site-metric.js',
+    '/src/bootstrap/site-traffic.js',
     '/src/ui/state.js',
     '/src/ui/toast-message-content.js',
     '/src/ui/toast.js',
@@ -739,6 +744,9 @@ const CORE_ASSETS = [
     '/src/ui/landing-home-navigation.js',
     '/src/ui/landing-showcase.js',
     '/src/ui/landing-actions.js',
+    '/src/adapters/visitors/aggregate-metrics-store.js',
+    '/src/ui/visitor-analytics.js',
+    '/src/bootstrap/visitor-analytics.js',
     '/src/adapters/auth/initialize-shell-platform.js',
     '/src/application/auth/resolve-shell-session.js',
     '/src/ui/shell-boot-controller.js',

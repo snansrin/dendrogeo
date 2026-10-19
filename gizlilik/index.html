@@ -27,6 +27,56 @@ main{padding:54px 0 70px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.08;ma
 <link rel="stylesheet" href="../css/appearance.css">
 <link rel="stylesheet" href="../assets/public-pages/style.css">
 <!-- /dg-public-theme -->
+<!-- dg-site-identity -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://dendrogeo.org/gizlilik/#webpage",
+      "url": "https://dendrogeo.org/gizlilik/",
+      "name": "Gizlilik Politikası | DendroGeo",
+      "description": "DendroGeo hangi verileri toplar, neden işler, kimlerle paylaşır ve haklarınız nelerdir? GPS konumu, ağaç ölçümleri, fotoğraflar, Google girişi, çerez kullanımı ve KVKK m.11 hakları.",
+      "inLanguage": "tr-TR",
+      "isPartOf": {
+        "@id": "https://dendrogeo.org/#website"
+      },
+      "publisher": {
+        "@id": "https://dendrogeo.org/#organization"
+      },
+      "breadcrumb": {
+        "@id": "https://dendrogeo.org/gizlilik/#breadcrumb"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://dendrogeo.org/gizlilik/#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "DendroGeo",
+          "item": "https://dendrogeo.org/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Gizlilik Politikası",
+          "item": "https://dendrogeo.org/gizlilik/"
+        }
+      ]
+    }
+  ]
+}
+</script>
+<!-- /dg-site-identity -->
+<!-- dg-site-traffic -->
+<script src="../src/config/site-traffic-config.js?v=e2325c41" defer></script>
+<script src="../src/domain/visitors/traffic-categories.js?v=9411d299" defer></script>
+<script src="../src/adapters/visitors/send-site-metric.js?v=52e4d0bc" defer></script>
+<script src="../src/bootstrap/site-traffic.js?v=910c8e7a" defer></script>
+<!-- /dg-site-traffic -->
 </head><body class="dg-page">
 <header class="top"><div class="wrap nav"><a class="brand" href="../">🌲 DendroGeo</a>
 <nav class="links" aria-label="Ana navigasyon"><a href="../">Ana Sayfa</a><a href="../agac-envanteri/">Ağaç Envanteri</a><a href="../karbon-hesaplama/">Karbon</a><a href="../arazi-ortusu/">Arazi Örtüsü</a><a href="../yontem/">Yöntem</a></nav></div></header>
@@ -53,6 +103,7 @@ main{padding:54px 0 70px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.08;ma
 <b>Türetilen değerler:</b> hacim, biyokütle (AGB/BHB) ve karbon (Chave vd. 2014 allometrik denklemi).<br>
 <b>Fotoğraf:</b> yalnız siz yüklerseniz; yükleme öncesi tarayıcıda kalite denetimi yapılır, 1024 px'e sıkıştırılır.</p></div>
 <div class="card"><h3>2.3 Teknik ve kullanım verileri</h3><p><b>Ziyaret sayacı:</b> tarih damgası (IP adresi, tarayıcı parmak izi veya kimlik saklanmaz).<br>
+<b>Anonim kullanım özetleri:</b> sayfa kategorisi, genel yönlendirme kaynağı (arama motoru, sosyal medya gibi), cihaz grubu ve altyapıdan sağlanabiliyorsa yaklaşık ülke; günlük toplamlar halinde en fazla 400 gün tutulur. Hesap veya oturum kimliği, IP adresi, tam yönlendiren adres, URL sorgusu ve ziyaretçi parmak izi bu özete alınmaz. Tekil kişi takibi veya kişi bazlı dönüşüm hesabı yapılmaz. Ülke belirlenemiyorsa bilinmiyor olarak sayılır. IP adresi yaklaşık ülkeyi belirlemek için sunucuda geçici olarak işlenir; saklanmaz ve üçüncü taraf bir sorgu servisine gönderilmez. Eşleştirme, yerel <a href="https://db-ip.com">DB-IP</a> ülke verisiyle yapılır; VPN veya proxy yaklaşık ülkeyi etkileyebilir. Yeni özetler tarayıcının Do Not Track veya Global Privacy Control tercihi etkinse gönderilmez.<br>
 <b>Çevrimdışı kuyruk:</b> internet yokken girilen ölçümler <b>yalnızca kendi cihazınızda</b> (IndexedDB) tutulur, bağlantı gelince silinerek sunucuya aktarılır.<br>
 <b>Service Worker önbelleği:</b> uygulamanın çevrimdışı çalışması için harita karoları ve kod dosyaları cihazınızda önbelleğe alınır.<br>
 <b>Veri talebi formu:</b> e-posta, ülke/şehir, proje adı ve not (yalnız talebinize yanıt vermek için).</p></div>

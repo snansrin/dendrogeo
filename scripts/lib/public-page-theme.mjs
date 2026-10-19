@@ -16,5 +16,6 @@ export function applyPublicPageTheme(html,prefix='..') {
   const legacy=html.indexOf('<!-- dg-public-theme -->');
   if(legacy>=0)html=html.slice(0,legacy)+html.slice(html.indexOf('</head>',legacy));
   html=html.replace(/<link\b[^>]*href=["'][^"']*\bcss\/(?:style|ui-standard)\.css(?:\?[^"']*)?["'][^>]*>\s*/gi,'');
-  return html.replace('</head>',publicPageThemeHead(prefix)+'\n</head>');
+  const anchor=html.includes('<!-- dg-site-identity -->')?'<!-- dg-site-identity -->':'</head>';
+  return html.replace(anchor,publicPageThemeHead(prefix)+'\n'+anchor);
 }

@@ -10221,6 +10221,63 @@
           "removed_sha256": "ea5d53e81d12f5dc2a8c598bc7aa61353e0b8ed40dc6af80d06ae0d1f45b402a"
         }
       ]
+    },
+    {
+      "date": "2026-10-19",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: improve public site identity, document hierarchy and reciprocal language discovery; add isolated first-party daily usage aggregates and an owner-only visitor dashboard with source, device, country and page summaries. Preserve existing visit timestamps, transient presence, allometry, species, park detection, surface analysis, accepted records and frozen report artifacts. Only two additive visitor service hooks connect workspace events and dashboard refresh; backend access is RLS-guarded and aggregate writes are service-only. Extend the reviewed-migration allowlists in DBH/form guards only for the isolated counter, adding explicit protection against changes to measurements/projects/parks. Keep the original seven-download app package contract.",
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "3dd7b20cc456f06813e46bc80a7910186537a4d97e929c15737c25d665cdf3d1",
+          "sha256": "08fb8fc087cd01f4e6259f3193ae7abd40d9ff77a1916393efb089a006eae5ad"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "f064b61d069784825e0f81b73bac9330a4454cca3ceee7403510cf3584c9d946",
+          "sha256": "25e0ed9eb229104b1781c2d167f91485466f58269501fdd8320c786e23087762"
+        },
+        {
+          "path": "package.json",
+          "previous_sha256": "0578b2b932de836d0275e358227df63daffaede67d4e15b525c561e04daf6ade",
+          "sha256": "29d2965f00f583f43d3067890ec236b5ad43097250dda37de68c38c5741828dc"
+        },
+        {
+          "path": "partials/boot.html",
+          "previous_sha256": "713b937c654f8013fc5d8f6a343e96fa6fce66d82eefbf17bfb8d7115f4d85ac",
+          "sha256": "840dacbf3466801315b68c28ebbb529d9bfa5c548d3a5d7ba76f0bba3794639d"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "ba632857d403faf45bc3d26c5fdfa422a2048e5e0bcb1cef49b40f4c19e9be84",
+          "sha256": "75e9ea8e025f022343ee0164e1c3e23436945306b6ce1b06468787d325cadb9a"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "8788c5923cbe7567639b821522ef85b529dce3c7d8924ae1f4dfc3ae84629a01",
+          "sha256": "4136fa2f67ff92f7de91247a0c77e898b8bbf505f90bba5c3aff919a72237b4c"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "a3816a5cf4b0f3af64798b49218f20d85351dd8444cf17adb93052213f296dce",
+          "sha256": "88c647dcf6fea2086f8cdb46baa92f90fee8326e8e002a5845b1b327f68598ab"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "e062d9e032451384eb17654d5143e30c99db6bb27cacd389c0e55b7aaad48b89",
+          "sha256": "6310409a39a34c59fabdb5e4bad26853ed9388bb4083faa844c6256ed4f44561"
+        },
+        {
+          "path": "test/dbh-qa.test.mjs",
+          "previous_sha256": "09d47ceb45a396bfe40f111e043698c04f31c935fe2c3e38c5a1ed48c11bd2a2",
+          "sha256": "0fb93d8cccbb806c23f164408e53db76ae19b48fb9cbcb2ba641b576338ac6f2"
+        },
+        {
+          "path": "test/form-qa.test.mjs",
+          "previous_sha256": "ab87a6a4d9d28198ed3029fd8785b2b183b758a1812d88b7bfc986227c907a5c",
+          "sha256": "d19d0c6ab9cd7872f0c01178e907f05e342b917a0d6bac6996579398d0f75742"
+        }
+      ]
     }
   ]
 }

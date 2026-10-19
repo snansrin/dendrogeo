@@ -138,10 +138,6 @@
         { "@type": "PropertyValue", "name": "Carbon stock (kg)" },
         { "@type": "PropertyValue", "name": "Park identity (OSM element key, park area ha)" },
         { "@type": "PropertyValue", "name": "GPS accuracy (m) / altitude (m)" }
-      ],
-      "distribution": [
-        { "@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": "https://dendrogeo.org/" },
-        { "@type": "DataDownload", "encodingFormat": "application/geo+json", "contentUrl": "https://dendrogeo.org/" }
       ]
     },
     {
@@ -952,11 +948,69 @@
      başlığı ölçeğini alır → Park Karşılaştırma kartı kıpırdamaz. -->
 <link rel="stylesheet" href="css/ui-standard.css?v=c5bd358e">
 <link rel="stylesheet" href="css/academic-profile.css?v=8e8a0eaf">
+<link rel="stylesheet" href="css/visitor-analytics.css?v=00000000">
 <link rel="stylesheet" href="css/park-admin.css?v=00000000">
 <!-- GIS workspace: scoped presentation, keeps locked engine and theme untouched. -->
 <link rel="stylesheet" href="css/surface-drawing.css?v=00000000">
 <link rel="stylesheet" href="css/gis-workspace.css?v=0069a5b6">
 <link rel="stylesheet" href="css/appearance.css?v=00000000">
+<!-- dg-site-identity -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://dendrogeo.org/#organization",
+      "name": "DendroGeo",
+      "url": "https://dendrogeo.org/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://dendrogeo.org/logo.png"
+      },
+      "sameAs": [
+        "https://github.com/snansrin/dendrogeo",
+        "https://doi.org/10.5281/zenodo.22948773"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://dendrogeo.org/#website",
+      "url": "https://dendrogeo.org/",
+      "name": "DendroGeo",
+      "alternateName": "DendroGeo GIS",
+      "inLanguage": [
+        "tr-TR",
+        "en-US"
+      ],
+      "publisher": {
+        "@id": "https://dendrogeo.org/#organization"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://dendrogeo.org/#webpage",
+      "url": "https://dendrogeo.org/",
+      "name": "DendroGeo — Küresel Ağaç Envanteri ve Karbon Veri Sistemi",
+      "description": "DendroGeo; GPS destekli ağaç envanteri ve allometrik karbon tahminini, park ölçeğinde arazi örtüsü, sınır çizimi ve göreli NDVI incelemesiyle bir araya getiren bilimsel web GIS platformudur.",
+      "inLanguage": "tr-TR",
+      "isPartOf": {
+        "@id": "https://dendrogeo.org/#website"
+      },
+      "publisher": {
+        "@id": "https://dendrogeo.org/#organization"
+      }
+    }
+  ]
+}
+</script>
+<!-- /dg-site-identity -->
+<!-- dg-site-traffic -->
+<script src="src/config/site-traffic-config.js?v=00000000" defer></script>
+<script src="src/domain/visitors/traffic-categories.js?v=00000000" defer></script>
+<script src="src/adapters/visitors/send-site-metric.js?v=00000000" defer></script>
+<script src="src/bootstrap/site-traffic.js?v=00000000" defer></script>
+<!-- /dg-site-traffic -->
 </head>
 <body class="dg-app">
 <div id="dgStartupScreen" role="status" aria-live="polite"><div>DendroGeo<p>Giriş kontrol ediliyor…</p></div></div>
