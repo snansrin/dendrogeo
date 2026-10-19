@@ -154,3 +154,7 @@ OpenAI Codex, using GPT-6 for this revision, assisted with manuscript structure,
 ## Separately licensed primary-data deposit candidate
 
 The author-review package in deposit-candidate contains tree-observations.csv and derived-estimates.csv joined by point_id, with a field dictionary, metadata, licence scope and SHA-256 manifest. Rights-holder authorization permits CC BY 4.0 for these newly scoped primary-data tables and documentation. Photographs, database row identifiers, OSM boundaries, reviewed surface geometries, imagery and original report artifacts are excluded. Spatial context discussed above refers to the separately licensed source report and is not included in the new CC BY release. The source report DOI is not a new dataset DOI. No new repository deposit has been registered. New metadata uses author-confirmed ORCID ownership without rewriting immutable source attribution.
+
+## Editorial source-status notice — 19 October 2026
+
+DGR-2026-0026 was withdrawn on 17 October 2026 and its original artifacts were removed in commit 472a247. Numerical descriptions above are historical draft claims and must not be treated as a currently accessible or validated dataset. The local candidate is not a published deposit. New source approval, methods confirmation, integrity checks and reviewer access are required before submission. Synthetic tooling fixtures do not substitute for field evidence.

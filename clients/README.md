@@ -4,6 +4,10 @@ The R and Python clients are read-only tools for retrieving publicly released DG
 
 Only reports that are already public can be read. A report's license and reuse conditions come from its metadata.json; client software is MIT-licensed. External map, raster, and field-data rights remain governed by their source and consent terms.
 
+## Current publication status
+
+As checked on 19 October 2026, the public report archive has no active packages. Previous test and withdrawn reports cannot be downloaded as current datasets. Examples below are templates: replace `PUBLISHED_DGR_ID` with an actual active report identifier once a new package is published. Automated client tests use isolated fixtures.
+
 ## Python
 
 From the repository root, install with pip install ./clients/python and run python -m unittest discover -s clients/python/tests -v.
@@ -11,7 +15,7 @@ From the repository root, install with pip install ./clients/python and run pyth
 Example:
 
     from dendrogeo_client import DendroGeoClient
-    report = DendroGeoClient().get_report("DGR-2026-0026")
+    report = DendroGeoClient().get_report(PUBLISHED_DGR_ID)
     print(report["metadata"]["license"])
     print(report["data"]["result_hash"])
 
@@ -19,7 +23,7 @@ Example:
 
 Install with R CMD INSTALL clients/r/dendrogeo. Requires R 4.1 or later and httr2, jsonlite, and digest.
 
-    report <- dendrogeo::dgr_get("DGR-2026-0026")
+    report <- dendrogeo::dgr_get(PUBLISHED_DGR_ID)
     report$metadata$license
     report$data$result_hash
 

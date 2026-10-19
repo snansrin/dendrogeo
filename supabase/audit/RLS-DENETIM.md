@@ -72,5 +72,15 @@ await sb.from('data_requests').select('*').limit(5).then(console.log)
 | 7 | başkasının fotoğraf yolu | ☐ … | | |
 | 8 | `site_visits` INSERT | ☐ izinli (beklenen) | | |
 | 9 | onaylı SELECT | ☐ izinli (beklenen) | | |
-| 10 | onay bekleyen SELECT | ☐ reddedildi ☐ **AÇIK** | | |
-| 12 | `data_requests` SELECT | ☐ reddedildi ☐ **AÇIK** | | |
+| 10 | onay bekleyen SELECT | Satırlar filtrelendi | 2026-10-19 | Anon GET, id alanı, limit 1: HTTP 200, 0 satır |
+| 12 | `data_requests` SELECT | Satırlar filtrelendi | 2026-10-19 | Anon GET, id alanı, limit 1: HTTP 200, 0 satır |
+
+## Salt okunur denetim — 19 Ekim 2026
+
+Canlı pg_tables/pg_policies katalogları okundu: public şemasındaki 13 tablonun ve incelenen tüm storage tablolarının RLS bayrağı açık. measurements yazma politikaları authenticated rolüne ve sahiplik/aktiflik koşullarına bağlı; data_requests okumaları sahip/yönetici kapsamlı; profiles ekleme politikası anon için mevcut değil. Bu sonuçlar katalog incelemesidir, tüm yetkilendirme senaryolarının davranışsal ispatı değildir.
+
+Yukarıdaki yazma senaryoları canlıda çalıştırılmadı; mevcut boş kutular tamamlanmış gibi işaretlenmedi. Özellikle fotoğraf yolu ve iki gerçek kullanıcının karşılıklı erişimi için izole test gerekir. site_visits anonim INSERT izni tasarım gereğidir; denemek için yapay ziyaret eklenmedi. Canlıda oluşturulan denetim satırı: 0.
+
+Eski `rls-probe.sh` POST/PATCH/DELETE içerir ve başarılı olursa veri yazabilir; salt okunur betik değildir. Üretim öncesi kontrol için otomatik çalıştırılmamalıdır.
+
+İki anonim REST GET kontrolü de HTTP 200 ve boş dizi verdi. Bu, ilgili anda bu iki sorgunun veri döndürmediğini gösterir; boş tablo ile satır filtrelemesini tek başına ayıramaz. Katalogdaki rol/sahiplik koşulları ayrıca incelendi. Gerçek kayıt içerikleri raporlanmadı.

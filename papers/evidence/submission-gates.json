@@ -28,12 +28,17 @@
     "new_dataset_doi": null,
     "compatible_primary_data_licensing_authorized": true,
     "pending": [
+      "New author-approved, accessible source package after withdrawal of DGR-2026-0026",
       "joint final manuscript approval and detailed contributions",
       "field details beyond documented tape/height/GNSS protocol",
       "repository deposit and reviewer access",
       "submission account access"
     ],
     "policy": "https://www.nature.com/sdata/policies/repositories",
-    "license_authorization_scope": "New rights-owned primary tree tables and documentation only; excludes original report, photographs and third-party spatial material"
+    "license_authorization_scope": "New rights-owned primary tree tables and documentation only; excludes original report, photographs and third-party spatial material",
+    "source_retracted": true,
+    "artifacts_purged_commit": "472a247",
+    "status_checked_at": "2026-10-19",
+    "reproducibility": "Historical audit only. Source report withdrawn on 2026-10-17; original artifacts are no longer available in the current repository. Synthetic tests validate tooling only, not these observations."
   }
 }

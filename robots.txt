@@ -21,9 +21,6 @@ Disallow: /?view=users
 Disallow: /?view=measure
 Disallow: /?view=nav
 
-# API endpoint'leri taranmasın (Supabase)
-
-
 # Site haritası
 Sitemap: https://dendrogeo.org/sitemap.xml
 

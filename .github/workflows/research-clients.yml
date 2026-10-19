@@ -6,6 +6,7 @@ on:
     paths:
       - "clients/**"
       - "research/**"
+      - "papers/tools/**"
       - "scripts/check-carbon-reference.mjs"
       - "test/fixtures/carbon-reference-v1.json"
       - "src/config/species.js"
@@ -19,6 +20,7 @@ on:
     paths:
       - "clients/**"
       - "research/**"
+      - "papers/tools/**"
       - "scripts/check-carbon-reference.mjs"
       - "test/fixtures/carbon-reference-v1.json"
       - "src/config/species.js"
@@ -81,3 +83,13 @@ jobs:
           extra-packages: any::rcmdcheck
       - name: Check R package
         run: Rscript -e 'rcmdcheck::rcmdcheck("clients/r/dendrogeo", args = c("--no-manual"), error_on = "error")'
+
+  papers-tools:
+    name: Manuscript audit tools (synthetic fixtures)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m unittest discover -s papers/tools -p "test_*.py" -t papers/tools -v

@@ -12,7 +12,10 @@
   <url><loc>https://dendrogeo.org/kullanim-kosullari/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://dendrogeo.org/aydinlatma/</loc><lastmod>2026-10-19</lastmod></url>
   <url><loc>https://dendrogeo.org/kunye/</loc><lastmod>2026-10-04</lastmod></url>
-  <url><loc>https://dendrogeo.org/en/</loc><xhtml:link rel="alternate" hreflang="tr" href="https://dendrogeo.org/"/><xhtml:link rel="alternate" hreflang="en" href="https://dendrogeo.org/en/"/><xhtml:link rel="alternate" hreflang="x-default" href="https://dendrogeo.org/"/><changefreq>monthly</changefreq></url>
+  <url><loc>https://dendrogeo.org/en/</loc><xhtml:link rel="alternate" hreflang="tr" href="https://dendrogeo.org/"/><xhtml:link rel="alternate" hreflang="en" href="https://dendrogeo.org/en/"/><xhtml:link rel="alternate" hreflang="x-default" href="https://dendrogeo.org/"/><changefreq>monthly</changefreq><lastmod>2026-10-19</lastmod></url>
   <url><loc>https://dendrogeo.org/en/methods/</loc><xhtml:link rel="alternate" hreflang="tr" href="https://dendrogeo.org/yontem/"/><xhtml:link rel="alternate" hreflang="en" href="https://dendrogeo.org/en/methods/"/><xhtml:link rel="alternate" hreflang="x-default" href="https://dendrogeo.org/yontem/"/><lastmod>2026-10-05</lastmod></url>
-  <url><loc>https://dendrogeo.org/rapor/</loc><lastmod>2026-10-15</lastmod><changefreq>weekly</changefreq></url>
+  <url><loc>https://dendrogeo.org/rapor/</loc><lastmod>2026-10-18</lastmod><changefreq>weekly</changefreq></url>
+  <url><loc>https://dendrogeo.org/en/privacy/</loc><lastmod>2026-10-19</lastmod></url>
+  <url><loc>https://dendrogeo.org/en/data-protection/</loc><lastmod>2026-10-19</lastmod></url>
+  <url><loc>https://dendrogeo.org/en/terms/</loc><lastmod>2026-10-19</lastmod></url>
 </urlset>

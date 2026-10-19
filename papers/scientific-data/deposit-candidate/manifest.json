@@ -16,7 +16,7 @@
     },
     {
       "name": "metadata.json",
-      "sha256": "f89fa18a27412563dfe789f0e6638e0e1200b6762b2101c57d390206391e5d17"
+      "sha256": "b8d2ea800957b266b5b084e17c2b0552306fb9428e1553bf8b1c6ce8f3d024ae"
     },
     {
       "name": "LICENSE.txt",
@@ -26,5 +26,9 @@
       "name": "README.md",
       "sha256": "3a9aa88da3fa2a464a1c09d4733c438d021ab7ff1cefcbc47def4870a100d44b"
     }
-  ]
+  ],
+  "source_retracted": true,
+  "artifacts_purged_commit": "472a247",
+  "status_checked_at": "2026-10-19",
+  "reproducibility": "Historical audit only. Source report withdrawn on 2026-10-17; original artifacts are no longer available in the current repository. Synthetic tests validate tooling only, not these observations."
 }

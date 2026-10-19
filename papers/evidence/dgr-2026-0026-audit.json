@@ -109,5 +109,9 @@
     "instruments"
   ],
   "journal_submission_ready": false,
-  "readiness_note": "Author declarations, journal eligibility, data licensing, deposit scope and field-method confirmation require separate review. File integrity is not submission approval."
+  "readiness_note": "Author declarations, journal eligibility, data licensing, deposit scope and field-method confirmation require separate review. File integrity is not submission approval.",
+  "source_retracted": true,
+  "artifacts_purged_commit": "472a247",
+  "status_checked_at": "2026-10-19",
+  "reproducibility": "Historical audit only. Source report withdrawn on 2026-10-17; original artifacts are no longer available in the current repository. Synthetic tests validate tooling only, not these observations."
 }

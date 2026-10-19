@@ -1,0 +1,22 @@
+name: Public policy documents
+on:
+  push:
+    branches: [main]
+    paths: ["en/**", "scripts/safe-document-smoke.mjs", "src/ui/toast-message-content.js", ".github/workflows/safe-public-documents.yml"]
+  pull_request:
+    paths: ["en/**", "scripts/safe-document-smoke.mjs", "src/ui/toast-message-content.js", ".github/workflows/safe-public-documents.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  policies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: node node_modules/playwright-core/cli.js install --with-deps webkit
+      - run: node scripts/safe-document-smoke.mjs

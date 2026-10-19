@@ -11,6 +11,7 @@
  * Ayrıca CITATION.cff'in Zenodo'nun beklediği alanları içerdiği ve
  * CHANGELOG'da o sürümün kaydı olduğu doğrulanır.
  */
+import { execFileSync } from 'node:child_process';
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
@@ -186,17 +187,8 @@ describe('satır sonu normalizasyonu (yama taşınabilirliği)', () => {
   });
 
   test('⭐ birinci taraf metin dosyalarında CRLF yok', () => {
-    const IKILI = /\.(png|jpe?g|gif|ico|webp|woff2?|ttf|eot|pdf|zip|gz|mp3)$/i;
-    const dosyalar = [];
-    const yuru = (d) => {
-      for (const a of readdirSync(d)) {
-        if (a === '.git' || a === 'node_modules' || a === 'vendor' || a.startsWith('.')) continue;
-        const t = join(d, a);
-        if (statSync(t).isDirectory()) yuru(t);
-        else if (!IKILI.test(a)) dosyalar.push(t);
-      }
-    };
-    yuru(ROOT);
+    const IKILI = /\.(png|jpe?g|gif|ico|webp|woff2?|ttf|eot|pdf|zip|gz|mp3|pyc|pyo|so|bin)$/i;
+    const dosyalar = execFileSync('git',['ls-files','-z'],{cwd:ROOT,maxBuffer:64*1024*1024}).toString('utf8').split('\0').filter(p=>p&&!p.startsWith('vendor/')&&!IKILI.test(p)).map(p=>join(ROOT,p));
     assert.ok(dosyalar.length > 30, 'tarama dosya bulamadı: ' + dosyalar.length);
     const crlf = dosyalar.filter((f) => {
       try { return readFileSync(f).includes(Buffer.from('\r\n')); } catch (e) { return false; }

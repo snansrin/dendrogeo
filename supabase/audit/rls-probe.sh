@@ -14,6 +14,10 @@
 # dbh_cm 0 olduğu için istatistikleri kirletmez, ama yine de temizleyin.
 # ============================================================================
 set -uo pipefail
+if [ "${DG_ALLOW_WRITE_PROBES:-}" != "1" ]; then
+  echo "Write probes disabled: use an isolated database; explicitly set DG_ALLOW_WRITE_PROBES=1 only after reviewing the targets." >&2
+  exit 2
+fi
 
 # Anon key'i kaynaktan oku (repoda zaten açık, tasarımı gereği)
 KAYNAK="$(dirname "$0")/../../src/config/supabase.js"

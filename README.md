@@ -157,3 +157,7 @@ Bu çalışma, **Nagihan ŞİRİN**’in Ankara Üniversitesi Ziraat Fakültesi 
 [Nagihan ŞİRİN · ORCID](https://orcid.org/0009-0003-7372-0973) · [Sinan ŞİRİN · ORCID](https://orcid.org/0009-0009-6303-5140) · [Künye ve iletişim](https://dendrogeo.org/kunye/) · [Rozetlerin kapsamı](docs/BADGES.md)
 
 <p align="center">© 2026 DendroGeo · Nagihan ŞİRİN &amp; Sinan ŞİRİN</p>
+
+### Current report archive status
+
+As checked on 19 October 2026, the public report index has no active research reports. Retired test releases and withdrawn report notices remain traceable; a notice is not a downloadable active dataset. The software supports publication, but a new reviewed report must be published before public client download examples can be used.

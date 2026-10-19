@@ -57,11 +57,11 @@ in our SECURITY-HALL.md (with permission) and acknowledged in release notes.
 
 DendroGeo implements:
 
-- ✅ Supabase Row Level Security (RLS) on all tables
+- Supabase RLS enabled on all 13 public tables and Storage tables inspected on 19 October 2026; policy coverage is a separate check (see supabase/audit/RLS-DENETIM.md)
 - ✅ Cloudflare Turnstile CAPTCHA on auth endpoints
 - ✅ Admin approval workflow for all published data
-- ✅ Content Security Policy (CSP) headers
-- ✅ No cookies / no tracking (GDPR/KVKK compliant)
+- Content Security Policy applied through an HTML meta element
+- No advertising or tracking cookies; aggregate usage metrics and transient authenticated presence are documented in the privacy policy
 - ✅ Photo storage with per-user path isolation
 - ✅ UUID-based client_id for offline sync duplicate prevention
 - ✅ Rate limiting via Supabase edge functions
@@ -69,11 +69,18 @@ DendroGeo implements:
 ## Data Privacy
 
 - **Stored:** email, full name, organization (account only)
-- **NOT stored:** IP addresses, browsing history, cookies
+- **Aggregate metrics:** daily page/source/device/country totals retained for up to 400 days; no visitor identifiers or IP addresses in these aggregates
+- **Presence:** authenticated activity and optional shared location have a separate, transient authorization scope
 - **Right to erasure:** Users can request full data deletion at any time
-- **Compliance:** KVKK (Turkey), GDPR (EU)
+- **Privacy requests:** handled under the published privacy policy and applicable law; this document is not a legal compliance certification.
 
 ---
 
-Last updated: 2026-09-11
+Last updated: 2026-10-19
 Contact: security@dendrogeo.org
+
+## Hosting limitations
+
+GitHub Pages does not provide repository-controlled custom HTTP response headers. A read-only GET of the deployed homepage on 19 October 2026 found no HTTP CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, HSTS or Permissions-Policy headers. A meta CSP cannot enforce frame-ancestors; the interface currently has no verified anti-framing protection. RLS and CAPTCHA do not prevent clickjacking. An edge/header configuration would be a separate infrastructure change.
+
+Public static responses may use Access-Control-Allow-Origin: *. This does not grant access to private Supabase records; those use separate authorization. See [cache behaviour](docs/CACHING.md).

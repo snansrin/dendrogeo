@@ -22,7 +22,7 @@ The evidence audit establishes file identity and structural consistency. It does
 Run from the repository root with Python 3.10 or newer:
 
 ```console
-python papers/tools/audit_public_report.py rapor/DGR-2026-0026 --output papers/evidence/dgr-2026-0026-audit.json
+python -m unittest discover -s papers/tools -p "test_*.py" -t papers/tools -v
 ```
 
 ## Policy sources
@@ -38,3 +38,7 @@ python papers/tools/audit_public_report.py rapor/DGR-2026-0026 --output papers/e
 Nagihan Şirin: doctoral student, Department of Landscape Architecture, Faculty of Agriculture, Ankara University, Türkiye; agreement to authorship of both manuscripts confirmed by the user. Sinan Şirin: system developer; unrelated employer is not a project affiliation. No external funding; development supported by the authors themselves. Sinan is confirmed as corresponding author and no influencing relationships are reported. Detailed contributions and final manuscript approval remain pending. Agreement to authorship is not treated as approval of the final manuscript.
 
 Further author declaration: Sinan Şirin is the corresponding author (sinan@dendrogeo.org). No sponsorship, patents, commercial income, paid consultancy or other influencing relationships were reported. His platform-development role is disclosed. Final manuscript approval and detailed contributions remain pending.
+
+## Source withdrawal — checked 19 October 2026
+
+DGR-2026-0026 was withdrawn on 17 October 2026 and its report artifacts were removed (commit 472a247). The existing audit is historical evidence, not a currently reproducible audit of a public report. Manuscript source claims and the deposit candidate require revalidation against a new author-approved dataset. Tests now generate explicitly synthetic packages in temporary directories; passing them does not validate the withdrawn observations or make either manuscript submission-ready.

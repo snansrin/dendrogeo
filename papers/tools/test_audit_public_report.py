@@ -5,7 +5,12 @@ import unittest
 from unittest.mock import patch
 from audit_public_report import audit
 
-REPORT = Path(__file__).resolve().parents[2] / "rapor" / "DGR-2026-0026"
+from synthetic_report_fixture import create_report
+import tempfile
+_TEMP_REPORT = tempfile.TemporaryDirectory()
+REPORT = create_report(_TEMP_REPORT.name)
+import atexit
+atexit.register(_TEMP_REPORT.cleanup)
 
 
 class ManuscriptAuditTests(unittest.TestCase):
@@ -13,9 +18,9 @@ class ManuscriptAuditTests(unittest.TestCase):
         result = audit(REPORT)
         self.assertTrue(result["integrity_passed"])
         self.assertEqual(len(result["verified_artifacts"]), 8)
-        self.assertEqual(result["records"], 36)
+        self.assertEqual(result["records"], 3)
         self.assertFalse(result["journal_submission_ready"])
-        self.assertEqual(result["geometry_structure"]["park.geojson"]["point_features"], 36)
+        self.assertEqual(result["geometry_structure"]["park.geojson"]["point_features"], 3)
 
     def test_changed_artifact_is_detected(self):
         original = Path.read_bytes

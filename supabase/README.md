@@ -1,7 +1,7 @@
 # supabase/ — veritabanı şeması, migration'lar ve güvenlik denetimi
 
 Bu dizin projenin **gerçek şemasını** repoya taşır. Daha önce şema yalnızca
-Supabase kontrol panelinde yaşıyordu; artık her değişiklik version control'da.
+Supabase kontrol panelinde yaşıyordu. Bu dizin tarihsel SQL dosyalarını ve sonraki değişiklikleri içerir; sıfırdan kurulumun canlı şemayla birebir eşdeğer olduğu henüz doğrulanmamıştır.
 
 > **Güncel ölçüm otoritesi — DG-MEASURE-LOCK-2026-10-06-FINAL:** sahada 1,30 m yükseklikte ham göğüs çevresi `girth_cm` ölçülür; `dbh_cm = girth_cm / π` ile türetilir. Ham çevre korunur, allometri yuvarlanmamış DBH ile çalışır; kullanıcıya DBH 1 ondalık basamakla gösterilir. 0011/0013 açıklamaları tarihsel geçiş kaydıdır ve bu FINAL kuralın yerine geçmez.
 
@@ -29,7 +29,7 @@ Supabase kontrol panelinde yaşıyordu; artık her değişiklik version control'
 | `migrations/20261015073309_realtime_presence_authorization.sql` | Canlı ziyaretçi Presence kanalını yalnız aktif kullanıcıların yayımlamasına ve yalnız kurucunun okumasına; park Presence kanalını ise yalnız aktif park üyelerinin görüp yayımlamasına sınırlar. İstemciler özel kanala JWT kurulduktan sonra katılır. Dört imtiyazlı davet fonksiyonunun `search_path` değeri sabitlenir. Ölçüm/yüzey/rapor tabloları ve Realtime mesaj saklama yapısı değiştirilmez. Idempotent. |
 | `dump-schema.sh` | Canlı şemayı `supabase db dump` ile yeniden dökmek için yardımcı |
 | `audit/rls-probe.sh` | Anon key ile 13 saldırı denemesi (yetki yükseltme dahil) |
-| `audit/RLS-DENETIM.md` | Denetim listesi + sonuç tablosu (doldurulacak) |
+| `audit/RLS-DENETIM.md` | Denetim listesi + 19 Ekim salt okunur katalog sonucu; yazma senaryoları ayrıca belirtilir |
 
 ## Nasıl uygulanır
 
@@ -251,3 +251,45 @@ akışı, ölçüm kapısı, geri doldurma aracı) + `test/park-identity.test.mj
 `measurement_protocol_guard` yeni kayıtların ham `girth_cm` ve tam hassasiyetli `dbh_cm = girth_cm / pi()` kontratını denetler. Merkezi fingerprint `4e48cf360622b5633e664618a8626756b3207cec8dd63a3158714e957eae3212` istemci kilidiyle eşleştirilir. Mevcut kayıtlara UPDATE/backfill çalıştırmaz. Durum/metadata güncellemeleri eski kanıtı korur; ham çevresi bulunmayan tarihsel satırlar için kanıt üretilmez. RLS/approval/geofence trigger’ları ve politikaları değiştirilmez. Yeni/gerçek boyut değişiminde çelişkili veya görüntü için yuvarlanmış DBH reddedilir.
 
 `npm run check:sql` migration’ı izole PostgreSQL’de iki kez çalıştırır; geçerli tam precision, invalid input, legacy metadata ve boyut güncelleme kontratlarını sınar. Canlı doğrulama kullanıcı satırı yazmadan katalog ve saf dönüşüm fonksiyonunu okur.
+
+## 19 Ekim 2026 — migration envanteri ve yeniden kurulum sınırı
+
+0016–0024 numaralı dosyalar depoda yoktur. Bu numaraların hiç kullanılmadığını kanıtsız olarak ileri sürmüyoruz. Canlı migration geçmişi 20261003171920 ile başlıyor; eski SQL Editor işlemleri bu liste tarafından kanıtlanmıyor. Bazı yerel dosyaların zaman damgası canlı kayıtla farklıdır; salt isim farkı SQL içerik eşdeğerliğini kanıtlamaz. Migration repair/push/reset üretimde çalıştırılmadı.
+
+Yeni migration dosyaları yalnız CLI ile zaman damgalı oluşturulmalıdır. Eski numaralı dosyalar yeniden adlandırılmaz ve değiştirilmez. Yeni bir 0026 dosyası eklemek sıralamayı geçmişe taşır.
+
+| Depodaki dosya | Açıklama / canlı geçmişi |
+|---|---|
+| `migrations/0001_init_v2_1.sql` | init v2 1 |
+| `migrations/0002_review_fixes.sql` | review fixes |
+| `migrations/0003_audit_and_agg.sql` | audit and agg |
+| `migrations/0004_parks.sql` | parks |
+| `migrations/0005_park_name_case.sql` | park name case |
+| `migrations/0006_park_admin_only.sql` | park admin only |
+| `migrations/0007_geo_fence.sql` | geo fence |
+| `migrations/0008_report_publish.sql` | report publish |
+| `migrations/0009_user_report_publish.sql` | user report publish |
+| `migrations/0010_report_retraction.sql` | report retraction |
+| `migrations/0011_inventory_qa.sql` | inventory qa |
+| `migrations/0012_report_author.sql` | report author |
+| `migrations/0013_restore_measurements.sql` | restore measurements |
+| `migrations/0014_publish_request_fix.sql` | publish request fix |
+| `migrations/0015_report_data_owner.sql` | report data owner |
+| `migrations/0025_park_invites.sql` | park invites |
+| `migrations/20261003165331_surface_reviews.sql` | surface reviews |
+| `migrations/20261003180749_surface_report_snapshot.sql` | surface report snapshot |
+| `migrations/20261003203000_report_accepted_surface_snapshot.sql` | report accepted surface snapshot |
+| `migrations/20261003220749_surface_geometry_compat.sql` | surface geometry compat |
+| `migrations/20261004165219_profile_privilege_guard.sql` | profile privilege guard |
+| `migrations/20261006193500_data_requests_delete_own.sql` | data requests delete own |
+| `migrations/20261007083413_report_access_hardening.sql` | report access hardening |
+| `migrations/20261007083543_rls_index_optimization.sql` | rls index optimization |
+| `migrations/20261014201828_measurement_protocol_guard.sql` | measurement protocol guard |
+| `migrations/20261015073309_realtime_presence_authorization.sql` | realtime presence authorization |
+| `migrations/20261016145733_shared_park_access_and_accepted_surface.sql` | shared park access and accepted surface |
+| `migrations/20261017062202_verified_invite_identity.sql` | verified invite identity |
+| `migrations/20261019092224_visitor_daily_aggregate_metrics.sql` | visitor daily aggregate metrics |
+
+Canlı kayıtta yerel dosya adından farklı olanlar: surface_reviews 20261003171920; surface_report_snapshot 20261003181124; surface_geometry_compat 20261003220940; profile_privilege_guard 20261004165219; allow_users_delete_own_data_requests 20261006163727; report_access_hardening 20261007084950; rls_index_optimization 20261007085148; realtime_presence_authorization 20261015073309. Ölçüm protokolü, paylaşılan park erişimi, davet kimliği ve ziyaretçi günlük özetinin son kayıtları mevcut. Bu liste yalnız salt okunur list_migrations sonucudur.
+
+Yerel config ve boş seed yalnız geliştirme yapılandırmasıdır. Docker/CLI çalıştırılmadığı ve tarihsel zincir bağımsız ortamda yeniden oynatılmadığı için `supabase db reset` başarısı vaat edilmez. Tarihsel SQL'in ayrık ortamdaki doğrulaması tamamlanmadan üretime push yapılmamalıdır. Denetim için yazma sondası yerine salt okunur katalog kontrolü ve izole PostgreSQL testleri tercih edilir.
