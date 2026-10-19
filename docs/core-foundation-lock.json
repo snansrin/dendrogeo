@@ -10056,6 +10056,23 @@
           "sha256": "2a478a24a9d66b43f99b13f7291a0c15fe53c63b70310e261bba01e39f362738"
         }
       ]
+    },
+    {
+      "date": "2026-10-19",
+      "scope": "User-authorized guided-tour stability fix: remove the broad live-map subtree observer that ran during OSM park detection and poll only the park result card at a bounded interval. Preserve park search, analysis, map and stored-data behavior.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "2a478a24a9d66b43f99b13f7291a0c15fe53c63b70310e261bba01e39f362738",
+          "sha256": "3160b1815b7eb04692303d9c2261f57bc17aa13c0895a458e486975efc4398bd"
+        },
+        {
+          "path": "src/ui/guided-map-demo.js",
+          "previous_sha256": "2e9e8e3eccac5c75d99f3c188b012f1a32af55ca72ccd54f36979135405ff453",
+          "sha256": "fc9ce962fdc07f82b6361cf10dab5459651c0c7972c1affcd2bb3d5aedc4cd9f"
+        }
+      ]
     }
   ]
 }

@@ -13,6 +13,7 @@
   resultTitle:"4 · Sonucu inceleyin",
   resultBody:"Tarama başladı. Tamamlanma süresi parkın büyüklüğüne ve dış veri servislerinin yanıtına bağlıdır. Sonuç geldiğinde sınıf düğmeleri, OSM nesneleri, fırça, sınır araçları ve göreli NDVI’yı deneyin.",
   notFound:"Park henüz algılanmadı. Haritayı Göksu Parkı sınırı içinden seçip yeniden deneyin.",
+  searching:"Park aranıyor… OSM yanıtı bekleniyor.",
   waitButton:"Park kartını veya yüzey analizi düğmesini bekliyor…",
   next:"Devam",
   close:"Turu kapat",
@@ -40,16 +41,30 @@
   if(wait&&step===3&&!analysisButton())wait.textContent=translate(copy.waitButton);
  }
  function stepTo(step){if(!state)return;state.step=step;render();}
- function scanForPark(){if(!state||state.step!==2)return;if(parkDetected()){stepTo(3);return;}if(state.parkClickSeen){const wait=state.panel.querySelector(".dg-guided-demo-wait");if(wait)wait.textContent=translate(copy.notFound);}}
+ function stopParkPolling(){if(!state?.parkPollTimer)return;root.clearTimeout(state.parkPollTimer);state.parkPollTimer=null;}
+ function scanForPark(){
+  if(!state||state.step!==2||!state.parkClickSeen)return;
+  if(parkDetected()){stopParkPolling();stepTo(3);return;}
+  if(Date.now()>=state.parkPollDeadline){stopParkPolling();const wait=state.panel.querySelector(".dg-guided-demo-wait");if(wait)wait.textContent=translate(copy.notFound);return;}
+  state.parkPollTimer=root.setTimeout(scanForPark,400);
+ }
+ function beginParkPolling(){
+  stopParkPolling();
+  if(!state)return;
+  state.parkClickSeen=true;
+  state.parkPollDeadline=Date.now()+45000;
+  const wait=state.panel.querySelector(".dg-guided-demo-wait");if(wait)wait.textContent=translate(copy.searching);
+  state.parkPollTimer=root.setTimeout(scanForPark,250);
+ }
  function onClick(event){if(!state)return;
   if(event.target.closest("[data-tour-close]")){stop(false);return;}
   if(event.target.closest("[data-tour-return]")){stop(true);return;}
   if(event.target.closest("[data-tour-next]")&&state.step===4){stop(false);return;}
   if(state.step===1&&event.target.closest("#parkModeBtn")){root.setTimeout(()=>{if(state?.step===1&&root.DG_GUIDED_MAP_DEMO_ADAPTER.create().parkMode())stepTo(2);},100);return;}
-  if(state.step===2&&event.target.closest("#map")){state.parkClickSeen=true;root.setTimeout(scanForPark,450);return;}
+  if(state.step===2&&event.target.closest("#map")){beginParkPolling();return;}
   if(state.step===3&&analysisButton()&&event.target.closest("button,[role='button']")===analysisButton())root.setTimeout(()=>{if(state?.step===3)stepTo(4);},250);
  }
- function stop(returnLanding){if(!state)return;const current=state;state=null;current.observer?.disconnect();current.root.removeEventListener("click",onClick,true);document.querySelectorAll(".dg-guided-demo-focus").forEach(node=>node.classList.remove("dg-guided-demo-focus"));current.panel.remove();if(returnLanding){const landing=document.getElementById("landing"),shell=document.getElementById("shell");if(shell)shell.style.display="none";if(landing)landing.style.display="block";root.scrollTo({top:0,behavior:"instant"});}}
+ function stop(returnLanding){if(!state)return;const current=state;state=null;if(current.parkPollTimer)root.clearTimeout(current.parkPollTimer);current.root.removeEventListener("click",onClick,true);document.querySelectorAll(".dg-guided-demo-focus").forEach(node=>node.classList.remove("dg-guided-demo-focus"));current.panel.remove();if(returnLanding){const landing=document.getElementById("landing"),shell=document.getElementById("shell");if(shell)shell.style.display="none";if(landing)landing.style.display="block";root.scrollTo({top:0,behavior:"instant"});}}
  function start(){
   if(state){state.panel.scrollIntoView({block:"nearest",behavior:"smooth"});return true;}
   const landing=document.getElementById("landing"),shell=document.getElementById("shell"),mapView=document.getElementById("v-map");
@@ -57,9 +72,8 @@
   landing.style.display="none";shell.style.display="block";root.go("map");
   const panel=document.createElement("section");panel.className="dg-guided-demo";panel.setAttribute("aria-label",translate(copy.guideLabel));panel.setAttribute("role","region");
   const heading=mapView.querySelector("h2");if(heading)heading.insertAdjacentElement("afterend",panel);else mapView.prepend(panel);
-  const current={panel,root:mapView,step:1,parkClickSeen:false,observer:null};state=current;render();
+  const current={panel,root:mapView,step:1,parkClickSeen:false,parkPollTimer:null,parkPollDeadline:0};state=current;render();
   current.root.addEventListener("click",onClick,true);
-  current.observer=new MutationObserver(scanForPark);current.observer.observe(mapView,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:["style","hidden"]});
   let attempts=0;const focus=()=>{if(!state||state!==current)return;const adapter=root.DG_GUIDED_MAP_DEMO_ADAPTER?.create();if(adapter?.focusGoksu())return;if(++attempts<20)root.setTimeout(focus,150);};root.setTimeout(focus,180);
   return true;
  }
