@@ -44,3 +44,5 @@ test('NDVI exhibit keeps actual observations, sample-grid provenance and product
  assert.deepEqual(ndvi.features.map(f=>f.properties.class),['sparse','moderate','dense']);assert.ok(ndvi.features.every(f=>f.geometry.type==='MultiPolygon'&&f.geometry.coordinates.length));
  assert.ok(!JSON.stringify(ndvi).includes('sig='));assert.ok(ndvi.acquiredAt>ndvi.surfaceContext.acceptedAt);
 });
+
+test('stale scrollend preserves the latest navigation target',()=>{const f=fixture();f.controller.go(1);f.controller.go(5);f.track.scrollLeft=1000;f.track.fire('scrollend');assert.equal(f.controller.index(),5);assert.equal(f.track.scrollLeft,1000);f.track.scrollLeft=5000;f.track.fire('scrollend');assert.equal(f.controller.index(),5);f.track.fire('touchstart');f.track.scrollLeft=3050;f.track.fire('scrollend');assert.equal(f.controller.index(),3);assert.equal(f.track.scrollLeft,3000);});

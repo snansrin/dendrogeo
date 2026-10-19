@@ -10290,6 +10290,18 @@
           "sha256": "bcf5269b10c7f9d82456abc6e817ff4b8c36507e95ad106fabde05578638e6c5"
         }
       ]
+    },
+    {
+      "date": "2026-10-19",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: landing navigation stale scrollend and mobile height resize correction; measurement and analysis sources untouched.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "bcf5269b10c7f9d82456abc6e817ff4b8c36507e95ad106fabde05578638e6c5",
+          "sha256": "24b96031103b98595bb3a85fc489af2572045b3831c54ef62029116e55c2b2bf"
+        }
+      ]
     }
   ]
 }

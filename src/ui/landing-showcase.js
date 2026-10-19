@@ -6,7 +6,7 @@
   if(!element||element.dataset.showcaseReady)return null;
   const track=element.querySelector('[data-showcase-track]'),panels=Array.from(element.querySelectorAll('[data-showcase-panel]')),buttons=Array.from(element.querySelectorAll('[data-showcase-index]')),status=element.querySelector('[data-showcase-status]');
   if(!track||!panels.length||buttons.length!==panels.length)return null;
-  element.dataset.showcaseReady='true';let current=0,frame=0,requested=null,settleTimer=0;
+  element.dataset.showcaseReady='true';let current=0,frame=0,requested=null,settleTimer=0,trackWidth=track.clientWidth;
   function fitHeight(){if(track.style&&panels[current]?.offsetHeight)track.style.height=Math.ceil(panels[current].offsetHeight)+'px';}
   function panelLeft(index){const panel=panels[index];return panel?panel.getBoundingClientRect().left-track.getBoundingClientRect().left+track.scrollLeft:0;}
   function nearestPanel(){let index=0,distance=Infinity;for(let i=0;i<panels.length;i++){const next=Math.abs(panelLeft(i)-track.scrollLeft);if(next<distance){distance=next;index=i;}}return index;}
@@ -19,17 +19,17 @@
    const active=buttons[current],nav=active.parentElement;if(nav&&nav.scrollWidth>nav.clientWidth){const left=active.offsetLeft-nav.offsetLeft;if(left<nav.scrollLeft||left+active.offsetWidth>nav.scrollLeft+nav.clientWidth)nav.scrollTo({left:Math.max(0,left-nav.clientWidth/2+active.offsetWidth/2),behavior:'auto'});}
    if(status)status.textContent=String(current+1).padStart(2,'0')+' / '+String(panels.length).padStart(2,'0');
   }
-  function go(index){const next=(index+panels.length)%panels.length;requested=next;update(next);track.scrollTo({left:panelLeft(next),behavior:root.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}
+  function go(index){if(settleTimer&&root.clearTimeout)root.clearTimeout(settleTimer);settleTimer=0;const next=(index+panels.length)%panels.length;requested=next;update(next);track.scrollTo({left:panelLeft(next),behavior:root.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}
   buttons.forEach((button,i)=>button.addEventListener('click',()=>go(i)));
   element.querySelector('[data-showcase-prev]')?.addEventListener('click',()=>go(current-1));
   element.querySelector('[data-showcase-next]')?.addEventListener('click',()=>go(current+1));
-  function settle(){if(settleTimer&&root.clearTimeout)root.clearTimeout(settleTimer);settleTimer=0;const index=nearestPanel();requested=null;current=index;update(index);const left=panelLeft(index);if(Math.abs(track.scrollLeft-left)>1)track.scrollTo({left,behavior:'auto'});fitHeight();}
+  function settle(){if(settleTimer&&root.clearTimeout)root.clearTimeout(settleTimer);settleTimer=0;/* Ignore scrollend left over from an interrupted navigation. */if(requested!==null&&Math.abs(track.scrollLeft-panelLeft(requested))>1)return;const index=nearestPanel();requested=null;current=index;update(index);const left=panelLeft(index);if(Math.abs(track.scrollLeft-left)>1)track.scrollTo({left,behavior:'auto'});fitHeight();}
   function scheduleSettle(){if(settleTimer&&root.clearTimeout)root.clearTimeout(settleTimer);settleTimer=root.setTimeout?root.setTimeout(settle,140):0;}
   for(const event of ['pointerdown','touchstart','wheel'])track.addEventListener(event,()=>{requested=null;},{passive:true});
   track.addEventListener('scroll',()=>{if(frame)return;frame=root.requestAnimationFrame(()=>{frame=0;if(!track.clientWidth)return;const index=nearestPanel();if(requested!==null&&index!==requested)return;if(requested===null)update(index);scheduleSettle();});},{passive:true});
   track.addEventListener('scrollend',settle,{passive:true});
   element.addEventListener('keydown',event=>{if(event.ctrlKey||event.metaKey||event.altKey||!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();go(event.key==='Home'?0:event.key==='End'?panels.length-1:current+(event.key==='ArrowLeft'?-1:1));buttons[current].focus({preventScroll:true});});
-  root.addEventListener('resize',()=>{requested=null;track.scrollTo({left:panelLeft(current),behavior:'auto'});fitHeight();},{passive:true});
+  root.addEventListener('resize',()=>{if(track.clientWidth===trackWidth){fitHeight();return;}trackWidth=track.clientWidth;const target=requested??current;requested=null;update(target);track.scrollTo({left:panelLeft(target),behavior:'auto'});fitHeight();},{passive:true});
   if(root.ResizeObserver){const observer=new root.ResizeObserver(fitHeight);panels.forEach(panel=>observer.observe(panel));}
   root.addEventListener('dg:lang',()=>{fieldLanguage();fitHeight();});fieldLanguage();
   update(0);fitHeight();return Object.freeze({go,index:()=>current});
