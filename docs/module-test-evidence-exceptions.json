@@ -1,0 +1,69 @@
+{
+  "metric": "Named module paths in assertion-bearing Node test files; not runtime, branch or assertion coverage",
+  "exceptions": [
+    {
+      "module": "src/adapters/surface/project-surface-review-feature-geometry.js",
+      "reason": "No explicit full-path Node test reference found. Existing integration/indirect evidence must not be presented as a dedicated behavioural contract; this is a tracked coverage gap."
+    },
+    {
+      "module": "src/adapters/surface/surface-review-cache.js",
+      "reason": "No explicit full-path Node test reference found. Existing integration/indirect evidence must not be presented as a dedicated behavioural contract; this is a tracked coverage gap."
+    },
+    {
+      "module": "src/adapters/visitors/send-site-metric.js",
+      "reason": "No explicit full-path Node test reference found. Existing integration/indirect evidence must not be presented as a dedicated behavioural contract; this is a tracked coverage gap."
+    },
+    {
+      "module": "src/application/surface/build-surface-review-summary.js",
+      "reason": "No explicit full-path Node test reference found. Existing integration/indirect evidence must not be presented as a dedicated behavioural contract; this is a tracked coverage gap."
+    },
+    {
+      "module": "src/bootstrap/app-runtime.js",
+      "reason": "Generated runtime package: exercised through browser startup; no standalone assertion-bearing test names this file."
+    },
+    {
+      "module": "src/config/site-traffic-config.js",
+      "reason": "Generated public configuration: validated by the build and browser fixture, not an independent configuration contract."
+    },
+    {
+      "module": "src/domain/reports/clean-report-context.js",
+      "reason": "No explicit full-path Node test reference found. Existing integration/indirect evidence must not be presented as a dedicated behavioural contract; this is a tracked coverage gap."
+    },
+    {
+      "module": "src/domain/reports/decode-report-context.js",
+      "reason": "No explicit full-path Node test reference found. Existing integration/indirect evidence must not be presented as a dedicated behavioural contract; this is a tracked coverage gap."
+    },
+    {
+      "module": "src/domain/reports/normalize-report-orcid.js",
+      "reason": "No explicit full-path Node test reference found. Existing integration/indirect evidence must not be presented as a dedicated behavioural contract; this is a tracked coverage gap."
+    },
+    {
+      "module": "src/domain/reports/validate-report-context.js",
+      "reason": "No explicit full-path Node test reference found. Existing integration/indirect evidence must not be presented as a dedicated behavioural contract; this is a tracked coverage gap."
+    },
+    {
+      "module": "src/domain/surface/is-surface-review-cache-current.js",
+      "reason": "No explicit full-path Node test reference found. Existing integration/indirect evidence must not be presented as a dedicated behavioural contract; this is a tracked coverage gap."
+    },
+    {
+      "module": "src/domain/surface/retype-cached-surface-review-parts.js",
+      "reason": "No explicit full-path Node test reference found. Existing integration/indirect evidence must not be presented as a dedicated behavioural contract; this is a tracked coverage gap."
+    },
+    {
+      "module": "src/ui/grid-waypoint-completion.js",
+      "reason": "No explicit full-path Node test reference found. Existing integration/indirect evidence must not be presented as a dedicated behavioural contract; this is a tracked coverage gap."
+    },
+    {
+      "module": "src/ui/map-layer-visibility.js",
+      "reason": "No explicit full-path Node test reference found. Existing integration/indirect evidence must not be presented as a dedicated behavioural contract; this is a tracked coverage gap."
+    },
+    {
+      "module": "src/ui/toast-message-content.js",
+      "reason": "Real DOM assertions are in scripts/safe-document-smoke.mjs and its dedicated CI job; not a Node test."
+    },
+    {
+      "module": "src/ui/visitor-analytics.js",
+      "reason": "Owner panel DOM assertions are in scripts/visitor-analytics-smoke.mjs; not a named Node contract."
+    }
+  ]
+}

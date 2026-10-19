@@ -28,5 +28,21 @@
     "education",
     "productivity",
     "utilities"
+  ],
+  "screenshots": [
+    {
+      "src": "assets/landing/goksu-map.jpg",
+      "sizes": "1280x901",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Kayıtlı Göksu Parkı haritası"
+    },
+    {
+      "src": "assets/landing/goksu-ndvi.jpg",
+      "sizes": "1280x901",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Göksu Parkı göreli NDVI görünümü"
+    }
   ]
 }

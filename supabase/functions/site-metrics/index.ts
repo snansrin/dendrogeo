@@ -1,5 +1,7 @@
 // Aggregate ingestion. Request bodies never include account, IP, session or full referrer data.
 import {resolveCountry} from './country-db.ts';
+import {createIngestionBudget} from './ingestion-budget.js';
+const ingestionBudget=createIngestionBudget({onExceeded:()=>console.warn('[site-metrics] aggregate_budget_exceeded')});
 const origins=new Set(['https://dendrogeo.org']);
 const pages=new Set(['home','home-en','inventory','carbon','landcover','parks','methods','methods-en','data','reports','about','privacy','notice','terms','contact','app-dash','app-measure','app-nav','app-map','app-projects','app-records','app-export','app-world']);
 const events=new Set(['page_view','workspace_open','analysis_request']);
@@ -19,6 +21,7 @@ Deno.serve(async(request:Request)=>{
   const value=JSON.parse(raw);
   if(!events.has(value.event)||!pages.has(value.page)||!sources.has(value.source)||!devices.has(value.device)||Object.keys(value).some(key=>!['event','page','source','device'].includes(key)))return reply(400,{error:'Unsupported aggregate category'});
   if((value.event==='page_view'&&value.page.startsWith('app-'))||(value.event==='workspace_open'&&!value.page.startsWith('app-'))||(value.event==='analysis_request'&&value.page!=='app-map'))return reply(400,{error:'Invalid event scope'});
+  if(!ingestionBudget.allow())return new Response(null,{status:204,headers});
   const key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),url=Deno.env.get('SUPABASE_URL');
   if(!key||!url)return reply(503,{error:'Counter unavailable'});
   const response=await fetch(url+'/rest/v1/rpc/record_site_metric_v1',{method:'POST',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({p_event:value.event,p_page:value.page,p_source:value.source,p_device:value.device,p_country:await resolveCountry(request)}),signal:AbortSignal.timeout(3000)});

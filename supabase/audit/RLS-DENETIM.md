@@ -72,6 +72,7 @@ await sb.from('data_requests').select('*').limit(5).then(console.log)
 | 7 | başkasının fotoğraf yolu | ☐ … | | |
 | 8 | `site_visits` INSERT | ☐ izinli (beklenen) | | |
 | 9 | onaylı SELECT | ☐ izinli (beklenen) | | |
+| 11 | İstemcide ayrıcalıklı anahtar | Kaynak regresyon testi | 2026-10-19 | src JS ve index içinde service_role JWT / secret key literal denetimi; Git geçmişi denetimi değildir |
 | 10 | onay bekleyen SELECT | Satırlar filtrelendi | 2026-10-19 | Anon GET, id alanı, limit 1: HTTP 200, 0 satır |
 | 12 | `data_requests` SELECT | Satırlar filtrelendi | 2026-10-19 | Anon GET, id alanı, limit 1: HTTP 200, 0 satır |
 

@@ -8,7 +8,7 @@
 
 Sahadan haritaya, kayıtlı analizden izlenebilir araştırma çıktısına.
 
-[**Platformu açın ↗**](https://dendrogeo.org/) · [**Yöntem**](https://dendrogeo.org/yontem/) · [**Rapor arşivi**](https://dendrogeo.org/rapor/)
+[**Platformu açın ↗**](https://dendrogeo.org/) · [**Yöntem**](https://dendrogeo.org/yontem/) · [**Rapor dizini · şu an aktif yayın yok**](https://dendrogeo.org/rapor/)
 
 [![Release](https://img.shields.io/github/v/release/snansrin/dendrogeo?label=release&color=167b59)](https://github.com/snansrin/dendrogeo/releases)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22948773.svg)](https://doi.org/10.5281/zenodo.22948773)
@@ -44,7 +44,7 @@ Görseller, ana sayfadaki etkileşimli Göksu Parkı tanıtım sahnelerinden al�
 | **Harita düzenleme** | Hücre kararı, yüzey fırçası, nesne/sınır düzenleme ve şekil çizimi; kabul edilen sonucu kaydetme | Ana sayfada etkileşimli Göksu Parkı tanıtım sahnesi |
 | **Saha planı** | Yeşil alanla sınırlı veya parkın tamamında grid; ölçüm noktaları ve saha navigasyonu | [Veri ve dışa aktarım](https://dendrogeo.org/veri/) |
 | **Projeler** | Park bağlamında kişisel/ortak projeler, üyelik ve ölçüm yönetimi | Platformun Projeler sekmesi |
-| **Raporlama** | DGR kimliği, dondurulmuş dosyalar, SHA-256, kalıcı bağlantı ve ayrı DOI kaydı | [Yayın arşivi](https://dendrogeo.org/rapor/) |
+| **Raporlama** | DGR kimliği, SHA-256 ve kalıcı bağlantıyla yayınlama altyapısı; şu an aktif rapor yok, yeni onaylı yayınlar dizinde listelenir | [Yayın dizini](https://dendrogeo.org/rapor/) |
 
 Son yüzey sonucu **Yeşil alan, Sert zemin, Bina, Su ve Çıplak zemin** sınıflarıyla ifade edilir. Ham yıllık raster, kabul edilmiş yüzey kaydı ve saha ağaç envanteri ayrı kanıt katmanlarıdır.
 

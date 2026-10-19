@@ -28,3 +28,6 @@ vendor/** -text
 *.woff binary
 *.woff2 binary
 *.gz binary
+
+# Pinned third-party gzip/base64 snapshot: preserve bytes and suppress text diffs.
+supabase/functions/site-metrics/country-data.json binary

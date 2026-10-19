@@ -2,9 +2,9 @@ name: Public policy documents
 on:
   push:
     branches: [main]
-    paths: ["en/**", "scripts/safe-document-smoke.mjs", "src/ui/toast-message-content.js", ".github/workflows/safe-public-documents.yml"]
+    paths: ["en/**", "manifest.json", "scripts/safe-document-smoke.mjs", "src/ui/toast-message-content.js", ".github/workflows/safe-public-documents.yml"]
   pull_request:
-    paths: ["en/**", "scripts/safe-document-smoke.mjs", "src/ui/toast-message-content.js", ".github/workflows/safe-public-documents.yml"]
+    paths: ["en/**", "manifest.json", "scripts/safe-document-smoke.mjs", "src/ui/toast-message-content.js", ".github/workflows/safe-public-documents.yml"]
   workflow_dispatch:
 permissions:
   contents: read

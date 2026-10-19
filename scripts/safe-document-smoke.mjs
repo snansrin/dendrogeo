@@ -20,12 +20,14 @@ try{
     assert.deepEqual(await page.evaluate(async()=>(await axe.run({runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})).violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))),[]);
    }
   }
+  const screenshots=await page.evaluate(async()=>{const manifest=await(await fetch('/manifest.json')).json();return await Promise.all(manifest.screenshots.map(async shot=>{const image=new Image();image.src='/'+shot.src;await image.decode();return {declared:shot.sizes,actual:image.naturalWidth+'x'+image.naturalHeight};}));});
+  for(const shot of screenshots)assert.equal(shot.declared,shot.actual);
   await page.addScriptTag({content:readFileSync('src/ui/toast-message-content.js','utf8')});
   const result=await page.evaluate(()=>{
-   const div=document.createElement('div');window.DG_TOAST_MESSAGE_CONTENT.render(div,'<b onclick="alert(1)">Safe <em>help</em></b><img src=x onerror=alert(1)><script>alert(1)</script>');
-   return {bold:div.querySelector('b')?.textContent,attributes:div.querySelector('b')?.attributes.length,active:div.querySelectorAll('img,script').length,text:div.textContent};
+   const div=document.createElement('div');window.DG_TOAST_MESSAGE_CONTENT.render(div,'<b onclick="alert(1)">Safe <em>help</em></b><img src=x onerror=alert(1)><script>alert(1)</script><iframe src=javascript:alert(1)></iframe><a href=javascript:alert(1)>link</a><svg onload=alert(1)></svg><span style=color:red data-private=x>plain</span>');
+   return {bold:div.querySelector('b')?.textContent,attributes:div.querySelector('b')?.attributes.length,active:div.querySelectorAll('img,script,iframe,a,svg').length,text:div.textContent,attributeCount:[...div.querySelectorAll('*')].reduce((sum,node)=>sum+node.attributes.length,0)};
   });
-  assert.equal(result.bold,'Safe help');assert.equal(result.attributes,0);assert.equal(result.active,0);assert.ok(result.text.includes('<img'));
+  assert.equal(result.bold,'Safe help');assert.equal(result.attributes,0);assert.equal(result.active,0);assert.equal(result.attributeCount,0);assert.ok(result.text.includes('<img'));
   assert.deepEqual(errors,[]);console.log(JSON.stringify({width,englishPolicies:true,overflow:false,accessibility:true,toastSanitizer:true}));await page.close();
  }
 }finally{await browser.close();await server.close();}

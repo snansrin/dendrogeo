@@ -10,7 +10,7 @@ async function database(){
   const packed=Uint8Array.from(atob(value.data),c=>c.charCodeAt(0));const binary=new Uint8Array(await new Response(new Blob([packed]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
   const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',binary)),byte=>byte.toString(16).padStart(2,'0')).join('');if(digest!==snapshot.sha256)throw Error('Country snapshot integrity failure');
   return binary;
- }catch{cached=null;retryAfter=Date.now()+30000;return null;}})();return cached;
+ }catch{console.warn('[site-metrics] country_snapshot_unavailable');cached=null;retryAfter=Date.now()+30000;return null;}})();return cached;
 }
 export async function resolveCountry(request:Request){
  const supplied=(request.headers.get('cf-ipcountry')||'').toUpperCase();if(/^[A-Z]{2}$/.test(supplied)&&!['XX','T1','ZZ'].includes(supplied))return supplied;
