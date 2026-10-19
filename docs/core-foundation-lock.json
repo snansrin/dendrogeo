@@ -10278,6 +10278,18 @@
           "sha256": "d19d0c6ab9cd7872f0c01178e907f05e342b917a0d6bac6996579398d0f75742"
         }
       ]
+    },
+    {
+      "date": "2026-10-19",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: bind visitor source/device/country row text explicitly to the existing ink token so WebKit theme transitions preserve text contrast. Rebuild only the versioned landing shell; maintain full contrast assertions with a committed-frame wait in the new analytics smoke test.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "25e0ed9eb229104b1781c2d167f91485466f58269501fdd8320c786e23087762",
+          "sha256": "bcf5269b10c7f9d82456abc6e817ff4b8c36507e95ad106fabde05578638e6c5"
+        }
+      ]
     }
   ]
 }

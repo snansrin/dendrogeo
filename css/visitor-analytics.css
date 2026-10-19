@@ -10,7 +10,7 @@
 #v-visitors .metric-note a{color:var(--green);text-decoration:underline;text-underline-offset:2px}
 #v-visitors .metric-panel{border:1px solid var(--line);border-radius:12px;background:var(--surface);min-width:0;overflow:hidden}
 #v-visitors .metric-panel>summary{font-weight:700;font-size:.84rem;padding:14px;background:var(--bg)}#v-visitors .metric-panel-body{padding:14px}
-#v-visitors .metric-bars{list-style:none;margin:0;padding:0;display:grid;gap:17px}#v-visitors .metric-bar-label{display:flex;align-items:center;gap:7px;font-size:.75rem;min-width:0;margin-bottom:6px}
+#v-visitors .metric-bars{list-style:none;margin:0;padding:0;display:grid;gap:17px}#v-visitors .metric-bar-label{display:flex;align-items:center;gap:7px;font-size:.75rem;min-width:0;margin-bottom:6px;color:var(--ink)}
 #v-visitors .metric-bar-label>span:not(.metric-country){overflow-wrap:anywhere}#v-visitors .metric-bar-label strong{margin-left:auto;white-space:nowrap;color:var(--ink)}#v-visitors .metric-bar-label small{color:var(--mut);min-width:32px;text-align:right}
 #v-visitors .metric-country{font:600 .65rem var(--f-mono);background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:4px;min-width:28px;text-align:center}
 #v-visitors .metric-bars progress{display:block;width:100%;height:7px;border:0;border-radius:9px;overflow:hidden;appearance:none;background:var(--line);accent-color:var(--green)}
