@@ -61,7 +61,7 @@ async function dgSensRenderVegetation(){
 function dgSensHa(a){return(Number(a||0)/10000).toFixed(3);}
 function dgSensNewRecord(){const pk=dgSensParkId(),owner=typeof USER!=="undefined"?USER?.id:null;return window.DG_CREATE_SURFACE_REVIEW_RECORD.create({park:pk,owner,createdAt:new Date().toISOString()});}
 function dgSensResetScanState(rec){if(!rec)return;rec.sens={green:50,water:50,hard:50,bare:50};rec.spectralEnabled=false;rec.profile=null;if(rec.period==="latest"&&!rec.periodExplicit)rec.period="ytd";}
-function dgSensMigrateOsmObjects(rec){if(!rec)return false;const stale=(!!rec.objectVersion&&rec.objectVersion!=="footprints-v5-osm-all")||((rec.objectFeatures||[]).length>0&&rec.objectVersion!=="footprints-v5-osm-all");if(!stale)return false;rec.objectFeatures=null;rec.objectVersion=null;rec.draftDirty=true;return true;}
+function dgSensMigrateOsmObjects(rec){if(!rec)return false;const stale=(!!rec.objectVersion&&rec.objectVersion!=="footprints-v6-road-width-policy")||((rec.objectFeatures||[]).length>0&&rec.objectVersion!=="footprints-v6-road-width-policy");if(!stale)return false;rec.objectFeatures=null;rec.objectVersion=null;rec.draftDirty=true;return true;}
 async function dgSensLoadRecord(){
  return window.DG_LOAD_SURFACE_REVIEW_RECORD.load({createFresh:dgSensNewRecord,loadLocal:fresh=>window.DG_LOAD_LOCAL_SURFACE_REVIEW_DRAFT.load({fresh,loadCampaigns:parkId=>window.DG_LC_VALIDATE.loadCampaigns(parkId),selectCampaign:window.DG_SELECT_VALIDATION_CAMPAIGN,fingerprint:(...args)=>window.DG_SURFACE_REVIEW.fingerprint(...args),cells:dgSensCells(),outer:PARK_POLY,holes:PARK_HOLES||[],year:typeof DG_LC_LAST!=="undefined"?DG_LC_LAST?.report?.year:null,engine:DG_LC_ENGINE_VERSION}),loadRemote:fresh=>fresh.owner&&fresh.parkId&&typeof sb!=="undefined"?window.DG_SURFACE_REVIEW.load(fresh.parkId,fresh.owner):null,selectSource:window.DG_SELECT_SURFACE_REVIEW_SOURCE.select,normalize:args=>window.DG_NORMALIZE_SURFACE_REVIEW_RECORD.normalize({...args,classes:DG_SENS_CLASSES,validFeature:feature=>window.DG_SURFACE_REVIEW.validFeature(feature)}),setStatus:value=>{DG_SENS.status=value;},translate:_tvs});
 }
@@ -342,7 +342,7 @@ async function dgSensRepartition(featureOverride=null){
   if(epoch!==DG_SENS.epoch)return false;
   // Commit staged boundaries only after geometry preparation succeeds.
   if(featureOverride)rec.features=featureOverride;
- if(!rec.objectFeatures){rec.objectFeatures=data.objects;rec.objectVersion="footprints-v5-osm-all";}
+ if(!rec.objectFeatures){rec.objectFeatures=data.objects;rec.objectVersion="footprints-v6-road-width-policy";}
   DG_SENS.partitionVersion=(DG_SENS.partitionVersion||0)+1;DG_SENS.vegetationRenderKey=null;DG_SENS.vegetationLayer?.clearLayers();DG_SENS.parkGeometry=data.park;DG_SENS.geometry=data.geometries;
   if(dgSensMigrateBrushMasks(rec,dgSensCells(),data.geometries,data.park,DG_SENS.epsg)){rec.draftDirty=true;DG_SENS.editing=true;DG_SENS.visualVersion++;data.parts=window.DG_SURFACE_REVIEW.resolved(dgSensCells(),dgSensEffective,data.geometries,dgSensFeatures(),DG_SENS.epsg,data.park);}
   // Structured cloning preserves geometry references; rebind cells to the UI's canonical array.

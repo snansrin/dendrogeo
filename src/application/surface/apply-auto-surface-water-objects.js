@@ -16,6 +16,6 @@ window.DG_APPLY_AUTO_SURFACE_WATER_OBJECTS={
     try{ok=await repartition(features);}catch(error){rollback();throw error;}
     if(!ok){rollback();return 0;}
     if(epoch!==getEpoch()||getRecord()!==record)return 0;
-    record.objectVersion="footprints-v5-osm-all";if(record.osmCoverage)record.osmCoverage.changed=true;dirty();return objects.length;
+    record.objectVersion="footprints-v6-road-width-policy";if(record.osmCoverage)record.osmCoverage.changed=true;dirty();return objects.length;
   }
 };

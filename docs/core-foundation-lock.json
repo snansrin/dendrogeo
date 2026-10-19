@@ -10073,6 +10073,53 @@
           "sha256": "fc9ce962fdc07f82b6361cf10dab5459651c0c7972c1affcd2bb3d5aedc4cd9f"
         }
       ]
+    },
+    {
+      "date": "2026-10-19",
+      "scope": "User-authorized modularization: route the shared OSM road-width policy into the surface-analysis worker, use its metric width consistently for clipped road geometry, and rebuild stale automatic OSM draft geometries under a new object version. Preserve raw raster classes, user boundary decisions, accepted snapshots, allometry, species data, park detection and core analysis workflow. Update the locked surface regression expectations to verify the applied highway-class width policy while preserving accepted records and manual edits.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "src/adapters/surface/osm-review-objects.js",
+          "previous_sha256": "2984967f6e48a6f1887bc179c09d12d8c45f170885ee05b62c6d605b8519921c",
+          "sha256": "9504a95d431c1e5258db7028a6ca246e05406d5ee4f3236e9336c47d7740ee90"
+        },
+        {
+          "path": "src/workers/surface-worker.js",
+          "previous_sha256": "036f18fa9d08120a6bd5b873868562b9dd35b7c7d5dbdfbcdaea757d767de2ea",
+          "sha256": "2c7ea77d9aebfd304460fee4af2c72a0e9b69ae6d7cb53bc0fa8969f2fc0f582"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "40902b576ca5dece85a4c7b32d15b0094250ba838cc310af7429b58f8fca2c40",
+          "sha256": "8206d783fa2e7b3bfeb06c8d4ed43315a5eac32dc97aef9d6774408583c05f29"
+        },
+        {
+          "path": "src/application/surface/apply-auto-surface-water-objects.js",
+          "previous_sha256": "da65dd52065d6472916212e96a0a1056abf8f51e253fed6926e6353b6d8db771",
+          "sha256": "92d497fd6a81beea123dd2a5f5b9ea90c55fc2d73aec6ef1a8c6ba1707bd51ce"
+        },
+        {
+          "path": "src/application/surface/commit-surface-repartition-result.js",
+          "previous_sha256": "36af61503d8c22741f6393b289ae7c8bf5f528810dc0cd6ebe651ad52c8ad10b",
+          "sha256": "74c985763942ff41c7b8aa842b86dc1a55237dcdf187c34c3d5c53955c3a6e37"
+        },
+        {
+          "path": "src/application/surface/finish-surface-review-mount.js",
+          "previous_sha256": "55e81b37ce1d659bb97de490c26fba338d7dd6b8923efc354e2b2e38b5c03276",
+          "sha256": "9a68a1a24bfdecd6434d7e96e4e2e2a607ce76c92c373eff263cf69dbdd1dc4a"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "f9cd48bcd7b64d80349e4161326c2a3d823c797ced01b9a2c688e7f52421ae92",
+          "sha256": "3c55752a1e62a8b8cc036f33323deb6c62a256e17f96e6ed5aa6d5efeb0845f8"
+        },
+        {
+          "path": "test/surface-review.test.mjs",
+          "previous_sha256": "eac386884e2c064836e0d9b667dd7115c8f43900d3c74291d93aa3b34953eff5",
+          "sha256": "a724c5180ecdb31b92f053a0e49aa61f5e800b68ec74f52f88ca83905f386c6f"
+        }
+      ]
     }
   ]
 }

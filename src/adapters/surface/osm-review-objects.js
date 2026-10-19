@@ -5,11 +5,14 @@
   return function objects(elements,epsg){
    const out=[];const paved=/^(asphalt|paved|concrete|paving_stones|sett|cobblestone|bricks|concrete:plates|concrete:lanes)$/;
    const roadKinds=new Set(["motorway","trunk","primary","secondary","tertiary","unclassified","residential","living_street","service","track","pedestrian","footway","path","cycleway","steps","bridleway"]);
-   const roadHalfWidth=t=>{
+   const roadEstimate=t=>{
+    const estimate=root.DG_OSM_ROAD_POLICY?.width?.(t);
+    if(Number.isFinite(estimate?.metres)&&estimate.metres>0&&estimate.metres<=60)return estimate;
     const number=v=>{const n=parseFloat(String(v??"").replace(",",".").replace(/[^0-9.+-]/g,""));return Number.isFinite(n)&&n>0?n:null;};
-    const width=number(t.width);if(width&&width<=60)return width/2;
-    const lanes=number(t.lanes);if(lanes&&lanes<10)return Math.max(1.25,lanes*1.5);
-    return{motorway:6,trunk:5.5,primary:5,secondary:4.5,tertiary:4,residential:3,unclassified:3,living_street:3,service:2.5,track:1.5,pedestrian:2,footway:1.25,path:1.25,cycleway:1.5,steps:1.25,bridleway:1.25}[t.highway]||3;
+    for(const key of["width","width:carriageway","est_width"]){const metres=number(t[key]);if(metres&&metres<=60)return{metres,source:key==="est_width"?"osm-estimated-width":"osm-width"};}
+    const lanes=number(t.lanes);if(lanes&&lanes<10)return{metres:Math.max(3,lanes*3),source:"lane-count-estimate"};
+    const highway=String(t.highway||"").toLowerCase(),footway=String(t.footway||"").toLowerCase(),metres={motorway:14,trunk:13,primary:12,secondary:11,tertiary:10,unclassified:9,residential:9,living_street:8,service:8,track:6,pedestrian:6,footway:footway==="sidewalk"?2.5:5,path:4,cycleway:4.5,steps:3,bridleway:3}[highway]||4;
+    return{metres,source:"highway-class-estimate"};
    };
    for(const el of elements||[]){
     const t=el.tags||{};let type=null;const deck=/^(pier|bridge)$/.test(t.man_made||"")||t.bridge==="yes";
@@ -28,7 +31,8 @@
      const pts=el.geometry.map(p=>[p.lon,p.lat]),a=pts[0],b=pts.at(-1);
      if(pts.length>=4&&a[0]===b[0]&&a[1]===b[1]&&(!isLinearHighway||(isArea&&t.area!=="no")))geom=[[projectRing(pts,epsg)]];
      else if(type==="hard"&&isLinearHighway&&roadKinds.has(String(t.highway).toLowerCase())){
-      const masks=gridLineMask({pts:pts.map(p=>[p[1],p[0]]),w:roadHalfWidth(t)},epsg);
+      const estimate=roadEstimate(t),roadWidthM=estimate.metres;
+      const masks=gridLineMask({pts:pts.map(p=>[p[1],p[0]]),w:roadWidthM/2},epsg);
       if(masks.length)geom=clip("union",...masks);
      }else if(type==="hard"&&(deck||paved.test(t.surface||""))){
       const width=Number(t.width);if(Number.isFinite(width)&&width>0&&width<=40){
@@ -38,7 +42,7 @@
       }
      }
     }
-    if(geom.length)out.push({type,method:"osm-boundary",osmId:el.type+"/"+el.id,priority:deck?4:null,geometry:{type:"MultiPolygon",coordinates:unprojectGeometry(geom,epsg)}});
+    if(geom.length){const estimate=isLinearHighway?roadEstimate(t):null,roadWidthM=estimate?.metres||null;out.push({type,method:"osm-boundary",osmId:el.type+"/"+el.id,priority:deck?4:null,...(roadWidthM?{roadWidthM,widthSource:estimate.source}:{}),geometry:{type:"MultiPolygon",coordinates:unprojectGeometry(geom,epsg)}});}
    }
    const priority={hard:0,water:1,pool:2,building:3};return out.sort((a,b)=>(a.priority??priority[a.type])-(b.priority??priority[b.type]));
   };
