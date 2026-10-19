@@ -167,14 +167,14 @@ function dgLcRoadShouldRefine(tags){
 
   /* highway etiketi yalnızca gerçek yol tipini kaydetmek için kullanılır.
    * Yüzey kanıtı yoksa yukarıdaki koşul nedeniyle sonuç sertleşmez. */
-  /* Land-cover sert zemin düzeltmesi yalnızca araç yolu karakterindeki
-   * highway tiplerini kullanır. Park içindeki yaya/bisiklet yolları asfalt
-   * etiketli olsa bile 10 m hücreyi otomatik olarak "Sert" yapmaz; aksi halde
-   * dar bir yürüyüş yolu çevresindeki yeşil pikseli yol gibi boyayabilir.
-   * Yaya yolları grid/erişim analizinde ayrıca ele alınabilir. */
+  /* Park içindeki yaya ve bisiklet yolları da yalnız OSM sert yüzey etiketi
+   * varsa sınıflandırılır. Genişlik, OSM width/est_width/lane bilgisini
+   * önceleyen ve yoksa highway tipinden türetilen tahmini bir metriktir.
+   * Doğal yüzeyli patikalar raster hücrelerini sertleştirmez. */
   return [
     "motorway","trunk","primary","secondary","tertiary",
-    "unclassified","residential","living_street","service"
+    "unclassified","residential","living_street","service","track",
+    "pedestrian","footway","path","cycleway","steps","bridleway"
   ].includes(hw);
 }
 

@@ -147,9 +147,9 @@ section.blk{padding:40px 0}
 /* Main showcase: a single full-width hero, with matched copy and evidence per slide. */
 #landing .dg-showcase{padding:24px 0 30px;background:radial-gradient(ellipse at 85% 20%,rgba(216,232,214,.45),transparent 54%)}
 .dg-nav-auth-short{display:none}
-.dg-showcase-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-inline:contain;scrollbar-width:none;border-radius:18px;scroll-behavior:smooth}
+.dg-showcase-track{display:flex;width:100%;min-width:0;max-width:100%;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-radius:18px;scroll-behavior:smooth}
 .dg-showcase-track::-webkit-scrollbar{display:none}
-.dg-showcase-slide{flex:0 0 100%;min-width:0;display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:34px;align-items:center;scroll-snap-align:start;scroll-snap-stop:always;padding:10px 4px 24px;min-height:500px}
+.dg-showcase-slide{box-sizing:border-box;flex:0 0 100%;width:100%;min-width:0;display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:34px;align-items:center;scroll-snap-align:start;scroll-snap-stop:always;padding:10px 4px 24px;min-height:500px}
 .dg-showcase-copy{min-width:0}
 .dg-showcase .kick{font-size:.6rem;letter-spacing:.16em;line-height:1.8;max-width:70ch}
 .dg-showcase h1,.dg-showcase h2{font-family:var(--f-disp);font-weight:600;color:var(--green-dk);font-size:clamp(2.05rem,3.5vw,3rem);line-height:1.12;max-width:23ch;margin:15px 0 18px;letter-spacing:-.025em}

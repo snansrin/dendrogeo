@@ -10,8 +10,8 @@ class Element{
  focus(){this.focused=true;}
 }
 function fixture(reduced=false){
- const host=new Element(),track=new Element(),panels=Array.from({length:6},()=>new Element()),buttons=panels.map(()=>new Element()),status={},prev=new Element(),next=new Element(),frames=[];
- track.clientWidth=1000;track.scrollLeft=0;track.scrollTo=options=>{track.lastScroll=options;track.scrollLeft=options.left;};
+ const host=new Element(),track=new Element(),panels=Array.from({length:6},(_,i)=>new Element()),buttons=panels.map(()=>new Element()),status={},prev=new Element(),next=new Element(),frames=[];
+ track.clientWidth=1000;track.scrollLeft=0;track.getBoundingClientRect=()=>({left:0});track.scrollTo=options=>{track.lastScroll=options;track.scrollLeft=options.left;};panels.forEach((panel,i)=>{panel.offsetLeft=i*1000;panel.getBoundingClientRect=()=>({left:panel.offsetLeft-track.scrollLeft});});
  host.querySelector=selector=>({'[data-showcase-track]':track,'[data-showcase-status]':status,'[data-showcase-prev]':prev,'[data-showcase-next]':next}[selector]);host.querySelectorAll=selector=>selector==='[data-showcase-panel]'?panels:buttons;
  const window={requestAnimationFrame:fn=>{frames.push(fn);return frames.length;},matchMedia:()=>({matches:reduced}),addEventListener:()=>{}};
  vm.runInNewContext(readFileSync(new URL('../src/ui/landing-showcase.js',import.meta.url),'utf8'),{window});const controller=window.DG_LANDING_SHOWCASE.mount(host);
@@ -25,6 +25,11 @@ test('keyboard navigation, touch-scroll state and reduced motion stay synchroniz
 });
 test('rapid navigation ignores intermediate smooth-scroll positions and preserves browser shortcuts',()=>{
  const f=fixture();f.next.fire('click');f.next.fire('click');f.track.scrollLeft=1000;f.track.fire('scroll');f.frames.shift()();assert.equal(f.controller.index(),2);let prevented=false;f.host.fire('keydown',{key:'Home',ctrlKey:true,preventDefault(){prevented=true;}});assert.equal(prevented,false);assert.equal(f.controller.index(),2);
+});
+test('manual touch scrolling settles to the measured nearest slide even when panel offsets differ from viewport steps',()=>{
+ const f=fixture();f.panels.forEach((panel,i)=>{panel.offsetLeft=i*1000+(i?18:0);panel.getBoundingClientRect=()=>({left:panel.offsetLeft-f.track.scrollLeft});});
+ f.track.fire('touchstart');f.track.scrollLeft=2050;f.track.fire('scroll');f.frames.shift()();f.track.fire('scrollend');
+ assert.equal(f.controller.index(),2);assert.equal(f.track.lastScroll.left,2018);assert.equal(f.status.textContent,'03 / 06');
 });
 test('public park exhibit contains actual accepted geometries and no account or user payload',()=>{
  const data=JSON.parse(readFileSync(new URL('../assets/landing/goksu-example.json',import.meta.url),'utf8'));assert.equal(data.park.osmKey,'way/423602737');assert.equal(data.source.status,'user-accepted');assert.equal(data.source.revision,32);assert.equal(data.source.publicRpc,'dg_accepted_park_surface');assert.ok(data.features.every(f=>f.geometry.type==='MultiPolygon'));assert.ok(data.areas.building>0&&data.areas.water>0);assert.equal(Object.hasOwn(data.areas,'pool'),false);

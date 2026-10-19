@@ -1073,6 +1073,12 @@
       "src/domain/surface/osm-road-width-preview.js",
       "src/application/surface/preview-surface-road-width.js",
       "src/ui/surface-road-width-control.js"
+    ],
+    "guided-map-demo-and-road-width": [
+      "css/guided-map-demo.css",
+      "src/ui/guided-map-demo-adapter.js",
+      "src/ui/guided-map-demo.js",
+      "test/surface-road-autoclassification.test.mjs"
     ]
   },
   "sha256": {
@@ -2096,7 +2102,11 @@
     "src/adapters/map/recover-imagery-tiles.js": "22662e817241aad091a9f67a990ece0fe43e63e20ee76148d8bca6f2e43e12d0",
     "src/domain/surface/osm-road-width-preview.js": "d17805e44286eda47b36d596aa1edf338d51747e721ee0887144a5b5bee66894",
     "src/application/surface/preview-surface-road-width.js": "3bc68976c4be2282a2392dbc1c820ffc28a53cac0439e078302b8460ad4310c8",
-    "src/ui/surface-road-width-control.js": "34f03140cae4a8a62f70d71690013f0a9876e7a0f364481a86eaf093f5fd7171"
+    "src/ui/surface-road-width-control.js": "34f03140cae4a8a62f70d71690013f0a9876e7a0f364481a86eaf093f5fd7171",
+    "css/guided-map-demo.css": "d40e52583716231472b23c0f3d6e4e7bc96fb7a4667d0d2594bc5a26481c024f",
+    "src/ui/guided-map-demo-adapter.js": "f3bb6d852c81fcbc03576a88fcadc51a8b091684000b97ff55cc01462424f62a",
+    "src/ui/guided-map-demo.js": "2e9e8e3eccac5c75d99f3c188b012f1a32af55ca72ccd54f36979135405ff453",
+    "test/surface-road-autoclassification.test.mjs": "6c666e25d8cb84cb565df1d8e5c42b0136d88aae05784cdb0e4e3a698ef579ad"
   },
   "authorized_modularizations": [
     {
@@ -9941,6 +9951,110 @@
         "src/domain/surface/osm-road-width-preview.js",
         "src/application/surface/preview-surface-road-width.js",
         "src/ui/surface-road-width-control.js"
+      ]
+    },
+    {
+      "date": "2026-10-19",
+      "scope": "User-authorized automatic OSM paved-road width estimates with explicit measurement provenance, plus a responsive guided live-map tour using the existing Göksu data and analysis controls. Preserve raw raster, water and building rules, accepted records, allometry, account writes and publication gates.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "css/landing.css",
+          "previous_sha256": "689202f08c3d7e0102e3d605349e353387dd469b94bbae86135d35daf9c48543",
+          "sha256": "4d30ee06fc67a8422e897fe8dad0a2e2760981d5a0dca73ab83fc6c39bff3d08"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "3d17077b419eb5d6f754774d0cccfa08714913367e6b7b669e2002666cea090d",
+          "sha256": "262f9cbca07e6ef72ed723368e39380f0b3d41074ae61906f64aa7edb4cbaab9"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "ba632857d403faf45bc3d26c5fdfa422a2048e5e0bcb1cef49b40f4c19e9be84",
+          "sha256": "45e649ec7d41320f0769c56a23d093c042768e448db7b69ff507f165a93a0514"
+        },
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "a724a9e119f3b032bd4606842a00e31a74ba893c2a94414578c05025ca163f47",
+          "sha256": "c214ee1683555ffed9adc1c5fc49f27597d0548269e1d4542c31d84d1a9f19b3"
+        },
+        {
+          "path": "src/domain/surface/osm-road-policy.js",
+          "previous_sha256": "01dd40e80e3394d7de24e3f7ba44bd9ff97cd467d645873775b617d3ae633b03",
+          "sha256": "cc0d89257a4a217a18dd973c4c25a07f3ca537d7c73a3053951a52e8c4fa75b4"
+        },
+        {
+          "path": "src/services/lc-osm.js",
+          "previous_sha256": "3ed50433eb96dcc882b9aaa59f1d0fc3736e9f62661de0344ee0643dd5252bdc",
+          "sha256": "86081518539c8b23b34ab152bef0497c7b8a93f31fa5c820ff9726d5db863c54"
+        },
+        {
+          "path": "src/ui/landing-actions.js",
+          "previous_sha256": "40a933ac60170adb08572a58b58788ff182ced1ab4fef59098276210ea7c3ba5",
+          "sha256": "2a97ccf06fbb02af03009c73820943ee37e887f1fa9120ac6c8aeb58a5704778"
+        }
+      ],
+      "added_protected_files": [
+        "css/guided-map-demo.css",
+        "src/ui/guided-map-demo-adapter.js",
+        "src/ui/guided-map-demo.js",
+        "test/surface-road-autoclassification.test.mjs"
+      ]
+    },
+    {
+      "date": "2026-10-19",
+      "scope": "Connect the guided Göksu live-map tour to the classic-script loader and offline precache after module integration validation identified missing registrations.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "262f9cbca07e6ef72ed723368e39380f0b3d41074ae61906f64aa7edb4cbaab9",
+          "sha256": "c84e064445d0044d5138b8ee3cc2d7b1a612dea66570559cdc60647ac3470f51"
+        },
+        {
+          "path": "partials/boot.html",
+          "previous_sha256": "713b937c654f8013fc5d8f6a343e96fa6fce66d82eefbf17bfb8d7115f4d85ac",
+          "sha256": "a431d475f6cbeead60290a2ad8abd217822f9b959a50e8e2819448b591f91819"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "e062d9e032451384eb17654d5143e30c99db6bb27cacd389c0e55b7aaad48b89",
+          "sha256": "6984f5d8a1137a88edd0db5f59c05ee9db7bf023f1efed4ecdba95ebedc85a4f"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-19",
+      "scope": "Add the guided map stylesheet to service-worker install and precache assets so the new public tour renders offline and passes asset-integrity checks.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "sw.js",
+          "previous_sha256": "6984f5d8a1137a88edd0db5f59c05ee9db7bf023f1efed4ecdba95ebedc85a4f",
+          "sha256": "6b3136db90d154b3cb0a91c2472b14f3883544a5b5258c79332cdd66514aeb6d"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-19",
+      "scope": "User-authorized modularization: version and precache the guided-tour stylesheet in the landing shell, preserving the small service-worker install set.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "sw.js",
+          "previous_sha256": "6b3136db90d154b3cb0a91c2472b14f3883544a5b5258c79332cdd66514aeb6d",
+          "sha256": "e042fb4b3b5ed4301b5ef6343f76b07a262569c165ba32e209c2d477135bfc08"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "45e649ec7d41320f0769c56a23d093c042768e448db7b69ff507f165a93a0514",
+          "sha256": "4a64efa602926a37021071c7a0c93c32344570f4bc26bcdfc2be86cce7c74c9d"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "c84e064445d0044d5138b8ee3cc2d7b1a612dea66570559cdc60647ac3470f51",
+          "sha256": "2a478a24a9d66b43f99b13f7291a0c15fe53c63b70310e261bba01e39f362738"
+        }
       ]
     }
   ]
