@@ -1068,6 +1068,11 @@
     ],
     "surface_png_preview_export_2026_10_17": [
       "scripts/surface-map-download-smoke.mjs"
+    ],
+    "surface-road-width-editor": [
+      "src/domain/surface/osm-road-width-preview.js",
+      "src/application/surface/preview-surface-road-width.js",
+      "src/ui/surface-road-width-control.js"
     ]
   },
   "sha256": {
@@ -2088,7 +2093,10 @@
     "scripts/surface-map-download-smoke.mjs": "9a1f470315c973b6ccd0ce4f3355b5e35986e51e76355598b739de84fa5a61d7",
     "src/ui/park-export-lazy-class-bridge.js": "da3706cebb84d663669d479a89459e5a3e9817fc1c62b97533c38e721e76ce75",
     "test/park-export-lazy-class-bridge.test.mjs": "9d75ab63c349cd6a7288e57c50a50637551935548aebf0417043719c4dd7ac65",
-    "src/adapters/map/recover-imagery-tiles.js": "22662e817241aad091a9f67a990ece0fe43e63e20ee76148d8bca6f2e43e12d0"
+    "src/adapters/map/recover-imagery-tiles.js": "22662e817241aad091a9f67a990ece0fe43e63e20ee76148d8bca6f2e43e12d0",
+    "src/domain/surface/osm-road-width-preview.js": "d17805e44286eda47b36d596aa1edf338d51747e721ee0887144a5b5bee66894",
+    "src/application/surface/preview-surface-road-width.js": "3bc68976c4be2282a2392dbc1c820ffc28a53cac0439e078302b8460ad4310c8",
+    "src/ui/surface-road-width-control.js": "34f03140cae4a8a62f70d71690013f0a9876e7a0f364481a86eaf093f5fd7171"
   },
   "authorized_modularizations": [
     {
@@ -9886,6 +9894,53 @@
           "previous_sha256": "8e6b9c5b3f01ce648f562d73462353856aa57f3ce54e6ee2e8e2feaf55285dbd",
           "sha256": "ff1f7f291eba7f92b754d78406f16b1b570e49274fceb660d203d7c46eef8a95"
         }
+      ]
+    },
+    {
+      "date": "2026-10-18",
+      "scope": "User-authorized modularization for Ataturk park road-width correction: additive manual metric road widening preview and existing explicit apply flow. OSM centreline widths are missing; preserve automatic road defaults, allometry, park detection, raster and accepted snapshots. Includes responsive regression and r442 asset publication.",
+      "audit_chain": "sha256-v1",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "1545736c87cb816d173264a358013724ab55006b8e45e3b6d452714cc796b9ae",
+          "sha256": "3d17077b419eb5d6f754774d0cccfa08714913367e6b7b669e2002666cea090d"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "608718d2395afb50b7c078e006dc28645305efd9fad78a1eeb76396cc90c683f",
+          "sha256": "a3816a5cf4b0f3af64798b49218f20d85351dd8444cf17adb93052213f296dce"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "1466e0e9e4bb93bb20ff9b8b8fe449f94c5aecae9515b6d77bd1c65f801059ac",
+          "sha256": "40902b576ca5dece85a4c7b32d15b0094250ba838cc310af7429b58f8fca2c40"
+        },
+        {
+          "path": "src/ui/render-surface-editor-menus.js",
+          "previous_sha256": "372eb5d40c0c0ef6a4c80cfe700672e665822dc95c83c1458ede82b9b09119a2",
+          "sha256": "645616568420aef2424274577c0afae88ed87df42b83131d9e4d73b64dd834ec"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "347d7d21a4c5edf40fbc15d34c1d59d83d75c253294327fb3eae451868831733",
+          "sha256": "498ec9aadca3717b030cece7d5f4712e45642c479f8a816dfde6002a8f2dd91c"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "0908543197f0eade85ae4696a20d8e2e7ef7d93eb7fc96d5730231f7a12ab538",
+          "sha256": "e062d9e032451384eb17654d5143e30c99db6bb27cacd389c0e55b7aaad48b89"
+        },
+        {
+          "path": "docs/SCIENTIFIC-CORE-FREEZE.md",
+          "previous_sha256": "ff1f7f291eba7f92b754d78406f16b1b570e49274fceb660d203d7c46eef8a95",
+          "sha256": "d776690312f51341416ae1e83e5b91042e5e319cdac2bb7aec6c57f560d61174"
+        }
+      ],
+      "added_protected_files": [
+        "src/domain/surface/osm-road-width-preview.js",
+        "src/application/surface/preview-surface-road-width.js",
+        "src/ui/surface-road-width-control.js"
       ]
     }
   ]

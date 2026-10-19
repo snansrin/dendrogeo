@@ -1790,3 +1790,13 @@ Object.assign(DG_I18N_EN,{
 });
 
 Object.assign(DG_I18N_EN,{"✓ Analiz önizlemesi PNG indirildi.":"✓ Analysis preview PNG downloaded."});
+
+Object.assign(DG_I18N_EN,{
+  "Yolu genişlet · toplam genişlik (m)": "Widen road · total width (m)",
+  "OSM yol çizgisi gerçek yol kenarı değildir. Genişliği saha ölçümüne göre girin; değişken genişlikler için Sınır çiz kullanın.": "An OSM centreline does not define the actual road edges. Enter a field-measured width; use Draw boundary for variable widths.",
+  "Genişliği önizle": "Preview width",
+  "Yol genişliği 0,5–60 m arasında olmalıdır.": "Road width must be between 0.5 and 60 m.",
+  "Yol geometrisi oluşturulamadı.": "Road geometry could not be created.",
+  "Yol geometrisi park sınırıyla kesişmiyor.": "The road geometry does not intersect the park boundary.",
+  "Bu araç yolu genişletir. Daraltmak veya değişken genişlik çizmek için Sınır çiz aracını kullanın.": "This tool widens the road. Use Draw boundary to narrow it or draw a variable width."
+});

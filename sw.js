@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r441';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r442';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -996,6 +996,9 @@ const CORE_ASSETS = [
     '/src/domain/surface/build-surface-toolbar-model.js',
     '/src/ui/render-surface-editor-menu-label.js',
     '/src/ui/render-surface-editor-panel-head.js',
+    '/src/domain/surface/osm-road-width-preview.js',
+    '/src/application/surface/preview-surface-road-width.js',
+    '/src/ui/surface-road-width-control.js',
     '/src/ui/render-surface-editor-menus.js',
     '/src/ui/render-surface-editor-tool-rail.js',
     '/src/ui/bind-surface-editor-events.js',
