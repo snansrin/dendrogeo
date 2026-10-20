@@ -10360,6 +10360,18 @@
           "sha256": "4b4fed1f374064ecc5ea61ce4be6f82cb89080074411e4e600ba99f10e0c59c5"
         }
       ]
+    },
+    {
+      "date": "2026-10-20",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: add English translations for the two new admin action group labels and regenerate only their runtime build and cache hashes. Preserve all scientific behavior and permissions.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "4b4fed1f374064ecc5ea61ce4be6f82cb89080074411e4e600ba99f10e0c59c5",
+          "sha256": "37ab8e902dc95b88f9b9391d7b6d574be41545b738c508476abaebc867653a8d"
+        }
+      ]
     }
   ]
 }
