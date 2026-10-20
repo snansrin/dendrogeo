@@ -5,7 +5,7 @@ async function database(){
  if(cached)return cached;if(Date.now()<retryAfter)return null;
  cached=(async()=>{try{
   // Only public country ranges are downloaded. No visitor address or headers are forwarded.
-  const response=await fetch('https://dendrogeo.org/supabase/functions/site-metrics/country-data.json?sha='+snapshot.sha256,{signal:AbortSignal.timeout(6000)});if(!response.ok)throw Error('Country snapshot unavailable');
+  const response=await fetch('https://dendrogeo.org/assets/site-metrics/country-data.json?sha='+snapshot.sha256,{signal:AbortSignal.timeout(6000)});if(!response.ok)throw Error('Country snapshot unavailable');
   const value=await response.json();if(value.sha256!==snapshot.sha256||value.release!==snapshot.release)throw Error('Country snapshot mismatch');
   const packed=Uint8Array.from(atob(value.data),c=>c.charCodeAt(0));const binary=new Uint8Array(await new Response(new Blob([packed]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
   const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',binary)),byte=>byte.toString(16).padStart(2,'0')).join('');if(digest!==snapshot.sha256)throw Error('Country snapshot integrity failure');

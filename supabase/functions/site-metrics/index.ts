@@ -1,6 +1,7 @@
 // Aggregate ingestion. Request bodies never include account, IP, session or full referrer data.
 import {resolveCountry} from './country-db.ts';
 import {createIngestionBudget} from './ingestion-budget.js';
+import {readBoundedText,PayloadTooLargeError} from './read-bounded-body.js';
 const ingestionBudget=createIngestionBudget({onExceeded:()=>console.warn('[site-metrics] aggregate_budget_exceeded')});
 const origins=new Set(['https://dendrogeo.org']);
 const pages=new Set(['home','home-en','inventory','carbon','landcover','parks','methods','methods-en','data','reports','about','privacy','notice','terms','contact','app-dash','app-measure','app-nav','app-map','app-projects','app-records','app-export','app-world']);
@@ -16,8 +17,7 @@ Deno.serve(async(request:Request)=>{
  if(request.method!=='POST')return reply(405,{error:'Method not allowed'});
  if(request.headers.get('sec-gpc')==='1'||request.headers.get('dnt')==='1'||/bot|crawler|spider|headless|playwright/i.test(request.headers.get('user-agent')||''))return new Response(null,{status:204,headers});
  try{
-  if(Number(request.headers.get('content-length')||0)>2048)return reply(413,{error:'Payload too large'});
-  const raw=await request.text();if(raw.length>2048)return reply(413,{error:'Payload too large'});
+  const raw=await readBoundedText(request,2048);
   const value=JSON.parse(raw);
   if(!events.has(value.event)||!pages.has(value.page)||!sources.has(value.source)||!devices.has(value.device)||Object.keys(value).some(key=>!['event','page','source','device'].includes(key)))return reply(400,{error:'Unsupported aggregate category'});
   if((value.event==='page_view'&&value.page.startsWith('app-'))||(value.event==='workspace_open'&&!value.page.startsWith('app-'))||(value.event==='analysis_request'&&value.page!=='app-map'))return reply(400,{error:'Invalid event scope'});
@@ -27,5 +27,5 @@ Deno.serve(async(request:Request)=>{
   const response=await fetch(url+'/rest/v1/rpc/record_site_metric_v1',{method:'POST',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({p_event:value.event,p_page:value.page,p_source:value.source,p_device:value.device,p_country:await resolveCountry(request)}),signal:AbortSignal.timeout(3000)});
   if(!response.ok)return reply(503,{error:'Counter unavailable'});
   return new Response(null,{status:204,headers});
- }catch{return reply(400,{error:'Invalid request'});}
+ }catch(error){return error instanceof PayloadTooLargeError?reply(413,{error:'Payload too large'}):reply(400,{error:'Invalid request'});}
 });
