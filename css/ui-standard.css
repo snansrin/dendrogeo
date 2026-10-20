@@ -148,3 +148,12 @@ body.dg-page{background:var(--bg);color:var(--ink);font:15px/1.65 var(--f-ui)}
 @media(prefers-reduced-motion:reduce){
  #shell #main .view details>summary,#shell #main .view details>summary::after{transition:none}
 }
+
+/* Admin storage controls share the existing button and typography tokens. */
+#v-admin .admin-storage-section{margin-top:18px}
+#v-admin .admin-storage-actions{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin-top:8px}
+#v-admin .admin-storage-actions>.btn{margin:0;max-width:100%;min-width:0;overflow-wrap:anywhere}
+@media(max-width:600px){
+ #v-admin .admin-storage-actions{flex-direction:column}
+ #v-admin .admin-storage-actions>.btn{width:100%}
+}

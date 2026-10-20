@@ -2,6 +2,8 @@
 /* English dictionary data for the runtime translator in i18n.js. */
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"Bakım işlemleri":"Maintenance actions",
+"Yedekleme ve geri yükleme":"Backup and restore",
 "OSM bina, yol ve su geometrileri yükleniyor…":"Loading OSM building, road and water geometries…",
 "Kayıt başka bir oturumda değişmiş, silinmiş veya erişim kapanmış olabilir. Değişiklikleriniz formda korundu; güncel kaydı açıp karşılaştırın.":"The record may have changed in another session, been deleted or become inaccessible. Your edits remain in the form; open the current record and compare.",
 "Sunucu kaydı doğrulanamadı. Bilgileriniz formda korundu; Kayıtlarım ekranından kontrol edin.":"The server write could not be confirmed. Your information remains in the form; check My Records.",

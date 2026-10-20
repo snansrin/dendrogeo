@@ -10338,6 +10338,40 @@
           "sha256": "2b9c25127e846938f9eefc285acfd06935751d197dbf2c96aafa1c6c33624ef1"
         }
       ]
+    },
+    {
+      "date": "2026-10-20",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: correct the admin storage and backup button layout reported by the user. Separate maintenance and backup action groups with existing labels and button tokens, consistent gaps and full-width phone controls. Preserve owner-only ZIP authorization, backup handlers, data access, scientific calculations and map behavior.",
+      "files": [
+        {
+          "path": "css/ui-standard.css",
+          "previous_sha256": "38777a9274498ab11d588a02f8d78e7b1f97828a8c2f572f4245c8f87a5f34ba",
+          "sha256": "d2c20869f073aceefa3427e18a974b89b7339afb522154b6e00910323b797f09"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "4136fa2f67ff92f7de91247a0c77e898b8bbf505f90bba5c3aff919a72237b4c",
+          "sha256": "1bd3bea0c15938d77f410491b69be53843c1a3a699ac4b1a8fd8be67ee1e99e3"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "e3287d885f1fc4cc587212adee06cfe33fdf2ee9d576ed9eed40f672353bedb9",
+          "sha256": "4b4fed1f374064ecc5ea61ce4be6f82cb89080074411e4e600ba99f10e0c59c5"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-20",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: add English translations for the two new admin action group labels and regenerate only their runtime build and cache hashes. Preserve all scientific behavior and permissions.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "4b4fed1f374064ecc5ea61ce4be6f82cb89080074411e4e600ba99f10e0c59c5",
+          "sha256": "37ab8e902dc95b88f9b9391d7b6d574be41545b738c508476abaebc867653a8d"
+        }
+      ]
     }
   ]
 }
