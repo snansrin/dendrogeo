@@ -17,7 +17,7 @@ function renderIndex(list, retractedReports) {
     const doi = r.doi
       ? `<a href="https://doi.org/${r.doi}" rel="noopener noreferrer">${escapeHtml(r.doi)}</a>`
       : 'DOI kaydı yok';
-    return `<tr><td><a href="${r.id}/">${r.id}</a></td><td>${doi}</td><td>${r.date || '—'}</td><td><span class="badge off">Geri çekildi</span></td></tr>`;
+    return `<tr><td><a href="${r.id}/">${r.id}</a></td><td>${doi}</td><td>${r.date || '—'}</td><td><span class="badge admin">Geri çekildi</span></td></tr>`;
   }).join('');
   return `<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Yayınlanmış Raporlar — DendroGeo</title>
@@ -112,4 +112,3 @@ export function parkHistory(dir, parkId, selfId) {
       }));
   } catch (error) { return []; }
 }
-

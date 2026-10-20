@@ -61,4 +61,3 @@
  }
  root.DG_PHOTO_ARCHIVE_UI=Object.freeze({mount,status,busy});
 })(window);
-

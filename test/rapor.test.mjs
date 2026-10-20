@@ -134,7 +134,7 @@ describe('yayınlanmış rapor dizini tutarlı', () => {
     assert.match(idx, /10\.5281\/zenodo\.23403425/);
     assert.match(idx, /DGR-2026-0024/);
     assert.match(idx, /DGR-2026-0023/);
-    assert.match(idx, /badge off">Geri çekildi/);
+    assert.match(idx, /badge admin">Geri çekildi/);
     assert.doesNotMatch(idx, /href="yayin-kuyrugu\.json"/);
   });
   test('Actions iş akışı mevcut ve izinli', () => {
@@ -245,4 +245,3 @@ describe('Şekil 2 tuvali: park sahası tam örtüşüm + kırpma', () => {
     assert.ok(buf.length > 1000 && buf[1] === 0x50, 'PNG geçerli');
   });
 });
-

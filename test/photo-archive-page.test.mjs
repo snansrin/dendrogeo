@@ -125,4 +125,3 @@ test('browser-only backup has a fresh server identity gate and no implicit remot
  assert.match(service,/DG_PHOTO_ARCHIVE_ZIP\.saveBlob/);
  assert.match(service,/inspectOwnerArchive/);
 });
-

@@ -88,4 +88,3 @@ test('public report index lists withdrawn DGR and validated DOI without exposing
   assert.doesNotMatch(html, /<private>|private-user|javascript:/);
   assert.doesNotMatch(html, /gorunum\/\?id=DGR-2026-0023/);
 });
-
