@@ -90,7 +90,7 @@ test('page rejects unprivileged browser session before 13-table reads or downloa
  const state=boot({role:'user'});
  await state.get('dgArchiveDownload').dispatch('click');
  assert.equal(state.reads(),0);
- assert.match(state.get('dgArchiveStatus').textContent,/yalnız yetkili yönetici/);
+ assert.match(state.get('dgArchiveStatus').textContent,/sahip \(owner\) hesabı/);
  assert.equal(state.downloadRefs.length,0);
 });
 
