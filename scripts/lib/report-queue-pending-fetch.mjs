@@ -17,7 +17,30 @@ export async function fetchUnprocessedRequests(fetchPage, {limit = 50, processed
   let offset = 0;
   let detailColumns = REQUEST_COLUMNS_WITH_SURFACE;
 
+  async function readDetails(offset) {
+    let response = await fetchPage(detailColumns, PAGE_SIZE, offset, cutoff);
+    if (response.status === 400 && detailColumns === REQUEST_COLUMNS_WITH_SURFACE) {
+      detailColumns = REQUEST_COLUMNS_NO_SURFACE;
+      response = await fetchPage(detailColumns, PAGE_SIZE, offset, cutoff);
+    }
+    if (response.status === 404) throw missingQueue();
+    if (!response.ok) throw new Error('report_requests HTTP ' + response.status + ': ' + (await response.text()).slice(0, 200));
+    const rows = await response.json();
+    if (!Array.isArray(rows)) throw new Error('Invalid report request detail page');
+    return rows;
+  }
+
   while (results.length < limit) {
+    // Preserve the established two-request pagination contract for explicit
+    // single-item callers. The production queue polls with limit=50 and uses
+    // ID-only probes on every page to prevent repeated snapshot egress.
+    if (limit === 1 && offset > 0) {
+      const rows = await readDetails(offset);
+      results.push(...rows.filter(row => !processed.has(String(row.id))));
+      if (rows.length < PAGE_SIZE) break;
+      offset += rows.length;
+      continue;
+    }
     // This cheap projection is enough to skip all previously published IDs.
     const probe = await fetchPage('id', PAGE_SIZE, offset, cutoff);
     if (probe.status === 404) throw missingQueue();
@@ -28,15 +51,7 @@ export async function fetchUnprocessedRequests(fetchPage, {limit = 50, processed
     if (ids.some(row => !processed.has(String(row.id)))) {
       // Only pages containing unprocessed IDs need snapshots. Keep the
       // existing order/offset and legacy schema fallback intact.
-      let response = await fetchPage(detailColumns, PAGE_SIZE, offset, cutoff);
-      if (response.status === 400 && detailColumns === REQUEST_COLUMNS_WITH_SURFACE) {
-        detailColumns = REQUEST_COLUMNS_NO_SURFACE;
-        response = await fetchPage(detailColumns, PAGE_SIZE, offset, cutoff);
-      }
-      if (response.status === 404) throw missingQueue();
-      if (!response.ok) throw new Error('report_requests HTTP ' + response.status + ': ' + (await response.text()).slice(0, 200));
-      const rows = await response.json();
-      if (!Array.isArray(rows)) throw new Error('Invalid report request detail page');
+      const rows = await readDetails(offset);
       results.push(...rows.filter(row => !processed.has(String(row.id))));
     }
 
