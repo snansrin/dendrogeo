@@ -5,8 +5,8 @@ import {resolve,relative,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 // GitHub Pages serves source HTML without requiring a DendroGeo session.
-// Restrict routable HTML to explicitly public marketing/legal pages, while
-// leaving intentionally published scientific reports in rapor/ untouched.
+// Restrict routable HTML to explicitly public marketing/legal pages and
+// approved DGR report URL patterns, refusing arbitrary test/admin routes.
 // Authenticated admin UI must stay in the existing gated main application.
 const root=fileURLToPath(new URL('../',import.meta.url));
 const PUBLIC_HTML=new Set([
@@ -28,7 +28,7 @@ const PUBLIC_HTML=new Set([
  'veri/index.html',
  'yontem/index.html'
 ]);
-const SKIP_DIRS=new Set(['.git','.github','node_modules','rapor','partials','test','tests']);
+const SKIP_DIRS=new Set(['.git','.github','node_modules','partials','test','tests']);
 function scan(dir=root,files=[]){
  for(const item of readdirSync(dir,{withFileTypes:true})){
   if(item.isDirectory()){
@@ -41,7 +41,8 @@ function scan(dir=root,files=[]){
 }
 test('publicly accessible HTML entry routes are reviewed and explicitly allowlisted',()=>{
  const pages=scan();
- const unexpected=pages.filter(page=>!PUBLIC_HTML.has(page));
+ const publishedReport=page=>/^rapor\/(?:index\.html|gorunum\/index\.html|DGR-\d{4}-\d{4}\/index\.html)$/.test(page);
+ const unexpected=pages.filter(page=>!PUBLIC_HTML.has(page)&&!publishedReport(page));
  assert.deepEqual(unexpected,[], 'Unreviewed public HTML entry points: '+unexpected.join(', '));
  // A marketing-page change must not silently turn into an unrestricted owner
  // dashboard, Oracle staging panel or photo backup endpoint.
