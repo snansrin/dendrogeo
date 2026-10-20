@@ -40,15 +40,15 @@ window.DG_BACKUP_JSON_DOWNLOAD={
    "Bütün dosyaları doğrulamak için integrity.json SHA-256 değerlerini kullanın.",
    "data/backup.json: Tam sütunlarıyla dışa aktarılmış erişilebilir public tablo kayıtları.",
    "storage/dendro-photos/: Gerçek fotoğraf dosyaları; URL veya küçük önizleme değil.",
-   "restore/data_restore.sql: SADECE parks, projects, measurements, waypoints, data_requests, surface_reviews tabloları için SQL.",
+   "restore/data_restore.sql: Oturumun erişebildiği 13 public tablosu için kimlik koruyan kurtarma SQL'i.",
    "Kurtarma: Önce boş/izole test projesinde hesap sahipliği ve şemayı hazırlayın.",
    "Fotoğrafları dendro-photos bucket'ına aynı yollarla yükleyin; sonra SQL'i test edin.",
    "SQL mevcut satırları değiştirmez (ON CONFLICT DO NOTHING). Kayıp Auth hesaplarını veya diğer tablolardaki satırları otomatik geri yüklemez.",
-   "Ek JSON tabloları: profiles, report_requests, report_retractions, park_invites, park_collaborators, site_metric_daily, site_visits.",
+   "13 tablonun tüm erişilebilir satırları JSON içindedir; Auth hesapları ve yetkiler için ayrı kurtarma gerekir.",
    "Uyarı: Bu paket Supabase Auth şifrelerini, RLS şemasını, GitHub rapor yayın arşivlerini veya cihazın çevrimdışı taslaklarını içermez.",
    "Fotoğraf dosyaları ve kişisel kayıtlar içerir; yalnız güvenli yerel ortama kaydedin."
   ].join("\n")+"\n";
-  const included={...backup,storage:{bucket:storage.bucket,downloaded_photo_files:imageItems,referenced_photo_count:storage.referencedCount,downloaded_photo_bytes:storage.downloadedBytes}};
+  const included={...backup,storage:{bucket:storage.bucket,downloaded_photo_files:imageItems,referenced_photo_count:storage.referencedCount,downloaded_photo_count:photos.length,downloaded_photo_bytes:storage.downloadedBytes}};
   await add("README.txt",bytes(readme));
   await add("data/backup.json",bytes(JSON.stringify(included,null,2)+"\n"));
   await add("restore/data_restore.sql",bytes(restoreSql));
@@ -97,5 +97,75 @@ window.DG_BACKUP_JSON_DOWNLOAD={
   }finally{browser.setTimeout(()=>browser.URL.revokeObjectURL(url),60000);}
   return{files:entries.length,photos:photos.length,bytes:archive.size};
  }
-
+,
+ async readComplete(browser,file){
+  if(!file||typeof file.arrayBuffer!=="function")throw new Error("ZIP dosyası seçilmedi.");
+  if(file.size>570000000)throw new Error("Arşiv dosyası boyut sınırını aşıyor.");
+  const bytes=new Uint8Array(await file.arrayBuffer()),v=new DataView(bytes.buffer,bytes.byteOffset,bytes.length),len=bytes.length;
+  const fail=message=>{throw new Error("Fotoğraflı Tam Veri Arşivi: "+message);};
+  if(len<22||v.getUint32(len-22,true)!==0x06054b50)fail("ZIP son kaydı geçersiz.");
+  const count=v.getUint16(len-12,true),size=v.getUint32(len-10,true),start=v.getUint32(len-6,true);
+  if(count<4||count>10020||start+size!==len-22)fail("ZIP dizin yapısı geçersiz.");
+  const decoder=new TextDecoder("utf-8",{fatal:true}),files=new Map();let offset=start,total=0;
+  function crc32(data){
+   let c=-1;for(const byte of data){c^=byte;for(let i=0;i<8;i++)c=(c>>>1)^((c&1)?0xedb88320:0);}
+   return(c^-1)>>>0;
+  }
+  for(let i=0;i<count;i++){
+   if(offset+46>start||v.getUint32(offset,true)!==0x02014b50)fail("ZIP dizini kesilmiş.");
+   const flags=v.getUint16(offset+8,true),method=v.getUint16(offset+10,true),crc=v.getUint32(offset+16,true);
+   const packed=v.getUint32(offset+20,true),unpacked=v.getUint32(offset+24,true);
+   const n=v.getUint16(offset+28,true),extra=v.getUint16(offset+30,true),comment=v.getUint16(offset+32,true);
+   const local=v.getUint32(offset+42,true),next=offset+46+n+extra+comment;
+   if(next>start||flags!==0x0800||method!==0||packed!==unpacked)fail("Sıkıştırılmış veya bozuk ZIP girdisi.");
+   const name=decoder.decode(bytes.subarray(offset+46,offset+46+n));
+   if(!name||name.startsWith("/")||name.includes("\\")||name.includes("//")||
+       name.split("/").some(x=>x==="."||x===".."||!x)||/[\u0000-\u001f\u007f]/.test(name)||files.has(name))fail("Güvensiz ya da yinelenen dosya yolu.");
+   if(local+30>start||v.getUint32(local,true)!==0x04034b50)fail("ZIP dosya başlığı eksik.");
+   const nn=v.getUint16(local+26,true),ne=v.getUint16(local+28,true),position=local+30+nn+ne;
+   if(position+packed>start||v.getUint16(local+8,true)!==0||v.getUint32(local+14,true)!==crc||
+       v.getUint32(local+18,true)!==packed||v.getUint32(local+22,true)!==unpacked||
+       decoder.decode(bytes.subarray(local+30,local+30+nn))!==name)fail("ZIP dosya başlığı uyuşmuyor.");
+   const payload=bytes.subarray(position,position+unpacked);
+   if(crc32(payload)!==crc)fail("CRC32 uyuşmuyor: "+name);
+   files.set(name,payload);total+=unpacked;
+   if(total>570000000)fail("ZIP açılmış boyut sınırı aşıldı.");
+   offset=next;
+  }
+  if(offset!==start+size||!browser.crypto?.subtle)fail("ZIP dizin sonu veya SHA-256 desteği geçersiz.");
+  const hash=async data=>Array.from(new Uint8Array(await browser.crypto.subtle.digest("SHA-256",data))).map(n=>n.toString(16).padStart(2,"0")).join("");
+  const json=path=>{
+   const data=files.get(path);if(!data)fail("Arşiv dosyası eksik: "+path);
+   try{return JSON.parse(decoder.decode(data));}catch{fail("Arşiv JSON bozuk: "+path);}
+  };
+  const integrity=json("integrity.json"),seen=new Set();
+  if(integrity?.schema!=="dendrogeo-archive-integrity/1"||!Array.isArray(integrity.entries)||integrity.entries.length!==files.size-1)fail("Bütünlük listesi eksik.");
+  for(const entry of integrity.entries){
+   if(!entry||typeof entry.path!=="string"||entry.path==="integrity.json"||seen.has(entry.path)||!files.has(entry.path))fail("Bütünlük listesi uyuşmuyor.");
+   const data=files.get(entry.path);
+   if(entry.bytes!==data.length||entry.sha256!==await hash(data))fail("SHA-256 uyuşmuyor: "+entry.path);
+   seen.add(entry.path);
+  }
+  for(const path of files.keys())if(path!=="integrity.json"&&!seen.has(path))fail("Bütünlük kontrolünde eksik dosya var.");
+  const backup=json("data/backup.json");
+  if(backup?.app!=="DendroGeo"||backup.schema_version!=="2.0.0"||backup.scope?.photo_files_included!==true||
+     backup.storage?.bucket!=="dendro-photos"||!Array.isArray(backup.storage.downloaded_photo_files))fail("Desteklenmeyen arşiv.");
+  const tables=["parks","projects","measurements","waypoints","data_requests","surface_reviews","profiles","report_requests","report_retractions","park_invites","park_collaborators","site_metric_daily","site_visits"];
+  for(const tab of tables)if(!Array.isArray(backup[tab])||backup.counts?.[tab]!==backup[tab].length)fail("Eksik veya bozuk veri tablosu: "+tab);
+  const items=backup.storage.downloaded_photo_files;
+  if(items.length!==backup.storage.downloaded_photo_count||items.length>10000)fail("Fotoğraf sayımı uyuşmuyor.");
+  const seenPhotos=new Set(),photos=[];let imageBytes=0;
+  for(const item of items){
+   if(!item||typeof item.path!=="string"||item.path.startsWith("/")||item.path.includes("\\")||
+       item.path.split("/").some(x=>!x||x==="."||x==="..")||seenPhotos.has(item.path))fail("Geçersiz fotoğraf yolu.");
+   const data=files.get("storage/dendro-photos/"+item.path);
+   if(!data||data.length!==item.bytes)fail("Fotoğraf eksik: "+item.path);
+   photos.push({path:item.path,data:new Uint8Array(data),contentType:item.content_type||"application/octet-stream"});
+   imageBytes+=data.length;seenPhotos.add(item.path);
+  }
+  if(imageBytes!==backup.storage.downloaded_photo_bytes)fail("Fotoğraf toplam boyutu uyuşmuyor.");
+  for(const path of files.keys())if(path.startsWith("storage/dendro-photos/")&&!seenPhotos.has(path.slice(22)))fail("Bilinmeyen fotoğraf ZIP içinde.");
+  if(!files.has("README.txt")||!files.has("restore/data_restore.sql"))fail("Kurtarma yönergesi/SQL eksik.");
+  return{backup,photos,restoreSql:decoder.decode(files.get("restore/data_restore.sql")),photoBytes:imageBytes,fileCount:files.size};
+ }
 };
