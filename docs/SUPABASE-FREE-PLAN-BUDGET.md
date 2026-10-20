@@ -21,6 +21,44 @@ bağımsızdır. Supabase'in panelindeki Log Query ve Log Ingestion için ücret
 uygulamasının 2027 başındaki geçiş dönemi sonrasında başlaması beklendiği
 bildirilmiştir; güncel koşullar için Supabase Usage/Billing paneli esastır.
 
+## 20 Ekim 2026 — ek ücretsiz kota ve güvenlik doğrulaması
+
+- Kullanıcının yeni Usage anlık görüntüsü: **Log Query 63,1 / 100 GB
+  (36,9 GB kaldı)**, **Egress 2,52 / 5 GB**, Log Ingestion yaklaşık
+  **0,41 / 1 GB**. Önceki 58,664 GB Log Query anlık görüntüsüne göre
+  **4,436 GB ek günlük taraması** var. Taranan veri hacmi, egress veya
+  yedeklenmiş dosya boyutu değildir. Tüketim kaynağı zaman damgaları
+  üzerinden tekil sorguya bağlanamadı.
+- GitHub CI'daki `test/free-plan-security-surface.test.mjs`, çalışma
+  zamanında ve otomatik işlerde Supabase Management Logs Query API
+  çağrılarını tarayarak reddediyor. Yapılan bu güvenlik incelemesi
+  `query_logs` çağırmadan, yalnızca GitHub ve düşük hacimli
+  salt okunur PostgreSQL denetimiyle yürütüldü.
+- Canlı Storage RLS: `anon` rolüyle `BEGIN READ ONLY` içinde
+  `storage.objects` sayım sorgusu **0 nesne** döndürdü.
+  `dendro-photos` bucket'ı yayınlanmış fotoğraf URL'lerinin
+  çalışabilmesi için hâlâ **public**. **Listelemeyi yasaklamak,
+  bilinen fotoğraf URL'sinin anonim GET ile görüntülenmesini
+  engellemez**. Fotoğrafların tümünü özel yapmak için rapor
+  görselleri ve mobil istemcilerde ayrı, testli mimari değişiklik
+  gerekir; otomatik gizlilik değişimi yapıp mevcut raporlar bozulmaz.
+- Supabase güvenlik danışmanı, dört `public.dg_invite_*` /
+  `dg_is_park_member` `SECURITY DEFINER` RPC için imzalı
+  kullanıcı yürütme uyarısı bildiriyor. Anonim `EXECUTE` yetkisi
+  **yok**. İşlevlerde `auth.uid()` ve park sahipliği ya da
+  doğrulanmış davet e-postası kontrolü görüldü. Bunlar çalışan
+  işbirliği akışının parçası; veri erişimini kapatmadan
+  değiştirmek testli işlev taşıma gerektirir.
+- Danışmandaki “Leaked Password Protection Disabled” bildirimi
+  için Supabase **Free plan bu özelliği sunmuyor**; ücretli plana
+  otomatik yükseltme yapılmadı. Güçlü ve benzersiz parola/2FA,
+  sahip hesabı için ek koruma olarak önerilir.
+- Oracle staging'in önceki `storage.mjs` aktarım motoru ve ona
+  bağlı eski test dosyaları kod tabanından kaldırıldı. Canlı
+  `oracle-storage-probe` v21 hâlâ JWT doğrulayan ve tüm isteklerde
+  **503** döndüren inert uygulamadır; silme ve IOC credential iptali
+  gerçekleştirilmiş **değildir**.
+
 ## İncelemenin kanıtları ve sınırları
 
 - 19 Ekim Oracle staging probe denemesi 403 yetkilendirme hatası verdi. Yetki
