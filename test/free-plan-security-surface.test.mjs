@@ -12,6 +12,13 @@ test('no retired Oracle probe, independent complete-backup page or orphaned publ
  for(const directory of ['fotografli-tam-veri-arsivi','tam-yedek','oracle-storage-check']){
   assert.equal(exists(directory),false,'Retired public entry and code must be removed: '+directory);
  }
+ // Retired Oracle transport must not survive as a runnable artifact.
+ for(const path of [
+  'supabase/functions/oracle-storage-probe/storage.mjs',
+  'supabase/functions/oracle-storage-probe/deno.json',
+  'test/oracle-storage-probe.test.mjs',
+  'test/oracle-storage-probe-fail-closed.test.mjs'
+ ])assert.equal(exists(path),false,'Obsolete Oracle staging transport remains: '+path);
  assert.match(read('src/application/backup/photo-full-workflow.mjs'),/client\.auth\.getUser\(\)/);
  assert.match(read('src/application/backup/photo-full-workflow.mjs'),/profile\.data\?\.role!=='owner'/);
  assert.match(read('src/ui/photo-admin-controls.mjs'),/PROFILE\?\.role!=='owner'/);
