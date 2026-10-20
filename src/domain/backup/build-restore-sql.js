@@ -21,5 +21,39 @@
   }
   return{sql:sql+"\nCOMMIT;\n",count};
  }
- root.DG_BUILD_RESTORE_SQL=Object.freeze({build});
+ function buildComplete(backup,serialize){
+  if(!backup||backup.app!=="DendroGeo"||backup.schema_version!=="2.0.0")throw new Error("Fotoğraflı Tam Veri Arşivi şeması geçersiz.");
+  const order=["profiles","parks","projects","measurements","waypoints","data_requests","surface_reviews","report_requests","report_retractions","park_invites","park_collaborators","site_metric_daily","site_visits"];
+  for(const table of order){
+   const rows=backup[table];
+   if(!Array.isArray(rows))throw new Error("Eksik arşiv tablosu: "+table);
+   if(backup.counts?.[table]!==rows.length)throw new Error("Arşiv tablosu sayımı uyuşmuyor: "+table);
+   for(const row of rows)if(!row||typeof row!=="object"||Array.isArray(row)||!Object.keys(row).length)throw new Error("Bozuk tablo satırı: "+table);
+  }
+  const safeComment=v=>String(v||"?").replace(/[\r\n\u0000-\u001f]/g," ").slice(0,160);
+  let sql="-- DendroGeo Fotograflı Tam Veri Arsivi · SQL geri yukleme (13 public tablosu)\n"+
+    "-- Yedek: "+safeComment(backup.exported_at)+" · aktaran: "+safeComment(backup.exported_by)+"\n"+
+    "-- Bu dosya SQL Editor'da postgres yetkisiyle ONCE, tercihen BOS/IZOLE test DB'sinde uygulanir.\n"+
+    "-- ON CONFLICT DO NOTHING mevcut satirlari ASLA degistirmez; onceki kayit kaybi var ise geri getirmez.\n"+
+    "-- Supabase Auth kullanicilari, tum RLS/migration semasi ve GitHub DOI yayinlari pakette yoktur.\n"+
+    "-- NOT: SQL fotoğrafları olusturmaz. Once archive ZIP icindeki Storage dosyalarini\n"+
+    "-- dendro-photos bucket'ina AYNI path ile yukleyip dogrulayin. Fotograf baglantilari ayni\n"+
+    "-- Supabase project origin'ini kullanir; farkli projede URL'ler uyarlanmalidir.\n"+
+    "-- FK kullanici kimlikleri auth.users tablosunda yoksa ISLEM HATA VERIR; veri yazilmaz.\n"+
+    "BEGIN;\n";
+  let count=0;
+  for(const table of order){
+   const rows=backup[table];
+   sql+="\n-- "+table+" ("+rows.length+" satir)\n";
+   for(const row of rows){
+    const columns=Object.keys(row);
+    sql+="INSERT INTO public."+table+" ("+columns.map(name=>'"'+name.replace(/"/g,'""')+'"').join(", ")+
+      ") OVERRIDING SYSTEM VALUE VALUES ("+columns.map(name=>serialize(row[name])).join(", ")+") ON CONFLICT DO NOTHING;\n";
+    count++;
+   }
+  }
+  sql+="\nCOMMIT;\n";
+  return{sql,count,tables:order.length};
+ }
+ root.DG_BUILD_RESTORE_SQL=Object.freeze({build,buildComplete});
 })(window);
