@@ -113,12 +113,12 @@ window.DG_BACKUP_JSON_DOWNLOAD={
    return(c^-1)>>>0;
   }
   for(let i=0;i<count;i++){
-   if(offset+46>start||v.getUint32(offset,true)!==0x02014b50)fail("ZIP dizini kesilmiş.");
+   if(offset+46>start+size||v.getUint32(offset,true)!==0x02014b50)fail("ZIP dizini kesilmiş.");
    const flags=v.getUint16(offset+8,true),method=v.getUint16(offset+10,true),crc=v.getUint32(offset+16,true);
    const packed=v.getUint32(offset+20,true),unpacked=v.getUint32(offset+24,true);
    const n=v.getUint16(offset+28,true),extra=v.getUint16(offset+30,true),comment=v.getUint16(offset+32,true);
    const local=v.getUint32(offset+42,true),next=offset+46+n+extra+comment;
-   if(next>start||flags!==0x0800||method!==0||packed!==unpacked)fail("Sıkıştırılmış veya bozuk ZIP girdisi.");
+   if(next>start+size||flags!==0x0800||method!==0||packed!==unpacked)fail("Sıkıştırılmış veya bozuk ZIP girdisi.");
    const name=decoder.decode(bytes.subarray(offset+46,offset+46+n));
    if(!name||name.startsWith("/")||name.includes("\\")||name.includes("//")||
        name.split("/").some(x=>x==="."||x===".."||!x)||/[\u0000-\u001f\u007f]/.test(name)||files.has(name))fail("Güvensiz ya da yinelenen dosya yolu.");
