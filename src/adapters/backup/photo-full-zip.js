@@ -1,5 +1,13 @@
 "use strict";
 window.DG_PHOTO_ARCHIVE_ZIP={
+ saveBlob(browser,blob,filename){
+  if(!blob||blob.size<=0||!/^dendrogeo_fotografli_tam_veri_arsivi_\d{4}-\d{2}-\d{2}\.zip$/.test(filename))
+    throw Error('Doğrulanmamış arşiv indirilemez.');
+  const url=browser.URL.createObjectURL(blob),link=browser.document.createElement('a');
+  try{
+   link.href=url;link.download=filename;browser.document.body.appendChild(link);link.click();link.remove();
+  }finally{browser.setTimeout(()=>browser.URL.revokeObjectURL(url),60000);}
+ },
  download(browser,backup,name){
   const a=browser.document.createElement("a");
   a.href=browser.URL.createObjectURL(new browser.Blob([JSON.stringify(backup,null,2)],{type:"application/json"}));
