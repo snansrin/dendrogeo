@@ -19,8 +19,8 @@
   if(error||!data?.user)throw new Error("Önce DendroGeo ana sayfasından giriş yapın.");
   const user=data.user;
   const profile=await sb.from("profiles").select("role,full_name").eq("id",user.id).single();
-  if(profile.error||!profile.data||!["owner","admin"].includes(profile.data.role))
-   throw new Error("Tam veri arşivi yalnız yetkili yönetici hesabıyla oluşturulabilir.");
+  if(profile.error||!profile.data||profile.data.role!=="owner")
+   throw new Error("Tam veri arşivi için DendroGeo sahip (owner) hesabı gereklidir; analitik RLS kapsamı diğer rollerde eksiktir.");
   return profile.data;
  }
  const plan=[
