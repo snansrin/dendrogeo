@@ -94,6 +94,6 @@ window.DG_BACKUP_PAGED_STORE={
    photos.push({path:item.path,blob:data,bytes:data.size,contentType:item.contentType});
    onProgress(photos.length,objects.length);
   }
-  return {bucket,photos,downloadedBytes,referencedCount:referenced.size,listedCount:objects.length};
+  return {bucket,sourceOrigin:expectedOrigin,photos,downloadedBytes,referencedCount:referenced.size,listedCount:objects.length};
  }
 };
