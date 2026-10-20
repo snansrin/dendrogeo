@@ -63,7 +63,10 @@ bildirilmiştir; güncel koşullar için Supabase Usage/Billing paneli esastır.
 
 - 19 Ekim Oracle staging probe denemesi 403 yetkilendirme hatası verdi. Yetki
   aşamasında durdu; üretim fotoğrafı ve kabul edilmiş GIS verisi taşınmadı.
-  Bu işlemde Supabase günlüklerini tarayan bir sorgu bulunmamaktadır.
+  **Düzeltme (20 Ekim çevrimdışı kayıt incelemesi):** Bu denemeyi araştırırken
+  19 Ekim kayıtlarında iki `query_logs` çağrısı bulundu. İkisi de üç dakikalık
+  Oracle işlevi günlük aralıklarını okuyor. Bunlar Logs Query tüketebilen
+  inceleme işlemleridir; "günlük sorgusu bulunmamaktadır" ifadesi yanlıştı.
 - DendroGeo rapor yayın kuyruğu, işlenmiş `surface_snapshot` alanını gereksiz
   yeniden indiriyordu. 19 Ekim Edge günlüklerinden hesaplanabilen ilgili
   121 yanıt toplamı yaklaşık 138 MB idi. Bu *Egress* trafiğidir, Log Query
@@ -84,7 +87,9 @@ bildirilmiştir; güncel koşullar için Supabase Usage/Billing paneli esastır.
    Bir hata kodunu doğrulamak için bile büyük günlük tablosuna geçmeden önce
    mevcut GitHub/test kanıtının yeterli olup olmadığını değerlendir.
 2. Günlük sorgusu zorunluysa önce **hangi soruyu cevapladığını** tanımla.
-   Dar zaman aralığı ve hizmet filtresi kullan; ham `SELECT *`, tüm
+   Hizmet, kesin zaman aralığı ve sorgu sayısını açıkla; kullanıcı bu belirli
+   taramayı açıkça istemedikçe çalıştırma. Genel hata ayıklama/güvenlik
+   incelemesi izni günlük taraması izni değildir. Dar zaman aralığı ve hizmet filtresi kullan; ham `SELECT *`, tüm
    kaynakları/ayları tarama, büyük sonuç indirme ve tekrar tekrar deneme yapma.
    Sonucun az satır dönmesi, sorgunun az veri taradığı anlamına gelmez.
 3. Log Query, Log Ingestion, Database/Storage Size, Egress ve Cached Egress
@@ -101,8 +106,37 @@ bildirilmiştir; güncel koşullar için Supabase Usage/Billing paneli esastır.
 6. Bağlantı denemeleri ve canlı Supabase log incelemeleri otomatik CI testlerinin
    bir parçası **olmamalıdır**. Testler sentetik veri/mocked `fetch` ile koşmalı.
 
-Oracle'daki servis kullanıcı anahtarı ve Supabase'deki şifreli OCI Secrets
-değerlerinin iptal/silme işlemi bu düzeltmede **gerçekleştirilmemiştir**.
-Kullanılmayan anahtarların OCI konsolundan iptal edilmesi ve Supabase Secrets'tan
-kaldırılması ayrıca doğrulanmalıdır. `oracle-storage-probe` v21 bu değerlere
-erişmediği için bağlantı girişimi yapamaz.
+20 Ekim devam oturumunda `oracle-storage-probe` Supabase'den silindi ve yedi
+`OCI_STORAGE_*` Edge Secrets kaydı kaldırıldı; işlev listesi ve yeniden açılan
+Secrets ekranıyla doğrulandı. Oracle hesabındaki anahtarların iptali ayrıca
+doğrulanmış değildir; Supabase'den silmek Oracle anahtarını iptal etmez.
+
+## 20 Ekim — günlük tüketiminin çevrimdışı neden incelemesi
+
+Yeni Supabase günlük sorgusu çalıştırmadan, mevcut yerel oturum/araç çağrısı
+kayıtları karşılaştırıldı. Aynı SQL ve araç zaman aralığının kopyaları ayıklanınca
+14–19 Ekim kayıtlarında 19 farklı `query_logs` çağrısı görüldü: 14 Ekim 3,
+15 Ekim 6, 16 Ekim 8, 19 Ekim 2. Bunlar eksiksiz erişim denetimi değildir;
+bulunabilen çağrılar için alt sınırdır, faturalandırılan tarama baytları değildir.
+
+- 15 Ekim: birden fazla kaynağı kapsayan 24 saatlik sayım, alan anahtarı ve
+  hata/timeout metni aramaları.
+- 16 Ekim: sekiz çağrı; yedisinde araç düzeyinde açık başlangıç/bitiş aralığı
+  yok. Bir sorgu `select source, count() as events from logs group by source`
+  biçiminde tüm kaynakları sayıyor; diğerleri alan/hata incelemeleri ve
+  tree-detection teşhisi. API'nin o çağrılara uyguladığı varsayılan aralığın ve
+  taradığı kesin baytların kaydı bulunamadı. `LIMIT` tarama bütçesi değildir.
+- 19 Ekim: iki üç dakikalık Oracle teşhis sorgusu bulundu. Aynı günün grafikteki
+  yaklaşık 24 GB sıçramasının tamamını bu iki çağrıya bağlayan kanıt yok.
+- 19 Ekim eklenen ziyaretçi özetleri normal veri/API işlemleridir. İncelenen
+  kaynakta bunların Management Logs/Analytics okuyucusu olduğu görülmedi.
+- Rapor kuyruğunun tamamlanmış büyük snapshot'ları tekrar indirmesi ayrı bir
+  Egress kusurudur; `a906241` / PR #502 ile 20 Ekim'de düzeltilmiştir. Bunu
+  Logs Query artışının açıklaması olarak sunmak doğru değildir.
+
+Önceki geniş asistan incelemeleri doğrudan kota tüketen işlemlerdir ve tüketim
+artışına katkıda bulunmuş olabilir. Kesin GB payı bilinmiyor. Site sayfası silmek
+veya fotoğraf bucket'ını gizlemek tüketilmiş Logs Query sayacını geri almaz.
+`AGENTS.md` artık özel kullanıcı isteği olmadan bu taramaları yasaklar; CI
+koruması alternatif log API/CLI girişlerini de tarar. Bunlar tekrarını önleyen
+proje kontrolleridir; Supabase tarafında teknik kota kesicisi değildir.

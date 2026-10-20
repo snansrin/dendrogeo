@@ -49,10 +49,18 @@ test('production scripts/workflows do not poll Supabase Logs Query APIs or embed
  const suspicious=[];
  // Log ingestion by normal service traffic is different from expensive Logs
  // Query scans. No background browser, CI, or scheduled log scans are allowed.
- const banned=/(?:\bquery_logs\s*\(|\/analytics\/v1\/query\b|\/v1\/projects\/[^\s'"\x60]+\/analytics\/|management\.api\.supabase\.com[^\n]*logs\/)/i;
+ const banned=/(?:\b(?:query_logs|get_logs)\s*\(|\/analytics\/v1\/query\b|\/v1\/projects\/[^\s'"\x60]+\/(?:analytics|logs)\/|management\.api\.supabase\.com[^\n]*logs\/|(?:["'\x60\n;&|]|\brun:)[ \t]*supabase[ \t]+(?:functions[ \t]+)?logs\b)/i;
  for(const file of sources){
   const code=readFileSync(file,'utf8');
   if(banned.test(code))suspicious.push(file.slice(root.length));
  }
  assert.deepEqual(suspicious,[]);
+});
+
+test('agent instructions prohibit quota-consuming log investigations without a specific user request',()=>{
+ const policy=read('AGENTS.md');
+ assert.match(policy,/Logs Query[\s\S]*YASAKTIR/);
+ assert.match(policy,/genel "kontrol et\/düzelt" talebi günlük taramasına izin sayılmaz/);
+ assert.match(policy,/kesin zaman aralığı ve sorgu sayısı/);
+ assert.match(policy,/teknik bir kota kesicisi[\s\S]*değildir/);
 });
