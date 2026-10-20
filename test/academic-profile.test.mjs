@@ -22,8 +22,8 @@ test('kuyruk işlenmiş eski taleplerle dolu olsa da yeni isteğe sayfalayarak u
  // This pagination unit fixture mocks REST, not GitHub's identity endpoint.
  // OIDC authorization is exercised separately in report-reader-security tests.
  delete process.env.DG_REPORT_READER;
- globalThis.fetch=async url=>{const u=new URL(url),offset=Number(u.searchParams.get('offset'));seen.push([offset,u.searchParams.get('select')]);assert.ok(u.searchParams.get('created_at').startsWith('gte.2026-10-04'));return{status:200,ok:true,json:async()=>offset===0?Array.from({length:50},(_,i)=>({id:'old'+i})):[{id:'fresh'}]};};
- try{const rows=await fetchPending(1,Array.from({length:50},(_,i)=>'old'+i),'2026-10-04T00:00:00Z');assert.deepEqual(rows.map(r=>r.id),['fresh']);assert.deepEqual(seen,[[0,'id'],[50,'id'],[50,'id,park_id,with_lulc,status,note,created_at,surface_snapshot']]);}
+ globalThis.fetch=async url=>{const u=new URL(url),offset=Number(u.searchParams.get('offset'));seen.push(offset);assert.ok(u.searchParams.get('created_at').startsWith('gte.2026-10-04'));return{status:200,ok:true,json:async()=>offset===0?Array.from({length:50},(_,i)=>({id:'old'+i})):[{id:'fresh'}]};};
+ try{const rows=await fetchPending(1,Array.from({length:50},(_,i)=>'old'+i),'2026-10-04T00:00:00Z');assert.deepEqual(rows.map(r=>r.id),['fresh']);assert.deepEqual(seen,[0,50]);}
  finally{globalThis.fetch=original;if(reader===undefined)delete process.env.DG_REPORT_READER;else process.env.DG_REPORT_READER=reader;}
 });
 test('ORCID URL and compact identifier normalize before profile validation',()=>{for(const value of ['https://orcid.org/0000-0002-1825-0097','0000000218250097']){const result=reportContext.clean({...study,orcid:value});assert.equal(result.orcid,study.orcid);assert.equal(reportContext.validate(result).valid,true);}});
