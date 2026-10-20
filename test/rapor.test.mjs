@@ -112,7 +112,7 @@ describe('yayınlanmış rapor dizini tutarlı', () => {
       assert.ok(html.includes(canonicalHash(data)), id + ": sayfa hash’i data.json ile eşleşmeli");
     }
   });
-  test('liste sayfası raporları dizinler', () => {
+  test('liste sayfası geçerli yayınları ve geri çekme bildirimlerini ayrı listeler', () => {
     const idx = readFileSync(join(dir, 'index.html'), 'utf8');
     const ids = readdirSync(dir).filter((d) => d.startsWith('DGR-') && !RETRACTED.has(d));
     /* 0015: "tümü geri çekilmiş" durum MEŞRUDUR (28.09.2026'da yaşandı:
@@ -123,7 +123,19 @@ describe('yayınlanmış rapor dizini tutarlı', () => {
     } else {
       for (const id of ids) assert.ok(idx.includes(id), 'liste geçerli yayını gösterir: ' + id);
     }
-    for (const id of RETRACTED) assert.ok(!new RegExp('href="' + id + '/"').test(idx), 'geri çekilen listede olamaz: ' + id);
+    for (const id of RETRACTED) {
+      if ((JSON.parse(read('rapor/yayin-kuyrugu.json')).entries || []).some(e => e.status === 'Geri çekildi' && e.report_id === id)) {
+        assert.ok(new RegExp('href="' + id + '/"').test(idx), 'geri çekme bildirimi görünür: ' + id);
+        assert.match(idx, /Yayından geri çekilen raporlar/);
+      }
+      assert.ok(!new RegExp('href="gorunum\/\?id=' + id + '&amp;v=3"').test(idx), 'geri çekilen rapor geçerli listede olamaz: ' + id);
+    }
+    assert.match(idx, /10\.5281\/zenodo\.23196877/);
+    assert.match(idx, /10\.5281\/zenodo\.23403425/);
+    assert.match(idx, /DGR-2026-0024/);
+    assert.match(idx, /DGR-2026-0023/);
+    assert.match(idx, /badge admin">Geri çekildi/);
+    assert.doesNotMatch(idx, /href="yayin-kuyrugu\.json"/);
   });
   test('Actions iş akışı mevcut ve izinli', () => {
     const y = read('.github/workflows/rapor.yml');

@@ -26,7 +26,7 @@
    photo.type='button';
    photo.className='btn sm';
    photo.textContent='💾 Fotoğraflı Tam Veri Arşivi (ZIP)';
-   photo.setAttribute('aria-label','Fotoğraflı Tam Veri Arşivini indir; yalnız hesap sahibi yetkilidir');
+   photo.setAttribute('aria-label','Fotoğraflı Tam Veri Arşivini indir');
    photo.addEventListener('click',()=>root.dgPhotoFullBackup?.());
    legacy.parentNode?.insertBefore(photo,legacy.nextSibling);
   }
@@ -35,14 +35,14 @@
   input.accept='.zip,application/zip,.json,application/json';
   const description=input.nextElementSibling;
   if(description?.classList?.contains('dg-meta'))
-   description.textContent='Fotoğraflı Tam Veri Arşivi yalnız hesap sahibi (owner) yetkisindedir: 13 erişilebilir tablo ve gerçek fotoğraflar SHA-256 ile doğrulanır. ZIP seçmek canlı kayıtları değiştirmez. Auth hesapları, cihaz taslakları ve şema bu pakete dahil değildir.';
+   description.textContent='13 erişilebilir tablo ve gerçek fotoğraflar SHA-256 ile doğrulanır. ZIP seçmek canlı kayıtları değiştirmez. Auth hesapları, cihaz taslakları ve şema bu pakete dahil değildir.';
   if(!document.getElementById('dgPhotoArchiveAdminStatus')){
    const status=document.createElement('p');
    status.id='dgPhotoArchiveAdminStatus';
    status.className='dg-meta';
    status.setAttribute('role','status');
    status.setAttribute('aria-live','polite');
-   status.textContent='Fotoğraflı ZIP yalnız yönetici panelindedir; indirme hesap sahibi yetkisi ister.';
+   status.textContent='Fotoğraflı ZIP indirmesi yönetim panelinden yapılır.';
    input.parentNode?.insertBefore(status,description||input.nextSibling);
   }
  }

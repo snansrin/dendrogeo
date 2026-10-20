@@ -311,15 +311,22 @@ describe('rapor v2: liste yeniden kurulumu', () => {
     }));
     mkdirSync(join(tmp, 'DGR-2026-0002')); /* geri çekilmiş: data.json yok */
     writeFileSync(join(tmp, 'DGR-2026-0002', 'index.html'), '<html>bildirim</html>');
+    writeFileSync(join(tmp, 'yayin-kuyrugu.json'), JSON.stringify({ entries: [
+      { report_id: 'DGR-2026-0001', status: 'Yayınlandı' },
+      { report_id: 'DGR-2026-0002', status: 'Yayınlandı', doi: '10.5281/zenodo.12345678' },
+      { report_id: 'DGR-2026-0002', status: 'Geri çekildi', finished_at: '2026-10-01T12:00:00Z', reason: 'gizli gerekçe' },
+    ] }));
     const list = rebuildIndex(tmp);
     assert.equal(list.length, 1);
     assert.equal(list[0].id, 'DGR-2026-0001');
     const idx = readFileSync(join(tmp, 'index.html'), 'utf8');
     assert.match(idx, /DGR-2026-0001/);
-    assert.ok(!idx.includes('DGR-2026-0002/'), 'geri çekilen listelenmez');
-    assert.match(idx, /Durum/, 'durum sütunu');
+    assert.match(idx, /href="DGR-2026-0002\/"/, 'geri çekilen rapor bildirimine listelenir');
+    assert.match(idx, /10\.5281\/zenodo\.12345678/, 'DOI görünür');
+    assert.match(idx, /Geri çekildi/, 'geri çekilme durumu görünür');
+    assert.doesNotMatch(idx, /gizli gerekçe/, 'günlükteki gerekçe kamu listesine taşınmaz');
     assert.match(idx, /Geçerli/, 'rozet');
-    assert.match(idx, /geri çekme kayıtları/, 'geri çekme açıklaması');
+    assert.match(idx, /Geri çekilen raporların veri dosyaları yayından kaldırılır/, 'geri çekme açıklaması');
   });
 });
 
