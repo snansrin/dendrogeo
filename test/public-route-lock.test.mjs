@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync,readdirSync} from 'node:fs';
+import {readFileSync,readdirSync,existsSync} from 'node:fs';
 import {resolve,relative,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -48,6 +48,24 @@ test('publicly accessible HTML entry routes are reviewed and explicitly allowlis
  // dashboard, Oracle staging panel or photo backup endpoint.
  for(const page of ['fotografli-tam-veri-arsivi/index.html','tam-yedek/index.html','oracle-storage-check/index.html'])
   assert.equal(pages.includes(page),false,page);
+});
+
+test('build inputs and tooling cannot be published as standalone Pages routes',()=>{
+ const config=readFileSync(join(root,'_config.yml'),'utf8');
+ const excluded=new Set(config.split(/\r?\n/).map(line=>/^  - (\S+)\s*$/.exec(line)?.[1]).filter(Boolean));
+ for(const path of ['partials','scripts','test','tests','supabase','docs','node_modules','AGENTS.md','package.json','package-lock.json'])
+  assert.ok(excluded.has(path),'Build-only path must be excluded from Pages: '+path);
+ assert.equal(existsSync(join(root,'.nojekyll')),false,'Do not bypass the Pages exclusions');
+ for(const path of ['src','css','assets','vendor','rapor'])assert.equal(excluded.has(path),false,'Runtime/public path must stay available: '+path);
+});
+
+test('retired test report IDs have no remaining public directory or tombstone',()=>{
+ const retired=JSON.parse(readFileSync(join(root,'rapor/test-publications.json'),'utf8')).report_ids;
+ assert.ok(retired.length>0);
+ for(const id of retired){
+  assert.match(id,/^DGR-\d{4}-\d{4}$/);
+  assert.equal(existsSync(join(root,'rapor',id)),false,'Retired test URL remains: '+id);
+ }
 });
 test('root, metadata and public navigator contain no retired privileged links',()=>{
  for(const path of ['README.md','index.html','sitemap.xml']){

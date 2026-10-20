@@ -1,0 +1,13 @@
+# GitHub Pages must serve the built application, not build inputs or tooling.
+# Runtime assets (src, css, assets, vendor) remain available to the application.
+exclude:
+  - partials
+  - scripts
+  - test
+  - tests
+  - supabase
+  - docs
+  - node_modules
+  - AGENTS.md
+  - package.json
+  - package-lock.json

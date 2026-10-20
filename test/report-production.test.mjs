@@ -5,7 +5,7 @@ test('test arşivi eski kuyruğu ve talepleri yeniden yayımlamaz; üretim ikinc
  const dir=mkdtempSync(join(tmpdir(),'dg-production-'));mkdirSync(join(dir,'DGR-2026-0020'));writeFileSync(join(dir,'DGR-2026-0020','data.json'),'{}');writeFileSync(join(dir,'yayin-kuyrugu.json'),JSON.stringify({schema:QUEUE_SCHEMA,entries:[{request_id:'old',report_id:'DGR-2026-0020'}]}));
  assert.throws(()=>resetTestPublications({dir}),/yedek/);assert.ok(existsSync(join(dir,'DGR-2026-0020','data.json')));
  const q=resetTestPublications({dir,backupRef:'archive/test',requests:[{id:'pending',kind:'request'},{id:'retract',kind:'retraction'}]});
- assert.deepEqual(q.retired_report_ids,['DGR-2026-0020']);assert.ok(!existsSync(join(dir,'DGR-2026-0020','data.json')));assert.deepEqual(q.processed_retraction_ids,['retract']);
+ assert.deepEqual(q.retired_report_ids,['DGR-2026-0020']);assert.ok(!existsSync(join(dir,'DGR-2026-0020')),'retired test URLs must have no public placeholder');assert.deepEqual(q.processed_retraction_ids,['retract']);
  const plan=planQueue([],[{id:'old'},{id:'pending'},{id:'new'}],10,q.processed_request_ids);assert.deepEqual(plan.todo.map(r=>r.id),['new']);
  saveQueue(q,join(dir,'yayin-kuyrugu.json'));assert.deepEqual(loadQueue(join(dir,'yayin-kuyrugu.json')).processed_request_ids,['old','pending']);
  assert.throws(()=>resetTestPublications({dir,backupRef:'archive/test'}),/tekrar uygulanamaz/);

@@ -10314,6 +10314,18 @@
           "sha256": "e3287d885f1fc4cc587212adee06cfe33fdf2ee9d576ed9eed40f672353bedb9"
         }
       ]
+    },
+    {
+      "date": "2026-10-20",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: user explicitly requested deletion of unnecessary publicly accessible pages. Remove the twenty retired test-report placeholders entirely. Change only the protected publication test's obsolete noindex-placeholder expectation to require the test directory to be absent; retain all queue deduplication, reserved ID, publication hash and production report checks. No scientific or application source changes.",
+      "files": [
+        {
+          "path": "test/report-publish.test.mjs",
+          "previous_sha256": "d024d3432adb8c974ef183473b850c6f8a61a6ef09258fec73ec91f8b8e37bd9",
+          "sha256": "296479da7478c2707137e8a420f551ef8561df6563381b94c554063bd3b7d7b4"
+        }
+      ]
     }
   ]
 }

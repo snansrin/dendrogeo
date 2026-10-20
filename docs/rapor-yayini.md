@@ -440,8 +440,9 @@ parkın tüm onaylı ölçümleridir. Beyan edilen saha tarihleri veri filtresi
 olarak kullanılmaz; kayıt tarih aralığı ayrıca raporda gösterilir.
 
 Önceki 20 rapor test yayınıdır. `test-publications.json` kimlik listesini
-sabitler; yeni rapor geçmişi bu listeyi dışlar. Eski rapor adreslerinde test
-bildirimi bulunur. Kimlikler yeniden kullanılmaz ve git geçmişi korunur.
+sabitler; yeni rapor geçmişi bu listeyi dışlar. Eski test raporu klasörleri
+tamamen silinir; bu adreslerde bildirim sayfası da bırakılmaz (404).
+Kimlikler yeniden kullanılmaz ve git geçmişi korunur.
 Bu geçişi yapan `reset-test-publications.mjs` idempotenttir; manifest varsa
 yeni yayınlara dokunmaz. Ölçüm, park, proje ve kullanıcı kayıtları silinmez.
 
