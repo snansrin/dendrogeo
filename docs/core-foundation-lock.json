@@ -10318,7 +10318,7 @@
     {
       "date": "2026-10-20",
       "audit_chain": "sha256-v1",
-      "scope": "User explicitly requested deletion of unnecessary publicly accessible pages. Remove the twenty retired test-report placeholders entirely. Change only the protected publication test's obsolete noindex-placeholder expectation to require the test directory to be absent; retain all queue deduplication, reserved ID, publication hash and production report checks. No scientific or application source changes.",
+      "scope": "User-authorized release follow-up: user explicitly requested deletion of unnecessary publicly accessible pages. Remove the twenty retired test-report placeholders entirely. Change only the protected publication test's obsolete noindex-placeholder expectation to require the test directory to be absent; retain all queue deduplication, reserved ID, publication hash and production report checks. No scientific or application source changes.",
       "files": [
         {
           "path": "test/report-publish.test.mjs",
