@@ -3,6 +3,9 @@
  * admin.js'ten birebir taşındı: fetchAllRows (sayfalı tam döküm),
  * fullBackup (JSON indirme), checkBackupReminder (7 gün uyarısı). */
 
+// Lazily mounted presentation only. No public archive routes or background reads.
+import('/src/ui/photo-admin-controls.mjs').catch(()=>{});
+
 /* ============ TAM YEDEK (JSON) — Tez verisi sigortası ============ */
 async function fetchAllRows(table,orderCol){return await window.DG_BACKUP_PAGED_STORE.load(sb,table,orderCol);}
 
