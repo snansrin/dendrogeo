@@ -5,11 +5,11 @@ import vm from 'node:vm';
 import {webcrypto} from 'node:crypto';
 
 const files=[
- 'src/domain/backup/sql-value.js',
- 'src/domain/backup/build-snapshot.js',
- 'src/domain/backup/build-restore-sql.js',
- 'src/adapters/backup/json-download.js',
- 'src/adapters/backup/paged-store.js'
+ 'fotografli-tam-veri-arsivi/sql-value.js',
+ 'fotografli-tam-veri-arsivi/build-snapshot.js',
+ 'fotografli-tam-veri-arsivi/build-restore-sql.js',
+ 'fotografli-tam-veri-arsivi/zip-archive.js',
+ 'fotografli-tam-veri-arsivi/paged-store.js'
 ];
 const context={URL,TextEncoder,TextDecoder,Uint8Array,DataView,Blob,window:null};
 context.window=context;
@@ -28,7 +28,7 @@ function fixture(){
  };
  const backup=DG_BACKUP_SNAPSHOT.buildComplete({...input,requests:input.data_requests},
   {exportedAt:'2026-10-20T00:00:00.000Z',exportedBy:'Tester'});
- const storage={bucket:'dendro-photos',photos:[{path,blob:new Blob([photoBytes]),bytes:photoBytes.length,contentType:'image/jpeg'}],
+ const storage={bucket:'dendro-photos',sourceOrigin:origin,photos:[{path,blob:new Blob([photoBytes]),bytes:photoBytes.length,contentType:'image/jpeg'}],
   referencedCount:1,downloadedBytes:photoBytes.length};
  const sql=DG_BUILD_RESTORE_SQL.buildComplete(backup,DG_BACKUP_SQL_VALUE.serialize).sql;
  return{backup,storage,sql,photoBytes,path,origin};
