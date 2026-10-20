@@ -52,6 +52,13 @@
     count++;
    }
   }
+  // Reconcile identity sequences after preserving original GENERATED ALWAYS ids.
+  // Never change the frozen schema or any existing rows.
+  for(const table of ["parks","projects","measurements","waypoints","data_requests","site_visits"]){
+   sql+="SELECT setval(pg_get_serial_sequence('public."+table+"','id'),"+
+    "GREATEST(COALESCE((SELECT max(id) FROM public."+table+"),0),1),"+
+    "(SELECT count(*)>0 FROM public."+table+"));\n";
+  }
   sql+="\nCOMMIT;\n";
   return{sql,count,tables:order.length};
  }
