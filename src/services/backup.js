@@ -3,17 +3,29 @@
  * admin.js'ten birebir taşındı: fetchAllRows (sayfalı tam döküm),
  * fullBackup (JSON indirme), checkBackupReminder (7 gün uyarısı). */
 
-// Lazily mounted presentation only. No public archive routes or background reads.
-import('/src/ui/photo-admin-controls.mjs').catch(()=>{});
-
 /* ============ TAM YEDEK (JSON) — Tez verisi sigortası ============ */
 async function fetchAllRows(table,orderCol){return await window.DG_BACKUP_PAGED_STORE.load(sb,table,orderCol);}
 
-let DG_PHOTO_BACKUP_BUSY=false;
 async function fullBackup(){
+ return await window.DG_CREATE_FULL_BACKUP.execute(PROFILE,{
+  load:(table,orderCol)=>fetchAllRows(table,orderCol),
+  build:data=>window.DG_BACKUP_SNAPSHOT.build(data,{exportedAt:new Date().toISOString(),exportedBy:(PROFILE&&PROFILE.full_name)||""}),
+  name:()=>"dendrogeo_yedek_"+new Date().toISOString().slice(0,10)+".json",
+  download:(backup,name)=>window.DG_BACKUP_JSON_DOWNLOAD.download(window,backup,name),
+  remember:()=>localStorage.setItem("dg_lastBackup",new Date().toISOString()),
+  onDenied:()=>toast("Yetki yok.","err"),
+  onStart:()=>toast("Yedek hazırlanıyor…","info","💾"),
+  onSuccess:(name,count)=>toast((typeof dgTfs==="function"?dgTfs("✓ Veri yedeği indirildi: {f} ({n} ölçüm). Fotoğraf dosyaları ve cihazdaki kuyruk ayrı yedeklenir.",{f:name,n:count}):("✓ Yedek indirildi: "+name+" ("+count+" ölçüm)")),"ok","💾"),
+  onFailure:error=>toast(dgCf("Yedek hatası: ")+error.message,"err","❌")
+ });
+}
+
+
+let DG_PHOTO_BACKUP_BUSY=false;
+async function dgPhotoFullBackup(){
  if(DG_PHOTO_BACKUP_BUSY)return;
  if(!PROFILE||PROFILE.role!=='owner'){
-  toast('Fotoğraflı Tam Veri Arşivi yalnız hesap sahibi (owner) yönetici yetkisinde açılır.','err','🔐');
+  toast(dgCf('Fotoğraflı Tam Veri Arşivi yalnız hesap sahibi (owner) yönetici yetkisinde açılır.'),'err','🔐');
   return;
  }
  DG_PHOTO_BACKUP_BUSY=true;
@@ -26,10 +38,10 @@ async function fullBackup(){
   window.DG_PHOTO_ARCHIVE_ZIP.saveBlob(window,archive.blob,archive.filename);
   try{localStorage.setItem('dg_lastBackup',archive.exportedAt);}catch{}
   progress('✓ 13 tablo, '+archive.photos+' fotoğraf, '+archive.counts.measurements+' ölçüm · ZIP indirildi.');
-  toast('✓ Fotoğraflı Tam Veri Arşivi doğrulandı: '+archive.photos+' fotoğraf, 13 tablo.','ok','💾');
+  toast(dgCf('✓ Fotoğraflı Tam Veri Arşivi doğrulandı: ')+archive.photos+' fotoğraf, 13 tablo.','ok','💾');
  }catch(error){
   progress('❌ Arşiv tamamlanamadı: '+(error?.message||error));
-  toast('Fotoğraflı arşiv hatası: '+(error?.message||error),'err','❌');
+  toast(dgCf('Fotoğraflı arşiv hatası: ')+(error?.message||error),'err','❌');
  }finally{
   DG_PHOTO_BACKUP_BUSY=false;
   window.DG_PHOTO_ARCHIVE_UI?.busy(false);
@@ -57,11 +69,11 @@ async function dgRestorePick(ev){
  try{if(ev&&ev.target)ev.target.value="";}catch(e){}
  if(!f){toast(dgCf("Yedek dosyası okunamadı."),"err","📥");return;}
  if(!PROFILE||(PROFILE.role!=='admin'&&PROFILE.role!=='owner')){
-  toast('Yedekten geri yükleme yalnız yönetici panelinde yapılabilir.','err','🔐');return;
+  toast(dgCf('Yedekten geri yükleme yalnız yönetici panelinde yapılabilir.'),'err','🔐');return;
  }
  if(/\.zip$/i.test(f.name||'')){
   if(PROFILE.role!=='owner'){
-   toast('Fotoğraflı arşiv geri yüklemesi yalnız hesap sahibine açıktır.','err','🔐');return;
+   toast(dgCf('Fotoğraflı arşiv geri yüklemesi yalnız hesap sahibine açıktır.'),'err','🔐');return;
   }
   window.DG_PHOTO_ARCHIVE_UI?.busy(true);
   try{
@@ -74,10 +86,10 @@ async function dgRestorePick(ev){
    const filename='dendrogeo_fotografli_tam_veri_geri_yukleme_'+new Date().toISOString().slice(0,10)+'.sql';
    window.DG_BACKUP_RESTORE_SQL_DOWNLOAD.download(window,result.sql,filename);
    window.DG_PHOTO_ARCHIVE_UI?.status('✓ ZIP doğrulandı; SQL hazır. Fotoğraf aktarım yönergeleri ZIP içindedir.');
-   toast('✓ 13 tablo ve '+result.photos+' fotoğraf doğrulandı. SQL kurtarma dosyası indirildi.','ok','📥');
+   toast(dgCf('✓ 13 tablo ve ')+result.photos+' fotoğraf doğrulandı. SQL kurtarma dosyası indirildi.','ok','📥');
   }catch(error){
    window.DG_PHOTO_ARCHIVE_UI?.status('❌ Arşiv doğrulanamadı: '+(error?.message||error));
-   toast('Geri yükleme doğrulama hatası: '+(error?.message||error),'err','❌');
+   toast(dgCf('Geri yükleme doğrulama hatası: ')+(error?.message||error),'err','❌');
   }finally{window.DG_PHOTO_ARCHIVE_UI?.busy(false);}
   return;
  }
