@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
-const migration=readFileSync(new URL('../supabase/migrations/20261020094000_dendro_photos_listing_rls.sql',import.meta.url),'utf8');
+const migration=readFileSync(new URL('../supabase/security/20261020_dendro_photos_listing_rls.sql',import.meta.url),'utf8');
 
 test('photo objects cannot be listed anonymously: SELECT policy is authenticated-only',()=>{
  assert.match(migration,/drop policy if exists "dendro_photos_public_read" on storage\.objects/i);
