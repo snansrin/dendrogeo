@@ -1,10 +1,10 @@
 // Owner-initiated archive only. This module is loaded from the existing
 // protected admin panel after an explicit click. No automatic network work.
-import '../../adapters/backup/photo-full-paged-store.js';
-import '../../domain/backup/photo-full-snapshot.js';
-import '../../domain/backup/photo-full-sql-value.js';
-import '../../domain/backup/photo-full-restore-sql.js';
-import '../../adapters/backup/photo-full-zip.js';
+import '../../adapters/backup/photo-full-paged-store.mjs';
+import '../../domain/backup/photo-full-snapshot.mjs';
+import '../../domain/backup/photo-full-sql-value.mjs';
+import '../../domain/backup/photo-full-restore-sql.mjs';
+import '../../adapters/backup/photo-full-zip.mjs';
 
 const tablePlan=Object.freeze([
  ['measurements',['created_at','id']],
