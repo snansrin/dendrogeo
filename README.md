@@ -8,7 +8,7 @@
 
 Sahadan haritaya, kayıtlı analizden izlenebilir araştırma çıktısına.
 
-[**Platformu açın ↗**](https://dendrogeo.org/) · [**Fotoğraflı Tam Veri Arşivi**](https://dendrogeo.org/fotografli-tam-veri-arsivi/) · [**Yöntem**](https://dendrogeo.org/yontem/) · [**Rapor dizini · şu an aktif yayın yok**](https://dendrogeo.org/rapor/)
+[**Platformu açın ↗**](https://dendrogeo.org/) · **Fotoğraflı Tam Veri Arşivi:** yalnız oturum açmış hesap sahibinin Ölçüm Yönetimi & Onay panelinde · [**Yöntem**](https://dendrogeo.org/yontem/) · [**Rapor dizini · şu an aktif yayın yok**](https://dendrogeo.org/rapor/)
 
 [![Release](https://img.shields.io/github/v/release/snansrin/dendrogeo?label=release&color=167b59)](https://github.com/snansrin/dendrogeo/releases)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22948773.svg)](https://doi.org/10.5281/zenodo.22948773)
