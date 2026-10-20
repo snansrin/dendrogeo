@@ -59,7 +59,7 @@
    const name="dendrogeo_fotografli_tam_veri_arsivi_"+when.slice(0,10)+".zip";
    const result=await window.DG_BACKUP_JSON_DOWNLOAD.downloadComplete(window,snapshot,storage,name,sql.sql);
    localStorage.setItem("dg_lastPhotoArchive",when);
-   status("✓ "+name+" · "+storage.photos.length+" fotoğraf · "+rows.measurements.length+" ölçüm · "+result.files+" ZIP dosyası");
+   status("✓ "+name+" · 13 tablo · "+storage.photos.length+" fotoğraf · "+rows.measurements.length+" ölçüm · "+result.files+" ZIP dosyası");
   }catch(error){
    status("❌ Arşiv oluşturulamadı: "+(error?.message||String(error))+" · Eksik arşiv başarı olarak işaretlenmedi.",true);
   }finally{freeze(false);}
