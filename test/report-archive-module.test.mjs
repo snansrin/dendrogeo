@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { DGR_ID_RE, nextReportId, parkHistory, rebuildIndex } from '../scripts/lib/report-archive.mjs';
+import { DGR_ID_RE, nextReportId, parkHistory, readReportIndex, readRetractedReportIndex, rebuildIndex } from '../scripts/lib/report-archive.mjs';
 import { parkHistory as legacyParkHistory, rebuildIndex as legacyRebuildIndex } from '../scripts/make-report.mjs';
 
 test('archive keeps report ID validation and chooses the next year sequence', () => {
@@ -62,3 +62,30 @@ test('archive reindex ignores missing, malformed and non-DGR snapshots and escap
   assert.equal(readFileSync(join(dir, 'index.html'), 'utf8').includes('&lt;script&gt;Park&lt;/script&gt;'), true);
   assert.equal(readFileSync(join(dir, 'index.html'), 'utf8').includes('DGR-2026-0003/'), false);
 });
+
+test('public report index lists withdrawn DGR and validated DOI without exposing retraction details', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'dg-report-retracted-index-'));
+  mkdirSync(join(dir, 'DGR-2026-0023'), { recursive: true });
+  writeFileSync(join(dir, 'DGR-2026-0023', 'data.json'), JSON.stringify({
+    park: { name: 'Park' }, totals: { n: 1, ci: { mean: 10, lo: 8, hi: 12 } }, generated_at: '2026-10-01T00:00:00Z',
+  }));
+  writeFileSync(join(dir, 'yayin-kuyrugu.json'), JSON.stringify({ entries: [
+    { report_id: 'DGR-2026-0023', status: 'Yayınlandı', doi: '10.5281/zenodo.23196877' },
+    { report_id: 'DGR-2026-0023', status: 'Geri çekildi', finished_at: '2026-10-14T09:48:11.279Z', reason: '<private>', requested_by: 'private-user' },
+    { report_id: 'DGR-2026-0024', status: 'Geri çekildi', finished_at: 'bad-date', doi: 'javascript:alert(1)' },
+  ] }));
+
+  assert.deepEqual(readRetractedReportIndex(dir), [
+    { id: 'DGR-2026-0023', doi: '10.5281/zenodo.23196877', date: '2026-10-14' },
+    { id: 'DGR-2026-0024', doi: '', date: '' },
+  ]);
+  assert.deepEqual(readReportIndex(dir), []);
+  rebuildIndex(dir);
+  const html = readFileSync(join(dir, 'index.html'), 'utf8');
+  assert.match(html, /DGR-2026-0023/);
+  assert.match(html, /https:\/\/doi\.org\/10\.5281\/zenodo\.23196877/);
+  assert.match(html, /Geri çekildi/);
+  assert.doesNotMatch(html, /<private>|private-user|javascript:/);
+  assert.doesNotMatch(html, /gorunum\/\?id=DGR-2026-0023/);
+});
+

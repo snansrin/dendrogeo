@@ -66,9 +66,12 @@ test('admin UI mounts separate photo ZIP button without altering legacy JSON exp
  assert.equal(photo.id,'dgPhotoArchiveAdminDownload');
  assert.equal(photo.className,'btn sm');
  assert.match(photo.textContent,/Fotoğraflı Tam Veri Arşivi/);
+ assert.doesNotMatch(photo.attributes['aria-label'],/hesap sahibi|owner/i);
  assert.match(restore.textContent,/Geri Yükleme/);
  assert.match(input.accept,/\.zip/);
  assert.match(input.nextElementSibling.textContent,/13 erişilebilir tablo/);
+ assert.doesNotMatch(input.nextElementSibling.textContent,/hesap sahibi|owner/i);
+ assert.doesNotMatch(status.textContent,/hesap sahibi|owner/i);
  assert.equal(status.attributes.role,'status');
  photo.handlers.click();
  assert.equal(photoCalls,1);
@@ -122,3 +125,4 @@ test('browser-only backup has a fresh server identity gate and no implicit remot
  assert.match(service,/DG_PHOTO_ARCHIVE_ZIP\.saveBlob/);
  assert.match(service,/inspectOwnerArchive/);
 });
+
