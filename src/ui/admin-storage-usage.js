@@ -2,6 +2,9 @@
 (function(root){
  let photoUi;
  function mountOwnerArchiveControls(){
+  // Even signed-in admins have no reason to fetch the owner's archive UI.
+  // Gate the network import itself, not only the button's visibility.
+  if(typeof PROFILE==='undefined'||!PROFILE||PROFILE.role!=='owner')return;
   // This UI module is NOT fetched on public landing or at startup.
   // The admin-only storage summary renders after the panel is opened.
   if(!photoUi){
