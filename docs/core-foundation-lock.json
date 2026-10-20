@@ -10302,6 +10302,18 @@
           "sha256": "24b96031103b98595bb3a85fc489af2572045b3831c54ef62029116e55c2b2bf"
         }
       ]
+    },
+    {
+      "date": "2026-10-20",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: secure owner-only photo backup in the existing admin panel and remove open photo backup and Oracle staging pages; mount the photo ZIP archive solely inside existing owner-authorized Measurement Admin panel. Version-bump only the backup service script in frozen landing HTML. No changes to allometry, GIS/raster, measurements, carbon, navigation, map tools, layout, styles or font sources.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "24b96031103b98595bb3a85fc489af2572045b3831c54ef62029116e55c2b2bf",
+          "sha256": "e3287d885f1fc4cc587212adee06cfe33fdf2ee9d576ed9eed40f672353bedb9"
+        }
+      ]
     }
   ]
 }

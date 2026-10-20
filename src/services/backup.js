@@ -20,6 +20,34 @@ async function fullBackup(){
  });
 }
 
+
+let DG_PHOTO_BACKUP_BUSY=false;
+async function dgPhotoFullBackup(){
+ if(DG_PHOTO_BACKUP_BUSY)return;
+ if(!PROFILE||PROFILE.role!=='owner'){
+  toast(dgCf('Fotoğraflı Tam Veri Arşivi yalnız hesap sahibi (owner) yönetici yetkisinde açılır.'),'err','🔐');
+  return;
+ }
+ DG_PHOTO_BACKUP_BUSY=true;
+ window.DG_PHOTO_ARCHIVE_UI?.busy(true);
+ const progress=message=>window.DG_PHOTO_ARCHIVE_UI?.status(message);
+ try{
+  progress('Veriler yetkili yönetici oturumundan okunuyor…');
+  const {makeOwnerArchive}=await import('/src/application/backup/photo-full-workflow.mjs');
+  const archive=await makeOwnerArchive(sb,{progress});
+  window.DG_PHOTO_ARCHIVE_ZIP.saveBlob(window,archive.blob,archive.filename);
+  try{localStorage.setItem('dg_lastBackup',archive.exportedAt);}catch{}
+  progress('✓ 13 tablo, '+archive.photos+' fotoğraf, '+archive.counts.measurements+' ölçüm · ZIP indirildi.');
+  toast(dgCf('✓ Fotoğraflı Tam Veri Arşivi doğrulandı: ')+archive.photos+' fotoğraf, 13 tablo.','ok','💾');
+ }catch(error){
+  progress('❌ Arşiv tamamlanamadı: '+(error?.message||error));
+  toast(dgCf('Fotoğraflı arşiv hatası: ')+(error?.message||error),'err','❌');
+ }finally{
+  DG_PHOTO_BACKUP_BUSY=false;
+  window.DG_PHOTO_ARCHIVE_UI?.busy(false);
+ }
+}
+
 function checkBackupReminder(){
   const last=localStorage.getItem("dg_lastBackup");
   const state=window.DG_BACKUP_REMINDER_STATE.evaluate(last,Date.now());
@@ -36,10 +64,35 @@ function checkBackupReminder(){
  * Bu araç yedeği doğrular, özetler ve OVERRIDING SYSTEM VALUE + ON CONFLICT
  * DO NOTHING ile idempotent bir .sql dosyası üretir (kimlikler/sahipler korunur,
  * mevcut satırlar ezilmez). Migration/şema/RLS DEĞİŞMEZ (kırmızı çizgi). */
-function dgRestorePick(ev){
+async function dgRestorePick(ev){
  const f=(ev&&ev.target&&ev.target.files&&ev.target.files[0])||null;
  try{if(ev&&ev.target)ev.target.value="";}catch(e){}
  if(!f){toast(dgCf("Yedek dosyası okunamadı."),"err","📥");return;}
+ if(!PROFILE||(PROFILE.role!=='admin'&&PROFILE.role!=='owner')){
+  toast(dgCf('Yedekten geri yükleme yalnız yönetici panelinde yapılabilir.'),'err','🔐');return;
+ }
+ if(/\.zip$/i.test(f.name||'')){
+  if(PROFILE.role!=='owner'){
+   toast(dgCf('Fotoğraflı arşiv geri yüklemesi yalnız hesap sahibine açıktır.'),'err','🔐');return;
+  }
+  window.DG_PHOTO_ARCHIVE_UI?.busy(true);
+  try{
+   window.DG_PHOTO_ARCHIVE_UI?.status('ZIP, 13 tablo ve fotoğraf SHA-256 doğrulanıyor…');
+   const {inspectOwnerArchive}=await import('/src/application/backup/photo-full-workflow.mjs');
+   const result=await inspectOwnerArchive(sb,f);
+   const ok=confirm('Fotoğraflı arşiv doğrulandı: '+result.measurements+' ölçüm, '+result.photos+
+    ' gerçek fotoğraf, 13 tablo. Yalnız kurtarma SQL dosyası indirilsin mi? Bu işlem canlı veritabanına veya Storage dosyalarına yazmaz.');
+   if(!ok)return;
+   const filename='dendrogeo_fotografli_tam_veri_geri_yukleme_'+new Date().toISOString().slice(0,10)+'.sql';
+   window.DG_BACKUP_RESTORE_SQL_DOWNLOAD.download(window,result.sql,filename);
+   window.DG_PHOTO_ARCHIVE_UI?.status('✓ ZIP doğrulandı; SQL hazır. Fotoğraf aktarım yönergeleri ZIP içindedir.');
+   toast(dgCf('✓ 13 tablo ve ')+result.photos+' fotoğraf doğrulandı. SQL kurtarma dosyası indirildi.','ok','📥');
+  }catch(error){
+   window.DG_PHOTO_ARCHIVE_UI?.status('❌ Arşiv doğrulanamadı: '+(error?.message||error));
+   toast(dgCf('Geri yükleme doğrulama hatası: ')+(error?.message||error),'err','❌');
+  }finally{window.DG_PHOTO_ARCHIVE_UI?.busy(false);}
+  return;
+ }
  const rd=new FileReader();
  rd.onload=()=>{
   let bk=null;try{bk=JSON.parse(String(rd.result));}catch(e){bk=null;}

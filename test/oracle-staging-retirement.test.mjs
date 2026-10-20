@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync, existsSync} from 'node:fs';
 import vm from 'node:vm';
 
 const read = relativePath => readFileSync(new URL('../' + relativePath, import.meta.url), 'utf8');
@@ -38,11 +38,10 @@ test('retired Oracle edge route always rejects requests without fetching any dat
   assert.equal(fetchCalls, 0);
 });
 
-test('retired Oracle check page has no Supabase SDK, scripts, credentials, or interactive probe', () => {
-  const page = read('oracle-storage-check/index.html');
-  assert.match(page, /Oracle depolama denemesi devre dışı/);
-  assert.match(page, /http-equiv="Content-Security-Policy"/);
-  assert.doesNotMatch(page, /<script\b|<form\b|<button\b|supabase-js|probe\.js|probe\.css|functions\.invoke|storage-check\//i);
+test('retired Oracle staging browser route is absent from static hosting', () => {
+  assert.equal(existsSync(new URL('../oracle-storage-check/index.html',import.meta.url)),false);
+  assert.equal(existsSync(new URL('../oracle-storage-check/probe.js',import.meta.url)),false);
+  assert.equal(existsSync(new URL('../oracle-storage-check/probe.css',import.meta.url)),false);
 });
 
 test('free plan operating guide explicitly separates log scanning and egress', () => {
