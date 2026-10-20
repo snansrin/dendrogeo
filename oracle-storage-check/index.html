@@ -4,46 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://xjbpounwdxrhelmixvqm.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-ancestors 'none'">
   <meta name="referrer" content="no-referrer">
-  <meta name="theme-color" content="#14532d">
-  <title>Özel depolama bağlantı kontrolü · DendroGeo</title>
-  <link rel="icon" type="image/png" href="../icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600;700&display=swap">
-  <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="../css/appearance.css">
-  <link rel="stylesheet" href="probe.css">
-  <link rel="stylesheet" href="../css/ui-standard.css">
-  <script src="../src/domain/settings/appearance-policy.js" defer></script>
-  <script src="../src/adapters/settings/appearance-preference.js" defer></script>
-  <script src="../src/ui/appearance.js" defer></script>
-  <script src="../vendor/supabase-js-2.116.0.js" defer></script>
-  <script src="../src/config/supabase.js" defer></script>
-  <script src="probe.js" defer></script>
+  <title>Oracle denemesi kapatıldı · DendroGeo</title>
+  <style>
+    :root{color-scheme:light dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{min-height:100svh;display:grid;place-items:center;margin:0;padding:1.5rem;box-sizing:border-box;background:Canvas;color:CanvasText}
+    main{width:min(100%,38rem);line-height:1.7}
+    h1{font-size:clamp(1.7rem,5vw,2.4rem);line-height:1.2}
+    a{color:LinkText}
+    a:focus-visible{outline:3px solid currentColor;outline-offset:4px}
+  </style>
 </head>
-<body class="dg-page">
-  <main class="wrap probe-wrap">
-    <a class="brand probe-brand" href="/" aria-label="DendroGeo ana sayfa">
-      <img class="brand-logo" src="../logo.png" alt="">
-      <span>DendroGeo</span>
-    </a>
-    <section class="card probe-card" aria-labelledby="probe-title">
-      <p class="lbl">Özel altyapı · tek seferlik kontrol</p>
-      <h1 id="probe-title" class="disp">Dosya depolama bağlantısı</h1>
-      <p class="probe-intro">Oturumunuz sunucuda doğrulanır. Ardından özel deneme alanına küçük, sentetik bir metin yazılır ve geri okunur. Hesap bilgileri, ölçümler ve fotoğraflar bu kontrole dahil değildir.</p>
-      <div class="probe-scope" aria-label="Deneme kapsamı">
-        <span><strong>1</strong> kısa metin</span>
-        <span><strong>2</strong> istek · yazma ve okuma</span>
-        <span><strong>0</strong> üretim dosyası</span>
-      </div>
-      <button id="runProbe" class="btn probe-button" type="button">Bağlantıyı doğrula</button>
-      <p id="probeStatus" class="probe-status" role="status" aria-live="polite">Deneme, yalnızca yetkili hesapta ve etkin olduğu kısa süre içinde çalışır.</p>
-      <p id="probeResult" class="probe-result" hidden></p>
-      <a class="probe-back" href="/">DendroGeo’ya dön</a>
-    </section>
-    <footer class="probe-footer">DendroGeo · geçici altyapı kontrolü · bu sayfa arama motorlarında listelenmez.</footer>
+<body>
+  <main>
+    <h1>Oracle depolama denemesi devre dışı</h1>
+    <p>Bu geçici bağlantı testi durduruldu. Bu sayfa hiçbir oturum açmaz, Supabase veya Oracle isteği göndermez ve veri aktarımı gerçekleştirmez.</p>
+    <p>DendroGeo'nun saha kayıtları, fotoğrafları ve raporları mevcut üretim altyapısında kalır.</p>
+    <p><a href="/">DendroGeo ana sayfasına dön</a></p>
   </main>
 </body>
 </html>
