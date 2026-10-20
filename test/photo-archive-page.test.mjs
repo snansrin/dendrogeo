@@ -29,7 +29,7 @@ test('existing frozen admin panel owns both archive and restore controls',()=>{
 });
 
 test('admin UI mounts photo archive labels with existing theme classes and keyboard controls',()=>{
- const readModule=read('src/ui/restore-backup-prompt.js');
+ const readModule=read('src/ui/photo-admin-controls.mjs');
  const newStatus={id:'dgPhotoArchiveAdminStatus',attributes:{},setAttribute(k,v){this.attributes[k]=v;}};
  const note={classList:{contains:c=>c==='dg-meta'},textContent:''};
  const input={accept:'.json',nextElementSibling:note,parentNode:{insertBefore(node){assert.equal(node,newStatus);}},disabled:false};
