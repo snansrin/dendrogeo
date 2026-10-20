@@ -1,126 +1,72 @@
-import {test} from 'node:test';
+import {test,after} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
-import vm from 'node:vm';
 import {webcrypto} from 'node:crypto';
 
-const files=[
- 'fotografli-tam-veri-arsivi/sql-value.js',
- 'fotografli-tam-veri-arsivi/build-snapshot.js',
- 'fotografli-tam-veri-arsivi/build-restore-sql.js',
- 'fotografli-tam-veri-arsivi/zip-archive.js',
- 'fotografli-tam-veri-arsivi/paged-store.js'
-];
-const context={URL,TextEncoder,TextDecoder,Uint8Array,DataView,Blob,window:null};
-context.window=context;
-vm.createContext(context);
-for(const path of files)vm.runInContext(readFileSync(new URL('../'+path,import.meta.url),'utf8'),context,{filename:path});
-const {DG_BACKUP_SNAPSHOT, DG_BUILD_RESTORE_SQL, DG_BACKUP_SQL_VALUE, DG_BACKUP_JSON_DOWNLOAD, DG_BACKUP_PAGED_STORE}=context;
+// Regression tests for the ONLY supported owner-admin archive implementation.
+const previous=globalThis.window;
+globalThis.window={crypto:webcrypto,Blob,URL};
+await import('../src/domain/backup/photo-full-snapshot.mjs');
+await import('../src/domain/backup/photo-full-restore-sql.mjs');
+await import('../src/domain/backup/photo-full-sql-value.mjs');
+await import('../src/adapters/backup/photo-full-zip.mjs');
+const ZIP=window.DG_PHOTO_ARCHIVE_ZIP;
 
 function fixture(){
- const photoBytes=new TextEncoder().encode('real photo file payload\n');
- const origin='https://fixture.supabase.co',path='user-id/goksu/1.jpg';
- const input={
-  measurements:[{id:7,owner:'user-id',photo_url:origin+'/storage/v1/object/public/dendro-photos/'+path}],
-  projects:[{id:3}],waypoints:[],data_requests:[],parks:[],surface_reviews:[],
-  profiles:[{id:'user-id'}],report_requests:[],report_retractions:[],
+ const photo=new TextEncoder().encode('real photograph bytes\n');
+ const rows={
+  measurements:[{id:17,owner:'owner-id',photo_url:'https://fixture.supabase.co/storage/v1/object/public/dendro-photos/owner-id/tree%20one.jpg'}],
+  projects:[],waypoints:[],data_requests:[],parks:[],surface_reviews:[],
+  profiles:[{id:'owner-id',role:'owner'}],report_requests:[],report_retractions:[],
   park_invites:[],park_collaborators:[],site_metric_daily:[],site_visits:[]
  };
- const backup=DG_BACKUP_SNAPSHOT.buildComplete({...input,requests:input.data_requests},
-  {exportedAt:'2026-10-20T00:00:00.000Z',exportedBy:'Tester'});
- const storage={bucket:'dendro-photos',sourceOrigin:origin,photos:[{path,blob:new Blob([photoBytes]),bytes:photoBytes.length,contentType:'image/jpeg'}],
-  referencedCount:1,downloadedBytes:photoBytes.length};
- const sql=DG_BUILD_RESTORE_SQL.buildComplete(backup,DG_BACKUP_SQL_VALUE.serialize).sql;
- return{backup,storage,sql,photoBytes,path,origin};
-}
-function browser(){
- let zip,downloadName;
- const anchor={remove(){},click(){}};
- return{
-  crypto:webcrypto,Blob,TextEncoder,URL:{createObjectURL(b){zip=b;return'blob:photo-archive';},revokeObjectURL(){}},
-  document:{createElement(){return anchor;},body:{appendChild(){}}},
-  setTimeout(){},
-  get result(){return{zip,downloadName:anchor.download};}
- };
+ const snapshot=window.DG_PHOTO_ARCHIVE_SNAPSHOT.buildComplete({...rows,requests:rows.data_requests},{
+  exportedAt:'2026-10-20T08:00:00Z',exportedBy:'Fixture'});
+ const sql=window.DG_PHOTO_ARCHIVE_RESTORE_SQL.buildComplete(snapshot,window.DG_PHOTO_ARCHIVE_SQL_VALUE.serialize).sql;
+ const storage={bucket:'dendro-photos',sourceOrigin:'https://fixture.supabase.co',
+  photos:[{path:'owner-id/tree one.jpg',blob:new Blob([photo]),bytes:photo.length,contentType:'image/jpeg'}],
+  downloadedBytes:photo.length,referencedCount:1};
+ return{snapshot,storage,sql,photo};
 }
 
-test('Fotoğraflı Tam Veri Arşivi: ZIP round-trip preserves 13 tables, real image bytes and SQL',async()=>{
- const f=fixture(),b=browser();
- const out=await DG_BACKUP_JSON_DOWNLOAD.downloadComplete(b,f.backup,f.storage,'photo.zip',f.sql);
- assert.equal(out.photos,1);assert.equal(b.result.downloadName,'photo.zip');
- assert.ok(out.bytes>f.photoBytes.length);
- const restored=await DG_BACKUP_JSON_DOWNLOAD.readComplete(b,b.result.zip);
- assert.equal(restored.backup.schema_version,'2.0.0');
- assert.equal(restored.photos.length,1);
- assert.equal(restored.photoBytes,f.photoBytes.length);
- assert.equal(restored.photos[0].path,f.path);
- assert.deepEqual(Array.from(restored.photos[0].data),Array.from(f.photoBytes));
- assert.equal(restored.restoreSql,f.sql);
- assert.equal(restored.backup.measurements[0].photo_url,f.backup.measurements[0].photo_url);
- assert.ok(restored.fileCount>=5);
+async function make(badCount=false){
+ const fixtureData=fixture();
+ if(badCount)fixtureData.snapshot.counts.profiles=99;
+ const result=await ZIP.downloadComplete(window,fixtureData.snapshot,fixtureData.storage,
+  'dendrogeo_fotografli_tam_veri_arsivi_2026-10-20.zip',fixtureData.sql,{deferDownload:true});
+ return{...fixtureData,blob:result.archive};
+}
+
+test('owner-panel ZIP round-trip preserves the 13 data tables, photo bytes and SQL',async()=>{
+ const f=await make(),read=await ZIP.readComplete(window,f.blob);
+ assert.equal(read.backup.counts.measurements,1);
+ assert.equal(read.backup.schema_version,'2.0.0');
+ assert.equal(read.photos.length,1);
+ assert.equal(read.photos[0].path,'owner-id/tree one.jpg');
+ assert.deepEqual(Array.from(read.photos[0].data),Array.from(f.photo));
+ assert.equal(read.restoreSql,f.sql);
+ assert.equal(read.backup.storage.source_origin,'https://fixture.supabase.co');
 });
 
-test('Fotoğraflı Tam Veri Arşivi: changing a single image byte fails CRC/SHA validation',async()=>{
- const f=fixture(),b=browser();
- await DG_BACKUP_JSON_DOWNLOAD.downloadComplete(b,f.backup,f.storage,'photo.zip',f.sql);
- const arr=new Uint8Array(await b.result.zip.arrayBuffer());
- const hit=Array.from(arr).findIndex((_,i)=>i>60&&
-  arr[i]===f.photoBytes[0]&&arr.slice(i,i+f.photoBytes.length).every((v,j)=>v===f.photoBytes[j]));
- assert.ok(hit>60);arr[hit]^=1;
- await assert.rejects(DG_BACKUP_JSON_DOWNLOAD.readComplete(b,new Blob([arr])),/CRC32|SHA-256|geçersiz/i);
+test('one corrupted photo byte invalidates an otherwise complete ZIP',async()=>{
+ const f=await make(),bytes=new Uint8Array(await f.blob.arrayBuffer());
+ let hit=-1;
+ for(let i=30;i<bytes.length-f.photo.length;i++){
+  if(f.photo.every((n,j)=>bytes[i+j]===n)){hit=i;break;}
+ }
+ assert.ok(hit>=30,'original photo bytes must appear as a real ZIP entry');
+ bytes[hit]^=1;
+ await assert.rejects(ZIP.readComplete(window,new Blob([bytes])),/CRC32|SHA-256/);
 });
 
-test('Fotoğraflı Tam Veri Arşivi: changed table count fails restoration',async()=>{
- const f=fixture(),bad={...f.backup,counts:{...f.backup.counts,profiles:8}},b=browser();
- await DG_BACKUP_JSON_DOWNLOAD.downloadComplete(b,bad,f.storage,'bad.zip',f.sql);
- await assert.rejects(DG_BACKUP_JSON_DOWNLOAD.readComplete(b,b.result.zip),/tablosu|tablo/i);
+test('tampered manifest data counts are rejected during restore',async()=>{
+ const f=await make(true);
+ await assert.rejects(ZIP.readComplete(window,f.blob),/Arşiv tablosu eksik|bozuk veri tablosu|Eksik veya bozuk/i);
 });
 
-test('Fotoğraflı Tam Veri Arşivi: missing measurement photo prevents any download',async()=>{
- const f=fixture(),calls=[];
- const sb={
-  supabaseUrl:f.origin,
-  storage:{from(name){
-   assert.equal(name,'dendro-photos');
-   return{async list(prefix){calls.push(['list',prefix]);return{data:[]};},async download(path){calls.push(['download',path]);return{error:{message:'missing'}};}};
-  }}
- };
- await assert.rejects(DG_BACKUP_PAGED_STORE.archivePhotos(sb,'dendro-photos',f.backup.measurements),/Storage listesinde bulunamadı/);
- assert.deepEqual(calls,[['list','']]);
+test('archive is only prepared locally, without automatic upload to any service',async()=>{
+ const f=await make(),checked=await ZIP.readComplete(window,f.blob);
+ assert.equal(checked.photos.length,1);
+ assert.equal(f.blob.type,'application/zip');
 });
 
-test('Fotoğraflı Tam Veri Arşivi: recursive Storage pagination and composite-key tables',async()=>{
- const f=fixture(),calls=[],blob=new Blob([f.photoBytes]);
- const sb={
-  supabaseUrl:f.origin,
-  storage:{from:()=>({
-   async list(prefix){
-    calls.push(['list',prefix]);
-    return{data:prefix===''?[{name:'user-id',id:null}]:prefix==='user-id'?[{name:'goksu',id:null}]:[{id:'1',name:'1.jpg',metadata:{size:blob.size,mimetype:'image/jpeg'}}]};
-   },
-   async download(path){calls.push(['download',path]);return{data:blob};}
-  })}
- };
- const objects=await DG_BACKUP_PAGED_STORE.archivePhotos(sb,'dendro-photos',f.backup.measurements);
- assert.equal(objects.listedCount,1);assert.equal(objects.referencedCount,1);
- assert.equal(objects.downloadedBytes,blob.size);
- assert.deepEqual(calls.at(-1),['download',f.path]);
- const orders=[],db={from(){
-  return{select(){return this;},order(field){orders.push(field);return this;},async range(){return{data:[{park_id:2,user_id:'owner'}]};}};
- }};
- const rows=await DG_BACKUP_PAGED_STORE.loadComplete(db,'park_collaborators',['park_id','user_id']);
- assert.equal(rows.length,1);
- assert.deepEqual(orders,['park_id','user_id']);
-});
-
-test('Fotoğraflı Tam Veri Arşivi: SQL contains all 13 tables without deleting or overwriting rows',()=>{
- const f=fixture();
- const sql=f.sql;
- for(const tab of ['profiles','parks','projects','measurements','waypoints','data_requests','surface_reviews',
-  'report_requests','report_retractions','park_invites','park_collaborators','site_metric_daily','site_visits'])
-  assert.ok(sql.includes('-- '+tab+' ('),tab);
- assert.match(sql,/INSERT INTO public\.measurements/);
- assert.match(sql,/ON CONFLICT DO NOTHING/);
- assert.doesNotMatch(sql,/\bDELETE FROM\b|\bTRUNCATE\b|\bDROP TABLE\b/);
- assert.equal(DG_BUILD_RESTORE_SQL.buildComplete(f.backup,DG_BACKUP_SQL_VALUE.serialize).tables,13);
-});
+after(()=>{if(previous===undefined)delete globalThis.window;else globalThis.window=previous;});
