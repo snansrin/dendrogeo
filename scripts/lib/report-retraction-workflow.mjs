@@ -19,7 +19,8 @@ return function handleRetraction(rt, pubEntry, root = defaultRoot) {
     if (!dir.startsWith(rapDir) || !existsSync(dir)) throw new Error('Rapor dizini bulunamadı: ' + base.report_id);
     for (const f of RETRACT_FILES) { try { unlinkSync(join(dir, f)); } catch (e) { /* dosya zaten yok */ } }
     writeFileSync(join(dir, 'index.html'), renderRetractionNotice({
-      id: base.report_id, parkName: base.park_name || '', reason: base.reason || '', retractedAt: now(),
+      id: base.report_id, parkName: base.park_name || '', reason: base.reason || '',
+      publicSafe: rt.public_safe === true, retractedAt: now(),
     }));
     rebuildIndex(rapDir);
     return { ...base, status: 'Geri çekildi', finished_at: now() };

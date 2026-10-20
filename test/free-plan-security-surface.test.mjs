@@ -1,8 +1,12 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {existsSync,readFileSync,readdirSync,statSync} from 'node:fs';
+import {existsSync,mkdtempSync,readFileSync,readdirSync,statSync} from 'node:fs';
+import {tmpdir} from 'node:os';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {saveQueue} from '../scripts/lib/report-queue-store.mjs';
+import {createRetractionNotice} from '../scripts/lib/report-retraction.mjs';
+import {createReportQueueRunner} from '../scripts/lib/report-queue-runner.mjs';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
@@ -76,4 +80,46 @@ test('agent instructions prohibit quota-consuming log investigations without a s
  assert.match(policy,/genel "kontrol et\/düzelt" talebi günlük taramasına izin sayılmaz/);
  assert.match(policy,/kesin zaman aralığı ve sorgu sayısı/);
  assert.match(policy,/teknik bir kota kesicisi[\s\S]*değildir/);
+});
+
+test('public report queue and withdrawal tombstones exclude requester identity and free-text reason',()=>{
+ const queue=JSON.parse(read('rapor/yayin-kuyrugu.json'));
+ for(const entry of queue.entries){
+  if(!entry.retraction_id)continue;
+  for(const key of ['requested_by','requested_at','reason'])
+   assert.equal(Object.hasOwn(entry,key),false,`public queue entry must omit ${key}`);
+  if(entry.status==='Geri çekildi'){
+   const notice=read(`rapor/${entry.report_id}/index.html`);
+   assert.doesNotMatch(notice,/Gerekçe|yayin-kuyrugu\.json|istek sahibinin|özel not/i);
+  }
+ }
+});
+
+test('public queue persistence strips private retraction fields and production notice hides the reason',()=>{
+ const path=resolve(mkdtempSync(resolve(tmpdir(),'dg-public-queue-')),'queue.json');
+ const serialized=JSON.stringify(saveQueue({entries:[{
+  retraction_id:'ret-1',report_id:'DGR-2026-0001',status:'Geri çekildi',requested_by:'private-user',
+  requested_at:'private-time',reason:'private-reason'
+ }]},path));
+ assert.doesNotMatch(serialized,/private-user|private-time|private-reason|requested_by|requested_at|"reason"/);
+ const render=createRetractionNotice({siteOrigin:'https://dendrogeo.org',reportTitle:'Rapor'});
+ const notice=render({id:'DGR-2026-0001',parkName:'Park',reason:'private-reason',publicSafe:true});
+ assert.doesNotMatch(notice,/private-reason|Gerekçe|yayin-kuyrugu\.json/);
+ assert.match(notice,/isteği gönderen hesaba ait ayrıntılar yayımlanmaz/);
+});
+
+test('production withdrawal runner never forwards the database reason to the public renderer',async()=>{
+ let received;
+ const queue={entries:[{report_id:'DGR-2026-0001',status:'Yayınlandı',park_id:5}],processed_retraction_ids:[]};
+ const run=createReportQueueRunner({
+  RUN_LIMIT:2,QUEUE_PATH:'queue.json',loadQueue:()=>structuredClone(queue),saveQueue:()=>{},
+  effectiveProcessedRequestIds:()=>[],fetchPending:async()=>[],
+  fetchPendingRetractions:async()=>({rows:[{id:'ret-1',report_id:'DGR-2026-0001',park_id:5,reason:'private-reason',requested_by:'private-user',created_at:'private-time'}],missing:false}),
+  planQueue:()=>({already:0,todo:[],skipped:0}),planRetractions:()=>({todo:[{id:'ret-1',report_id:'DGR-2026-0001',park_id:5,reason:'private-reason',requested_by:'private-user',created_at:'private-time'}],invalid:[]}),
+  handle:()=>{},handleRetraction:(rt)=>{received=rt;return{report_id:rt.report_id,status:'Geri çekildi'};},log:()=>{}
+ });
+ await run();
+ assert.equal(received.reason,'');
+ assert.equal(received.public_safe,true);
+ assert.equal(received.requested_by,'private-user');
 });

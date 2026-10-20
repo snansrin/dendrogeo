@@ -6,7 +6,7 @@ const esc = (value) => String(value ?? '').replace(/[&<>"]/g, (char) => ({ '&': 
 export function createRetractionNotice({ siteOrigin, reportTitle }) {
   const SITE_ORIGIN = siteOrigin;
   const DGR_TITLE_DEF = reportTitle;
-  return function renderRetractionNotice({ id, parkName = '', reason = '', retractedAt = null }) {
+  return function renderRetractionNotice({ id, parkName = '', reason = '', publicSafe = false, retractedAt = null }) {
     const date = retractedAt ? fmtDateTr(retractedAt) : '—';
     return applyPublicPageTheme(`<!doctype html>
 <html lang="tr">
@@ -39,11 +39,11 @@ a{color:var(--green)}
 <tr><td class="k">Rapor kimliği</td><td><code>${esc(id)}</code></td></tr>
 <tr><td class="k">Park</td><td>${esc(parkName || '—')}</td></tr>
 <tr><td class="k">Geri çekme tarihi</td><td>${esc(date)}</td></tr>
-<tr><td class="k">Gerekçe</td><td>${reason ? esc(reason) : 'Gerekçe belirtilmedi.'}</td></tr>
+${publicSafe ? '' : `<tr><td class="k">Gerekçe</td><td>${reason ? esc(reason) : 'Gerekçe belirtilmedi.'}</td></tr>`}
 <tr><td class="k">Durum</td><td><b>Geri çekildi</b> — geçerli sürüm değildir</td></tr>
 </table>
 <p>Geri çekme, yanlışlıkla yayımlanan veya geçerliliğini yitiren içerik için uygulanan standart işlemdir: raporun veri dosyaları (ölçüm verisi, konumlar, snapshot, harita ve üst veri) yayından kaldırılmış; bu adres bilgilendirme bildirimine dönüştürülmüştür. <b>DGR kimliği kalıcıdır ve yeniden kullanılmaz.</b></p>
-<p>Geri çekme kaydı, gerekçesi ve zaman damgasıyla <code>rapor/yayin-kuyrugu.json</code> günlüğünde ve git geçmişinde saklanır. Kaldırılan içeriğe ilişkin talepler (ör. kişisel veri bildirimi) için depo sahibiyle iletişime geçiniz; önceki sürümler git geçmişinde teknik olarak bulunmaya devam edebilir.</p>
+${publicSafe ? '<p>Bu bildirim rapor kimliği, park ve geri çekilme tarihini gösterir; isteği gönderen hesaba ait ayrıntılar yayımlanmaz.</p>' : '<p>Geri çekme kaydı, gerekçesi ve zaman damgasıyla <code>rapor/yayin-kuyrugu.json</code> günlüğünde ve git geçmişinde saklanır. Kaldırılan içeriğe ilişkin talepler (ör. kişisel veri bildirimi) için depo sahibiyle iletişime geçiniz; önceki sürümler git geçmişinde teknik olarak bulunmaya devam edebilir.</p>'}
 <p><a href="../">← Yayınlanmış raporlar dizini</a></p>
 <div class="foot">DendroGeo · ${DGR_TITLE_DEF} · © DendroGeo · CC BY-NC 4.0</div>
 </div>

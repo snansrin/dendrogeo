@@ -58,7 +58,9 @@ return async function runQueue(opts = {}) {
   for (const rt of rplan.todo) {
     log(`\n🗑 geri çekme ${rt.id} · ${rt.report_id}`);
     const pubEntry = q.entries.find((e) => e.status === 'Yayınlandı' && String(e.report_id) === String(rt.report_id)) || null;
-    const entry = handleRetraction(rt, pubEntry);
+    // The queue and report pages are public GitHub Pages artifacts. Keep the
+    // database reason private by opting into the public-safe notice path.
+    const entry = handleRetraction({...rt, reason: '', public_safe: true}, pubEntry);
     q.entries.push(entry);
     if (entry.status === 'Geri çekildi') { retOk++; log(`  ✅ ${entry.report_id} yayından kaldırıldı (bildirim yerinde, listeden düştü)`); }
     else { retFail++; log(`  ❌ geri çekilemedi: ${entry.message}`); }

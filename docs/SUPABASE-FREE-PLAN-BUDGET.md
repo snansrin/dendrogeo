@@ -53,11 +53,13 @@ bildirilmiştir; güncel koşullar için Supabase Usage/Billing paneli esastır.
   için Supabase **Free plan bu özelliği sunmuyor**; ücretli plana
   otomatik yükseltme yapılmadı. Güçlü ve benzersiz parola/2FA,
   sahip hesabı için ek koruma olarak önerilir.
-- Oracle staging'in önceki `storage.mjs` aktarım motoru ve ona
-  bağlı eski test dosyaları kod tabanından kaldırıldı. Canlı
-  `oracle-storage-probe` v21 hâlâ JWT doğrulayan ve tüm isteklerde
-  **503** döndüren inert uygulamadır; silme ve IOC credential iptali
-  gerçekleştirilmiş **değildir**.
+- Oracle staging'in önceki `storage.mjs` aktarım motoru ve ona bağlı eski
+  test dosyaları kod tabanından kaldırıldı. İlk 20 Ekim kontrolünde canlı
+  `oracle-storage-probe` v21 JWT doğrulayan ve tüm isteklerde **503** döndüren
+  inert uygulamaydı. Daha sonraki 20 Ekim devam kontrolünde işlev ve yedi
+  `OCI_STORAGE_*` Edge Secret kaydı Supabase'den silindi; güncel Edge Function
+  listesinde Oracle işlevi yok. Oracle sağlayıcısındaki anahtarların iptali
+  doğrulanmış değildir.
 
 ## İncelemenin kanıtları ve sınırları
 
@@ -76,9 +78,11 @@ bildirilmiştir; güncel koşullar için Supabase Usage/Billing paneli esastır.
   kotasını tüketmiş olabilir. Her sorgu için taranan kesin bayt bilgisi
   bulunmadığından toplamın ne kadarı hangi incelemeden geldiği ispatlanamaz.
   Zaman yakınlığı, Oracle'ın onlarca GB veri aktardığı anlamına gelmez.
-- 20 Ekim'de canlı `oracle-storage-probe` v21, tüm istekleri 503 ile
-  karşılayan, JWT doğrulaması açık ve **sıfır dış ağ işlemi** yapan sürüme
-  değiştirildi. Geçici tarayıcı sayfasının veri bağlantıları kaldırıldı.
+- İlk 20 Ekim kontrolünde canlı `oracle-storage-probe` v21, tüm istekleri
+  503 ile karşılayan, JWT doğrulaması açık ve **sıfır dış ağ işlemi** yapan
+  sürümdü. Daha sonraki devam oturumunda Supabase işlevi ve ilgili Edge
+  Secrets kaldırıldı. Geçici tarayıcı sayfasının veri bağlantıları da
+  kaldırılmıştı.
 
 ## Bağlayıcı işletim kuralları (CI, geliştirici ve otomatik asistan)
 
