@@ -23,10 +23,25 @@ try{for(const width of [320,360,390,430,768,1280]){
  let disclosures=0,buttons=0;
  const disclosure=async node=>{
   const summary=node.locator(':scope > summary');if(!await summary.isVisible())return;
-  const arrowState=async open=>page.waitForFunction(({element,open})=>{
-   const matrix=new DOMMatrix(getComputedStyle(element,'::after').transform);
-   return open?matrix.a<-.6&&matrix.b<-.6:matrix.a>.6&&matrix.b>.6;
-  },{element:await summary.elementHandle(),open},{timeout:5000});
+  // GitHub's shared runner can pause animation frames when heavy GIS smoke
+  // checks precede this UI probe. Verify the same end-state (never bypass it),
+  // with a bounded 12s transition allowance and useful failure diagnostics.
+  const arrowState=async open=>{
+   const element=await summary.elementHandle();
+   try{
+    await page.waitForFunction(({element,open})=>{
+     const matrix=new DOMMatrix(getComputedStyle(element,'::after').transform);
+     return open?matrix.a<-.6&&matrix.b<-.6:matrix.a>.6&&matrix.b>.6;
+    },{element,open},{timeout:12000});
+   }catch(error){
+    const observed=await summary.evaluate(el=>({
+     transform:getComputedStyle(el,'::after').transform,
+     expanded:el.parentElement?.hasAttribute('open')||false
+    })).catch(()=>({transform:'detached',expanded:null}));
+    throw new Error('Disclosure arrow end-state timeout (width='+width+', open='+open+
+     ', observed='+JSON.stringify(observed)+')',{cause:error});
+   }finally{await element?.dispose();}
+  };
   if(await node.getAttribute('open')!==null)await summary.click();
   await arrowState(false);
   const closed=await summary.evaluate(e=>getComputedStyle(e,'::after').transform);
