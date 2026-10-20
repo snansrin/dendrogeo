@@ -10,25 +10,5 @@
    parks,projects,measurements,waypoints,data_requests:requests,surface_reviews
   };
  }
- function buildComplete(input,meta){
-  const baseline=build(input,meta);
-  const extraNames=["profiles","report_requests","report_retractions","park_invites","park_collaborators","site_metric_daily","site_visits"];
-  const extra={},counts={...baseline.counts};
-  for(const name of extraNames){
-   const rows=input[name];
-   if(!Array.isArray(rows))throw new Error("Eksik yedek tablosu: "+name);
-   extra[name]=rows;counts[name]=rows.length;
-  }
-  return{
-   ...baseline,schema_version:"2.0.0",
-   scope:{
-    access:"current-session-rls",complete_system_backup:false,
-    photo_files_included:true,
-    excluded:["auth-credentials-and-accounts","device-local-offline-queue","local-validation-campaigns","database-schema-and-policies","published-report-archives"],
-    note:"Kullanıcının Supabase RLS izinleriyle erişebildiği kayıtlar; Auth ve yerel veriler bu pakette yer almaz."
-   },
-   counts,...extra
-  };
- }
- root.DG_BACKUP_SNAPSHOT=Object.freeze({build,buildComplete});
+ root.DG_BACKUP_SNAPSHOT=Object.freeze({build});
 })(window);
