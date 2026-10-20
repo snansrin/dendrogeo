@@ -10302,6 +10302,18 @@
           "sha256": "24b96031103b98595bb3a85fc489af2572045b3831c54ef62029116e55c2b2bf"
         }
       ]
+    },
+    {
+      "date": "2026-10-20",
+      "audit_chain": "sha256-v1",
+      "scope": "User explicitly requested security hardening: remove public photo backup and Oracle staging access pages; mount the photo ZIP archive solely inside existing owner-authorized Measurement Admin panel. Version-bump only the backup service script in frozen landing HTML. No changes to allometry, GIS/raster, measurements, carbon, navigation, map tools, layout, styles or font sources.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "24b96031103b98595bb3a85fc489af2572045b3831c54ef62029116e55c2b2bf",
+          "sha256": "cf52f4af857b7c14067dd68589e708a7830cd49b8f9edc6efbd4078ab5bed8ad"
+        }
+      ]
     }
   ]
 }
