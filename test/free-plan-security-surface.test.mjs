@@ -43,7 +43,9 @@ function scan(directory,result=[]){
 
 test('production scripts/workflows do not poll Supabase Logs Query APIs or embed a management token',()=>{
  const sources=[...scan(resolve(root,'.github/workflows')),...scan(resolve(root,'scripts')),
-  ...scan(resolve(root,'src')),...scan(resolve(root,'supabase/functions'))];
+  ...scan(resolve(root,'src')),...scan(resolve(root,'supabase/functions')),
+  ...scan(resolve(root,'assets')),...scan(resolve(root,'vendor')),
+  resolve(root,'sw.js'),resolve(root,'index.html')];
  const suspicious=[];
  // Log ingestion by normal service traffic is different from expensive Logs
  // Query scans. No background browser, CI, or scheduled log scans are allowed.
