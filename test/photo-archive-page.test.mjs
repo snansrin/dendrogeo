@@ -47,11 +47,10 @@ function boot({role='owner'}={}){
   auth:{async getUser(){return{data:{user:{id:'u1'}}};}},
   from(table){
    assert.ok(tableNames.includes(table));
-   if(table==='profiles')return{
-    select(){return{eq(){return{async single(){return{data:{role,full_name:'Owner'}};}};}};}
-   };
-   return{select(){return this;},order(){return this;},async range(){
-    reads++;return{data:records[table]};}
+   return{
+    select(){return this;},order(){return this;},eq(){return this;},
+    async single(){return{data:{role,full_name:'Owner'}};},
+    async range(){reads++;return{data:records[table]};}
    };
   },
   storage:{from(bucket){
