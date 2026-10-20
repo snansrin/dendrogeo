@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://xjbpounwdxrhelmixvqm.supabase.co; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
+<meta name="theme-color" content="#14532d">
+<title>Fotoğraflı Veri Yedeği · DendroGeo</title>
+<link rel="icon" type="image/png" href="../icon.png">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/appearance.css">
+<link rel="stylesheet" href="./style.css">
+<script src="../vendor/supabase-js-2.116.0.js" defer></script>
+<script src="../src/config/supabase.js" defer></script>
+<script type="module" src="./app.mjs"></script>
+</head>
+<body class="dg-page">
+<main class="wrap dg-backup-page">
+ <a class="dg-backup-logo" href="/" aria-label="DendroGeo ana sayfasına dön">🌳 DendroGeo</a>
+ <section class="card dg-backup-card" aria-labelledby="title">
+  <p class="lbl">Kurtarma ve güvenli dışa aktarım</p>
+  <h1 id="title">Fotoğraflı veri yedeği</h1>
+  <p>Yedekleme yalnızca düğmeye bastığınızda çalışır. Erişebildiğiniz tüm veri tablolarının satırları ve <strong>dendro-photos fotoğraflarının gerçek dosyaları</strong> tek ZIP arşivine konulur.</p>
+  <p><strong>Kayıp dosya veya başarısız istek olursa eksik arşiv indirilmez.</strong> Fotoğraflar sırayla ve birer kez indirilir; otomatik zamanlayıcı yoktur.</p>
+  <button id="downloadArchive" type="button" class="btn" disabled>📦 Fotoğraflı Tam Arşivi İndir (ZIP)</button>
+  <p id="backupStatus" class="dg-backup-status" role="status" aria-live="polite">Hesap yetkisi kontrol ediliyor…</p>
+  <p id="backupResult" class="dg-backup-result" hidden></p>
+  <p class="dg-meta dg-backup-note">Kapsam: Supabase RLS izinleriyle bu hesapta okunabilen 13 veri tablosu, fotoğraf dosyaları, dosya bütünlük özetleri ve temel tablolar için SQL kurtarma taslağı. Auth parolaları, veritabanı şeması/RLS politikaları, cihazdaki çevrimdışı taslaklar ve GitHub yayın arşivleri dahil değildir. Arşiv kişisel bilgiler içerir; güvenli bir yerde saklayın.</p>
+  <a href="/" class="dg-backup-back">← Ana sayfaya dön</a>
+ </section>
+</main>
+</body>
+</html>
