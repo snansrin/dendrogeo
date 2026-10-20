@@ -56,7 +56,7 @@ async function dgRestorePick(ev){
  if(!PROFILE||(PROFILE.role!=='admin'&&PROFILE.role!=='owner')){
   toast('Yedekten geri yükleme yalnız yönetici panelinde yapılabilir.','err','🔐');return;
  }
- if(/\\.zip$/i.test(f.name||'')){
+ if(/\.zip$/i.test(f.name||'')){
   if(PROFILE.role!=='owner'){
    toast('Fotoğraflı arşiv geri yüklemesi yalnız hesap sahibine açıktır.','err','🔐');return;
   }
