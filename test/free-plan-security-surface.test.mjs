@@ -41,6 +41,20 @@ function scan(directory,result=[]){
  return result;
 }
 
+const LOG_READ_PATTERN=/(?:query_logs\s*\(|get_logs\s*\(|\/analytics\/v1\/query\b|\/v1\/projects\/[^\s'"\x60]+\/(?:analytics|logs)\/|management\.api\.supabase\.com[^\n]*logs\/|(?:["'\x60\n;&|]|\brun:)[ \t]*supabase[ \t]+(?:functions[ \t]+)?logs\b)/i;
+
+test('log guard recognizes the actual namespaced MCP calls and CLI reads, not ordinary log comments',()=>{
+ for(const code of [
+  'tools.mcp__codex_apps__supabase_query_logs({project_id:"example",sql:"select source,count() from logs group by source"})',
+  'tools.mcp__supabase__get_logs({project_id:"example",service:"edge-function"})',
+  'run: supabase functions logs example',
+  'fetch("https://api.supabase.com/v1/projects/example/analytics/endpoints/logs.all")',
+  'fetch("https://api.supabase.com/v1/projects/example/logs/query")'
+ ])assert.match(code,LOG_READ_PATTERN,'Expensive log reader bypasses the guard');
+ assert.doesNotMatch('// Avoid repeatedly scanning Supabase logs.',LOG_READ_PATTERN);
+ assert.doesNotMatch('client.from("measurements").select("id")',LOG_READ_PATTERN);
+});
+
 test('production scripts/workflows do not poll Supabase Logs Query APIs or embed a management token',()=>{
  const sources=[...scan(resolve(root,'.github/workflows')),...scan(resolve(root,'scripts')),
   ...scan(resolve(root,'src')),...scan(resolve(root,'supabase/functions')),
@@ -49,10 +63,17 @@ test('production scripts/workflows do not poll Supabase Logs Query APIs or embed
  const suspicious=[];
  // Log ingestion by normal service traffic is different from expensive Logs
  // Query scans. No background browser, CI, or scheduled log scans are allowed.
- const banned=/(?:\bquery_logs\s*\(|\/analytics\/v1\/query\b|\/v1\/projects\/[^\s'"\x60]+\/analytics\/|management\.api\.supabase\.com[^\n]*logs\/)/i;
  for(const file of sources){
   const code=readFileSync(file,'utf8');
-  if(banned.test(code))suspicious.push(file.slice(root.length));
+  if(LOG_READ_PATTERN.test(code))suspicious.push(file.slice(root.length));
  }
  assert.deepEqual(suspicious,[]);
+});
+
+test('agent instructions prohibit quota-consuming log investigations without a specific user request',()=>{
+ const policy=read('AGENTS.md');
+ assert.match(policy,/Logs Query[\s\S]*YASAKTIR/);
+ assert.match(policy,/genel "kontrol et\/düzelt" talebi günlük taramasına izin sayılmaz/);
+ assert.match(policy,/kesin zaman aralığı ve sorgu sayısı/);
+ assert.match(policy,/teknik bir kota kesicisi[\s\S]*değildir/);
 });
