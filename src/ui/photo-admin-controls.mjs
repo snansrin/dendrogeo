@@ -5,6 +5,14 @@
   if(typeof document==='undefined'||!document.getElementById||!document.createElement)return;
   const panel=document.getElementById('v-admin');
   if(!panel)return;
+  // UI-only visibility guard. Access to real data is independently enforced
+  // by Supabase RLS and makeOwnerArchive()/inspectOwnerArchive() getUser checks.
+  // Admin may enter the panel but cannot see the owner-only ZIP control.
+  if(typeof PROFILE==='undefined'||PROFILE?.role!=='owner'){
+   document.getElementById('dgPhotoArchiveAdminDownload')?.remove?.();
+   document.getElementById('dgPhotoArchiveAdminStatus')?.remove?.();
+   return;
+  }
   const legacy=panel.querySelector('[data-dg-backup-action="download"]');
   const restore=panel.querySelector('[data-dg-backup-action="pick-file"]');
   const input=panel.querySelector('[data-dg-backup-action="restore-file"]');
