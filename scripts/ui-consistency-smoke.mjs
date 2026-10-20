@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {mkdirSync} from 'node:fs';
+import {mkdirSync,readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {loadChromium} from './lib/playwright-runtime.mjs';
@@ -75,6 +75,26 @@ try{for(const width of [320,360,390,430,768,1280]){
   const tab=tabs.nth(i),id=await tab.getAttribute('data-dg-view');
   await tab.click();await page.locator('#v-'+id+'.on').waitFor({state:'visible'});
   await auditView('#v-'+id);
+  if(id==='admin'){
+   await page.addScriptTag({content:readFileSync('src/ui/photo-admin-controls.mjs','utf8')});
+   await page.evaluate(()=>window.DG_PHOTO_ARCHIVE_UI.mount());
+   const actions=page.locator('#v-admin .admin-storage-actions');
+   assert.equal(await actions.count(),2,'maintenance and backups have separate named groups');
+   assert.equal(await actions.nth(1).locator('#dgPhotoArchiveAdminDownload').count(),1,'ZIP stays in backup group');
+   for(const theme of ['light','dark']){
+    await page.evaluate(value=>document.documentElement.dataset.theme=value,theme);
+    for(const group of await actions.all()){
+     const layout=await group.evaluate(el=>{const r=el.getBoundingClientRect();const buttons=[...el.querySelectorAll('.btn')].map(b=>{const x=b.getBoundingClientRect();return {left:x.left,right:x.right,top:x.top,bottom:x.bottom};});return {gap:parseFloat(getComputedStyle(el).gap),contained:buttons.every(b=>b.left>=r.left-1&&b.right<=r.right+1),overlap:buttons.some((a,i)=>buttons.slice(i+1).some(b=>a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top))};});
+     assert.ok(layout.gap>=8,'buttons have a theme-consistent gap');
+     assert.equal(layout.contained,true,'buttons stay inside their group');
+     assert.equal(layout.overlap,false,'admin action buttons never touch or overlap');
+    }
+    await auditView('#v-admin');
+    await actions.nth(1).locator('..').locator('..').screenshot({path:join(output,'admin-storage-'+theme+'-'+width+'.png')});
+   }
+   await page.evaluate(()=>delete document.documentElement.dataset.theme);
+  }
+
  }
  await page.locator('#side [data-dg-view="map"]').click();
  await page.evaluate(()=>{
