@@ -1,5 +1,24 @@
 # Oracle dosya depolama geçişi — hazırlık
 
+> **DURUM — 20 Ekim 2026: DENEME SÜRESİZ KAPATILDI.**
+> Supabase `oracle-storage-probe` v21, geçerli JWT dahil her isteğe 503 döndüren,
+> bağımlılıksız bir uç nokta olarak yeniden dağıtıldı. Kod artık Oracle SDK'sını,
+> `OCI_*` Secrets değerlerini, Supabase Auth'u veya başka bir servisi okumuyor;
+> ağ isteği ya da dosya aktarımı yapamıyor. `/oracle-storage-check/` sayfası
+> yalnızca durağan kapanış bildirimi gösterir; eski JavaScript/CSS varlıkları
+> kaldırıldı. **Üretim depolaması Supabase'de kalmıştır.**
+>
+> Supabase Secrets'taki OCI deneme anahtarları **silinmedi veya iptal edilmedi**:
+> bu işlem için burada bir Secrets silme/Oracle anahtar iptal aracı yok.
+> Anahtarlar uygulama tarafından kullanılmıyor; yeniden etkinleştirmeyin.
+> Oracle servis kullanıcısındaki Customer Secret Key ayrıca iptal edilmeli;
+> iptal işlemi yapıldığı doğrulanmadan yapılmış kabul etmeyin.
+>
+> Aşağıdaki bağlantı denemesi adımları geçmiş olayların dokümantasyonudur;
+> mevcut sistemde yürütülmeyecek. Yeni Oracle entegrasyonu ancak ayrı
+> kapsam/güvenlik/kota onayı ve regresyon testlerinden sonra değerlendirilebilir.
+
+
 ## Durum
 
 - Paris ana bölgesinde `dendrogeo-staging-private` oluşturuldu: özel erişim, Standart katman, Oracle anahtarıyla şifreleme.
