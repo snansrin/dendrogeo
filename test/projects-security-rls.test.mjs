@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-const src=readFileSync(new URL('../supabase/migrations/20261020111203_restrict_authenticated_projects_read_to_members.sql',import.meta.url),'utf8');
+const src=readFileSync(new URL('../supabase/security/20261020111203_restrict_authenticated_projects_read_to_members.sql',import.meta.url),'utf8');
 
 test('authenticated project rows are restricted to ownership, admin or explicit park participation',()=>{
  assert.match(src,/ALTER POLICY projects_select ON public\.projects/);
