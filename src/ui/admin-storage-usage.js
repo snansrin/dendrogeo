@@ -4,7 +4,15 @@
  function mountOwnerArchiveControls(){
   // Even signed-in admins have no reason to fetch the owner's archive UI.
   // Gate the network import itself, not only the button's visibility.
-  if(typeof PROFILE==='undefined'||!PROFILE||PROFILE.role!=='owner')return;
+  if(typeof PROFILE==='undefined'||!PROFILE||PROFILE.role!=='owner'){
+   // A formerly signed-in owner can switch sessions without a page reload.
+   // Never leave an old owner-only button or status line visible.
+   if(typeof document!=='undefined'){
+    document.getElementById('dgPhotoArchiveAdminDownload')?.remove?.();
+    document.getElementById('dgPhotoArchiveAdminStatus')?.remove?.();
+   }
+   return;
+  }
   // This UI module is NOT fetched on public landing or at startup.
   // The admin-only storage summary renders after the panel is opened.
   if(!photoUi){
