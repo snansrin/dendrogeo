@@ -20,7 +20,17 @@ export function loadQueue(rel = QUEUE_PATH) {
   } catch (e) { return emptyQueue(); }
 }
 export function saveQueue(q, rel = QUEUE_PATH) {
-  const out = { ...q, ...(q.production_started_at ? {processed_request_ids:[...new Set([...(q.processed_request_ids||[]),...(q.entries||[]).filter(e=>e.request_id).map(e=>String(e.request_id))])],processed_retraction_ids:[...new Set([...(q.processed_retraction_ids||[]),...(q.entries||[]).filter(e=>e.retraction_id).map(e=>String(e.retraction_id))])]} : {}), schema: QUEUE_SCHEMA, updated_at: new Date().toISOString(), entries: (q.entries || []).slice(-QUEUE_CAP) };
+  // The queue file is committed to a public repository and served by Pages.
+  // Keep only operational/report fields; never publish account IDs, free-text
+  // withdrawal reasons, or the timestamp at which an individual requested it.
+  const validEntries = Array.isArray(q.entries);
+  const sourceEntries = validEntries ? q.entries : [];
+  const entries = validEntries ? sourceEntries.slice(-QUEUE_CAP).map((entry) => {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry) || !entry.retraction_id) return entry;
+    const {requested_by, requested_at, reason, ...publicEntry} = entry;
+    return publicEntry;
+  }) : q.entries;
+  const out = { ...q, ...(q.production_started_at ? {processed_request_ids:[...new Set([...(q.processed_request_ids||[]),...sourceEntries.filter(e=>e.request_id).map(e=>String(e.request_id))])],processed_retraction_ids:[...new Set([...(q.processed_retraction_ids||[]),...sourceEntries.filter(e=>e.retraction_id).map(e=>String(e.retraction_id))])]} : {}), schema: QUEUE_SCHEMA, updated_at: new Date().toISOString(), entries };
   writeFileSync(qpath(rel), JSON.stringify(out, null, 2) + '\n');
   return out;
 }
