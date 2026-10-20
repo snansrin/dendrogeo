@@ -45,6 +45,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { publishPark, renderRetractionNotice, rebuildIndex, DGR_ID_RE, renderReport, buildMetadata, qrDataUri, parkHistory } from './make-report.mjs';
 import {createReportQueueApplication} from './lib/report-queue-application.mjs';
+import {fetchUnprocessedRequests} from './lib/report-queue-pending-fetch.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
@@ -72,17 +73,8 @@ async function fetchRequestRows(select, limit, offset=0, cutoff=null) {
   });
   return reportRead(u, { headers: { apikey: SB.key, Authorization: 'Bearer ' + SB.key } });
 }
-export async function fetchPending(limit = 50, processedIds=[],cutoff=null) {
-  const done=new Set(processedIds.map(String)),out=[];let offset=0,select='id,park_id,with_lulc,status,note,created_at,surface_snapshot';
-  while(out.length<limit){
-    let r=await fetchRequestRows(select,50,offset,cutoff);
-    if(r.status===400){select='id,park_id,with_lulc,status,note,created_at';r=await fetchRequestRows(select,50,offset,cutoff);}
-    if(r.status===404){const e=new Error('report_requests tablosu yok — Supabase SQL Editor\'da 0008_report_publish.sql çalıştırılmalı');e.code='NO_TABLE';throw e;}
-    if(!r.ok)throw Error('report_requests HTTP '+r.status+': '+(await r.text()).slice(0,200));
-    const rows=await r.json();if(!Array.isArray(rows))return out;
-    out.push(...rows.filter(r=>!done.has(String(r.id))));if(rows.length<50)break;offset+=rows.length;
-  }
-  return out.slice(0,limit);
+export async function fetchPending(limit = 50, processedIds=[], cutoff=null) {
+  return fetchUnprocessedRequests(fetchRequestRows, {limit, processedIds, cutoff});
 }
 
 /* ---------- geri çekme istekleri (0010; ANON anahtarla salt-okunur) ---------- */
