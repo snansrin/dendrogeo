@@ -60,7 +60,7 @@ test('admin UI mounts separate photo ZIP button without altering legacy JSON exp
  };
  let photoCalls=0;
  const window={dgPhotoFullBackup(){photoCalls++;}};
- vm.runInNewContext(source,{window,document});
+ vm.runInNewContext(source,{window,document,PROFILE:{role:'owner'}});
  window.DG_PHOTO_ARCHIVE_UI.mount();
  assert.equal(download.textContent,'💾 Tam Veri Yedeği (JSON)');
  assert.equal(photo.id,'dgPhotoArchiveAdminDownload');
@@ -85,6 +85,31 @@ test('admin UI mounts separate photo ZIP button without altering legacy JSON exp
  window.DG_PHOTO_ARCHIVE_UI.mount();
  assert.equal(events.filter(x=>x==='photo-insert').length,1);
 });
+test('non-owner admin cannot see a photo ZIP control; stale owner control is removed on role switch',()=>{
+ const source=read('src/ui/photo-admin-controls.mjs');
+ let removed=false,created=false;
+ const button={remove(){removed=true;}};
+ const panel={querySelector(){throw Error('Owner-only controls must not be selected in non-owner panel');}};
+ const document={
+  getElementById(id){
+   if(id==='v-admin')return panel;
+   if(id==='dgPhotoArchiveAdminDownload')return button;
+   return null;
+  },
+  createElement(){created=true;throw Error('Unauthorized UI must not create controls');}
+ };
+ const window={};
+ const ctx={window,document,PROFILE:{role:'admin'}};
+ vm.runInNewContext(source,ctx);
+ window.DG_PHOTO_ARCHIVE_UI.mount();
+ assert.equal(removed,true);
+ assert.equal(created,false);
+ ctx.PROFILE={role:'user'};
+ removed=false;
+ window.DG_PHOTO_ARCHIVE_UI.mount();
+ assert.equal(removed,true);
+});
+
 test('browser-only backup has a fresh server identity gate and no implicit remote upload',()=>{
  const source=read('src/application/backup/photo-full-workflow.mjs');
  assert.match(source,/client\.auth\.getUser\(\)/);
