@@ -28,44 +28,63 @@ test('existing frozen admin panel owns both archive and restore controls',()=>{
  assert.doesNotMatch(section,/<iframe\b|href="\/(?:tam-yedek|fotografli-tam-veri-arsivi|oracle-storage-check)/);
 });
 
-test('admin UI mounts photo archive labels with existing theme classes and keyboard controls',()=>{
- const readModule=read('src/ui/photo-admin-controls.mjs');
- const newStatus={id:'dgPhotoArchiveAdminStatus',attributes:{},setAttribute(k,v){this.attributes[k]=v;}};
- const note={classList:{contains:c=>c==='dg-meta'},textContent:''};
- const input={accept:'.json',nextElementSibling:note,parentNode:{insertBefore(node){assert.equal(node,newStatus);}},disabled:false};
- const mkButton=()=>({textContent:'',attributes:{},disabled:false,setAttribute(k,v){this.attributes[k]=v;}});
- const download=mkButton(),restore=mkButton();
- const bySelector={
+test('admin UI mounts separate photo ZIP button without altering legacy JSON export',()=>{
+ const source=read('src/ui/photo-admin-controls.mjs');
+ const events=[],notes=[];
+ const makeButton=()=>({
+  textContent:'',disabled:false,attributes:{},handlers:{},
+  setAttribute(k,v){this.attributes[k]=v;},
+  addEventListener(k,v){this.handlers[k]=v;}
+ });
+ const download=makeButton(),restore=makeButton();
+ download.textContent='💾 Tam Veri Yedeği (JSON)';
+ const input={accept:'.json',nextElementSibling:{classList:{contains:k=>k==='dg-meta'},textContent:''},
+  parentNode:{insertBefore(node){notes.push(node);}}};
+ let photo=null,status=null;
+ download.parentNode={insertBefore(node){photo=node;events.push('photo-insert');}};
+ const panel={querySelector:selector=>({
   '[data-dg-backup-action="download"]':download,
   '[data-dg-backup-action="pick-file"]':restore,
-  '[data-dg-backup-action="restore-file"]':input
- };
- const panel={querySelector:x=>bySelector[x]};
- let statusCreated=false;
+  '[data-dg-backup-action="restore-file"]':input,
+  '#dgPhotoArchiveAdminDownload':photo
+ })[selector]||null};
  const document={
-  readyState:'complete',
-  getElementById:id=>id==='v-admin'?panel:(id==='dgPhotoArchiveAdminStatus'&&(statusCreated?newStatus:null)),
-  createElement:()=>{statusCreated=true;return newStatus;},
-  addEventListener(){throw Error('DOMContentLoaded should not be registered when page is ready');}
+  getElementById:id=>id==='v-admin'?panel:
+   id==='dgPhotoArchiveAdminDownload'?photo:
+   id==='dgPhotoArchiveAdminStatus'?status:null,
+  createElement:tag=>{
+   const element=makeButton();
+   if(tag==='p'){status=element;}
+   return element;
+  }
  };
- const window={};
- vm.runInNewContext(readModule,{window,document});
- assert.match(download.textContent,/Fotoğraflı Tam Veri Arşivi/);
+ let photoCalls=0;
+ const window={dgPhotoFullBackup(){photoCalls++;}};
+ vm.runInNewContext(source,{window,document});
+ window.DG_PHOTO_ARCHIVE_UI.mount();
+ assert.equal(download.textContent,'💾 Tam Veri Yedeği (JSON)');
+ assert.equal(photo.id,'dgPhotoArchiveAdminDownload');
+ assert.equal(photo.className,'btn sm');
+ assert.match(photo.textContent,/Fotoğraflı Tam Veri Arşivi/);
  assert.match(restore.textContent,/Geri Yükleme/);
  assert.match(input.accept,/\.zip/);
- assert.match(note.textContent,/13 erişilebilir tablo/);
- assert.match(newStatus.className,/dg-meta/);
- assert.equal(newStatus.attributes.role,'status');
+ assert.match(input.nextElementSibling.textContent,/13 erişilebilir tablo/);
+ assert.equal(status.attributes.role,'status');
+ photo.handlers.click();
+ assert.equal(photoCalls,1);
  window.DG_PHOTO_ARCHIVE_UI.status('Kontrol ediliyor');
- assert.equal(newStatus.textContent,'Kontrol ediliyor');
+ assert.equal(status.textContent,'Kontrol ediliyor');
  window.DG_PHOTO_ARCHIVE_UI.busy(true);
+ assert.equal(photo.disabled,true);
  assert.equal(download.disabled,true);
  assert.equal(restore.disabled,true);
  window.DG_PHOTO_ARCHIVE_UI.busy(false);
+ assert.equal(photo.disabled,false);
  assert.equal(download.disabled,false);
  assert.equal(restore.disabled,false);
+ window.DG_PHOTO_ARCHIVE_UI.mount();
+ assert.equal(events.filter(x=>x==='photo-insert').length,1);
 });
-
 test('browser-only backup has a fresh server identity gate and no implicit remote upload',()=>{
  const source=read('src/application/backup/photo-full-workflow.mjs');
  assert.match(source,/client\.auth\.getUser\(\)/);
