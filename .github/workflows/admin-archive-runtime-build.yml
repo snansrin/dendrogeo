@@ -1,0 +1,48 @@
+name: Admin archive runtime build (temporary)
+on:
+  push:
+    branches:
+      - codex/admin-only-photo-archive-security-20261020
+    paths:
+      - .github/workflows/admin-archive-runtime-build.yml
+permissions:
+  contents: write
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/admin-only-photo-archive-security-20261020
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install locked offline tooling
+        run: npm ci
+      - name: Regenerate only published index and runtime package
+        run: node scripts/build-index.mjs --write
+      - name: Refuse unrelated output mutations
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --short
+          unexpected=$(git diff --name-only | grep -Ev '^(index\.html|src/bootstrap/app-runtime\.js)$' || true)
+          if [ -n "$unexpected" ]; then
+            echo "::error::Unexpected build mutation: $unexpected"
+            exit 1
+          fi
+      - name: Commit generated runtime to feature branch only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "DendroGeo Secure Runtime Builder"
+          git config user.email "secure-runtime@dendrogeo.local"
+          git add index.html src/bootstrap/app-runtime.js
+          if git diff --cached --quiet; then
+            echo "Build already in sync."
+            exit 0
+          fi
+          git commit -m "build(admin): regenerate runtime after owner-only photo archive integration"
+          git push origin HEAD:codex/admin-only-photo-archive-security-20261020
