@@ -1,30 +1,28 @@
--- DendroGeo · Least-privilege reads for private measurement projects/grid.
--- Applied to Supabase only after offline CI + read-only rollback validation.
--- BEFORE: projects_select / wp_select returned TRUE for EVERY authenticated
--- visitor; any signed-in account could enumerate all 10 projects and 154
--- waypoint coordinates even with no authenticated user claim.
---
--- AFTER: owner, approved collaboration on the linked park, or DendroGeo
--- owner/admin. The existing public park discovery, published measurements,
--- mobile GIS engine, tree formulae and all table data stay unchanged.
--- The established private.is_admin and dg_is_park_member functions already
--- use verified auth.uid(), project ownership and park_collaborators.
--- No grants are broadened; anon gets no SELECT. Do not put this migration
--- into user-facing app JavaScript or bypass policies with a service key.
+-- DendroGeo · 20 Oct 2026 · least-privilege field waypoint reads.
+-- PR preflight identified 10 projects/154 waypoints visible to all signed-in
+-- users. While QA was running, another security deployment ALREADY narrowed
+-- projects_select to owner/admin/park collaboration. This migration MUST NOT
+-- overwrite it; only the still-broad waypoint SELECT policy is replaced.
+-- Fail closed if the project policy regresses to unconditional true.
+-- Compatible with owned projects and existing park collaborator memberships.
+-- No data mutation, no schema changes, no GIS/measurement/carbon changes.
 BEGIN;
 SET LOCAL lock_timeout = '5s';
 
-DROP POLICY IF EXISTS "projects_select" ON public.projects;
-CREATE POLICY "projects_select" ON public.projects
-  FOR SELECT TO authenticated
-  USING (
-    owner = (SELECT auth.uid())
-    OR (SELECT private.is_admin())
-    OR (
-      park_id IS NOT NULL
-      AND public.dg_is_park_member(park_id)
-    )
-  );
+DO $guard$
+DECLARE project_read_rule text;
+BEGIN
+  SELECT qual INTO project_read_rule FROM pg_policies
+    WHERE schemaname='public' AND tablename='projects'
+      AND policyname='projects_select' AND cmd='SELECT';
+  IF project_read_rule IS NULL
+     OR btrim(project_read_rule, ' ()') = 'true'
+     OR position('dg_is_park_member' in project_read_rule) = 0
+     OR position('auth.uid' in project_read_rule) = 0
+  THEN
+     RAISE EXCEPTION 'projects_select must already be restricted before waypoint policy update';
+  END IF;
+END $guard$;
 
 DROP POLICY IF EXISTS "wp_select" ON public.waypoints;
 CREATE POLICY "wp_select" ON public.waypoints
