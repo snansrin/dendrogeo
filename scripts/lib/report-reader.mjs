@@ -19,6 +19,27 @@ export async function reportRead(url,options){
  if(process.env.DG_REPORT_READER!=='oidc'||!PRIVATE_REPORT_RESOURCES.has(resource))return fetch(url,options);
  const target=new URL('/functions/v1/report-reader',input.origin);
  target.search=input.search;target.searchParams.set('resource',resource);
- const token=await oidcToken();
- return fetch(target,{method:'GET',headers:{Authorization:'Bearer '+token,apikey:options?.headers?.apikey||'',Accept:'application/json'},signal:AbortSignal.timeout(30000)});
+ // Queue checks are read-only. A single bounded retry handles transient
+ // Edge cold starts/JWKS refresh/overloaded upstream without hiding persistent
+ // authorization errors or repeatedly scanning Supabase logs.
+ for(let attempt=0;attempt<2;attempt++){
+  const token=await oidcToken();
+  let response;
+  try{
+   response=await fetch(target,{method:'GET',headers:{Authorization:'Bearer '+token,apikey:options?.headers?.apikey||'',Accept:'application/json'},signal:AbortSignal.timeout(30000)});
+  }catch(error){
+   if(attempt===1)throw error;
+   await new Promise(resolve=>setTimeout(resolve,600));
+   continue;
+  }
+  if(attempt===0&&[401,429,502,503,504].includes(response.status)){
+   // A rejected bearer might be stale; mint a fresh OIDC identity once.
+   // Persistent 401 is still returned unchanged to the caller.
+   if(response.status===401)cached=null;
+   await new Promise(resolve=>setTimeout(resolve,600));
+   continue;
+  }
+  return response;
+ }
+ throw Error('Unreachable OIDC reader retry state');
 }
