@@ -6,7 +6,7 @@ import vm from 'node:vm';
 const source=readFileSync(new URL('../src/ui/admin-storage-usage.js',import.meta.url),'utf8');
 
 test('the protected owner archive import is gated before any network request',()=>{
- const guard=source.indexOf("if(typeof PROFILE==='undefined'||!PROFILE||PROFILE.role!=='owner')return;");
+ const guard=source.indexOf("if(typeof PROFILE==='undefined'||!PROFILE||PROFILE.role!=='owner'){");
  const dynamicImport=source.indexOf("import('/src/ui/photo-admin-controls.mjs')");
  assert.ok(guard>=0,'owner access guard must be present');
  assert.ok(dynamicImport>guard,'owner guard must execute before requesting the module');
@@ -17,7 +17,9 @@ test('the protected owner archive import is gated before any network request',()
 test('storage quota stays visible to admin and visitor while owner-only import is skipped',()=>{
  for(const role of ['admin','user']){
   const root={};
-  const context={window:root,PROFILE:{role}};
+  const removed=[];
+  const document={getElementById(id){return {remove(){removed.push(id);}};}};
+  const context={window:root,PROFILE:{role},document};
   vm.runInNewContext(source,context,{filename:'src/ui/admin-storage-usage.js'});
   const bar={style:{}},info={textContent:''};
   root.DG_ADMIN_STORAGE_USAGE_UI.render(bar,info,{
@@ -28,5 +30,6 @@ test('storage quota stays visible to admin and visitor while owner-only import i
   assert.equal(bar.style.width,'1%');
   root.DG_ADMIN_STORAGE_USAGE_UI.unavailable(info,'Veri geçici olarak alınamadı');
   assert.equal(info.textContent,'Veri geçici olarak alınamadı');
+  assert.deepEqual(removed,['dgPhotoArchiveAdminDownload','dgPhotoArchiveAdminStatus','dgPhotoArchiveAdminDownload','dgPhotoArchiveAdminStatus']);
  }
 });
