@@ -163,8 +163,7 @@ describe('publish-queue.mjs: plan + günlük', () => {
       assert.ok(h.includes(e.report_hash.replace('sha256:', '')));
       assert.equal(e.park_id,JSON.parse(read('rapor/'+e.report_id+'/data.json')).park.id);
     }
-    assert.match(read('rapor/DGR-2026-0020/index.html'), /noindex,nofollow/);
-    assert.ok(!existsSync(join(ROOT,'rapor/DGR-2026-0020/data.json')));
+    assert.ok(!existsSync(join(ROOT,'rapor/DGR-2026-0020')),'retired test URL must be absent, not a public noindex page');
   });
 
   test('günlükteki her başarılı girdi rapor diziniyle birebir örtüşür', () => {
