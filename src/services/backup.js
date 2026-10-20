@@ -129,9 +129,8 @@ async function dgPhotoFullArchive(){
  if(!PROFILE||(PROFILE.role!=="admin"&&PROFILE.role!=="owner")){toast("Fotoğraflı arşivi yalnız yetkili yönetici oluşturabilir.","err","💾");return;}
  if(_dgPhotoArchiveBusy)return;
  _dgPhotoArchiveBusy=true;
- const control=typeof document!=="undefined"?document.getElementById("dgPhotoArchiveDownload"):null;
- if(control)control.disabled=true;
- const stage=message=>{const node=typeof document!=="undefined"?document.getElementById("dgPhotoArchiveStatus"):null;if(node)node.textContent=message;};
+ if(window.DG_RESTORE_BACKUP_PROMPT?.busy)window.DG_RESTORE_BACKUP_PROMPT.busy(true);
+ const stage=message=>window.DG_RESTORE_BACKUP_PROMPT?.status?.(message);
  try{
   stage("13 tablo sayfalı olarak okunuyor…");
   const plan=[
@@ -167,29 +166,5 @@ async function dgPhotoFullArchive(){
   stage("❌ Arşiv tamamlanamadı; eksik dosya indirilmedi.");
   toast("Fotoğraflı Tam Veri Arşivi hatası: "+(error?.message||error),"err","❌");
   return{ok:false,error};
- }finally{_dgPhotoArchiveBusy=false;if(control)control.disabled=false;}
-}
-function dgSetupPhotoArchiveUi(){
- if(typeof document==="undefined"||!document.querySelector||!document.createElement)return;
- const legacy=document.querySelector('[data-dg-backup-action="download"]');
- if(!legacy||document.getElementById("dgPhotoArchiveDownload"))return;
- const archive=document.createElement("button");
- archive.type="button";archive.id="dgPhotoArchiveDownload";archive.className="btn sm";
- archive.style.marginTop="10px";archive.style.marginLeft="8px";
- archive.textContent="💾 Fotoğraflı Tam Veri Arşivi (ZIP)";
- archive.addEventListener("click",dgPhotoFullArchive);
- legacy.parentNode?.insertBefore(archive,legacy);
- legacy.textContent="JSON Yedeği (eski)";
- const picker=document.getElementById("dgRestoreFile");
- if(picker)picker.accept=".zip,application/zip,.json,application/json";
- const restore=document.querySelector('[data-dg-backup-action="pick-file"]');
- if(restore)restore.textContent="📥 Fotoğraflı Arşivden Geri Yükleme";
- const status=document.createElement("p");
- status.id="dgPhotoArchiveStatus";status.className="dg-meta";
- status.textContent="ZIP: 13 erişilebilir tablo + gerçek fotoğraflar + SHA-256 + kurtarma SQL. Dosya yalnız sizin cihazınıza indirilir.";
- archive.parentNode?.insertBefore(status,legacy);
-}
-if(typeof document!=="undefined"&&typeof document.addEventListener==="function"){
- if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",dgSetupPhotoArchiveUi);
- else dgSetupPhotoArchiveUi();
+ }finally{_dgPhotoArchiveBusy=false;window.DG_RESTORE_BACKUP_PROMPT?.busy?.(false);}
 }
