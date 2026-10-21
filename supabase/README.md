@@ -292,4 +292,87 @@ Yeni migration dosyaları yalnız CLI ile zaman damgalı oluşturulmalıdır. Es
 
 Canlı kayıtta yerel dosya adından farklı olanlar: surface_reviews 20261003171920; surface_report_snapshot 20261003181124; surface_geometry_compat 20261003220940; profile_privilege_guard 20261004165219; allow_users_delete_own_data_requests 20261006163727; report_access_hardening 20261007084950; rls_index_optimization 20261007085148; realtime_presence_authorization 20261015073309. Ölçüm protokolü, paylaşılan park erişimi, davet kimliği ve ziyaretçi günlük özetinin son kayıtları mevcut. Bu liste yalnız salt okunur list_migrations sonucudur.
 
-Yerel config ve boş seed yalnız geliştirme yapılandırmasıdır. Docker/CLI çalıştırılmadığı ve tarihsel zincir bağımsız ortamda yeniden oynatılmadığı için `supabase db reset` başarısı vaat edilmez. Tarihsel SQL'in ayrık ortamdaki doğrulaması tamamlanmadan üretime push yapılmamalıdır. Denetim için yazma sondası yerine salt okunur katalog kontrolü ve izole PostgreSQL testleri tercih edilir.
+Yerel config ve boş seed yalnız geliştirme yapılandırmasıdır. Docker üzerinden tarihsel zincir bağımsız ortamda yeniden oynatılmadığı için `supabase db reset` başarısı vaat edilmez. Tarihsel SQL'in ayrık ortamdaki doğrulaması tamamlanmadan üretime toplu migration push yapılmamalıdır. Denetim için yazma sondası yerine salt okunur katalog kontrolü ve izole PostgreSQL testleri tercih edilir.
+
+## 30 Ekim 2026 — Data API için açık yetki tanımı
+
+Supabase yeni `public` tablolarına otomatik Data API yetkisi vermeyi kaldırıyor;
+mevcut tabloların yetkileri korunuyor. [Resmî duyuru](https://github.com/orgs/supabase/discussions/45329).
+Tablo yetkisi (`GRANT`) ile satır yetkisi (RLS) ayrı katmanlardır; ikisi de gerekir.
+
+`20261021111211_explicit_data_api_grants.sql` tarihsel dosyaları değiştirmeden
+uygulamanın gereken tablo, view ve sequence yetkilerini açıkça tamamlar.
+Sunucudaki `service_role` iş akışları ve kullanıcının kendi veri talebini silmesi
+artık otomatik tablo grant'lerine bağlı değildir. Migration önce 13 tabloda RLS
+olduğunu doğrular; mevcut tablo grant'lerini, RLS politikalarını, ölçüm verilerini,
+hesapları ve arşivi değiştirmez. Yalnız `postgres` tarafından **daha sonra**
+oluşturulacak tablo/dizilerin otomatik Data API grant'lerini kaldırır. Diğer
+nesne sahipleri ve fonksiyonların varsayılan yetkileri bu migration'ın kapsamı dışındadır.
+
+Yeni yerel kurulumda `api.auto_expose_new_tables = false` kullanılır
+(Supabase CLI 2.121.0 ile doğrulanan ayar). Yeni projelerde otomatik exposure
+yeniden açılmaz; her tabloya yalnız gerekli roller ve işlemler verilir.
+
+Yeni tablo eklerken:
+
+1. `supabase migration new <anlamli_ad>` ile dosya oluşturun.
+2. Aynı dosyada `public.tablo`yu oluşturun, RLS'yi etkinleştirin ve eski
+   projelerdeki otomatik yetkileri `REVOKE ALL ... FROM PUBLIC, anon, authenticated`
+   ile temizleyin.
+3. Aynı dosyada gereken işlemleri gereken rollere açıkça `GRANT` edin.
+   Anonim ziyaretçiye özel hesap/profil/davet verisi için grant vermeyin.
+4. Sahiplik/yetki politikalarını `USING` ve `WITH CHECK` ile tanımlayın;
+   sequence gerekiyorsa yalnız ilgili sequence'e gerekli erişimi verin.
+5. `node --test test/data-api-grants.test.mjs` ve `npm run check` çalıştırın.
+
+Başlangıç örneği: [`templates/owner-table.sql.example`](templates/owner-table.sql.example).
+Bu dosya otomatik çalıştırılmaz; tablo adını ve erişim modelini projeye göre uyarlayın.
+Hiçbir API rolünün erişmemesi gereken `public` tablosunu açık revoke ve RLS ile
+oluşturup `-- data-api: internal public.tablo` şeklinde işaretleyin; tercihen
+API'ye açılmayan bir şemada tutun. `ON ALL TABLES` ya da otomatik genel grant
+kullanmayın. Yeni migration'lar aynı dosyada RLS ve açık erişim kararı açısından
+testlerde denetlenir. Bu lint genel amaçlı SQL ayrıştırıcısı değildir; dinamik
+DDL kullanmayın ve olağandışı SQL için ayrıca inceleme/test yapın.
+
+İzole PostgreSQL testleri sıfır otomatik grant ile erişimi, legacy ACL'lerin
+korunmasını, migration'ın tekrar uygulanabilirliğini ve RLS hatasında atomik
+iptali kontrol eder. Bunlar tarihsel zincirin Docker ile tam `db reset`
+sertifikası değildir. Üretimde reset/push yerine yalnız incelenmiş bu migration
+uygulanır; ardından kullanıcı tablosu okumadan katalogdaki grant/RLS doğrulanır.
+
+21 Ekim 2026 canlı uygulama kaydı: `explicit_data_api_grants` sürümü
+`20261021111211` uygulandı. CLI ile oluşturulan yeni dosyanın adı, sunucunun
+kaydettiği sürümle eşleştirildi. 13 tablonun RLS durumu, mevcut tablo/view/sequence
+ACL özeti ve public/storage/realtime politika özeti öncesi/sonrası birebir aynı.
+`postgres` için gelecek tablo DML ve sequence USAGE/SELECT varsayılanları kapalı
+olarak doğrulandı. Danışmanda yeni bulgu oluşmadı; Logs Query, üretim veri yazma,
+reset veya toplu migration push çalıştırılmadı. Diğer sahipler için platformun
+30 Ekim geçişi ve tabloya özel açık yetki incelemesi geçerlidir.
+
+## 21 Ekim 2026 — sıfırdan kurulum denetimi
+
+`node scripts/verify-supabase-replay.mjs` 31 migration'ı boş PGlite üzerinde
+sırayla çalıştırır ve sentetik hesaplarla erişim sözleşmesini sınar.
+Bu testin Auth/Storage/Realtime şemaları yalnız gereken SQL arayüzlerini sağlayan
+test taklitleridir. PostgreSQL 18.6 üzerinde yapılan bu denetim, config'deki
+PostgreSQL 15 Docker servislerinin çalıştığını tek başına kanıtlamaz.
+
+Denetim sırasında ayrı `security/` dosyalarında kalmış üç korumanın sıfırdan
+kuruluma taşınmadığı görüldü: proje SELECT kısıtı, fotoğraf listeleme RLS'si ve
+JPEG/8 MiB yükleme sınırı. `20261021112046_replay_security_parity.sql` bunları
+yeni kurulum zincirine ekler. Canlı proje zaten bu korumalara sahiptir; bu
+migration canlıya uygulanmadı. Eşleşen bucket ayarı değişmez; farklı ayarda
+fotoğraf varsa migration toplu inceleme yapmadan durur.
+
+Salt okunur canlı katalogla karşılaştırmada 135 uygulama sütunu, 44 RLS politikası
+ve 7 view ayarı bu ek migration sonrasında birebir eşleşti. Kullanıcı kayıtları
+ve fotoğraflar indirilmedi. Sentetik test kendi/başka hesap projelerini, park
+ortaklığını, fotoğraf listeleme sınırını ve yeni tablo grant varsayılanını sınar;
+tüm test satırlarını rollback eder.
+
+Gerçek yerel stack doğrulaması `.github/workflows/supabase-reset.yml` içindedir:
+geçici Docker servisleri başlatılır, `db reset --local --no-seed` iki kez uygulanır,
+`tests/reset-contract.sql` çalıştırılır. İş akışında üretim anahtarı, proje bağlantısı
+veya uzak veritabanı URL'si kullanılmaz. Windows makinesinde Docker olmadığı için
+yerel CLI denemesi servis inceleme hatasıyla durmuştur; Docker doğrulaması CI'da
+ayrı izlenir. Üretimde `db reset --linked` kullanılmaz.
