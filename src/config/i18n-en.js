@@ -2,6 +2,7 @@
 /* English dictionary data for the runtime translator in i18n.js. */
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"{n} veri talebi yanıt bekliyor":"{n} data requests await a response",
 "Fotoğraf alanı %{p} dolu. Yeni yüklemeler için çok az alan kaldı.":"Photo storage is {p}% full. Very little space remains for new uploads.",
 "Fotoğraf alanı %{p} dolu. Depolama kapasitesini artırmayı planlayın.":"Photo storage is {p}% full. Plan to increase storage capacity.",
 "Fotoğraf alanı %{p} dolu. Kalan alanı takip edin.":"Photo storage is {p}% full. Monitor the remaining space.",

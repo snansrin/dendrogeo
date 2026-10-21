@@ -244,14 +244,14 @@
 <script src="src/config/wood-density-lock.js?v=895bae6a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/species.js?v=1b610c26" type="application/x-dendrogeo-module" defer></script>
 <!-- DİL KATMANI (0035): sözlük verisi çalışma zamanı çeviricisinden önce yüklenir. -->
-<script src="src/config/i18n-en.js?v=b64eb522" type="application/x-dendrogeo-module" defer></script>
+<script src="src/config/i18n-en.js?v=732bd9ea" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/i18n.js?v=5466c5ca" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/map/web-mercator-coordinates.js?v=721838c9" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/geo.js?v=d1460277" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/truncation.js?v=f438600d" type="application/x-dendrogeo-module" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"8c56f90976c42922"</script>
+<script id="dgRuntimeBuild" type="application/json">"ed72da22ac30fd3e"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
 <script src="src/adapters/parks/fetch-nominatim-osm-way.js?v=7e4900cf" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/osm-water-backup.js?v=9dcc34a2" type="application/x-dendrogeo-module" defer></script>
@@ -411,7 +411,7 @@
 <script src="src/adapters/data-requests/my-requests-store.js?v=8654864a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/data-requests/status-store.js?v=0485009a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/data-requests/partition-queue.js?v=cb559821" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/data-request-pending-table.js?v=0b8625ab" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/data-request-pending-table.js?v=9e4712f8" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/data-requests/reply-window.js?v=2f253168" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/data-requests/queue-store.js?v=ac144147" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/data-request-closed-table.js?v=b5bb4c62" type="application/x-dendrogeo-module" defer></script>
@@ -424,9 +424,9 @@
 <script src="src/application/data-requests/reject-request.js?v=c5cbb53c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/data-requests/load-options.js?v=2e3ebac0" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/data-requests/load-own-requests.js?v=e0969973" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/data-requests/load-queue.js?v=a1835691" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/data-requests/load-queue.js?v=f440614f" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/data-request-submission-feedback.js?v=513069c1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/data-requests.js?v=816ed4e4" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/data-requests.js?v=edfab872" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/users/admin-store.js?v=30fbc401" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/users/summarize-admin-users.js?v=e8a54884" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-user-table.js?v=520ac8e0" type="application/x-dendrogeo-module" defer></script>
@@ -447,7 +447,7 @@
 <script src="src/ui/admin-measurement-row.js?v=a4372e25" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-measurement-table.js?v=3d243cb5" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/admin/export-filter-options.js?v=77acbee2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/admin/admin-persistence-store.js?v=98a037d3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/admin/admin-persistence-store.js?v=2c04d83d" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/admin/build-export-query.js?v=51091d79" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/admin/read-export-rows.js?v=34dfc1cd" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-measurement-filter.js?v=6202b3e9" type="application/x-dendrogeo-module" defer></script>
@@ -499,7 +499,7 @@
 <!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
      görünümü + sorgu hatası görünürlüğü. admin.js'ten SONRA yüklenir
      (approve/reject/del fonksiyonlarını çağırır). -->
-<script src="src/services/admin-tree.js?v=e26fbce7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/admin-tree.js?v=a4b10750" type="application/x-dendrogeo-module" defer></script>
 <!-- BİLİMSEL RAPOR YAYINI (2026-09-27): site içinden yayın kuyruğu —
      📄 Yayınla → report_requests (0008) → rapor-yayin.yml → rapor/DGR-…/
      → kalıcı bağlantı + 📤 Paylaş. admin.js loadAdmin() bu modülü çağırır. -->
@@ -1988,6 +1988,6 @@
 <!-- Resolve the lazily loaded class list for the legacy, read-only park PNG path. -->
 <script src="src/ui/park-export-lazy-class-bridge.js?v=38c67f2d" type="application/x-dendrogeo-module" defer></script>
 
-<script src="/src/bootstrap/app-runtime.js?v=59567406" defer></script>
+<script src="/src/bootstrap/app-runtime.js?v=948f4179" defer></script>
 </body>
 </html>

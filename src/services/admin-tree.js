@@ -123,6 +123,7 @@ function dgUpdateSidebarBadge(n){
 /* Yan menü rozeti, yönetim sekmesi AÇILMADAN da güncel olsun diye ayrı bir
  * hafif sorgu (head:true → yalnız sayı, satır çekilmez). */
 async function dgRefreshPendingBadge(){
+  if(typeof dgRefreshDataRequestBadge==="function")dgRefreshDataRequestBadge();
   const store=window.DG_ADMIN_PERSISTENCE_STORE.create(()=>sb);
   if(window.DG_REFRESH_ADMIN_TREE_PENDING_BADGE)return window.DG_REFRESH_ADMIN_TREE_PENDING_BADGE.execute(store,dgUpdateSidebarBadge);
   try{
