@@ -2,13 +2,31 @@
 /* Add read-only help beside controls without moving or invoking the controls. */
 (function(root){
  const pairs=new Map();let dialog,lastTrigger,scheduled=false,observer,escapePending=false;
- const selector='button,input:not([type="hidden"]),select,textarea,.view>.shead h2,.dg-editor-panel-head strong';
+ const anchors=[
+  ['.waypoint-target-copy>.lbl','navActions'],['#waypointListTitle','pointList'],['#waypointFileTitle','pointUpload'],
+  ['#measureLocationTitle','gps'],['#measureTreeTitle','measure'],['.measure-photo h4','photo'],
+  ['label[for="pLabel"]','project'],['#projectOwnedTitle','ownedProjects'],['#projectSharedTitle','sharedProjects'],['#projectTeamTitle','sharing'],
+  ['.records-heading h2','records'],
+  ['.export-format-card:has([data-dg-export-action="csv-download"])>h3','tableCsv'],
+  ['.export-format-card:has([data-dg-export-action="geo-download"])>h3','recordGeojson'],
+  ['.export-format-card:has([data-dg-export-action="qgis-download"])>h3','qgisCsv'],
+  ['.export-panel-body:has(.export-request-grid)>.export-copy','request'],
+  ['#gridSummary>b:first-child','gridResults'],
+  ['label[for="gridSize"]','gridSize'],['label[for="refHa"]','reference'],['label[for="gridClearance"]','clearance'],
+  ['#dgMaintenanceLabel','maintenance'],['#dgBackupLabel','backupRestore'],['#adminPublishTitle','report'],
+  ['.card:has(#aReqT)>.shead h2','reply'],['.card:has(#admExpCountry)>.shead h2','adminExport'],
+  ['#adminUsersListTitle','users'],['#visAnalyticsTitle','usageSummary']
+ ];
+ const menuTopics={'10':'fileMenu','20':'viewMenu','30':'grid','40':'layerMenu','50':'brush','60':'boundary','70':'scan'};
+ const selector=anchors.map(([query])=>query).concat('.dg-editor-panel-head strong').join(',');
  const language=()=>root.document.documentElement.lang==='en'?'en':'tr';
  const t=(tr,en)=>language()==='en'?en:tr;
- function descriptor(control){
-  return{id:control.id||'',attributes:Object.fromEntries(Array.from(control.attributes).map(a=>[a.name,a.value])),view:control.closest('.view')?.id||'',menu:control.closest('details[data-menu-order]')?.dataset.menuOrder||'',text:control.getAttribute('aria-label')||control.getAttribute('title')||control.textContent||''};
+ function topic(control){
+  for(const[query,key]of anchors)if(control.matches(query))return key;
+  if(control.matches('.dg-editor-panel-head strong'))return menuTopics[control.closest('details[data-menu-order]')?.dataset.menuOrder]||null;
+  return null;
  }
- function content(control){return root.DG_OPERATION_HELP_CONTENT.get(root.DG_OPERATION_HELP_CONTENT.resolve(descriptor(control)),language());}
+ function content(control){return root.DG_OPERATION_HELP_CONTENT.get(topic(control),language());}
  function makeDialog(){
   if(dialog)return dialog;
   const doc=root.document;dialog=doc.createElement('dialog');dialog.id='dgOperationHelp';dialog.className='dg-operation-help-dialog';
@@ -32,38 +50,15 @@
   const list=doc.createElement('ol');for(const step of entry.steps){const item=doc.createElement('li');item.textContent=step;list.append(item);}
   body.append(intro,list);if(!box.open)box.showModal();
  }
- function eligible(control){
-  if(!control.closest('#shell')||control.closest('#dgOperationHelp,.dg-operation-help,.dg-field-help,.leaflet-control-zoom')||control.matches('[type="hidden"],[type="password"],.dg-lang-toggle,[data-dg-help-skip]'))return false;
-  if(control.tagName==='BUTTON')return !!(control.textContent.trim()||control.getAttribute('aria-label')||control.getAttribute('title'));
-  return true;
- }
  function add(control){
-  if(pairs.has(control)){
-   const button=pairs.get(control);
-   if(control.tagName==='BUTTON'&&control.nextElementSibling!==button)control.insertAdjacentElement('afterend',button);
-   return;
-  }
-  if(!eligible(control))return;
-  let host=null;
-  if(control.matches('input,select,textarea')){
-   const label=control.labels?.[0]||control.closest('.dg-png-field,.dg-sens-row')?.querySelector('label,.dg-sens-label')||control.parentElement?.querySelector(':scope>label,:scope>.lbl');
-   if(label?.querySelector('.dg-field-help'))return;
-   host=label?.querySelector('.dg-png-copy strong,.measure-label-copy')||label;
-   // Some slider captions are themselves action buttons with their own guide.
-   if(host?.matches('button,[role="button"],a[href]'))return;
-   if(host?.querySelector('.dg-operation-help'))return;
-  }
-  const doc=root.document,button=doc.createElement('button');button.type='button';button.className='btn sm ghost dg-operation-help';button.textContent='?';
+  if(pairs.has(control)||!topic(control)||!control.closest('#shell')||control.closest('button,a,summary,label:has(input),#dgOperationHelp,.dg-operation-help'))return;
+  const doc=root.document,button=doc.createElement('button');button.type='button';button.className='dg-operation-help';
+  const mark=doc.createElement('span');mark.textContent='?';mark.setAttribute('aria-hidden','true');button.append(mark);
+  button.dataset.dgHelpTopic=topic(control);
   button.setAttribute('aria-label',content(control).title+' — '+t('Nasıl kullanılır?','How to use'));
   button.setAttribute('aria-haspopup','dialog');button.setAttribute('aria-controls','dgOperationHelp');
   button.title=t('Kullanım talimatları','Instructions');
-  button.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();open(control,button);});
-  if(host&&control.matches('input[type="checkbox"],input[type="radio"]')){(control.labels?.[0]||host).insertAdjacentElement('afterend',button);}
-  else if(host){host.append(button);host.classList.add('dg-operation-help-label');}
-  else{const anchor=control.type==='file'?(control.closest('.dg-file')||control):control;anchor.insertAdjacentElement('afterend',button);if(control.tagName==='BUTTON')control.classList.add('dg-has-operation-help');}
-  const parent=control.parentElement;
-  if(control.tagName==='BUTTON'&&parent?.matches('.dg-editor-action-grid,.dg-ux-tool-grid,.admin-storage-actions,#gridSummary>div'))parent.classList.add('dg-operation-help-grid');
-  pairs.set(control,button);
+  control.append(button);pairs.set(control,button);
  }
  function scan(node=root.document.getElementById('shell')){
   if(!node||node.nodeType!==1||node.closest('#dgOperationHelp,.dg-operation-help'))return;

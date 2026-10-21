@@ -10597,6 +10597,18 @@
           "sha256": "064a78d96bda2bd9d1502ce09529b602cb12f7bb18ec2d324e337364a810f977"
         }
       ]
+    },
+    {
+      "date": "2026-10-21",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: remove blanket help injection and layout overrides; place compact guides at explicit section headings with source-verified instructions. Original controls, data access and scientific engines stay unchanged.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "376e2c3d31f9436b474861b0a4bbd4ea93f8dff4572494890fb6e86f668b6135",
+          "sha256": "d3a04a2a0b8e69adbe5b1ddb04930810b64da60615a12e95528e334d2e729280"
+        }
+      ]
     }
   ]
 }
