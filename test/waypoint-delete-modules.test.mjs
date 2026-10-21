@@ -21,7 +21,7 @@ test('project gate rejects an empty selection and accepts a project ID',()=>{
 test('confirmation preserves the exact translated permanent-delete warning',()=>{
   const confirmDeletion=setup().DG_CONFIRM_WAYPOINT_LIST_DELETION.confirm,events=[];
   assert.equal(confirmDeletion({confirm:message=>{events.push(message);return true;},translate:value=>`EN:${value}`}),true);
-  assert.deepEqual(events,["EN:⚠ Bu projedeki TÜM waypoint'ler kalıcı olarak silinsin mi? Yanlış liste ise sonra yeniden yükleyebilirsiniz."]);
+  assert.deepEqual(events,["EN:⚠ Bu projedeki TÜM ölçüm noktaları kalıcı olarak silinsin mi? Yanlış liste ise sonra yeniden yükleyebilirsiniz."]);
 });
 
 test('delete adapter preserves project_id-only Supabase filtering and response identity',async()=>{

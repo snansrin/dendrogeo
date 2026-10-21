@@ -373,23 +373,23 @@ window.dgTreeRows=dgTreeRows;
 async function dgTreeDeleteProject(ev,pid){
  const store=window.DG_ADMIN_PERSISTENCE_STORE.create(()=>sb);
  if(window.DG_DELETE_ADMIN_TREE_PROJECT)return window.DG_DELETE_ADMIN_TREE_PROJECT.execute(ev,pid,{
-  confirmation:_ta("Proje TÜM ölçüm ve waypoint'leriyle kalıcı olarak silinsin mi? Bu işlem geri alınamaz (park kimliği kalır)."),
+  confirmation:_ta("Proje TÜM ölçüm ve ölçüm noktalarıyla kalıcı olarak silinsin mi? Bu işlem geri alınamaz (park kimliği kalır)."),
   confirm:message=>confirm(message),
   deleteProject:id=>store.deleteProject(id),
   markLiveDirty:()=>{DG_LIVE_DIRTY=true;},
-  success:()=>toast(_ta("✓ Proje silindi (ölçümler + waypoint'ler cascade ile kaldırıldı)"),"ok","🗑"),
+  success:()=>toast(_ta("✓ Proje silindi (ölçümler + ölçüm noktaları cascade ile kaldırıldı)"),"ok","🗑"),
   failure:error=>toast(_ta("Proje silinemedi: ")+(error&&error.message||error),"err","🗑"),
   redraw:()=>{if(typeof dgTreeDraw==="function")dgTreeDraw();},
   refresh:()=>{if(typeof loadAdmin==="function")loadAdmin();}
  });
  if(ev){ev.preventDefault();ev.stopPropagation();}
- const msg=_ta("Proje TÜM ölçüm ve waypoint'leriyle kalıcı olarak silinsin mi? Bu işlem geri alınamaz (park kimliği kalır).");
+ const msg=_ta("Proje TÜM ölçüm ve ölçüm noktalarıyla kalıcı olarak silinsin mi? Bu işlem geri alınamaz (park kimliği kalır).");
  if(!confirm(msg))return;
  try{
   const{error}=await store.deleteProject(pid);
   if(error){toast(_ta("Proje silinemedi: ")+error.message,"err","🗑");return;}
   try{DG_LIVE_DIRTY=true;}catch(e){}
-  toast(_ta("✓ Proje silindi (ölçümler + waypoint'ler cascade ile kaldırıldı)"),"ok","🗑");
+  toast(_ta("✓ Proje silindi (ölçümler + ölçüm noktaları cascade ile kaldırıldı)"),"ok","🗑");
   if(typeof dgTreeDraw==="function")dgTreeDraw();
   if(typeof loadAdmin==="function")loadAdmin();
  }catch(e){toast(_ta("Proje silinemedi: ")+(e&&e.message||e),"err","🗑");}

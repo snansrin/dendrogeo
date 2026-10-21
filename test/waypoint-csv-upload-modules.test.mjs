@@ -39,13 +39,13 @@ test('Supabase adapter performs one upsert and propagates PostgREST errors',asyn
 test('application uploads valid rows sequentially, counts rejects, reports outcome, and refreshes',async()=>{
   const upload=setup().DG_UPLOAD_WAYPOINT_CSV.upload,events=[];let active=0,maxActive=0;
   const result=await upload({projectId:4,file:{text:async()=> 'lon,lat,id\n32,39,1\n181,0,2\n33,40,3'},owner:'u',parse:()=>[['32','39','1'],['181','0','2'],['33','40','3']],validate:cells=>cells[0]==='181'?null:{id:Number(cells[2]),lat:Number(cells[1]),lon:Number(cells[0])},build:input=>input,upsert:async value=>{active++;maxActive=Math.max(maxActive,active);events.push(['save',value.waypoint.id]);await Promise.resolve();active--;},notify:(...args)=>events.push(['notify',...args]),refresh:async()=>events.push(['refresh']),translate:value=>value});
-  assert.deepEqual(JSON.parse(JSON.stringify(result)),{saved:2,invalid:1});assert.equal(maxActive,1);assert.deepEqual(events,[['save',1],['save',3],['notify','✓ 2 waypoint kaydedildi. 1 geçersiz satır atlandı.','warn'],['refresh']]);
+  assert.deepEqual(JSON.parse(JSON.stringify(result)),{saved:2,invalid:1});assert.equal(maxActive,1);assert.deepEqual(events,[['save',1],['save',3],['notify','✓ 2 ölçüm noktası kaydedildi. 1 geçersiz satır atlandı.','warn'],['refresh']]);
 });
 
 test('partial failure reports completed rows before refreshing the current list',async()=>{
   const upload=setup().DG_UPLOAD_WAYPOINT_CSV.upload,events=[];let attempts=0;
   const result=await upload({projectId:4,file:{text:async()=>''},owner:'u',parse:()=>[[1],[2]],validate:cells=>({id:cells[0]}),build:input=>input,upsert:async()=>{if(++attempts===2)throw new Error('RLS');},notify:(...args)=>events.push(['notify',...args]),refresh:async()=>events.push(['refresh']),translate:value=>value});
-  assert.deepEqual(JSON.parse(JSON.stringify(result)),{saved:1,invalid:0});assert.deepEqual(events,[['notify','Waypoint yükleme hatası: RLS · 1 satır kaydedildi.','err'],['refresh']]);
+  assert.deepEqual(JSON.parse(JSON.stringify(result)),{saved:1,invalid:0});assert.deepEqual(events,[['notify','Ölçüm noktası yükleme hatası: RLS · 1 satır kaydedildi.','err'],['refresh']]);
 });
 
 test('waypoint modules load before the locked map service and are precached',()=>{

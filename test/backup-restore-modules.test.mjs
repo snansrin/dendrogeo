@@ -37,7 +37,7 @@ test('restore SQL keeps table order, escapes identifiers and metadata, and skips
 test('restore prompt keeps all existing counts and export date',()=>{
  const w=runtime(),format=(template,args)=>template.replace(/\{(\w+)\}/g,(_,key)=>args[key]);
  const prompt=w.DG_RESTORE_BACKUP_PROMPT.build({counts:{measurements:2,projects:3,waypoints:4,data_requests:5},exported_at:'2026-10-12T14:00:00Z'},format);
- assert.match(prompt,/2 ölçüm · 3 proje · 4 waypoint · 5 talep/);
+ assert.match(prompt,/2 ölçüm · 3 proje · 4 ölçüm noktası · 5 talep/);
  assert.match(prompt,/2026-10-12/);
 });
 

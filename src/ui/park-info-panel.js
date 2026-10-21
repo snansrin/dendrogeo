@@ -21,7 +21,7 @@
       `<div id="parkGridTools" class="dg-png-card">`+
         `<div class="dg-png-head">`+
           `<div>`+
-            `<div class="dg-png-kicker">1 · GRID & WAYPOINT</div>`+
+            `<div class="dg-png-kicker">1 · GRID & ÖLÇÜM NOKTALARI</div>`+
             `<div class="dg-png-title">🔲 Grid sistemi</div>`+
             `<div class="dg-png-sub">Ölçüm alanını otomatik böl</div>`+
           `</div>`+
@@ -111,7 +111,7 @@
           `<label class="dg-png-option">`+
             `<span class="dg-png-icon">📍</span>`+
             `<span class="dg-png-copy">`+
-              `<strong>Waypoint'ler</strong>`+
+              `<strong>Ölçüm noktaları</strong>`+
               `<span>Ölçüm noktalarını göster</span>`+
             `</span>`+
             `<input type="checkbox" class="dg-switch" id="togWp" checked data-park-change="waypointVisibility">`+

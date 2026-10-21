@@ -28,7 +28,7 @@ test('measurement reset clears only per-tree fields and preserves helper order',
 test('delete confirmation retains count-aware Turkish warning',()=>{
   const{window}=setup(),messages=[];
   const result=window.DG_CONFIRM_MEASUREMENT_PROJECT_DELETE.confirm({count:12,format:(text,data)=>text.replace('{n}',data.n),confirm:text=>{messages.push(text);return false;}});
-  assert.equal(result,false);assert.match(messages[0],/12 ölçüm/);assert.match(messages[0],/Park kimliği silinmez/);assert.match(messages[0],/waypoint/);
+  assert.equal(result,false);assert.match(messages[0],/12 ölçüm/);assert.match(messages[0],/Park kimliği silinmez/);assert.match(messages[0],/ölçüm noktaları/);
 });
 
 test('project deletion adapter preserves measurement count and waypoint-before-project RLS writes',async()=>{

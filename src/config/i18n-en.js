@@ -2,6 +2,24 @@
 /* English dictionary data for the runtime translator in i18n.js. */
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"Aktif ölçüm noktası yok":"No active measurement point",
+"1 · GRID & ÖLÇÜM NOKTALARI":"1 · GRID & MEASUREMENT POINTS",
+"Ölçüm noktası yükleme hatası:":"Waypoint upload failed:",
+"Proje TÜM ölçüm ve ölçüm noktalarıyla kalıcı olarak silinsin mi? Bu işlem geri alınamaz (park kimliği kalır).":"Delete the project permanently with ALL its measurements and waypoints? This cannot be undone (the park identity remains).",
+"✓ Proje silindi (ölçümler + ölçüm noktaları cascade ile kaldırıldı)":"✓ Project deleted (measurements + waypoints removed via cascade)",
+"{m} ölçüm · {p} proje · {w} ölçüm noktası · {r} talep içeriyor (dışa aktarma: {d}). Tam geri yükleme SQL dosyası indirilsin mi? (Supabase → SQL Editor'da çalıştırılır; kimlikler ve sahipler korunur, çakışan satırlar atlanır.)":"Contains {m} measurements · {p} projects · {w} waypoints · {r} requests (exported: {d}). Download the full-restore SQL file? (Run it in Supabase → SQL Editor; identities and owners are preserved, conflicting rows are skipped.)",
+"Ölçüm noktası listesi alınamadı:":"Could not load waypoints:",
+"⚠ Bu projedeki TÜM ölçüm noktaları kalıcı olarak silinsin mi? Yanlış liste ise sonra yeniden yükleyebilirsiniz.":"⚠ Delete ALL waypoints in this project permanently? If it's the wrong list you can re-upload later.",
+"Bekleyen ölçüm noktası kalmadı.":"No pending waypoints remain.",
+"Projeyi kalıcı olarak sil (ölçümler + ölçüm noktaları dahil)":"Delete permanently (including measurements + waypoints)",
+"Proje silinsin mi? Bağlı {n} ölçüm ve ölçüm noktaları da silinebilir.\n(Park kimliği silinmez — aynı parktaki diğer projelerin karşılaştırması devam eder.)":"Delete this project? Linked {n} measurements and waypoints may also be deleted.\n(The park identity is kept — comparison of other projects in the same park continues.)",
+"Yüzey değişti. Ölçüm noktası üretmeden önce gridi yeniden oluşturun.":"The surface changed. Rebuild the grid before creating waypoints.",
+"Bu projede ölçüm noktası yok. CSV yükleyin.":"No waypoints in this project. Upload a CSV.",
+"Grid & Ölçüm noktaları":"Grid & Measurement Points",
+"Grid oluşturma ve ölçüm noktası araçları":"Grid creation and measurement point tools",
+"Ölçüm noktası pusula navigasyonu":"Waypoint compass navigation",
+"GPS konumunu alın, ölçüm noktası pusulasıyla ağaca yönelin; 1,30 m yükseklikte göğüs çevresini mezurayla ölçün, boy ve grup/tür bilgilerini girin.":"Record the GPS position and navigate using the waypoint compass; measure stem circumference with a tape at 1.30 m and enter height and group/species information.",
+"Veri yedeği, bu oturumun erişebildiği ölçüm, proje, ölçüm noktası, talep, park ve yüzey kayıtlarını içerir. Fotoğraf dosyaları, hesaplar ve cihazdaki çevrimdışı kayıtlar ayrıca korunmalıdır.":"The data backup includes measurements, projects, waypoints, requests, parks and surface records accessible to this session. Photo files, accounts and offline records on the device require separate protection.",
 "{n} veri talebi yanıt bekliyor":"{n} data requests await a response",
 "Fotoğraf alanı %{p} dolu. Yeni yüklemeler için çok az alan kaldı.":"Photo storage is {p}% full. Very little space remains for new uploads.",
 "Fotoğraf alanı %{p} dolu. Depolama kapasitesini artırmayı planlayın.":"Photo storage is {p}% full. Plan to increase storage capacity.",
@@ -31,7 +49,7 @@ const DG_I18N_EN={
 "📡 Konumu Aç":"📡 Enable location",
 "En yakından":"Nearest first",
 "LİSTE YÖNETİMİ":"LIST MANAGEMENT",
-"Waypoint dosyası":"Waypoint file",
+"Ölçüm noktaları dosyası":"Waypoint file",
 "⬆ Yükle":"⬆ Upload",
 "🗑 Tümünü Sil":"🗑 Delete all",
 "⏳ Yüzey analizi hazırlanıyor…":"⏳ Preparing surface analysis…",
@@ -252,7 +270,7 @@ const DG_I18N_EN={
 "Geçici izleri göster":"Show temporary trails",
 "🗺️ Tümünü göster":"🗺️ Show all",
 
-"Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun.":"The surface changed. Rebuild the grid before creating waypoints.",
+
 "Haritada yeni parkın içine dokunun.":"Tap inside the new park on the map.",
 "Yeni konum":"New location",
 "Su ve sert zeminden uzaklık":"Distance from water and hard surfaces",
@@ -288,12 +306,12 @@ const DG_I18N_EN={
 "Haritada hücreleri seçilen sınıfa boya":"Paint map cells with the selected class",
 "Fırça etkin":"Brush active",
 "El ile kaydırma":"Pan with hand",
-"Fırçayı aç":"Enable brush",
-"Fırçayı kapat":"Disable brush",
+
+
 "Sol tuşla fırçala; sağ tuşla haritayı kaydır. Fırça kapalıyken haritayı normal şekilde taşıyabilirsiniz. Ham raster korunur.":"Paint with the left button; pan with the right button. When the brush is off, drag the map normally. The raw raster remains unchanged.",
-"Son fırça izini geri al":"Undo last brush stroke",
-"Fırça sınıfı":"Brush class",
-"Fırça çapı":"Brush diameter",
+
+
+
 "Sol tuşla basılı tutup hücreleri boya. Sağ tuşla haritayı kaydır.":"Hold the left button to paint cells. Drag with the right button to pan.",
 "El aracıyla haritayı sürükle. Fırçayı seçince sol tuş boyar; sağ tuş her zaman haritayı kaydırır.":"Drag the map with the hand tool. The brush paints with the left button; the right button always pans.",
 "Sınır sınıfı":"Boundary class",
@@ -343,7 +361,7 @@ const DG_I18N_EN={
 "Çizim park sınırının dışında veya çok küçük.":"The boundary is outside the park or too small.",
 
 "Koordinatlar":"Coordinates",
-"Waypoint noktaları":"Waypoint points",
+
 "📍 En yakın bekleyen":"\ud83d\udccd Nearest pending point",
 "→ Sıradaki nokta":"\u2192 Next point",
 "🎯 Hedefi göster":"\ud83c\udfaf Show target",
@@ -352,15 +370,15 @@ const DG_I18N_EN={
 "Nokta numarası":"Point number",
 "Yakından uzağa (GPS)":"Nearest first (GPS)",
 "En yakın noktayı seçmek için önce konumu etkinleştirin.":"Enable location to select the nearest point.",
-"Bekleyen waypoint kalmadı.":"No pending waypoints remain.",
+
 "Hedef seçerek navigasyona başlayın.":"Select a target to start navigation.",
 "Hedef seçildi. Mesafe ve yön için konumu etkinleştirin.":"Target selected. Enable location for distance and direction.",
 "Hedef GPS belirsizlik alanında. Noktayı sahada doğrulayın.":"Target is within GPS uncertainty. Verify the point in the field.",
 "Hedefe yaklaştınız. Noktayı doğrulayıp Vardım düğmesine basın.":"You are near the target. Verify the point and press Arrived.",
 "Kesikli çizgi hedefe kuş uçuşu yönü gösterir; yürüyüş rotası değildir.":"The dashed line shows the straight-line direction; it is not a walking route.",
 
-"Waypoint yükleme hatası:":"Waypoint upload failed:",
-"Waypoint listesi alınamadı:":"Could not load waypoints:",
+
+
 "Nokta ara":"Find a point",
 "Durum":"Status",
 "Tümü":"All",
@@ -429,7 +447,7 @@ const DG_I18N_EN={
 "Sahadan Veri":"Data from the Field",
 "GPS konumu ve cihazın bildirdiği doğruluk değeriyle saha ölçümünü konumlandırır; fotoğraf eklenirse tarayıcı içi kalite kontrolü uygulanır.":"Positions each field measurement with GPS coordinates and the device-reported accuracy; if a photo is added, in-browser quality control is applied.",
 "GPS doğruluğu ölçümle kaydedilir":"GPS accuracy recorded with each measurement",
-"Waypoint pusula navigasyonu":"Waypoint compass navigation",
+
 "Çevrimdışı ölçüm + senkronizasyon":"Offline measurement + synchronization",
 "Fotoğraf için tarayıcı içi QA/QC":"In-browser QA/QC for photos",
 "Bilimsel Hesap":"Scientific Computation",
@@ -453,7 +471,7 @@ const DG_I18N_EN={
 "Sahadan Haritaya — Üç Adımda":"From Field to Map — In Three Steps",
 "Her ölçüm, saha verisinden hesaplamaya ve denetimli yayına uzanan kontrollü bir akıştan geçer. Yayınlanan küresel veri ve istatistik katmanlarına yalnızca onaylı kayıtlar dahil edilir.":"Every measurement passes through a controlled flow from field data to computation to moderated publication. Only approved records enter the published global data and statistics layers.",
 "Sahada Ölç":"Measure in the Field",
-"GPS konumunu alın, waypoint pusulasıyla ağaca yönelin; DBH, boy ve grup/tür bilgilerini girin.":"Get the GPS fix, navigate to the tree with the waypoint compass; enter DBH, height and group/species.",
+"GPS konumunu alın, ölçüm noktası pusulasıyla ağaca yönelin; DBH, boy ve grup/tür bilgilerini girin.":"Get the GPS fix, navigate to the tree with the waypoint compass; enter DBH, height and group/species.",
 "GPS · DBH · BOY · FOTOĞRAF":"GPS · DBH · HEIGHT · PHOTO",
 "Otomatik Hesap":"Automatic Computation",
 "Fotoğraf eklenirse tarayıcı içi QA/QC uygulanır. Ardından Chave et al. (2014) modeliyle AGB hesaplanır; kök biyokütlesi ve karbon, sistemde tanımlı sabit varsayımlarla türetilir.":"If a photo is added, in-browser QA/QC is applied. AGB is then computed with the Chave et al. (2014) model; root biomass and carbon are derived with the system's documented constant assumptions.",
@@ -470,7 +488,7 @@ const DG_I18N_EN={
 "DBH ≤ 400 cm, boy ≤ 100 m":"DBH ≤ 400 cm, height ≤ 100 m",
 "Admin onayı zorunlu":"Admin approval is mandatory",
 /* === 03 veri & harita === */
-"Veri & Harita":"Data & Map",
+
 "🟢 Onaylı noktalara dokunun → ölçüm bilgisi + varsa fotoğraf.":"🟢 Tap approved points → measurement details + photo if available.",
 "Bölgesel Dağılım":"Regional Distribution",
 "Kayıt":"Records","Karbon(t)":"Carbon(t)","Ort.DBH":"Avg.DBH","Ort.Yükseklik(m)":"Avg.Height(m)","Ort.Çap":"Avg.Diam",
@@ -522,12 +540,12 @@ const DG_I18N_EN={
 "Üretici · Sinan ŞİRİN":"Producer · Sinan ŞİRİN",
 /* === uygulama kabuğu: üst bar + menü === */
 "📲 Uygulayı Kur":"📲 Install App","Çıkış":"Log out","Saha":"Field",
-"📊 Panel":"📊 Dashboard","📏 Yeni Ölçüm":"📏 New Measurement","🧭 Waypoint":"🧭 Waypoint","🗺️ Canlı Harita":"🗺️ Live Map",
+"📊 Panel":"📊 Dashboard","📏 Yeni Ölçüm":"📏 New Measurement","🧭 Ölçüm noktası":"🧭 Waypoint","🗺️ Canlı Harita":"🗺️ Live Map",
 "Veri":"Data","📁 Projeler":"📁 Projects","📋 Kayıtlarım":"📋 My Records","💾 Dışa Aktar":"💾 Export","🌍 Dünya Verisi":"🌍 World Data",
 "Yönetim":"Administration","🔐 Ölçüm Yönetimi":"🔐 Measurement Admin","👥 Kullanıcılar":"👥 Users",
 /* === panel === */
 "Genel Bakış":"Overview","Kişisel Analiz Paneli":"Personal Analysis Panel",
-"🌱 Karbonum":"🌱 My Carbon","kg C (saf karbon)":"kg C (pure carbon)","📍 Waypoint":"📍 Waypoints","✅ Tamamlanan":"✅ Completed",
+"🌱 Karbonum":"🌱 My Carbon","kg C (saf karbon)":"kg C (pure carbon)","📍 Ölçüm noktası":"📍 Waypoints","✅ Tamamlanan":"✅ Completed",
 "Kişisel Ağaç Analizi":"Personal Tree Analysis","Karbon Trendi":"Carbon Trend","son 10 kayıt · kg":"last 10 records · kg",
 /* === yeni ölçüm === */
 "Yeni Ölçüm":"New Measurement","Düzenleme modu:":"Edit mode:","mevcut kaydı güncelliyorsunuz.":"you are updating an existing record.","Vazgeç":"Cancel",
@@ -541,13 +559,13 @@ const DG_I18N_EN={
 "Grup":"Group","Seç":"Select","Tür (Latince)":"Species (Latin)","Çap (cm)":"Diameter (cm)","Boy (m)":"Height (m)",
 "📸 Fotoğraf (canlı çekim)":"📸 Photo (live capture)","💾 Hesapla ve Kaydet":"💾 Compute & Save",
 /* === waypoint === */
-"Waypoint Navigasyon":"Waypoint Navigation","Waypoints.csv Yükle (X,Y,id)":"Load Waypoints.csv (X,Y,id)",
-"⬆ Waypoint Yükle":"⬆ Upload Waypoints","🗑 Listeyi Tamamen Sil":"🗑 Delete Entire List",
+"Ölçüm noktası navigasyonu":"Waypoint Navigation","Ölçüm noktaları CSV yükle (X,Y,id)":"Load Waypoints.csv (X,Y,id)",
+"⬆ Ölçüm noktası Yükle":"⬆ Upload Waypoints","🗑 Listeyi Tamamen Sil":"🗑 Delete Entire List",
 "Liste projeye kalıcı kaydedilir; tekrar yüklemeye gerek yok.":"The list is saved to the project permanently; no need to re-upload.",
 "hedefe mesafe":"distance to target","🎯 Vardım → Ölçüme Geç":"🎯 Arrived → Go to Measurement",
-"📍 Waypoint Listesi":"📍 Waypoint List","(üstü çizili = yapıldı)":"(strikethrough = done)",
-"Durum":"Status","İşlem":"Action",
-"🔴 waypoint (numaralı, tıkla=hedef) · 🟢 yapıldı · 🔵 konumun":"🔴 waypoint (numbered, click=target) · 🟢 done · 🔵 you are here",
+"📍 Ölçüm noktası Listesi":"📍 Waypoint List","(üstü çizili = yapıldı)":"(strikethrough = done)",
+"İşlem":"Action",
+"🔴 ölçüm noktası (numaralı, tıkla=hedef) · 🟢 yapıldı · 🔵 konumun":"🔴 waypoint (numbered, click=target) · 🟢 done · 🔵 you are here",
 /* === canlı harita === */
 "Canlı Harita":"Live Map","🌳 Park Analizi Modu: KAPALI":"🌳 Park Analysis Mode: OFF","Harita:":"Map:",
 "🗺️ Sokak":"🗺️ Street","🛰️ Uydu":"🛰️ Satellite","🏔️ Topoğrafik":"🏔️ Topographic",
@@ -575,14 +593,14 @@ const DG_I18N_EN={
 "⏳ yükleniyor…":"⏳ loading…","🔄 Yenile":"🔄 Refresh","Park seçilince davetler ve ortaklar burada listelenir.":"Invitations and collaborators are listed here once a park is selected.",
 /* === kayıtlarım === */
 "Kayıtlarım":"My Records","Kayıtlarınız admin onayından sonra dünya verisinde yayınlanır.":"Your records are published in world data after admin approval.",
-"Nokta":"Point","Tür":"Species","Çap":"DBH","Boy":"Height","Karbon":"Carbon","Foto":"Photo",
+"Nokta":"Point","Tür":"Species","Boy":"Height","Karbon":"Carbon","Foto":"Photo",
 /* === dışa aktar === */
 "📥 Standart CSV":"📥 Standard CSV","Tam bilimsel format (AGB/BHB/Karbon)":"Full scientific format (AGB/BGB/Carbon)",
 "İndir":"Download","Görüntüle":"View","🗺 GeoJSON":"🗺 GeoJSON","QGIS / web harita katmanı":"QGIS / web map layer",
 "🧾 QGIS CSV":"🧾 QGIS CSV","Fotoğraf eşleştirmeli saha formatı":"Field format with photo matching",
 "Yöneticiden Veri Talep Et":"Request Data from the Admin",
 "Belirli bir ülke / şehir / proje (kent parkı) için tüm onaylı veriyi yönetici tarafında hazırlanmış olarak e‑postanıza almak isterseniz talep oluşturun.":"Create a request to receive all approved data for a specific country / city / project (urban park), prepared by the admin, via e-mail.",
-"Tümü":"All","Proje / Park":"Project / Park","Not":"Note","✉️ Talep Gönder":"✉️ Send Request",
+"Proje / Park":"Project / Park","Not":"Note","✉️ Talep Gönder":"✉️ Send Request",
 "QGIS Fotoğraf Aktarım Rehberi":"QGIS Photo Transfer Guide",
 /* === dünya verisi === */
 "🟢 Noktalara dokunun → bilgi + fotoğraf balonu.":"🟢 Tap points → info + photo popup.",
@@ -672,7 +690,7 @@ const DG_I18N_EN={
 "AMBERAĞACI":"AMERICAN SWEETGUM","DİĞER YAPRAKLI":"OTHER BROADLEAF",
 "BELİRLENEMEDİ":"UNDETERMINED",
 /* yer adları (veri değerleri) */
-"Karbon":"Carbon","Hacim":"Volume",
+"Hacim":"Volume",
 "Kuzey Kıbrıs":"Northern Cyprus","Gazimağusa":"Famagusta",
 
 /* === 0035c: uygulama içi DİNAMİK ekranlar — kullanıcı denetimi: "EN modunda
@@ -680,11 +698,11 @@ const DG_I18N_EN={
    düğümleri tam eşleşmeyle çevrilir. === */
 "✓ {n} onaylı kayıt yüklendi · {t} · noktaya dokun → bilgi + fotoğraf.":"✓ {n} approved records loaded · {t} · tap a point → info + photo.",
 "⚠ {n} onaylı kayıt yüklendi · {t} · kümeleme eklentisi yüklenemedi, noktalar tek tek çizildi.":"⚠ {n} approved records loaded · {t} · clustering plugin failed to load, points drawn individually.",
-"📌 <b>{a}</b> waypoint kayıtlı · <b>{b}</b> yapıldı · <b>{c}</b> bekliyor. Liste kalıcıdır.":"📌 <b>{a}</b> waypoints saved · <b>{b}</b> done · <b>{c}</b> pending. The list is persistent.",
+"📌 <b>{a}</b> ölçüm noktası kayıtlı · <b>{b}</b> yapıldı · <b>{c}</b> bekliyor. Liste kalıcıdır.":"📌 <b>{a}</b> waypoints saved · <b>{b}</b> done · <b>{c}</b> pending. The list is persistent.",
 "boş park (projesi/kaydı yok) gizlendi — yalnız sorgulanmışlar.":"empty park(s) (no projects/records) hidden — only queried ones shown.",
 "kişi":"contributor(s)","proje":"project(s)","kayıt":"record(s)","tür":"species","kullanıcı":"user(s)","park":"park(s)",
 "ort. çap":"avg. DBH","ort. boy":"avg. height","alan":"area","raporda":"in report",
-"onaylı kayıt":"approved records","kayıt onay bekliyor":"record(s) awaiting approval",
+"kayıt onay bekliyor":"record(s) awaiting approval",
 "🏆 En İyi":"🏆 Best","🌲 İbreli":"🌲 Conifer","🍃 Yapraklı":"🍃 Broadleaf","Latince":"Latin","Adet":"Count","Karbon (kg)":"Carbon (kg)",
 "Ort. Çap":"Avg. DBH","Ort. Boy":"Avg. Height",
 "· proje:":"· project:","Parkı değiştir":"Change park",
@@ -700,7 +718,7 @@ const DG_I18N_EN={
 "Taleplerim":"My Requests","Tamamlandı":"Completed","İşleme Alındı":"Processing","Reddedildi":"Declined",
 "Tümünü aç":"Expand all","Tümünü kapat":"Collapse all",
 "🔀 = bu parkı seçtiğin hedefin içine taşır (projeler + ölçümler + adlar), kaynak kimlik silinir. ✏️ = adı düzeltir; proje adları otomatik yeniden kurulur (\"park - etiket\"). 🗑️ = yalnız yanlış kimlikse; bağ kopar, veri silinmez.":"🔀 = moves this park into the target you picked (projects + measurements + names); the source identity is deleted. ✏️ = fixes the name; project names are recomposed automatically (\"park - label\"). 🗑️ = only for wrong identities; the link is removed, data is not deleted.",
-"📄 Rapor Oluştur":"📄 Generate Report",
+
 /* placeholder / title öznitelikleri */
 "örn: 52":"e.g. 52","örn: 7,2":"e.g. 7.2","örn. deneme":"e.g. trial",
 "🔍 Ara...":"🔍 Search...","park, proje, kullanıcı, tür, nokta…":"park, project, user, species, point…",
@@ -714,7 +732,7 @@ const DG_I18N_EN={
 /* 0035c ikinci tur: gözden kaçan statik dizeler */
 "Ayarlar → Gizlilik ve Güvenlik → Konum Servisleri →Safari Siteleri→ \"Uygulamayı Kullanırken\" seçin, sayfayı yenileyin.":"Settings → Privacy & Security → Location Services → Safari Websites → choose \"While Using the App\", then refresh the page.",
 "CSV'yi içe aktar:":"Import the CSV:",
-"— 🔀 ile birleştir. OSM'de adı olmayan park \"İsimsiz Park\" gelir, ✏️ ile ad ver (proje adları otomatik yeniden kurulur).":"— merge with 🔀. Parks without a name in OSM appear as \"Unnamed Park\"; name them with ✏️ (project names are recomposed automatically).",
+
 
 /* === 0035d: UYGULAMA DİNAMİK DİZELERİ — toast/confirm/tablo/rozet/panel.
    Tam eşleşenler MutationObserver ile, confirm'ler dgCf() ile çevrilir. === */
@@ -782,9 +800,9 @@ const DG_I18N_EN={
 "Tüm kayıtların şehir/ülke bilgisi GPS koordinatından yeniden algılansın mı? (Nominatim limiti ~1 istek/sn)":"Re-detect city/country for all records from GPS coordinates? (Nominatim limit ~1 request/s)",
 "Kayıt silinsin mi?":"Delete this record?",
 "Kayıt tamamen silinsin mi?":"Permanently delete this record?",
-"⚠ Bu projedeki TÜM waypoint'ler kalıcı olarak silinsin mi? Yanlış liste ise sonra yeniden yükleyebilirsiniz.":"⚠ Delete ALL waypoints in this project permanently? If it's the wrong list you can re-upload later.",
+
 "Hedeften {d} m uzaktasın.\nYine de 'vardım' işaretlensin mi?":"You are {d} m from the target.\nMark as 'arrived' anyway?",
-"Proje silinsin mi? Bağlı {n} ölçüm ve waypoint'ler de silinebilir.\n(Park kimliği silinmez — aynı parktaki diğer projelerin karşılaştırması devam eder.)":"Delete this project? Linked {n} measurements and waypoints may also be deleted.\n(The park identity is kept — comparison of other projects in the same park continues.)",
+
 "Bekleyen yayın isteği iptal edilsin mi?":"Cancel the pending publish request?",
 "için onaylı nokta yok":"— no approved points",
 "İsimsiz park":"Unnamed park",
@@ -971,7 +989,7 @@ const DG_I18N_EN={
 "Hedef:":"Target:",
 "Hedef seç / tamamlandı":"Select a target / completed",
 "Hedef yapmak için tıkla":"click to set as target",
-"Bu projede waypoint yok. CSV yükleyin.":"No waypoints in this project. Upload a CSV.",
+
 "Alan":"Area",
 "Yayın durumu":"Publish status",
 "Yayınlandı":"Published",
@@ -1013,13 +1031,13 @@ const DG_I18N_EN={
 "📥 Yedekten Yükle":"📥 Restore from Backup",
 "Yedek dosyası okunamadı.":"Could not read the backup file.",
 "Bu dosya bir DendroGeo yedeği değil.":"This file is not a DendroGeo backup.",
-"{m} ölçüm · {p} proje · {w} waypoint · {r} talep içeriyor (dışa aktarma: {d}). Tam geri yükleme SQL dosyası indirilsin mi? (Supabase → SQL Editor'da çalıştırılır; kimlikler ve sahipler korunur, çakışan satırlar atlanır.)":"Contains {m} measurements · {p} projects · {w} waypoints · {r} requests (exported: {d}). Download the full-restore SQL file? (Run it in Supabase → SQL Editor; identities and owners are preserved, conflicting rows are skipped.)",
+
 "✓ Geri yükleme SQL'i indirildi — Supabase → SQL Editor'da çalıştırın. Satırlar korunur, çakışanlar atlanır.":"✓ Restore SQL downloaded — run it in Supabase → SQL Editor. Existing rows are preserved, conflicts skipped.",
 "Geri yükleme hazırlanamadı: ":"Could not prepare the restore: ",
-"Proje TÜM ölçüm ve waypoint'leriyle kalıcı olarak silinsin mi? Bu işlem geri alınamaz (park kimliği kalır).":"Delete the project permanently with ALL its measurements and waypoints? This cannot be undone (the park identity remains).",
-"✓ Proje silindi (ölçümler + waypoint'ler cascade ile kaldırıldı)":"✓ Project deleted (measurements + waypoints removed via cascade)",
+
+
 "Proje silinemedi: ":"Could not delete project: ",
-"Projeyi kalıcı olarak sil (ölçümler + waypoint'ler dahil)":"Delete permanently (including measurements + waypoints)",
+
 "▾ liste":"▾ list",
 "▾ ülke kırılımı":"▾ by country",
 "Kullanıcılar (tümü) — karta tekrar tıklayınca kapanır":"Users (all) — click the card again to close",
@@ -1032,7 +1050,7 @@ const DG_I18N_EN={
 "(şu an başka kimse yok — kanal sessiz)":"(nobody else online right now — channel silent)",
 "Gerçek zamanlı katman bu tarayıcıda etkin değil.":"The realtime layer is not available in this browser.",
 "Panel":"Dashboard",
-"Canlı Harita":"Live Map",
+
 "Dünya Verisi":"World Data",
 "Ölçüm Yönetimi":"Measurement Admin",
 "Kullanıcılar":"Users",
@@ -1080,7 +1098,7 @@ const DG_I18N_EN={
 "Park davetlerin":"Your park invitations",
 "parkına çalışma arkadaşı davetin var":"you have a collaboration invitation for this park",
 "not":"note",
-"ortak":"shared",
+
 "Giriş gerekli":"Login required",
 "Paylaşılabilecek parkın yok":"No park available to share",
 "Davet e-postası kimlik doğrulamaz; kabul yalnız arkadaşın KENDİ hesabıyla olur. Ortak ölçümleri kendi adıyla girer, konum çiti ve onay akışı aynen geçerlidir.":"Invitation e-mails do not verify identity; acceptance happens only through your friend's OWN account. Collaborators enter measurements under their own name; the geofence and approval flow apply unchanged.",
@@ -1206,12 +1224,12 @@ const DG_I18N_EN={
 "Konumun {p} DIŞINDA (kenara ~{d} m). Bu proje yalnızca bu parktan veri kabul eder — başka parktan giriş engellendi.":"Your location is OUTSIDE {p} (~{d} m from the edge). This project accepts data only from this park — entry from another park was blocked.",
 "Konum doğrulanamadı ({r})":"Location could not be verified ({r})",
 "kenar payı":"edge margin",
-"proje":"project",
+
 "ölçüm":"measurement",
 "parkı":"the park",
 "Cihazda konum servisi yok: yerinde doğrulama yapılamadı; sunucu çiti yine de park dışı girişi reddeder.":"No location service on this device: on-site verification could not run; the server-side geofence still rejects out-of-park entries.",
 "ℹ P{p} için kayıt yok · Yeni kayıt oluşturulacak.":"ℹ No record for P{p} · a new record will be created.",
-"✓ {n} waypoint yüklendi ve projeye kalıcı kaydedildi.":"✓ {n} waypoints uploaded and saved to the project permanently.",
+"✓ {n} ölçüm noktası yüklendi ve projeye kalıcı kaydedildi.":"✓ {n} waypoints uploaded and saved to the project permanently.",
 "✅ {n} çevrimdışı ölçüm senkronize edildi!":"✅ {n} offline measurements synchronized!",
 "⚠️ {n} ölçüm başarısız. Hata: {e}":"⚠️ {n} measurements failed. Error: {e}",
 "Senkronizasyon hatası:":"Sync error:",
@@ -1262,7 +1280,7 @@ const DG_I18N_EN={
 "⚠ Onaylı kayıtlar yüklenemedi":"⚠ Approved records could not be loaded",
 "— harita bu yüzden boş. Veri silinmedi:":"— the map is empty because of this. No data was deleted:",
 "Önce proje seçin.":"Select a project first.",
-"Rapor alınamadı:":"Could not fetch the report:",
+
 "Park → Proje → Kullanıcı":"Park → Project → User",
 "Google girişi bu projede henüz etkin değil. Supabase → Authentication → Providers → Google → Enable ile açın; ardından bu düğme çalışır.":"Google sign-in is not enabled for this project yet. Enable it via Supabase → Authentication → Providers → Google; the button will then work.",
 "Google girişi başlatılamadı:":"Could not start Google sign-in:",
@@ -1377,7 +1395,7 @@ const DG_I18N_EN={
 "Tara":"Scan",
 "Uydu/sokak altlığı":"Satellite/street basemap",
 "Sokak":"Street",
-"Uydu":"Satellite",
+
 "DÖNEM":"PERIOD",
 "Güncel sezon (en yeni görüntü)":"Current season (newest imagery)",
 "WorldCover yılı (2021)":"WorldCover year (2021)",
@@ -1393,9 +1411,9 @@ const DG_I18N_EN={
 "✓ Tarama bitti: {n} hücre · kaydırıcıları oynat, adaylar haritada.":"✓ Scan complete: {n} cells · move the sliders, candidates appear on the map.",
 "Tarama başarısız: ":"Scan failed: ",
 "Uydu kanıtı":"Satellite evidence",
-"Kabul":"Accept",
+
 "Harita doğru":"Map is right",
-"Geri al":"Undo",
+
 "{n} aday hücre '{c}' olarak kabul edilsin mi? (Yalnız görüntüyle gözle doğruladığın sınıf için kullan)":"Accept {n} candidate cells as '{c}'? (Use only for a class you visually verified in the imagery)",
 "✓ {n} hücre kabul edildi ve kaydedildi.":"✓ {n} cells accepted and saved.",
 "Tüm kararlar silinsin mi? (Tarama profili kalır)":"Delete all decisions? (The scan profile is kept)",
@@ -1411,13 +1429,13 @@ const DG_I18N_EN={
 "Analiz moduna dön":"Return to analysis mode",
 "Park seçmek için algılamayı aç":"Enable detection to pick a park",
 "Analiz":"Analysis",
-"Park seç":"Pick park",
+
 
 /* === 0058 · Doğrulanmış Harita PNG çıktısı === */
 "Doğrulanmış Harita":"Validated Map",
 "Önce en az bir hücre kararı ver — doğrulanmış harita kararlarını gösterir.":"Make at least one cell decision first — the validated map shows your decisions.",
 "✓ Doğrulanmış harita PNG indirildi.":"✓ Validated map PNG downloaded.",
-"Önce arazi örtüsü analizini çalıştırın.":"Run the land cover analysis first.",
+
 "PNG üretilemedi.":"Could not produce the PNG.",
 };
 
@@ -1707,7 +1725,7 @@ Object.assign(DG_I18N_EN,{
  "Yayımlanan bilimsel raporları inceleyin ↗":"Browse published scientific reports ↗",
  "✓ Veri yedeği indirildi: {f} ({n} ölçüm). Fotoğraf dosyaları ve cihazdaki kuyruk ayrı yedeklenir.":"✓ Data backup downloaded: {f} ({n} measurements). Photo files and the device queue need separate backups.",
  "⚠ Son veri yedeğinin üzerinden {n} gün geçti — bugünkü yedeği alın":"⚠ Your last data backup was {n} days ago — export today's backup",
- "Veri yedeği, bu oturumun erişebildiği ölçüm, proje, waypoint, talep, park ve yüzey kayıtlarını içerir. Fotoğraf dosyaları, hesaplar ve cihazdaki çevrimdışı kayıtlar ayrıca korunmalıdır.":"The data backup includes measurements, projects, waypoints, requests, parks and surface records accessible to this session. Photo files, accounts and offline records on the device require separate protection."
+ 
 });
 
 Object.assign(DG_I18N_EN,{
@@ -1765,7 +1783,7 @@ Object.assign(DG_I18N_EN,{
  "Chave et al. 2014 (çevre ÷ π → DBH + boy + ρ)":"Chave et al. 2014 (circumference ÷ π → DBH + height + ρ)",
  "Özel tür ρ değeri yoksa yalnız kendi grup geneli":"If species-specific ρ is unavailable, only the corresponding group default is used",
  "CC BY‑NC 4.0 paylaşım lisansı":"CC BY‑NC 4.0 data-sharing licence",
- "GPS konumunu alın, waypoint pusulasıyla ağaca yönelin; 1,30 m yükseklikte göğüs çevresini mezurayla ölçün, boy ve grup/tür bilgilerini girin.":"Record the GPS position and navigate using the waypoint compass; measure stem circumference with a tape at 1.30 m and enter height and group/species information.",
+ 
  "GPS · ÇEVRE · BOY · FOTOĞRAF":"GPS · CIRCUMFERENCE · HEIGHT · PHOTO",
  "Fotoğraf eklenirse tarayıcı içi QA/QC uygulanır. Ölçülen göğüs çevresi önce π’ye bölünerek gerçek DBH çapına dönüştürülür; ardından Chave et al. (2014) modeliyle AGB, kök biyokütlesi ve karbon hesaplanır.":"If a photo is added, in-browser QA/QC is applied. Measured stem circumference is divided by π to derive DBH; the Chave et al. (2014) model is then used to estimate aboveground biomass, root biomass and carbon.",
  "AGB · BHB · C · m³":"AGB · BGB · C · m³",

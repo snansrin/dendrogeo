@@ -6,7 +6,7 @@
     setLayer(renderLayer(rows));
     getProjectControl().value=String(projectId);
     loadWaypoints();
-    notify("✓ "+rows.length+" waypoint (P"+first+"–P"+(next-1)+")","ok","📍");
+    notify("✓ "+rows.length+" ölçüm noktası (P"+first+"–P"+(next-1)+")","ok","📍");
     clearSelection();
   }
   root.DG_GRID_WAYPOINT_COMPLETION_UI=Object.freeze({complete:completeGridWaypoints});

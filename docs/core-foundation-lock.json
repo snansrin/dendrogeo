@@ -10418,6 +10418,138 @@
           "sha256": "c08d476d9ea1a571dd9b348b23dafc7c654db063e035e18dc610855d7cbb3650"
         }
       ]
+    },
+    {
+      "date": "2026-10-21",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: replace remaining Turkish-facing Waypoint labels with Ölçüm noktası/noktaları in live map menus, navigation feedback, grid tools, backup descriptions and public copy. Normalized AST comparison verifies display-text-only changes in 18 runtime sources; technical selectors, variables, schema names, calculations and styles remain unchanged. Update only matching human-text test expectations and regenerate index.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "c08d476d9ea1a571dd9b348b23dafc7c654db063e035e18dc610855d7cbb3650",
+          "sha256": "5c434e9c193e4a366436d14bc15aeffe91dfefa1a199879fcf22c1966917e1f7"
+        },
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "9c4834a8969837ddabba8d1f3fdf1ad5443804d7444d4331c5a7c299d64ce415",
+          "sha256": "d7a164c3946d5c1a6dcca426a006987cfd393bdf1285de7567389a8a21b3b1ec"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "1b2e77e2cd4df2d7483fa099834f6d16044bd311cde5424ea2bd49886431e45e",
+          "sha256": "9e15628120588385c5b171b74d7bdeb6eaba15a4396317926c67848db7c272d3"
+        },
+        {
+          "path": "scripts/grid-menu-smoke.mjs",
+          "previous_sha256": "0a817e09aa08edb35feab6929ec7d2f25a1bbaa9bf608189e1ad06cb88ab7ee7",
+          "sha256": "bde99499eb3bed8ceeb95a68408dfaf349e56faa2bbc21f3cb211d8d69460dac"
+        },
+        {
+          "path": "src/application/map/arrive-at-waypoint.js",
+          "previous_sha256": "a875bac2f370eb9ade3d9423240938b3ef2e43ad993b385dea563fb7e59d78a1",
+          "sha256": "23afedd8272bdd2639e1f7fd72f9e8b37f454b440e87f63a0e52867db7704da0"
+        },
+        {
+          "path": "src/application/parks/upload-waypoint-csv.js",
+          "previous_sha256": "3abbaf00f10d5662417388c7becdbd3274cfb664ce38a691a37ae4e03c43ae67",
+          "sha256": "0c56e874e427181a42212b8ce6bacdd57ef945571a910e5e6d69448bb90c8fdb"
+        },
+        {
+          "path": "src/services/grid-engine.js",
+          "previous_sha256": "60e691fa0c999077c2438c709b17e16c6232bb6753055a53b0508286583f2cf0",
+          "sha256": "d7e9d02d5370446559de0b54e469b8379a696d5016d0459eec64fb6123b7a9ee"
+        },
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "26642848c4e079030c79741eaeb4094971b67bcd5a7275d92990e3727f33b555",
+          "sha256": "3d6dd746f50af262e31140cfa8a689bc0bb78d0ed85a16ff94b9ee786a482277"
+        },
+        {
+          "path": "src/ui/confirm-measurement-project-delete.js",
+          "previous_sha256": "2124a7956858680fe5dc9e0743ec4a503b91e59a1628488ec4718341c4eed3fc",
+          "sha256": "b0c594f70bd0500f810993f508ef43eefe1aa17c7bcd0e6627586911b1a9683a"
+        },
+        {
+          "path": "src/ui/confirm-waypoint-list-deletion.js",
+          "previous_sha256": "57857f3b153f47b1372204a672790f2fb5ef5eb5fbeebe3b7af4fe4ad71ad366",
+          "sha256": "9218f9426434c9f1b4551f73857187e58db572874efcf4e8f4b1a05edd261beb"
+        },
+        {
+          "path": "src/ui/grid-waypoint-completion.js",
+          "previous_sha256": "eb76e596143f59992dbaba08111319f67633c622e3132db745ff08d4eee3fb38",
+          "sha256": "bbf6ce61f1c44d8c1eb6e8aa7fd0e8a4762d9ee90c179196aa759c2ce2264946"
+        },
+        {
+          "path": "src/ui/grid-waypoint-controller.js",
+          "previous_sha256": "eb4f58d30fd59a46840f58f2b428b79d8afc9e1211d48d26ea2cfb74ba2b3531",
+          "sha256": "98354166ab55d3bd47f61179e976d538638a1db6d0c64a9b3fa6bc2cde76d272"
+        },
+        {
+          "path": "src/ui/park-info-panel.js",
+          "previous_sha256": "ba90b0ba0f62a8ce24b25ac26b285a382b4a4829e1b0ec793aef2c1c5c49aaaa",
+          "sha256": "a7cfe21363250d269831ccef5ed96becc1056b4543647b5f95c15e4c50261af8"
+        },
+        {
+          "path": "src/ui/park-menu-ui.js",
+          "previous_sha256": "f64c05af2ee722a3efffe8ae5c1557b0cf6ea27135dd65bf932700b6a873a61a",
+          "sha256": "1afba349c908f2be40effc4be5e23a12dce73cd333987c1bf8901a48fb05a436"
+        },
+        {
+          "path": "src/ui/show-waypoint-load-error.js",
+          "previous_sha256": "dd72c902dd39f2e606c4a0cc631f7f17d9103ed2d0d232eefb991792d4d6d3de",
+          "sha256": "cb6d5466bcd2ca8f849bc3dca4ce3ccad0be8f92aa1d414ec7bd41051da3151c"
+        },
+        {
+          "path": "src/ui/waypoint-list.js",
+          "previous_sha256": "de71786643ef5bbdf852adb6bd4e844d2335ef70210638835c84cddb0e42e73b",
+          "sha256": "8ac88de43ff6b2a921547f8f61027632e5006205cf1c1e6454dcb13e141394c2"
+        },
+        {
+          "path": "src/ui/waypoint-navigation-feedback.js",
+          "previous_sha256": "72ddf74dd6945c0d6389b0d6c9421f1f4aed17da6174d8b580185f18616bf6e3",
+          "sha256": "fc139f4ce77218da1bac3b4646ca2ef365052b0b60c159783c7928c4bdb182bb"
+        },
+        {
+          "path": "test/grid-waypoint-controller-ui.test.mjs",
+          "previous_sha256": "de0b0309f7cc660d6054df559a98bbc41a8ee9e9055ed05bed9cdf0a86ad36c8",
+          "sha256": "5f1f8b6b1522684a3ae5149516eb7c6b1ab2e9616cf9b74ffe0f196d38a11862"
+        },
+        {
+          "path": "test/landing-claims.test.mjs",
+          "previous_sha256": "cb65c129227f6b633e411ed38e7913d0cfda59212514c505d7488f747595b4e1",
+          "sha256": "d72f5e68eb7f03a252a3ee32bb2f415f21336177a17b75ed1a80f5c30db59bb7"
+        },
+        {
+          "path": "test/measurement-points-labels.test.mjs",
+          "previous_sha256": "f97ba4b257a8346d5451c494b3fae1bf1ec0dedfcb98a30239f306801d4457fa",
+          "sha256": "c506a91786cbfd046dde05aec27bfd189153a1238d3204c3105555a53905c0c8"
+        },
+        {
+          "path": "test/waypoint-arrival-modules.test.mjs",
+          "previous_sha256": "1fec01b2fb1b3d6321d2e71f13af50d350a0f7c251804bf8c5f4c50071fc2991",
+          "sha256": "080abb17e99d8450a61c4577070cc7ca306b5617199f5131b4947c0c0b8b43bb"
+        },
+        {
+          "path": "test/waypoint-csv-upload-modules.test.mjs",
+          "previous_sha256": "c2ac1fde9029a4123ed0c10a5937946555093fd8d6883760101f302de67dcead",
+          "sha256": "90f50a8d3436c6b0524eebc797f773575e0b4e6bce563a32e62778c78830343b"
+        },
+        {
+          "path": "test/waypoint-delete-modules.test.mjs",
+          "previous_sha256": "968715d1f6c11cd540be739a6f0ef4695c14374bc1f6ef67375121d2df172c7d",
+          "sha256": "a03abf59b5f127886d684bfc64b0a825d8735a5fb85fa3bd04378108ed833993"
+        },
+        {
+          "path": "test/waypoint-load-modules.test.mjs",
+          "previous_sha256": "cd0f5b0436f1597a17d235e78f0554dec8ff341d2111dd1adf891d454635327b",
+          "sha256": "f248350d87f5c5641f1abc9c0343fd6f77b3b8230302a5f4ff8eec39c10ffa2a"
+        },
+        {
+          "path": "test/waypoint-navigation-actions.test.mjs",
+          "previous_sha256": "4ae09da6603b88bb86517e30014925e4219c30aa33e09dccab4afe67e560bda0",
+          "sha256": "42c5d34d5b7f195adf89e1debe0f3b30a70f1f14a5726910a2c38768631f8530"
+        }
+      ]
     }
   ]
 }

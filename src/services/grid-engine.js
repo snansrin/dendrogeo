@@ -123,7 +123,7 @@ function toggleWpVis(){
 ========================================================= */
 
 const DG_GRID_WAYPOINT_CREATE=window.DG_GRID_WAYPOINT_CREATE_APPLICATION.create({
-  confirmBatch:count=>confirm(count+" waypoint?\nDevam?"),
+  confirmBatch:count=>confirm(count+" ölçüm noktası?\nDevam?"),
   fetchLatest:pid=>window.DG_GRID_WAYPOINT_STORE.fetchLatest(sb,pid),
   isCurrent:({source,park,projectId})=>window.DG_GRID_WAYPOINT_CONTEXT.isCurrent({
     source,park,projectId,getReviewSignature:dgGridReviewSignature,
