@@ -244,14 +244,14 @@
 <script src="src/config/wood-density-lock.js?v=895bae6a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/species.js?v=1b610c26" type="application/x-dendrogeo-module" defer></script>
 <!-- DİL KATMANI (0035): sözlük verisi çalışma zamanı çeviricisinden önce yüklenir. -->
-<script src="src/config/i18n-en.js?v=e9966304" type="application/x-dendrogeo-module" defer></script>
+<script src="src/config/i18n-en.js?v=c16155e0" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/i18n.js?v=5466c5ca" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/map/web-mercator-coordinates.js?v=721838c9" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/geo.js?v=d1460277" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/truncation.js?v=f438600d" type="application/x-dendrogeo-module" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"9e4ce940f884878e"</script>
+<script id="dgRuntimeBuild" type="application/json">"cba9053f44003a70"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
 <script src="src/adapters/parks/fetch-nominatim-osm-way.js?v=7e4900cf" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/osm-water-backup.js?v=9dcc34a2" type="application/x-dendrogeo-module" defer></script>
@@ -894,7 +894,7 @@
 <script src="src/ui/grid-reset.js?v=03ef3b12" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/map-layer-visibility.js?v=41681083" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/grid-selection.js?v=96cb0182" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/grid-summary.js?v=e5b41380" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/grid-summary.js?v=9381be1a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/grid-waypoint-layer.js?v=0260b5d6" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/grid-engine.js?v=c785009e" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/editor-ui.js?v=e4857246" type="application/x-dendrogeo-module" defer></script>
@@ -919,7 +919,7 @@
 <script src="src/ui/park-export-canvas.js?v=23a12a32" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-landcover-analysis.js?v=b15afad5" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/export/download-blob.js?v=0d599e40" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-export.js?v=6fb75bc2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-export.js?v=7adbf9d3" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/users/record-status-meta.js?v=0a199a5e" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/users/group-own-records.js?v=e9be083d" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/record-item.js?v=ef090575" type="application/x-dendrogeo-module" defer></script>
@@ -954,6 +954,7 @@
 <link rel="stylesheet" href="css/surface-drawing.css?v=cb61e294">
 <link rel="stylesheet" href="css/gis-workspace.css?v=a031f690">
 <link rel="stylesheet" href="css/appearance.css?v=fccfe24b">
+<link rel="stylesheet" href="css/operation-help.css?v=a9064a10">
 <!-- dg-site-identity -->
 <script type="application/ld+json">
 {
@@ -1988,6 +1989,8 @@
 <!-- Resolve the lazily loaded class list for the legacy, read-only park PNG path. -->
 <script src="src/ui/park-export-lazy-class-bridge.js?v=38c67f2d" type="application/x-dendrogeo-module" defer></script>
 
-<script src="/src/bootstrap/app-runtime.js?v=a764385d" defer></script>
+<script src="src/ui/operation-help-content.js?v=38e85aec" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/operation-help.js?v=7e680971" type="application/x-dendrogeo-module" defer></script>
+<script src="/src/bootstrap/app-runtime.js?v=eeb708e5" defer></script>
 </body>
 </html>

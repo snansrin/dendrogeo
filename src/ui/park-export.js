@@ -81,7 +81,7 @@ function downloadWaypointsCSV(){
     !rows.length
   ){
     return toast(
-      "WP yok"
+      "Ölçüm noktası yok"
     );
   }
 
@@ -96,7 +96,7 @@ function downloadWaypointsCSV(){
   toast(
     "✓ "+
     rows.length+
-    " WP",
+    " ölçüm noktası",
     "ok",
     "📥"
   );

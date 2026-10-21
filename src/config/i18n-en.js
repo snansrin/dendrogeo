@@ -2,6 +2,8 @@
 /* English dictionary data for the runtime translator in i18n.js. */
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"📥 Ölçüm noktaları CSV":"📥 Measurement points CSV",
+"Ölçüm noktası yok":"No measurement points available",
 "Aktif ölçüm noktası yok":"No active measurement point",
 "1 · GRID & ÖLÇÜM NOKTALARI":"1 · GRID & MEASUREMENT POINTS",
 "Ölçüm noktası yükleme hatası:":"Waypoint upload failed:",

@@ -28,7 +28,7 @@ function dgRenderGridSummary({ element, size, total, measured, empty, selected, 
     (selected > 0 ? `<button type="button" class="btn sm" style="background:#1d4ed8;color:#fff" data-grid-summary-action="createManual">${translateFormat("📍 Seçili ({n})",{n:selected})}</button>` : "")+
     (selected > 0 ? `<button type="button" class="btn sm ghost" data-grid-summary-action="clearSelection">✕ Seçimi Temizle</button>` : "")+
     `<button type="button" class="btn sm ghost" data-grid-summary-action="downloadGeoJson">📥 GeoJSON</button>`+
-    `<button type="button" class="btn sm ghost" data-grid-summary-action="downloadCsv">📥 WP CSV</button>`+
+    `<button type="button" class="btn sm ghost" data-grid-summary-action="downloadCsv">${translate("📥 Ölçüm noktaları CSV")}</button>`+
     `</div>`+meta;
   bindGridSummaryActions(element,actions);
 }
