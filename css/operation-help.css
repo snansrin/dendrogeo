@@ -5,7 +5,7 @@
 #shell .dg-operation-help-label>.dg-operation-help{margin-left:auto}
 #shell label.dg-png-option:has(+.dg-operation-help){display:inline-flex;box-sizing:border-box;width:calc(100% - var(--dg-operation-help-size) - 8px);vertical-align:middle}
 #shell .dg-png-btn.dg-has-operation-help{display:inline-flex;max-width:calc(100% - var(--dg-operation-help-size) - 8px);vertical-align:middle}
-#shell .dg-operation-help-grid{display:grid!important;grid-template-columns:minmax(0,1fr) var(--dg-operation-help-size)!important;gap:6px;align-items:center}
+#shell .dg-operation-help-grid{display:grid!important;grid-template-columns:minmax(0,1fr) var(--dg-operation-help-size)!important;gap:8px;align-items:center}
 #shell .dg-operation-help-grid>.dg-has-operation-help{max-width:100%;width:100%;min-width:0}
 #shell .dg-operation-help-grid>.dg-operation-help{margin:0}
 #shell .dg-editor-rail{display:grid;grid-template-columns:42px var(--dg-operation-help-size);align-items:center}
