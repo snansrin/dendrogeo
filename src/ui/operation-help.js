@@ -49,6 +49,8 @@
    const label=control.labels?.[0]||control.closest('.dg-png-field,.dg-sens-row')?.querySelector('label,.dg-sens-label')||control.parentElement?.querySelector(':scope>label,:scope>.lbl');
    if(label?.querySelector('.dg-field-help'))return;
    host=label?.querySelector('.dg-png-copy strong,.measure-label-copy')||label;
+   // Some slider captions are themselves action buttons with their own guide.
+   if(host?.matches('button,[role="button"],a[href]'))return;
    if(host?.querySelector('.dg-operation-help'))return;
   }
   const doc=root.document,button=doc.createElement('button');button.type='button';button.className='btn sm ghost dg-operation-help';button.textContent='?';
