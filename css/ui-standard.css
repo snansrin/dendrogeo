@@ -143,7 +143,8 @@ body.dg-page{background:var(--bg);color:var(--ink);font:15px/1.65 var(--f-ui)}
 }
 #shell :is(button,[role="button"]):disabled{cursor:not-allowed;opacity:.45;transform:none}
 #shell :is(.btn,.dg-png-btn){font-family:var(--f-ui);min-height:44px;line-height:1.4;white-space:normal}
-#shell button.dg-field-help{width:44px;height:44px;flex:0 0 44px;color:var(--green);border-color:var(--line);background:var(--tint)}
+/* Match section guides: a 20px visible mark inside a transparent touch target. */
+#shell .dg-field-help{box-sizing:border-box;display:inline-grid;place-items:center;width:44px;height:44px;min-width:44px;min-height:44px;max-width:44px;max-height:44px;flex:0 0 44px;padding:0;border:0;border-radius:0;color:var(--green);background:radial-gradient(circle at center,var(--tint) 0 9px,var(--line) 9px 10px,transparent 10px);font:700 .75rem/1 var(--f-ui);letter-spacing:normal;text-transform:none;box-shadow:none}
 #shell :is(.btn,.dg-png-btn):active{transform:translateY(0);box-shadow:none}
 @media(prefers-reduced-motion:reduce){
  #shell #main .view details>summary,#shell #main .view details>summary::after{transition:none}
