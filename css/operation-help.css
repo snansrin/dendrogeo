@@ -1,0 +1,24 @@
+/* Contextual help uses the existing theme and type tokens. */
+:root{--dg-operation-help-size:44px}
+#shell button.dg-operation-help{display:inline-flex;align-items:center;justify-content:center;flex:0 0 var(--dg-operation-help-size);width:var(--dg-operation-help-size);min-width:var(--dg-operation-help-size);height:var(--dg-operation-help-size);min-height:var(--dg-operation-help-size);padding:0;margin:2px 0 2px 4px;border:1px solid var(--line);border-radius:50%;background:var(--tint);color:var(--green);font:700 .82rem/1 var(--f-ui);vertical-align:middle;box-shadow:none}
+#shell .dg-operation-help-label{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+#shell .dg-operation-help-label>.dg-operation-help{margin-left:auto}
+#shell label.dg-png-option:has(+.dg-operation-help){display:inline-flex;box-sizing:border-box;width:calc(100% - var(--dg-operation-help-size) - 8px);vertical-align:middle}
+#shell .dg-png-btn.dg-has-operation-help{display:inline-flex;max-width:calc(100% - var(--dg-operation-help-size) - 8px);vertical-align:middle}
+#shell .dg-operation-help-grid{display:grid!important;grid-template-columns:minmax(0,1fr) var(--dg-operation-help-size)!important;gap:8px;align-items:center}
+#shell .dg-operation-help-grid>.dg-has-operation-help{max-width:100%;width:100%;min-width:0}
+#shell .dg-operation-help-grid>.dg-operation-help{margin:0}
+#shell .dg-editor-rail{display:grid;grid-template-columns:42px var(--dg-operation-help-size);align-items:center}
+#shell .dg-editor-rail>.dg-operation-help{margin:0}
+.dg-operation-help-dialog{box-sizing:border-box;width:min(560px,calc(100vw - 28px));max-height:calc(100dvh - 36px);padding:0;overflow:auto;border:1px solid var(--line);border-radius:var(--radius,12px);background:var(--surface);color:var(--ink);font:14px/1.65 var(--f-ui);box-shadow:0 12px 48px #0003}
+.dg-operation-help-dialog::backdrop{background:#0008}
+.dg-operation-help-header{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line);background:var(--surface)}
+.dg-operation-help-header h2{margin:0;min-width:0;font:600 1.2rem/1.35 var(--f-disp);overflow-wrap:anywhere}
+.dg-operation-help-header button{flex:0 0 auto;min-height:44px;font-family:var(--f-ui)}
+.dg-operation-help-body{padding:8px 18px 18px;overflow-wrap:anywhere}
+.dg-operation-help-body ol{padding-left:22px;margin:8px 0 0}
+.dg-operation-help-body li+li{margin-top:10px}
+.dg-operation-help-body .dg-meta{margin:4px 0;color:var(--mut)}
+.dg-operation-help-dialog :focus-visible{outline:2px solid var(--green);outline-offset:3px}
+@media(pointer:coarse){:root{--dg-operation-help-size:44px}}
+@media(max-width:430px){.dg-operation-help-header{padding:12px}.dg-operation-help-body{padding:6px 14px 16px}.dg-operation-help-header h2{font-size:1.05rem}}

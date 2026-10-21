@@ -53,3 +53,4 @@ jobs:
           node scripts/measurement-save-smoke.mjs
           node scripts/park-analysis-interaction-smoke.mjs
           node scripts/surface-menu-smoke.mjs
+          node scripts/operation-help-smoke.mjs

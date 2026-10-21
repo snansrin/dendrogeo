@@ -10550,6 +10550,53 @@
           "sha256": "42c5d34d5b7f195adf89e1debe0f3b30a70f1f14a5726910a2c38768631f8530"
         }
       ]
+    },
+    {
+      "date": "2026-10-21",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: contextual operation instructions and clear measurement-points CSV label. UI-only additions preserve original controls, CSV schema, scientific calculations, map geometry and data access.",
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "08fb8fc087cd01f4e6259f3193ae7abd40d9ff77a1916393efb089a006eae5ad",
+          "sha256": "337977606da78f5b37ee62c660f9d5af540ed5b9fde4131b9cbaf5e1ddfe49f0"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "ceb33441d86b57702f9a008cb9eaa872643bb45a862b83f228de4ba6394e1b3b",
+          "sha256": "376e2c3d31f9436b474861b0a4bbd4ea93f8dff4572494890fb6e86f668b6135"
+        },
+        {
+          "path": "partials/boot.html",
+          "previous_sha256": "840dacbf3466801315b68c28ebbb529d9bfa5c548d3a5d7ba76f0bba3794639d",
+          "sha256": "1384ba99f267be98715d9cbecb9acf1aa4e11a78abbee311f06b483bb65df22b"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "75e9ea8e025f022343ee0164e1c3e23436945306b6ce1b06468787d325cadb9a",
+          "sha256": "318e846b20f68fa888c8a46f6463f99867a23900f9d104b90c6df51a074b9eb2"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "88c647dcf6fea2086f8cdb46baa92f90fee8326e8e002a5845b1b327f68598ab",
+          "sha256": "d3c5fc2ee37ecf99a9dcb91825012ab909113be2a5151a42bdbdad889d8a462e"
+        },
+        {
+          "path": "src/ui/grid-summary.js",
+          "previous_sha256": "99e6993e3cd175ab96fcc60cbbb9f4adec45ce6794c28aed28a6138051898326",
+          "sha256": "6c06d75a847256317c092979d571a65e3b90a5cf4267f07a025ae4cd31dd967f"
+        },
+        {
+          "path": "src/ui/park-export.js",
+          "previous_sha256": "ef08e973fcfb03ac190b4fd3023394682729462ad979e9155ac1bf8bef72fba9",
+          "sha256": "90c0170602eaa775218971bcca07ede83777faf29fb7d4d03acfe8891ee31443"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "6310409a39a34c59fabdb5e4bad26853ed9388bb4083faa844c6256ed4f44561",
+          "sha256": "064a78d96bda2bd9d1502ce09529b602cb12f7bb18ec2d324e337364a810f977"
+        }
+      ]
     }
   ]
 }
