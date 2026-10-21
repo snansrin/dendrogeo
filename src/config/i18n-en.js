@@ -1725,7 +1725,7 @@ Object.assign(DG_I18N_EN,{
  "Yayımlanan bilimsel raporları inceleyin ↗":"Browse published scientific reports ↗",
  "✓ Veri yedeği indirildi: {f} ({n} ölçüm). Fotoğraf dosyaları ve cihazdaki kuyruk ayrı yedeklenir.":"✓ Data backup downloaded: {f} ({n} measurements). Photo files and the device queue need separate backups.",
  "⚠ Son veri yedeğinin üzerinden {n} gün geçti — bugünkü yedeği alın":"⚠ Your last data backup was {n} days ago — export today's backup",
- 
+
 });
 
 Object.assign(DG_I18N_EN,{
@@ -1783,7 +1783,7 @@ Object.assign(DG_I18N_EN,{
  "Chave et al. 2014 (çevre ÷ π → DBH + boy + ρ)":"Chave et al. 2014 (circumference ÷ π → DBH + height + ρ)",
  "Özel tür ρ değeri yoksa yalnız kendi grup geneli":"If species-specific ρ is unavailable, only the corresponding group default is used",
  "CC BY‑NC 4.0 paylaşım lisansı":"CC BY‑NC 4.0 data-sharing licence",
- 
+
  "GPS · ÇEVRE · BOY · FOTOĞRAF":"GPS · CIRCUMFERENCE · HEIGHT · PHOTO",
  "Fotoğraf eklenirse tarayıcı içi QA/QC uygulanır. Ölçülen göğüs çevresi önce π’ye bölünerek gerçek DBH çapına dönüştürülür; ardından Chave et al. (2014) modeliyle AGB, kök biyokütlesi ve karbon hesaplanır.":"If a photo is added, in-browser QA/QC is applied. Measured stem circumference is divided by π to derive DBH; the Chave et al. (2014) model is then used to estimate aboveground biomass, root biomass and carbon.",
  "AGB · BHB · C · m³":"AGB · BGB · C · m³",
