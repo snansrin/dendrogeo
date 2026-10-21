@@ -10372,6 +10372,23 @@
           "sha256": "37ab8e902dc95b88f9b9391d7b6d574be41545b738c508476abaebc867653a8d"
         }
       ]
+    },
+    {
+      "date": "2026-10-21",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: verify fresh Supabase reset, explicitly grant Data API access, and reproduce the existing project/photo security policies in fresh installations. Update only the two QA migration allowlists and add a check forbidding scientific schema/data mutations in the grants migration. Scientific calculations and all historical migrations are preserved.",
+      "files": [
+        {
+          "path": "test/dbh-qa.test.mjs",
+          "previous_sha256": "0fb93d8cccbb806c23f164408e53db76ae19b48fb9cbcb2ba641b576338ac6f2",
+          "sha256": "4e5933ea2ffd1f6a6b905c879a96cde4370e01cae1d29d37cdb3f6e8c3d8ccbe"
+        },
+        {
+          "path": "test/form-qa.test.mjs",
+          "previous_sha256": "d19d0c6ab9cd7872f0c01178e907f05e342b917a0d6bac6996579398d0f75742",
+          "sha256": "a176f03d71477c7acf810030c5164e68a991f1816937a4db643b7c647fd02196"
+        }
+      ]
     }
   ]
 }

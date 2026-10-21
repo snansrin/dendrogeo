@@ -1,0 +1,32 @@
+name: Supabase fresh reset
+on:
+  pull_request:
+    paths:
+      - 'supabase/**'
+      - 'scripts/verify-supabase-replay.mjs'
+      - '.github/workflows/supabase-reset.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      SUPABASE_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.121.0
+      - name: Start disposable local Supabase services
+        run: supabase start
+      - name: Reset the local database twice and verify access contracts
+        run: |
+          for attempt in 1 2; do
+            supabase db reset --local --no-seed
+            psql 'postgresql://postgres:postgres@127.0.0.1:54322/postgres' -v ON_ERROR_STOP=1 -f supabase/tests/reset-contract.sql
+          done
+      - name: Stop disposable local services
+        if: always()
+        run: supabase stop --no-backup

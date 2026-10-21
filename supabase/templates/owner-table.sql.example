@@ -1,0 +1,21 @@
+-- Copy into a file created by: supabase migration new <descriptive_name>
+-- Replace research_notes with the real name and review the actual access model.
+begin;
+create table public.research_notes (
+ id uuid primary key default gen_random_uuid(),
+ user_id uuid not null references auth.users(id) on delete cascade,
+ note text not null
+);
+alter table public.research_notes enable row level security;
+-- Normalize exposure even on older projects with automatic grants enabled.
+revoke all on table public.research_notes from public, anon, authenticated;
+grant select, insert, update, delete on table public.research_notes to authenticated;
+grant select, insert, update, delete on table public.research_notes to service_role;
+create policy research_notes_owner on public.research_notes
+ for all to authenticated
+ using ((select auth.uid())=user_id)
+ with check ((select auth.uid())=user_id);
+-- No anon grant: this example contains private account data.
+-- If using an explicit sequence/default nextval, grant only that sequence's
+-- USAGE (and SELECT if needed) to the roles that insert rows.
+commit;

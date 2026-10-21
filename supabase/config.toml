@@ -1,7 +1,8 @@
-# Local development only. Historical migration replay is not yet certified.
+# Local development only. Offline SQL replay is tested; Docker reset has a separate CI job.
 project_id = "dendrogeo-local"
 [api]
 enabled = true
+auto_expose_new_tables = false
 port = 54321
 schemas = ["public", "graphql_public"]
 extra_search_path = ["public", "extensions"]
