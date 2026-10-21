@@ -15,7 +15,7 @@
   ['label[for="gridSize"]','gridSize'],['label[for="refHa"]','reference'],['label[for="gridClearance"]','clearance'],
   ['#dgMaintenanceLabel','maintenance'],['#dgBackupLabel','backupRestore'],['#adminPublishTitle','report'],
   ['.card:has(#aReqT)>.shead h2','reply'],['.card:has(#admExpCountry)>.shead h2','adminExport'],
-  ['#adminUsersListTitle','users'],['#visAnalyticsTitle','usageSummary']
+  ['#adminUsersListTitle','users']
  ];
  const menuTopics={'10':'fileMenu','20':'viewMenu','30':'grid','40':'layerMenu','50':'brush','60':'boundary','70':'scan'};
  const selector=anchors.map(([query])=>query).concat('.dg-editor-panel-head strong').join(',');
@@ -53,7 +53,7 @@
  function add(control){
   if(pairs.has(control)||!topic(control)||!control.closest('#shell')||control.closest('button,a,summary,label:has(input),#dgOperationHelp,.dg-operation-help'))return;
   const doc=root.document,button=doc.createElement('button');button.type='button';button.className='dg-operation-help';
-  const mark=doc.createElement('span');mark.textContent='?';mark.setAttribute('aria-hidden','true');button.append(mark);
+  const mark=doc.createElement('span');mark.setAttribute('aria-hidden','true');button.append(mark);
   button.dataset.dgHelpTopic=topic(control);
   button.setAttribute('aria-label',content(control).title+' — '+t('Nasıl kullanılır?','How to use'));
   button.setAttribute('aria-haspopup','dialog');button.setAttribute('aria-controls','dgOperationHelp');

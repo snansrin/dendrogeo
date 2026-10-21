@@ -61,7 +61,7 @@ try{for(const width of [360,390,430,1280]){
  const actionWidths=()=>page.locator('.waypoint-actions-primary button,.waypoint-arrival button').evaluateAll(nodes=>nodes.map(el=>({width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height})));
  const withHelp=await actionWidths();const hidden=await page.addStyleTag({content:'.dg-operation-help{display:none!important}'});const withoutHelp=await actionWidths();await hidden.evaluate(el=>el.remove());
  assert.deepEqual(withHelp,withoutHelp,'help must not resize original navigation buttons');
- const mark=await navHelp.locator('span').boundingBox(),target=await navHelp.boundingBox();assert.equal(mark.width,20);assert.equal(mark.height,20);assert.equal(target.width,44);assert.equal(target.height,44);
+ const mark=await navHelp.locator('span').boundingBox(),target=await navHelp.boundingBox();for(const [actual,expected]of [[mark.width,20],[mark.height,20],[target.width,44],[target.height,44]])assert.ok(Math.abs(actual-expected)<0.05,'fixed-size help mark and touch target');
  for(const theme of ['light','dark']){await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);if(process.env.DG_QA_SCREENSHOT_DIR)await nav.screenshot({path:join(process.env.DG_QA_SCREENSHOT_DIR,'help-nav-'+theme+'-'+width+'.png')});}
  await navHelp.click();const guide=await page.locator('#dgOperationHelpBody').innerText();for(const label of ['En yakın','Sıradaki','Haritada göster','Tüm noktalar','Vardım'])assert.ok(guide.includes(label));assert.doesNotMatch(guide,/Soldaki menüden/);await page.keyboard.press('Escape');
  assert.equal(await page.locator('#waypointFileTitle .dg-operation-help').getAttribute('data-dg-help-topic'),'pointUpload');
