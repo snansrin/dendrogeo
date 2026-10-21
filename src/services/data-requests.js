@@ -8,6 +8,28 @@
  * tüm çağrılar boot sonrasında olur). */
 
 /* ============ VERİ TALEBİ (kullanıcı → yönetici) ============ */
+let DG_REQUEST_BADGE_READ=null,DG_REQUEST_BADGE_LAST=0,DG_REQUEST_BADGE_EPOCH=0;
+async function dgRefreshDataRequestBadge(){
+ const ui=window.DG_DATA_REQUEST_PENDING_TABLE_UI;
+ const authorized=()=>typeof PROFILE!=="undefined"&&PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner");
+ if(!authorized()){
+  DG_REQUEST_BADGE_EPOCH++;
+  ui?.updateBadge(document,0);
+  return;
+ }
+ if(DG_REQUEST_BADGE_READ)return DG_REQUEST_BADGE_READ;
+ if(Date.now()-DG_REQUEST_BADGE_LAST<15000)return;
+ DG_REQUEST_BADGE_LAST=Date.now();
+ const epoch=DG_REQUEST_BADGE_EPOCH,userId=typeof USER!=="undefined"?USER?.id:null;
+ DG_REQUEST_BADGE_READ=Promise.resolve().then(async()=>{
+  try{
+   const{count,error}=await window.DG_ADMIN_PERSISTENCE_STORE.create(()=>sb).countPendingDataRequests();
+   if(!error&&epoch===DG_REQUEST_BADGE_EPOCH&&authorized()&&userId===(typeof USER!=="undefined"?USER?.id:null))ui?.updateBadge(document,count||0,typeof dgTfs==="function"?dgTfs:undefined);
+  }catch(error){}finally{DG_REQUEST_BADGE_READ=null;}
+ });
+ return DG_REQUEST_BADGE_READ;
+}
+window.DG_DATA_REQUEST_PENDING_TABLE_UI?.bindRefresh(dgRefreshDataRequestBadge);
 async function sendDataRequest(){
  if(!USER)return;
  const country=$("reqCountry").value.trim()||null;
@@ -83,7 +105,7 @@ async function loadRequests__scroll(){
  return await window.DG_LOAD_DATA_REQUEST_QUEUE.execute({
   load:()=>window.DG_DATA_REQUEST_QUEUE_STORE.load(sb),
   partition:rows=>window.DG_DATA_REQUEST_QUEUE.partition(rows),
-  updateCounts:pending=>window.DG_DATA_REQUEST_PENDING_TABLE_UI.updateCounts(document,pending),
+  updateCounts:pending=>{DG_REQUEST_BADGE_EPOCH++;window.DG_DATA_REQUEST_PENDING_TABLE_UI.updateCounts(document,pending);},
   renderPending:pending=>window.DG_DATA_REQUEST_PENDING_TABLE_UI.render($("aReqT"),pending,{escape:esc,actions:{
    fulfill:control=>fulfillRequest(Number(control.dataset.requestId)),
    reject:control=>rejectRequest(Number(control.dataset.requestId))

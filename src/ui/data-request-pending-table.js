@@ -3,6 +3,28 @@
 /* Render active requests and their visible queue counters. */
 (function(root){
  const bindings=new WeakSet(),actionsByElement=new WeakMap();
+ let refreshBound=false;
+ function bindRefresh(refreshBadge){
+  if(refreshBound||typeof root.addEventListener!=="function"||typeof root.setInterval!=="function"||!root.document?.addEventListener)return;
+  refreshBound=true;
+  const refresh=()=>{if(root.document.visibilityState!=="hidden"&&root.navigator?.onLine!==false)refreshBadge();};
+  root.addEventListener("focus",refresh);
+  root.document.addEventListener("visibilitychange",refresh);
+  root.setInterval(refresh,60000);
+ }
+ function updateBadge(document,count,format=(text,values)=>text.replace("{n}",values.n)){
+  let badge=document.getElementById("adminDataRequestBadge");
+  const menu=document.getElementById("miAdmin");
+  if(!badge&&menu&&document.createElement){
+   badge=document.createElement("span");badge.id="adminDataRequestBadge";badge.className="dg-menu-badge";
+   badge.setAttribute("role","status");menu.appendChild(badge);
+  }
+  if(!badge)return;
+  badge.style.display=count>0?"inline-block":"none";
+  badge.textContent=count>0?(count>99?"99+":String(count)):"";
+  const label=format("{n} veri talebi yanıt bekliyor",{n:count});
+  badge.title=label;badge.setAttribute("aria-label",label);
+ }
  function bindDataRequestPendingActions(element,actions){
   if(!element||typeof element.addEventListener!=="function")return;
   actionsByElement.set(element,actions||{});
@@ -17,6 +39,7 @@
  }
  function updateCounts(document,pending){
   for(const id of ["aReqPending","aReqPendingMini"]){const element=document.getElementById(id);if(element)element.textContent=pending.length;}
+  updateBadge(document,pending.length,typeof root.dgTfs==="function"?root.dgTfs:undefined);
  }
  function render(element,pending,{escape=value=>String(value),actions}={}){
  element.innerHTML=pending.length?pending.map(r=>{
@@ -36,5 +59,5 @@
  }).join(""):"<tr><td colspan=6 style='text-align:center;color:var(--mut)'>Bekleyen talep yok</td></tr>";
  bindDataRequestPendingActions(element,actions);
  }
- root.DG_DATA_REQUEST_PENDING_TABLE_UI=Object.freeze({render,updateCounts,bind:bindDataRequestPendingActions});
+ root.DG_DATA_REQUEST_PENDING_TABLE_UI=Object.freeze({render,updateCounts,updateBadge,bindRefresh,bind:bindDataRequestPendingActions});
 })(window);

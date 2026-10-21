@@ -13,6 +13,19 @@ try{
   await isolateAccount(page);await page.goto(server.url,{waitUntil:'domcontentloaded'});
   await page.locator('#shell').waitFor({state:'visible'});await page.waitForFunction(()=>document.getElementById('dgStartupScreen').hidden);
   await page.evaluate(()=>{
+   PROFILE.role='owner';document.getElementById('miAdmin').style.display='';
+   window.DG_ADMIN_TREE_ACTIONS.updateBadge(3);
+   window.DG_DATA_REQUEST_PENDING_TABLE_UI.updateCounts(document,[{id:1},{id:2}]);
+  });
+  assert.equal(await page.locator('#adminDataRequestBadge').isVisible(),true);
+  assert.equal(await page.locator('#adminDataRequestBadge').innerText(),'2');
+  assert.equal(await page.locator('#adminPendingBadge').innerText(),'3');
+  assert.equal(await page.locator('#adminDataRequestBadge').evaluate(el=>getComputedStyle(el).backgroundColor),await page.locator('#adminPendingBadge').evaluate(el=>getComputedStyle(el).backgroundColor));
+  if(process.env.DG_QA_SCREENSHOT_DIR&&width===390){await page.locator('#miAdmin').scrollIntoViewIfNeeded();await page.locator('#side').screenshot({path:join(process.env.DG_QA_SCREENSHOT_DIR,'data-request-badge-390.png')});}
+  await page.evaluate(()=>window.DG_DATA_REQUEST_PENDING_TABLE_UI.updateCounts(document,[]));
+  assert.equal(await page.locator('#adminDataRequestBadge').isVisible(),false);
+  assert.equal(await page.locator('#adminPendingBadge').isVisible(),true);
+  await page.evaluate(()=>{
    document.querySelectorAll('.view').forEach(view=>view.classList.toggle('on',view.id==='v-admin'));
    window.DG_ADMIN_STORAGE_USAGE_UI.render(document.getElementById('storeBar'),document.getElementById('storeInfo'),{bytes:950000000,count:2000,format:(text,values)=>text.replace(/\{(\w+)\}/g,(_,key)=>values[key])});
   });
