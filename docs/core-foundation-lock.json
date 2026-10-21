@@ -10609,6 +10609,23 @@
           "sha256": "f2953f63f91feb95a4874c2d12c407a2e6ffdd92cbad29ded79e7239875f160a"
         }
       ]
+    },
+    {
+      "date": "2026-10-22",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: make existing field help marks visually consistent with compact section guides while retaining tooltip behavior and touch targets. No measurement or analysis logic changes.",
+      "files": [
+        {
+          "path": "css/ui-standard.css",
+          "previous_sha256": "d2c20869f073aceefa3427e18a974b89b7339afb522154b6e00910323b797f09",
+          "sha256": "43f30877e0840eb8286827f2e5f14b6c3c5ce7747ec8da9cdea5f941cdee1e2d"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "f2953f63f91feb95a4874c2d12c407a2e6ffdd92cbad29ded79e7239875f160a",
+          "sha256": "55e18b6e12d8ad28629db0b481505c654d176f01790be6c3189de3eb24ed52e6"
+        }
+      ]
     }
   ]
 }

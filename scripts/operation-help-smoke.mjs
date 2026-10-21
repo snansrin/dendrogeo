@@ -60,12 +60,41 @@ try{for(const width of [360,390,430,1280]){
  assert.equal(await page.locator('.waypoint-project .dg-operation-help').count(),0,'plain project selection needs no generic guide');
  const actionWidths=()=>page.locator('.waypoint-actions-primary button,.waypoint-arrival button').evaluateAll(nodes=>nodes.map(el=>({width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height})));
  const withHelp=await actionWidths();const hidden=await page.addStyleTag({content:'.dg-operation-help{display:none!important}'});const withoutHelp=await actionWidths();await hidden.evaluate(el=>el.remove());
- assert.deepEqual(withHelp,withoutHelp,'help must not resize original navigation buttons');
+ assert.equal(withHelp.length,withoutHelp.length,'help must preserve original navigation buttons');
+ // DOMRect subtraction can introduce subpixel rounding when a control changes position.
+ for(let i=0;i<withHelp.length;i++)for(const dimension of ['width','height']){
+  assert.ok(Math.abs(withHelp[i][dimension]-withoutHelp[i][dimension])<0.01,`help must not resize navigation button ${i} ${dimension}`);
+ }
  const mark=await navHelp.locator('span').boundingBox(),target=await navHelp.boundingBox();for(const [actual,expected]of [[mark.width,20],[mark.height,20],[target.width,44],[target.height,44]])assert.ok(Math.abs(actual-expected)<0.05,'fixed-size help mark and touch target');
  for(const theme of ['light','dark']){await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);if(process.env.DG_QA_SCREENSHOT_DIR)await nav.screenshot({path:join(process.env.DG_QA_SCREENSHOT_DIR,'help-nav-'+theme+'-'+width+'.png')});}
  await navHelp.click();const guide=await page.locator('#dgOperationHelpBody').innerText();for(const label of ['En yakın','Sıradaki','Haritada göster','Tüm noktalar','Vardım'])assert.ok(guide.includes(label));assert.doesNotMatch(guide,/Soldaki menüden/);await page.keyboard.press('Escape');
  assert.equal(await page.locator('#waypointFileTitle .dg-operation-help').getAttribute('data-dg-help-topic'),'pointUpload');
  assert.equal(await page.locator('.export-format-card [data-dg-help-topic]').evaluateAll(nodes=>new Set(nodes.map(el=>el.dataset.dgHelpTopic)).size),3,'each export format has its own instructions');
+ await page.evaluate(()=>{
+  PROJ_LIST=[{id:1,park_id:36,name:'Test projesi',owner:USER.id,parks:{name:'Test parkı',area_m2:10000}}];
+  document.getElementById('mProject').innerHTML='<option value="1">Test projesi</option>';
+ });
+ await page.locator('#side [data-dg-view="measure"]').click();
+ const fieldHelp=page.locator('.measure-dimensions .dg-field-help');
+ await fieldHelp.first().waitFor({state:'visible'});
+ assert.equal(await fieldHelp.count(),2);
+ for(const theme of ['light','dark']){
+  await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);
+  for(const field of await fieldHelp.all()){
+   const style=await field.evaluate(el=>{const s=getComputedStyle(el);return {background:s.backgroundImage,border:s.borderWidth,font:s.fontFamily,width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height};});
+   assert.match(style.background,/radial-gradient/,'field help must draw only the compact central mark');
+   assert.match(style.background,/9px.*10px.*10px/,'visible field help radius is 10px');
+   assert.equal(style.border,'0px','touch target must not have a large circular border');
+   assert.equal(style.font,computedFont,'field help shares the UI font');
+   for(const value of [style.width,style.height])assert.ok(Math.abs(value-44)<0.01,`field help keeps its touch target: ${JSON.stringify(style)}`);
+   await field.focus();
+   const focused=await field.elementHandle();
+   await page.waitForFunction(el=>getComputedStyle(el,'::after').visibility==='visible',focused,{timeout:5000});
+   await focused.dispose();
+  }
+  await fieldHelp.last().blur();
+  if(process.env.DG_QA_SCREENSHOT_DIR)await page.locator('.measure-dimensions').screenshot({path:join(process.env.DG_QA_SCREENSHOT_DIR,'help-measure-'+theme+'-'+width+'.png')});
+ }
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);assert.deepEqual(errors,[]);
  console.log(JSON.stringify({engine:engine.name(),width,light:true,dark:true,accessible:true,noActionOnHelp:true,escPreservesMap:true,controlsUnmoved:true,originalActionOnce:true,bilingual:true}));
  await page.close();
