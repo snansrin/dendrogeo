@@ -292,7 +292,7 @@ Yeni migration dosyaları yalnız CLI ile zaman damgalı oluşturulmalıdır. Es
 
 Canlı kayıtta yerel dosya adından farklı olanlar: surface_reviews 20261003171920; surface_report_snapshot 20261003181124; surface_geometry_compat 20261003220940; profile_privilege_guard 20261004165219; allow_users_delete_own_data_requests 20261006163727; report_access_hardening 20261007084950; rls_index_optimization 20261007085148; realtime_presence_authorization 20261015073309. Ölçüm protokolü, paylaşılan park erişimi, davet kimliği ve ziyaretçi günlük özetinin son kayıtları mevcut. Bu liste yalnız salt okunur list_migrations sonucudur.
 
-Yerel config ve boş seed yalnız geliştirme yapılandırmasıdır. Docker üzerinden tarihsel zincir bağımsız ortamda yeniden oynatılmadığı için `supabase db reset` başarısı vaat edilmez. Tarihsel SQL'in ayrık ortamdaki doğrulaması tamamlanmadan üretime toplu migration push yapılmamalıdır. Denetim için yazma sondası yerine salt okunur katalog kontrolü ve izole PostgreSQL testleri tercih edilir.
+Yerel config ve boş seed yalnız geliştirme yapılandırmasıdır. 21 Ekim 2026'da tarihsel zincir, aşağıda bağlantısı verilen bağımsız Supabase/PostgreSQL 15 Docker işinde iki kez sıfırdan doğrulandı. Bu doğrulama mevcut üretim migration geçmişini otomatik eşleştirmez ve üretime toplu migration push/reset izni değildir. Denetim için yazma sondası yerine salt okunur katalog kontrolü ve izole PostgreSQL testleri tercih edilir.
 
 ## 30 Ekim 2026 — Data API için açık yetki tanımı
 
@@ -337,7 +337,7 @@ DDL kullanmayın ve olağandışı SQL için ayrıca inceleme/test yapın.
 İzole PostgreSQL testleri sıfır otomatik grant ile erişimi, legacy ACL'lerin
 korunmasını, migration'ın tekrar uygulanabilirliğini ve RLS hatasında atomik
 iptali kontrol eder. Bunlar tarihsel zincirin Docker ile tam `db reset`
-sertifikası değildir. Üretimde reset/push yerine yalnız incelenmiş bu migration
+sertifikası değildir; tam Docker testi aşağıda ayrıca kaydedilir. Üretimde reset/push yerine yalnız incelenmiş bu migration
 uygulanır; ardından kullanıcı tablosu okumadan katalogdaki grant/RLS doğrulanır.
 
 21 Ekim 2026 canlı uygulama kaydı: `explicit_data_api_grants` sürümü
@@ -375,4 +375,12 @@ geçici Docker servisleri başlatılır, `db reset --local --no-seed` iki kez uy
 `tests/reset-contract.sql` çalıştırılır. İş akışında üretim anahtarı, proje bağlantısı
 veya uzak veritabanı URL'si kullanılmaz. Windows makinesinde Docker olmadığı için
 yerel CLI denemesi servis inceleme hatasıyla durmuştur; Docker doğrulaması CI'da
-ayrı izlenir. Üretimde `db reset --linked` kullanılmaz.
+tamamlanmıştır. [Başarılı Docker işi](https://github.com/snansrin/dendrogeo/actions/runs/39592390057),
+Supabase CLI 2.121.0 ve PostgreSQL 15.19.0.004 ile başlangıçta ve iki reset sırasında
+31 migration'ı toplam 93 kez uyguladı; iki resetin erişim sözleşmeleri de geçti.
+[Kaynak, telefon, erişilebilirlik ve WebKit CI](https://github.com/snansrin/dendrogeo/actions/runs/39592390118)
+başarılıdır. Kanıtlar `bcef0c31848ff43db01e3352958652667d0b8a1a` kod commit'ine aittir.
+Gerçek kullanıcı verileri, fotoğraf dosyaları, Auth sağlayıcı sırları ve canlı
+proje yapılandırması bu test sırasında kopyalanmadı. Üretimde `db reset --linked`
+kullanılmaz.
+
