@@ -11,8 +11,8 @@ window.DG_UPLOAD_WAYPOINT_CSV={
         if(!waypoint){invalid++;continue;}
         await upsert(build({owner,projectId,waypoint}));saved++;
       }
-      notify("✓ "+saved+" waypoint kaydedildi."+(invalid?" "+invalid+" geçersiz satır atlandı.":""),invalid?"warn":"ok");
-    }catch(error){notify(translate("Waypoint yükleme hatası:")+" "+error.message+" · "+saved+" satır kaydedildi.","err");}
+      notify("✓ "+saved+" ölçüm noktası kaydedildi."+(invalid?" "+invalid+" geçersiz satır atlandı.":""),invalid?"warn":"ok");
+    }catch(error){notify(translate("Ölçüm noktası yükleme hatası:")+" "+error.message+" · "+saved+" satır kaydedildi.","err");}
     await refresh();
     return{saved,invalid};
   }

@@ -6,7 +6,7 @@
    const {source,park}=getContext();
    const readiness=resolveReadiness(mode,source);
   if(!readiness.ok){
-    if(readiness.reason==="surface-stale")return notify(translate("Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun."),"warn");
+    if(readiness.reason==="surface-stale")return notify(translate("Yüzey değişti. Ölçüm noktası üretmeden önce gridi yeniden oluşturun."),"warn");
     const messages={
       "grid-missing":"Önce grid oluştur",
       "project-missing":"Önce proje seç",
@@ -19,7 +19,7 @@
   const pid=readiness.projectId;
   const result=await create({source,park,projectId:pid,targetCells:readiness.targetCells});
   if(result.status==="cancelled")return;
-  if(result.status==="stale")return notify(translate("Yüzey değişti. Waypoint üretmeden önce gridi yeniden oluşturun."),"warn");
+  if(result.status==="stale")return notify(translate("Yüzey değişti. Ölçüm noktası üretmeden önce gridi yeniden oluşturun."),"warn");
   if(result.status==="write-failed")return notify("Hata: "+result.error.message,"err");
   return complete(result,pid);
   };

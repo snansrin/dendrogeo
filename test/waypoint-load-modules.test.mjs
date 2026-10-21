@@ -35,7 +35,7 @@ test('reset clears the old list and performs the legacy second render without a 
 test('waypoint load error preserves translated message and error toast type',()=>{
   const show=setup().DG_SHOW_WAYPOINT_LOAD_ERROR.show,events=[];
   show({error:new Error('offline'),notify:(...args)=>events.push(args),translate:value=>`EN:${value}`});
-  assert.deepEqual(events,[['EN:Waypoint listesi alınamadı: offline','err']]);
+  assert.deepEqual(events,[['EN:Ölçüm noktası listesi alınamadı: offline','err']]);
 });
 
 test('project load resets first, commits only for the current project and restores its pending target',async()=>{

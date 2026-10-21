@@ -415,7 +415,7 @@ describe('i18n katmanı sözleşmesi (0035)', () => {
   });
   test('⭐ dinamik şablonlar dgTf/dgT ile çevriliyor (0035c — EN modunda Türkçe kalmaz)', () => {
     assert.match(i18n, /function dgTf\(/, 'dgTf şablon çevirici tanımlı');
-    for (const s of ['"✓ {n} onaylı kayıt yüklendi', '"📌 <b>{a}</b> waypoint kayıtlı',
+    for (const s of ['"✓ {n} onaylı kayıt yüklendi', '"📌 <b>{a}</b> ölçüm noktası kayıtlı',
       '"🌲 İbreli":"🌲 Conifer"', '"🍃 Yapraklı":"🍃 Broadleaf"', '"Dosya seç":"Choose file"',
       '"🏆 En İyi":"🏆 Best"', '"Taleplerim":"My Requests"'])
       assert.ok(i18n.includes(s), 'eksik şablon/çeviri: ' + s);

@@ -45,7 +45,7 @@ test('navigation feedback preserves the warning and triggers GPS activation once
   const window=app(),events=[];
   window.DG_WAYPOINT_NAVIGATION_FEEDBACK_UI.gpsRequired({translate:value=>'EN:'+value,notify:(...args)=>events.push(args),startGps:()=>events.push('start-gps')});
   window.DG_WAYPOINT_NAVIGATION_FEEDBACK_UI.noPending({translate:value=>'EN:'+value,notify:(...args)=>events.push(args)});
-  assert.deepEqual(events,[['EN:En yakın noktayı seçmek için önce konumu etkinleştirin.','warn','📡'],'start-gps',['EN:Bekleyen waypoint kalmadı.','info']]);
+  assert.deepEqual(events,[['EN:En yakın noktayı seçmek için önce konumu etkinleştirin.','warn','📡'],'start-gps',['EN:Bekleyen ölçüm noktası kalmadı.','info']]);
 });
 
 test('all five modules load before map.js and are precached',()=>{

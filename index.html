@@ -244,14 +244,14 @@
 <script src="src/config/wood-density-lock.js?v=895bae6a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/species.js?v=1b610c26" type="application/x-dendrogeo-module" defer></script>
 <!-- DİL KATMANI (0035): sözlük verisi çalışma zamanı çeviricisinden önce yüklenir. -->
-<script src="src/config/i18n-en.js?v=732bd9ea" type="application/x-dendrogeo-module" defer></script>
+<script src="src/config/i18n-en.js?v=e9966304" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/i18n.js?v=5466c5ca" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/map/web-mercator-coordinates.js?v=721838c9" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/geo.js?v=d1460277" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/truncation.js?v=f438600d" type="application/x-dendrogeo-module" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"ed72da22ac30fd3e"</script>
+<script id="dgRuntimeBuild" type="application/json">"9e4ce940f884878e"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
 <script src="src/adapters/parks/fetch-nominatim-osm-way.js?v=7e4900cf" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/osm-water-backup.js?v=9dcc34a2" type="application/x-dendrogeo-module" defer></script>
@@ -402,7 +402,7 @@
 <script src="src/ui/update-live-visitor-filters.js?v=e7ba46cb" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/visitors/set-live-visitor-pause.js?v=ed16a5b5" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/visitors/fit-live-visitor-map.js?v=f519a590" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/visit-stats.js?v=ecce1d6b" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/visit-stats.js?v=d154c0f4" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/data-requests/find-pending-duplicate.js?v=66a61d0f" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/data-requests/summarize-dataset.js?v=8b246b06" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/data-requests/submit-store.js?v=2fe372e7" type="application/x-dendrogeo-module" defer></script>
@@ -440,10 +440,10 @@
 <script src="src/domain/backup/reminder-state.js?v=f71de0e9" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/backup/sql-value.js?v=b1e7b28f" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/backup/build-restore-sql.js?v=cce5d939" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/restore-backup-prompt.js?v=e57ad17d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/restore-backup-prompt.js?v=03cb8d4a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/backup/download-restore-sql.js?v=ba281c0b" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/backup/restore-backup.js?v=c29d1cac" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/backup.js?v=94aa9908" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/backup.js?v=ecc610af" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-measurement-row.js?v=a4372e25" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-measurement-table.js?v=3d243cb5" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/admin/export-filter-options.js?v=77acbee2" type="application/x-dendrogeo-module" defer></script>
@@ -483,7 +483,7 @@
 <script src="src/ui/admin-tree-pending-summary.js?v=f92171e0" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-tree-measurement-row.js?v=fc8a99ef" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-tree-user.js?v=655dce44" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-tree-project.js?v=0f978d52" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-tree-project.js?v=6eddab63" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-tree-park.js?v=79cd121e" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-tree-view.js?v=9d5c5d9b" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/admin/refresh-tree-pending-badge.js?v=351c31e1" type="application/x-dendrogeo-module" defer></script>
@@ -499,7 +499,7 @@
 <!-- YÖNETİM AĞACI (2026-09-24): park → proje → kullanıcı → ölçüm kademeli
      görünümü + sorgu hatası görünürlüğü. admin.js'ten SONRA yüklenir
      (approve/reject/del fonksiyonlarını çağırır). -->
-<script src="src/services/admin-tree.js?v=a4b10750" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/admin-tree.js?v=29d1a9fb" type="application/x-dendrogeo-module" defer></script>
 <!-- BİLİMSEL RAPOR YAYINI (2026-09-27): site içinden yayın kuyruğu —
      📄 Yayınla → report_requests (0008) → rapor-yayin.yml → rapor/DGR-…/
      → kalıcı bağlantı + 📤 Paylaş. admin.js loadAdmin() bu modülü çağırır. -->
@@ -641,7 +641,7 @@
 <script src="src/adapters/trees/measurement-wake-lock.js?v=3ec75e74" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/trees/start-measurement-gps.js?v=e837f4d7" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/reset-measurement-entry-fields.js?v=740e0e7b" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/confirm-measurement-project-delete.js?v=26c8546e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/confirm-measurement-project-delete.js?v=1a3cf122" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/trees/measurement-project-deletion-store.js?v=7847bce8" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/trees/delete-measurement-project.js?v=35b3cb73" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/measure.js?v=4edd662d" type="application/x-dendrogeo-module" defer></script>
@@ -656,11 +656,11 @@
 <script src="src/application/map/schedule-measurement-marker-chunks.js?v=dec53f85" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/map/add-measurement-markers.js?v=a897604b" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/map-measurement-markers.js?v=6316e2c2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/waypoint-list.js?v=bce226fb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/waypoint-list.js?v=1935702c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/select-waypoint.js?v=f8404332" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/map/select-nearest-waypoint.js?v=67cb214b" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/map/advance-waypoint-target.js?v=517c93a8" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/waypoint-navigation-feedback.js?v=6027a3bb" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/waypoint-navigation-feedback.js?v=d8037f74" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/waypoint-map-viewport.js?v=7e575bf2" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/map/resolve-waypoint-guidance.js?v=262e462c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/waypoint-map-markers.js?v=5e22ddb7" type="application/x-dendrogeo-module" defer></script>
@@ -689,7 +689,7 @@
 <script src="src/domain/parks/validate-waypoint-csv-row.js?v=382ae119" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/build-waypoint-upsert-command.js?v=4794999b" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/parks/upsert-project-waypoint.js?v=8e56b122" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/parks/upload-waypoint-csv.js?v=0b032900" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/parks/upload-waypoint-csv.js?v=33d90bd0" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/map/prepare-approved-map-measurements.js?v=f3045c26" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/map/fetch-approved-map-measurements.js?v=ce758954" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/map/load-approved-measurement-markers.js?v=552cb55d" type="application/x-dendrogeo-module" defer></script>
@@ -699,14 +699,14 @@
 <script src="src/ui/confirm-waypoint-arrival-distance.js?v=5228f68a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/map/mark-waypoint-visited.js?v=fa3a3e2e" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/map/complete-waypoint-arrival.js?v=8377aa67" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/map/arrive-at-waypoint.js?v=51c5150f" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/map/arrive-at-waypoint.js?v=6d05fc0f" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/map/select-restored-waypoint-target.js?v=de504aab" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/map/fetch-project-waypoints.js?v=426e6a52" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/map/reset-waypoint-load-state.js?v=d6385bcd" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/show-waypoint-load-error.js?v=17240dd6" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/show-waypoint-load-error.js?v=4960e265" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/map/load-project-waypoints.js?v=42950a2c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/map/is-waypoint-project-selected.js?v=cc977c17" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/confirm-waypoint-list-deletion.js?v=88b0a44a" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/confirm-waypoint-list-deletion.js?v=23416fa4" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/map/delete-project-waypoints.js?v=53b15a6d" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/map/clear-deleted-waypoint-list.js?v=39c7e21b" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/map/delete-project-waypoints.js?v=1ca4078a" type="application/x-dendrogeo-module" defer></script>
@@ -721,7 +721,7 @@
 <script src="src/adapters/map/recover-imagery-tiles.js?v=19d2a118" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/map/create-base-map-layer.js?v=7ed496a5" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/map/switch-base-map-layer.js?v=0645661e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/map.js?v=f385ed07" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/map.js?v=36afba2e" type="application/x-dendrogeo-module" defer></script>
 <!-- LULC ZİNCİRİ ARTIK TEMBEL (2026-09-25 · Faz 8): 8 dosya ilk yüklemede
      indirilmiyor. Yalnız "🌿 Yüzey Örtüsü Analizi"ne basan kullanıcı için
      src/utils/lazylibs.js → dgEnsureLulc() sırayla enjekte eder
@@ -888,15 +888,15 @@
 <script src="src/ui/grid-build-controller.js?v=baeb6d12" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/build-grid.js?v=3079f09e" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/create-grid-waypoints.js?v=3790c9cb" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/grid-waypoint-controller.js?v=d77fbcb1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/grid-waypoint-completion.js?v=22515dd7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/grid-waypoint-controller.js?v=178de416" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/grid-waypoint-completion.js?v=68599b7d" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/grid-layer.js?v=726fc307" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/grid-reset.js?v=03ef3b12" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/map-layer-visibility.js?v=41681083" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/grid-selection.js?v=96cb0182" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/grid-summary.js?v=e5b41380" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/grid-waypoint-layer.js?v=0260b5d6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/grid-engine.js?v=7b39006c" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/grid-engine.js?v=c785009e" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/editor-ui.js?v=e4857246" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-reference-area.js?v=d8e0f566" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-mode-controller.js?v=ff6a1c3d" type="application/x-dendrogeo-module" defer></script>
@@ -905,10 +905,10 @@
 <script src="src/ui/park-reset-controller.js?v=b9e7b17b" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-boundary-layer.js?v=0b615b4e" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-candidate-select.js?v=404b2208" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-info-panel.js?v=599ce4f7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-info-panel.js?v=03e462fa" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/surface/read-accepted-park-surface.js?v=59492204" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/accepted-park-surface.js?v=d3124ac6" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-menu-ui.js?v=92e4ebf2" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-menu-ui.js?v=5da59a9a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/normalize-drawn-park-geometry.js?v=8f6411b2" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/draw-selected-park.js?v=daf53a7f" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/present-drawn-park.js?v=af3a99ed" type="application/x-dendrogeo-module" defer></script>
@@ -1184,7 +1184,7 @@
    <p>GPS konumu ve cihazın bildirdiği doğruluk değeriyle saha ölçümünü konumlandırır; fotoğraf eklenirse tarayıcı içi kalite kontrolü uygulanır.</p>
    <ul>
     <li>GPS doğruluğu ölçümle kaydedilir</li>
-    <li>Waypoint pusula navigasyonu</li>
+    <li>Ölçüm noktası pusula navigasyonu</li>
     <li>Çevrimdışı ölçüm + senkronizasyon</li>
     <li>Fotoğraf için tarayıcı içi QA/QC</li>
    </ul>
@@ -1222,7 +1222,7 @@
   <div class="step">
    <div class="num">1</div>
    <h4>Sahada Ölç</h4>
-   <p>GPS konumunu alın, waypoint pusulasıyla ağaca yönelin; 1,30 m yükseklikte göğüs çevresini mezurayla ölçün, boy ve grup/tür bilgilerini girin.</p>
+   <p>GPS konumunu alın, ölçüm noktası pusulasıyla ağaca yönelin; 1,30 m yükseklikte göğüs çevresini mezurayla ölçün, boy ve grup/tür bilgilerini girin.</p>
    <div class="sub">GPS · ÇEVRE · BOY · FOTOĞRAF</div>
   </div>
   <div class="step">
@@ -1710,7 +1710,7 @@
      </div>
     </div>
     <input type="file" id="dgRestoreFile" accept=".json,application/json" style="display:none" data-dg-backup-action="restore-file">
-    <p class="dg-meta" style="margin-top:10px">Veri yedeği, bu oturumun erişebildiği ölçüm, proje, waypoint, talep, park ve yüzey kayıtlarını içerir. Fotoğraf dosyaları, hesaplar ve cihazdaki çevrimdışı kayıtlar ayrıca korunmalıdır.</p>
+    <p class="dg-meta" style="margin-top:10px">Veri yedeği, bu oturumun erişebildiği ölçüm, proje, ölçüm noktası, talep, park ve yüzey kayıtlarını içerir. Fotoğraf dosyaları, hesaplar ve cihazdaki çevrimdışı kayıtlar ayrıca korunmalıdır.</p>
     <!-- Park bağı olmayan ESKİ projeleri ölçüm merkezinden OSM parkıyla eşleştirir.
          İki fazlı: önce plan/önizleme (yazmaz), onaydan sonra dgApplyBackfill(). -->
     <div id="backfillBox" style="display:none;margin-top:12px"></div>
@@ -1988,6 +1988,6 @@
 <!-- Resolve the lazily loaded class list for the legacy, read-only park PNG path. -->
 <script src="src/ui/park-export-lazy-class-bridge.js?v=38c67f2d" type="application/x-dendrogeo-module" defer></script>
 
-<script src="/src/bootstrap/app-runtime.js?v=948f4179" defer></script>
+<script src="/src/bootstrap/app-runtime.js?v=a764385d" defer></script>
 </body>
 </html>

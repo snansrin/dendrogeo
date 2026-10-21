@@ -7,7 +7,7 @@
   clearMenus("park");
   host.replaceChildren();
   const nav=doc.createElement("nav");nav.className="dg-editor-menubar";nav.setAttribute("aria-label",translate("Harita menüsü"));
-  for(const [id,label,icon,description] of [["parkGridTools","Grid & Waypoint","grid","Grid oluşturma ve waypoint araçları"],["parkLayerTools","Katmanlar","layers","Haritada gösterilecek katmanlar"]]){
+  for(const [id,label,icon,description] of [["parkGridTools","Grid & Ölçüm noktaları","grid","Grid oluşturma ve ölçüm noktası araçları"],["parkLayerTools","Katmanlar","layers","Haritada gösterilecek katmanlar"]]){
    const controls=retained.get(id);if(!controls)continue;
    const menu=doc.createElement("details");menu.className="dg-editor-menu";menu.setAttribute("data-menu-owner","park");menu.setAttribute("data-menu-order",id==="parkGridTools"?"30":"40");
    const title=translate(label),subtitle=translate(description),safeTitle=escape(title),safeSubtitle=escape(subtitle);

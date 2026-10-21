@@ -44,7 +44,7 @@ test('successful completion preserves local state and navigation side-effect ord
 test('arrival use case exits safely for no target, cancellation and write failure, then completes once',async()=>{
   const arrive=setup().DG_ARRIVE_AT_WAYPOINT.arrive,events=[],waypoint={id:1};
   const base={target:null,waypoints:[],gps:null,distance(){},selectTarget:()=>waypoint,confirmDistance:()=>true,persist:async id=>{events.push(['persist',id]);return{error:null};},complete:value=>events.push(['complete',value]),notify:(...args)=>events.push(['notify',...args])};
-  await arrive({...base,selectTarget:()=>null});assert.deepEqual(JSON.parse(JSON.stringify(events)),[['notify','Aktif waypoint yok','warn','🎯']]);events.length=0;
+  await arrive({...base,selectTarget:()=>null});assert.deepEqual(JSON.parse(JSON.stringify(events)),[['notify','Aktif ölçüm noktası yok','warn','🎯']]);events.length=0;
   await arrive({...base,confirmDistance:()=>false});assert.deepEqual(events,[]);
   await arrive({...base,persist:async id=>{events.push(['persist',id]);return{error:{message:'RLS'}};}});assert.deepEqual(JSON.parse(JSON.stringify(events)),[['persist',1],['notify','Hata: RLS','err','🎯']]);events.length=0;
   await arrive(base);assert.deepEqual(JSON.parse(JSON.stringify(events)),[['persist',1],['complete',{id:1}]]);

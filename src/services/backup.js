@@ -124,7 +124,7 @@ function dgRestoreSQL(bk){
  }
  try{
   const c=bk.counts||{};
-  const msg=dgTfs("{m} ölçüm · {p} proje · {w} waypoint · {r} talep içeriyor (dışa aktarma: {d}). Tam geri yükleme SQL dosyası indirilsin mi? (Supabase → SQL Editor'da çalıştırılır; kimlikler ve sahipler korunur, çakışan satırlar atlanır.)",
+  const msg=dgTfs("{m} ölçüm · {p} proje · {w} ölçüm noktası · {r} talep içeriyor (dışa aktarma: {d}). Tam geri yükleme SQL dosyası indirilsin mi? (Supabase → SQL Editor'da çalıştırılır; kimlikler ve sahipler korunur, çakışan satırlar atlanır.)",
    {m:c.measurements||0,p:c.projects||0,w:c.waypoints||0,r:c.data_requests||0,d:String(bk.exported_at||"").slice(0,10)});
   if(!confirm(msg))return;
   const tabs=[["projects",bk.projects],["measurements",bk.measurements],["waypoints",bk.waypoints],["data_requests",bk.data_requests]];

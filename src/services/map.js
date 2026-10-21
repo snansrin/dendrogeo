@@ -123,8 +123,8 @@ async function uploadWpCsv(){
    await window.DG_UPSERT_PROJECT_WAYPOINT.upsert({client:sb,command:{row:{owner:USER.id,project_id:pid,wp_id:id,lat,lon},options:{onConflict:"project_id,wp_id"}}});
    n++;
   }
-  toast("✓ "+n+" waypoint kaydedildi."+(invalid?" "+invalid+" geçersiz satır atlandı.":""),invalid?"warn":"ok");
- }catch(e){toast(dgCf("Waypoint yükleme hatası:")+" "+e.message+" · "+n+" satır kaydedildi.","err");}
+  toast("✓ "+n+" ölçüm noktası kaydedildi."+(invalid?" "+invalid+" geçersiz satır atlandı.":""),invalid?"warn":"ok");
+ }catch(e){toast(dgCf("Ölçüm noktası yükleme hatası:")+" "+e.message+" · "+n+" satır kaydedildi.","err");}
  await loadWaypoints();
 }
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
@@ -143,7 +143,7 @@ async function loadWaypoints__scroll(){
   WP=data||[];
   navTarget=WP.find(w=>w.id===previousTarget?.id&&!w.visited)||null;
   drawNav();
- }catch(e){toast(dgCf("Waypoint listesi alınamadı:")+" "+e.message,"err");}
+ }catch(e){toast(dgCf("Ölçüm noktası listesi alınamadı:")+" "+e.message,"err");}
 }
 let DG_WP_PAGE=0,DG_WP_QUERY="";
 const DG_WP_PAGE_SIZE=8;
@@ -163,7 +163,7 @@ async function deleteAllWaypoints(){
  const app=window.DG_DELETE_PROJECT_WAYPOINTS_USE_CASE,selected=window.DG_IS_WAYPOINT_PROJECT_SELECTED,confirmation=window.DG_CONFIRM_WAYPOINT_LIST_DELETION,store=window.DG_DELETE_PROJECT_WAYPOINTS,completion=window.DG_CLEAR_DELETED_WAYPOINT_LIST;
  if(app&&selected&&confirmation&&store&&completion){await app.execute({projectId:pid,isSelected:selected.isSelected,confirmDeletion:()=>confirmation.confirm({confirm,translate:dgCf}),remove:projectId=>store.delete({client:sb,projectId}),showError:error=>toast("Hata: "+error.message,"err"),complete:()=>completion.clear({setTarget:value=>{navTarget=value;},setWaypoints:value=>{WP=value;},notify:toast,refresh:loadWaypoints}),notify:toast});return;}
  if(!pid)return toast("Proje seç");
- if(!confirm(dgCf("⚠ Bu projedeki TÜM waypoint'ler kalıcı olarak silinsin mi? Yanlış liste ise sonra yeniden yükleyebilirsiniz.")))return;
+ if(!confirm(dgCf("⚠ Bu projedeki TÜM ölçüm noktaları kalıcı olarak silinsin mi? Yanlış liste ise sonra yeniden yükleyebilirsiniz.")))return;
  const{error}=await window.DG_DELETE_PROJECT_WAYPOINTS.delete({client:sb,projectId:pid});
  if(error)return toast("Hata: "+error.message,"err");
  navTarget=null;WP=[];
@@ -185,17 +185,17 @@ async function selectWaypoint(id){
 function dgNearestWaypoint(){
  if(window.DG_SELECT_NEAREST_WAYPOINT&&window.DG_WAYPOINT_NAVIGATION_FEEDBACK_UI&&window.DG_WAYPOINT_TARGET){return window.DG_SELECT_NEAREST_WAYPOINT.select({waypoints:WP,gps:GPS,distance:hav,nearest:(rows,gps,distance)=>window.DG_WAYPOINT_TARGET.nearest(rows,gps,distance),onGpsRequired:()=>window.DG_WAYPOINT_NAVIGATION_FEEDBACK_UI.gpsRequired({translate:dgCf,notify:toast,startGps:()=>typeof startGps==="function"?startGps():null}),onEmpty:()=>window.DG_WAYPOINT_NAVIGATION_FEEDBACK_UI.noPending({translate:dgCf,notify:toast}),onSelect:id=>selectWaypoint(id)});}
  if(!GPS){toast(dgCf("En yakın noktayı seçmek için önce konumu etkinleştirin."),"warn","📡");try{if(typeof startGps==="function")startGps();}catch(e){}return;}
- if(window.DG_WAYPOINT_TARGET){const nearest=window.DG_WAYPOINT_TARGET.nearest(WP,GPS,hav);if(!nearest)return toast(dgCf("Bekleyen waypoint kalmadı."),"info");return selectWaypoint(nearest.id);}
+ if(window.DG_WAYPOINT_TARGET){const nearest=window.DG_WAYPOINT_TARGET.nearest(WP,GPS,hav);if(!nearest)return toast(dgCf("Bekleyen ölçüm noktası kalmadı."),"info");return selectWaypoint(nearest.id);}
  const pending=WP.filter(w=>!w.visited);
- if(!pending.length)return toast(dgCf("Bekleyen waypoint kalmadı."),"info");
+ if(!pending.length)return toast(dgCf("Bekleyen ölçüm noktası kalmadı."),"info");
  const nearest=pending.reduce((a,b)=>hav(GPS.latitude,GPS.longitude,a.lat,a.lon)<=hav(GPS.latitude,GPS.longitude,b.lat,b.lon)?a:b);
  selectWaypoint(nearest.id);
 }
 function dgNextWaypoint(){
  if(window.DG_ADVANCE_WAYPOINT_TARGET&&window.DG_WAYPOINT_NAVIGATION_FEEDBACK_UI&&window.DG_WAYPOINT_TARGET){return window.DG_ADVANCE_WAYPOINT_TARGET.advance({waypoints:WP,currentId:navTarget?.wp_id??-Infinity,next:(rows,currentId)=>window.DG_WAYPOINT_TARGET.next(rows,currentId),onEmpty:()=>window.DG_WAYPOINT_NAVIGATION_FEEDBACK_UI.noPending({translate:dgCf,notify:toast}),onSelect:id=>selectWaypoint(id)});}
- if(window.DG_WAYPOINT_TARGET){const next=window.DG_WAYPOINT_TARGET.next(WP,navTarget?.wp_id??-Infinity);if(!next)return toast(dgCf("Bekleyen waypoint kalmadı."),"info");return selectWaypoint(next.id);}
+ if(window.DG_WAYPOINT_TARGET){const next=window.DG_WAYPOINT_TARGET.next(WP,navTarget?.wp_id??-Infinity);if(!next)return toast(dgCf("Bekleyen ölçüm noktası kalmadı."),"info");return selectWaypoint(next.id);}
  const pending=WP.filter(w=>!w.visited).sort((a,b)=>a.wp_id-b.wp_id);
- if(!pending.length)return toast(dgCf("Bekleyen waypoint kalmadı."),"info");
+ if(!pending.length)return toast(dgCf("Bekleyen ölçüm noktası kalmadı."),"info");
  const next=pending.find(w=>w.wp_id>(navTarget?.wp_id??-Infinity))||pending[0];
  selectWaypoint(next.id);
 }
@@ -239,7 +239,7 @@ async function arriveWp(){
         hav(GPS.latitude,GPS.longitude,b.lat,b.lon))[0];
     }
   }
-  if(!w)return toast("Aktif waypoint yok","warn","🎯");
+  if(!w)return toast("Aktif ölçüm noktası yok","warn","🎯");
   if(GPS){
     const d=hav(GPS.latitude,GPS.longitude,w.lat,w.lon);
     if(d>50&&!confirm(dgTfs("Hedeften {d} m uzaktasın.\nYine de 'vardım' işaretlensin mi?",{d:d.toFixed(0)})))return;

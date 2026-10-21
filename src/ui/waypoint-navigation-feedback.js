@@ -7,6 +7,6 @@ window.DG_WAYPOINT_NAVIGATION_FEEDBACK_UI={
     try{startGps();}catch(error){}
   },
   noPending({translate,notify}){
-    notify(translate("Bekleyen waypoint kalmadı."),"info");
+    notify(translate("Bekleyen ölçüm noktası kalmadı."),"info");
   }
 };

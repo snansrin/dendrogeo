@@ -21,6 +21,12 @@ try{for(const width of [360,390,430]){
   map.fitBounds(PARK_POLY[0]);dgParkMountMenus();dgParkMountMenus();
  });
  await page.waitForFunction(()=>document.getElementById('surfaceMenuBar').contains(document.getElementById('gridBuildBtn')));
+ assert.match(await page.locator('#surfaceMenuBar details[data-menu-order="30"] > summary').innerText(),/Grid & Ölçüm noktaları/);
+ assert.match(await page.locator('#togWp').locator('..').textContent(),/Ölçüm noktaları/);
+ await page.evaluate(()=>dgSetLang('en'));
+ await page.waitForFunction(()=>document.querySelector('#surfaceMenuBar details[data-menu-order="30"] > summary').textContent.includes('Measurement Points'));
+ await page.evaluate(()=>dgSetLang('tr'));
+ await page.waitForFunction(()=>document.querySelector('#surfaceMenuBar details[data-menu-order="30"] > summary').textContent.includes('Ölçüm noktaları'));
  const menu=page.locator('#surfaceMenuBar details[data-menu-order="30"]');await menu.locator(':scope > summary').click();
  const toggle=page.locator('#chkGreenOnly');await toggle.locator("..").click();assert.equal(await toggle.isChecked(),false);assert.equal(await page.evaluate(()=>DG_GREEN_ONLY),false);
  await page.locator('#gridBuildBtn').click();await page.waitForFunction(()=>DG_GRID_SESSION.getCells().length>0&&!document.getElementById('gridBuildBtn').disabled);
