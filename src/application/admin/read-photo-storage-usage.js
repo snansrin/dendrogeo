@@ -1,11 +1,20 @@
 "use strict";
 (function(root){
  async function read(ports,bucket="dendro-photos"){
-  const folders=await ports.listPhotoFiles(bucket,"",100);
   let bytes=0,count=0;
-  for(const folder of folders){
-   const children=await ports.listPhotoFiles(bucket,folder.name,1000);
-   children.forEach(file=>{bytes+=(file.metadata&&file.metadata.size)||0;count++;});
+  const paths=[""];
+  while(paths.length){
+   const path=paths.shift(),limit=path?1000:100;
+   for(let offset=0;;offset+=limit){
+    const page=await ports.listPhotoFiles(bucket,path,limit,offset);
+    for(const file of page){
+     if(file.metadata==null&&file.id==null){paths.push(path?path+"/"+file.name:file.name);continue;}
+     const size=Number(file.metadata?.size);
+     if(!Number.isFinite(size)||size<0)throw new Error("Fotoğraf boyutu doğrulanamadı.");
+     bytes+=size;count++;
+    }
+    if(page.length<limit)break;
+   }
   }
   return{bytes,count};
  }

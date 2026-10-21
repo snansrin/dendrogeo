@@ -244,14 +244,14 @@
 <script src="src/config/wood-density-lock.js?v=895bae6a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/species.js?v=1b610c26" type="application/x-dendrogeo-module" defer></script>
 <!-- DİL KATMANI (0035): sözlük verisi çalışma zamanı çeviricisinden önce yüklenir. -->
-<script src="src/config/i18n-en.js?v=0b015f04" type="application/x-dendrogeo-module" defer></script>
+<script src="src/config/i18n-en.js?v=b64eb522" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/i18n.js?v=5466c5ca" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/map/web-mercator-coordinates.js?v=721838c9" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/geo.js?v=d1460277" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/truncation.js?v=f438600d" type="application/x-dendrogeo-module" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"bdd2d8cb6f9f1013"</script>
+<script id="dgRuntimeBuild" type="application/json">"8c56f90976c42922"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
 <script src="src/adapters/parks/fetch-nominatim-osm-way.js?v=7e4900cf" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/osm-water-backup.js?v=9dcc34a2" type="application/x-dendrogeo-module" defer></script>
@@ -447,7 +447,7 @@
 <script src="src/ui/admin-measurement-row.js?v=a4372e25" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-measurement-table.js?v=3d243cb5" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/admin/export-filter-options.js?v=77acbee2" type="application/x-dendrogeo-module" defer></script>
-<script src="src/adapters/admin/admin-persistence-store.js?v=61dd5bb3" type="application/x-dendrogeo-module" defer></script>
+<script src="src/adapters/admin/admin-persistence-store.js?v=98a037d3" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/admin/build-export-query.js?v=51091d79" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/admin/read-export-rows.js?v=34dfc1cd" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-measurement-filter.js?v=6202b3e9" type="application/x-dendrogeo-module" defer></script>
@@ -456,8 +456,8 @@
 <script src="src/adapters/admin/admin-export-filter-store.js?v=9226358f" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/admin/update-admin-export-filter-options.js?v=13e6354b" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/admin/download-admin-measurements.js?v=08c94424" type="application/x-dendrogeo-module" defer></script>
-<script src="src/application/admin/read-photo-storage-usage.js?v=8b336e3c" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/admin-storage-usage.js?v=6172c9db" type="application/x-dendrogeo-module" defer></script>
+<script src="src/application/admin/read-photo-storage-usage.js?v=74d49c89" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/admin-storage-usage.js?v=2098f8ed" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/admin/clean-orphan-photos.js?v=9bb78b02" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/admin/re-geocode-measurements.js?v=9efbe060" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/admin/re-geocode-store.js?v=c60521fb" type="application/x-dendrogeo-module" defer></script>
@@ -474,7 +474,7 @@
 <script src="src/ui/admin-overview-metrics.js?v=59e80fc7" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-overview-measurements.js?v=cf96b364" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/admin/load-admin-overview.js?v=6c604609" type="application/x-dendrogeo-module" defer></script>
-<script src="src/services/admin.js?v=ba2c1911" type="application/x-dendrogeo-module" defer></script>
+<script src="src/services/admin.js?v=0d0c431b" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/admin/admin-tree-state.js?v=e6d4a88e" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/admin/admin-tree-store.js?v=4c277b2a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/admin/group-measurement-tree.js?v=e8ce9e72" type="application/x-dendrogeo-module" defer></script>
@@ -1693,6 +1693,7 @@
     <div class="lbl">💽 Depolama Kullanımı</div>
     <div style="height:10px;background:var(--line);border-radius:6px;margin:10px 0 6px;overflow:hidden"><div id="storeBar" style="height:100%;width:0%;background:var(--green);transition:width .6s"></div></div>
     <div class="mono" id="storeInfo" style="font-size:.75rem;color:var(--mut)">Hesaplanıyor…</div>
+    <div class="dg-meta" id="storeWarning" role="status" hidden></div>
     <div class="admin-storage-section">
      <div class="lbl" id="dgMaintenanceLabel">Bakım işlemleri</div>
      <div class="admin-storage-actions" role="group" aria-labelledby="dgMaintenanceLabel">
@@ -1987,6 +1988,6 @@
 <!-- Resolve the lazily loaded class list for the legacy, read-only park PNG path. -->
 <script src="src/ui/park-export-lazy-class-bridge.js?v=38c67f2d" type="application/x-dendrogeo-module" defer></script>
 
-<script src="/src/bootstrap/app-runtime.js?v=d2bc5767" defer></script>
+<script src="/src/bootstrap/app-runtime.js?v=59567406" defer></script>
 </body>
 </html>

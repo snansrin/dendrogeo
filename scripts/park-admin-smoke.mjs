@@ -13,6 +13,14 @@ try{
   await isolateAccount(page);await page.goto(server.url,{waitUntil:'domcontentloaded'});
   await page.locator('#shell').waitFor({state:'visible'});await page.waitForFunction(()=>document.getElementById('dgStartupScreen').hidden);
   await page.evaluate(()=>{
+   document.querySelectorAll('.view').forEach(view=>view.classList.toggle('on',view.id==='v-admin'));
+   window.DG_ADMIN_STORAGE_USAGE_UI.render(document.getElementById('storeBar'),document.getElementById('storeInfo'),{bytes:950000000,count:2000,format:(text,values)=>text.replace(/\{(\w+)\}/g,(_,key)=>values[key])});
+  });
+  assert.match(await page.locator('#storeInfo').innerText(),/950\.0 MB \/ 1000 MB/);
+  assert.equal(await page.locator('#storeWarning').isVisible(),true);
+  assert.match(await page.locator('#storeWarning').innerText(),/%95/);
+  assert.equal(await page.locator('#storeWarning').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true,'storage warning fits phone widths');
+  await page.evaluate(()=>{
    PROFILE.role='owner';
    document.querySelectorAll('.view').forEach(view=>view.classList.toggle('on',view.id==='v-admin'));
    const parks=[
