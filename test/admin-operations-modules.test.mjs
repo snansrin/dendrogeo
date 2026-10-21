@@ -20,7 +20,7 @@ function app(){
  return window;
 }
 
-test('storage usage sums the same folder listing sizes and UI preserves quota thresholds',async()=>{
+test('storage usage sums folder sizes and UI uses decimal storage units',async()=>{
  const window=app(),calls=[];
  const storage={from(bucket){assert.equal(bucket,'dendro-photos');return{list(path,options){calls.push([path,options.limit]);return Promise.resolve({data:path===''?[{name:'u1'}]:[{metadata:{size:1048576}},{metadata:{size:524288}}]});}};}};
  const ports=window.DG_ADMIN_PERSISTENCE_STORE.create(()=>({storage}));
@@ -28,8 +28,36 @@ test('storage usage sums the same folder listing sizes and UI preserves quota th
  assert.deepEqual(JSON.parse(JSON.stringify(usage)),{bytes:1572864,count:2});
  assert.deepEqual(calls,[['',100],['u1',1000]]);
  const bar={style:{}},info={};
- window.DG_ADMIN_STORAGE_USAGE_UI.render(bar,info,{...usage,quota:2,format:(message,values)=>`${values.n}|${values.mb}|${values.q}`});
+ window.DG_ADMIN_STORAGE_USAGE_UI.render(bar,info,{bytes:1500000,count:2,quotaBytes:2000000,format:(message,values)=>`${values.n}|${values.mb}|${values.q}`});
  assert.equal(bar.style.width,'75%');assert.equal(bar.style.background,'var(--amber)');assert.equal(info.textContent,'2|1.5|2');
+});
+
+test('photo capacity is 1 GB and warnings begin at 70, 85 and 95 percent',()=>{
+ const window=app(),bar={style:{}},warning={style:{}},info={ownerDocument:{getElementById:id=>id==='storeWarning'?warning:null}};
+ const format=(text,values)=>text.replace(/\{(\w+)\}/g,(_,key)=>values[key]);
+ for(const [bytes,color,hidden,phrase] of [[699999999,'green',true,null],[700000000,'amber',false,'Kalan alanı takip'],[850000000,'red',false,'kapasitesini artırmayı'],[950000000,'red',false,'çok az alan'],[1100000000,'red',false,'çok az alan']]){
+  window.DG_ADMIN_STORAGE_USAGE_UI.render(bar,info,{bytes,count:63,format});
+  assert.equal(bar.style.background,`var(--${color})`);assert.equal(warning.hidden,hidden);
+  assert.ok(info.textContent.endsWith('/ 1000 MB'));
+  if(phrase)assert.ok(warning.textContent.includes(phrase));
+  assert.ok(parseFloat(bar.style.width)<=100);
+ }
+ window.DG_ADMIN_STORAGE_USAGE_UI.unavailable(info,'Unavailable');assert.equal(warning.hidden,true);
+});
+
+test('storage count reads beyond 100 folders and 1000 photos, including root files',async()=>{
+ const window=app(),calls=[];
+ const files={ '':Array.from({length:101},(_,i)=>({name:'u'+i})).concat({name:'root.jpg',id:'root',metadata:{size:3}}),u0:Array.from({length:1001},(_,i)=>({name:i+'.jpg',id:String(i),metadata:{size:2}})) };
+ const result=await window.DG_READ_PHOTO_STORAGE_USAGE.read({listPhotoFiles:async(bucket,path,limit,offset)=>{calls.push([path,offset]);return(files[path]||[]).slice(offset,offset+limit);}});
+ assert.deepEqual(JSON.parse(JSON.stringify(result)),{bytes:2005,count:1002});
+ assert.ok(calls.some(([path,offset])=>path===''&&offset===100));
+ assert.ok(calls.some(([path,offset])=>path==='u0'&&offset===1000));
+});
+
+test('storage count fails instead of displaying incomplete or malformed usage',async()=>{
+ const window=app();
+ await assert.rejects(window.DG_READ_PHOTO_STORAGE_USAGE.read({listPhotoFiles:async()=>[{id:'bad',metadata:{size:'invalid'}}]}),/boyutu/);
+ await assert.rejects(window.DG_READ_PHOTO_STORAGE_USAGE.read({listPhotoFiles:async()=>{throw Error('permission denied');}}),/permission denied/);
 });
 
 test('orphan cleanup preserves measurement URLs and only removes unmatched public objects',async()=>{

@@ -10389,6 +10389,23 @@
           "sha256": "a176f03d71477c7acf810030c5164e68a991f1816937a4db643b7c647fd02196"
         }
       ]
+    },
+    {
+      "date": "2026-10-21",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: fix of photo storage quota display and 70/85/95 percent warnings. Shell adds only the accessible storage warning; index is regenerated from those UI sources. Scientific engines, permissions and stored data are unchanged.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "37ab8e902dc95b88f9b9391d7b6d574be41545b738c508476abaebc867653a8d",
+          "sha256": "225e4f631c768ab1a482bc97dff3fa4db094a00b55435374227c3dbca6b3506e"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "1bd3bea0c15938d77f410491b69be53843c1a3a699ac4b1a8fd8be67ee1e99e3",
+          "sha256": "1b2e77e2cd4df2d7483fa099834f6d16044bd311cde5424ea2bd49886431e45e"
+        }
+      ]
     }
   ]
 }

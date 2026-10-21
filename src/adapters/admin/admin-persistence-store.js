@@ -9,8 +9,8 @@
     if(!Array.isArray(data))throw new Error("Ölçüm fotoğraf bağlantıları doğrulanamadı.");
     return data;
    },
-   async listPhotoFiles(bucket,path,limit){
-    const{data,error}=await storage().from(bucket).list(path,{limit});
+   async listPhotoFiles(bucket,path,limit,offset=0){
+    const{data,error}=await storage().from(bucket).list(path,{limit,offset,sortBy:{column:"name",order:"asc"}});
     if(error)throw error;
     if(!Array.isArray(data))throw new Error("Fotoğraf depolama listesi doğrulanamadı.");
     return data;

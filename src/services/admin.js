@@ -122,7 +122,7 @@ async function loadStorageStats(){
  try{
   const adminStore=window.DG_ADMIN_PERSISTENCE_STORE.create(()=>sb);
   const usage=await window.DG_READ_PHOTO_STORAGE_USAGE.read(adminStore);
-  window.DG_ADMIN_STORAGE_USAGE_UI.render($("storeBar"),$("storeInfo"),{...usage,quota:QUOTA_MB,format:_tadf});
+  window.DG_ADMIN_STORAGE_USAGE_UI.render($("storeBar"),$("storeInfo"),{...usage,format:_tadf});
  }catch(e){window.DG_ADMIN_STORAGE_USAGE_UI.unavailable($("storeInfo"),_tad("Depolama bilgisi alınamadı."));}
 }
 
