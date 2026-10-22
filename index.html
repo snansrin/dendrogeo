@@ -228,7 +228,7 @@
 <script src="src/adapters/settings/appearance-preference.js?v=db0a4a20" data-dg-eager></script>
 <script src="src/ui/appearance.js?v=caddab48" data-dg-eager></script>
 <link rel="stylesheet" href="css/startup.css?v=84f56dba">
-<link rel="stylesheet" href="css/style.css?v=f675f71c">
+<link rel="stylesheet" href="css/style.css?v=af1241b3">
 <link rel="stylesheet" href="css/landing.css?v=598bd2e0">
 <link rel="stylesheet" href="css/landing-scenes.css?v=13f15325">
 <script src="src/ui/startup-screen.js?v=3c39939a" type="application/x-dendrogeo-module" defer></script>
@@ -251,7 +251,7 @@
 <script src="src/utils/truncation.js?v=f438600d" type="application/x-dendrogeo-module" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"3e53e8e4e1b11ba0"</script>
+<script id="dgRuntimeBuild" type="application/json">"9a0dce08ef6f2e9d"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
 <script src="src/adapters/parks/fetch-nominatim-osm-way.js?v=7e4900cf" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/osm-water-backup.js?v=9dcc34a2" type="application/x-dendrogeo-module" defer></script>
@@ -323,12 +323,12 @@
 <script src="src/domain/export/build-measurement-csv.js?v=6114c9f4" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/export/build-measurement-geojson.js?v=1032a080" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/export/measurement-store.js?v=ba1860e1" type="application/x-dendrogeo-module" defer></script>
-<script src="src/domain/export/resolve-export-options.js?v=b9aff051" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/export/resolve-export-options.js?v=d3286050" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/export/serialize-measurement-export.js?v=719288b3" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/export/file-download.js?v=f942c7e4" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/export/download-user-measurement-export.js?v=a4f57473" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/export/prepare-user-measurement-preview.js?v=c5a24b6f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/export-preview.js?v=fd1a027e" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/export-preview.js?v=0a5ceacb" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/export.js?v=af052470" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/offline/create-client-id.js?v=5d852f6c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/offline/same-measurement.js?v=d76c0410" type="application/x-dendrogeo-module" defer></script>
@@ -584,7 +584,7 @@
 <script src="src/ui/park-report-summary.js?v=5ee61684" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-report-species-table.js?v=cb194bd6" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/build-park-report-csv.js?v=a7adb74f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-report-preview.js?v=5428b528" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-report-preview.js?v=960e2a3f" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/resolve-park-report-target.js?v=8171b123" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/build-park-report-request.js?v=29034e8a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/build-legacy-park-report-request.js?v=7b9ccf08" type="application/x-dendrogeo-module" defer></script>
@@ -1606,7 +1606,7 @@
      <div class="export-format-grid">
       <article class="export-format-card"><div class="export-format-top"><span class="export-format-icon">📥</span><span class="badge on">TABLO</span></div><h3>Standart CSV</h3><p>Ham çevre, türetilmiş DBH, AGB/BHB, karbon, koordinat ve fotoğraf alanlarını içeren bilimsel tablo.</p><div class="export-actions"><button type="button" class="btn sm" data-dg-export-action="csv-download">⬇ İndir</button><button type="button" class="btn sm ghost" data-dg-export-action="csv-preview">👁 Önizle</button></div></article>
       <article class="export-format-card"><div class="export-format-top"><span class="export-format-icon">🗺️</span><span class="badge admin">GIS</span></div><h3>GeoJSON</h3><p>QGIS ve web haritalarında doğrudan kullanılabilen nokta geometrisi ve temel envanter öznitelikleri.</p><div class="export-actions"><button type="button" class="btn sm blue" data-dg-export-action="geo-download">⬇ İndir</button><button type="button" class="btn sm ghost" data-dg-export-action="geo-preview">👁 Önizle</button></div></article>
-      <article class="export-format-card"><div class="export-format-top"><span class="export-format-icon">🧭</span><span class="badge">QGIS</span></div><h3>QGIS CSV</h3><p>EPSG:4326 koordinatları ve fotoğraf alanlarıyla QGIS saha/masaüstü iş akışına hazır CSV.</p><div class="export-actions"><button type="button" class="btn sm amber" data-dg-export-action="qgis-download">⬇ İndir</button><button type="button" class="btn sm ghost" data-dg-export-action="csv-preview">👁 Önizle</button></div></article>
+      <article class="export-format-card"><div class="export-format-top"><span class="export-format-icon">🧭</span><span class="badge">QGIS</span></div><h3>QGIS CSV</h3><p>EPSG:4326 koordinatları ve fotoğraf alanlarıyla QGIS saha/masaüstü iş akışına hazır CSV.</p><div class="export-actions"><button type="button" class="btn sm amber" data-dg-export-action="qgis-download">⬇ İndir</button><button type="button" class="btn sm ghost" data-dg-export-action="qgis-preview">👁 Önizle</button></div></article>
      </div>
     </div>
    </details>
@@ -1887,11 +1887,11 @@
 <button class="dg-png-btn ghost" style="margin-top:8px" data-dg-account-action="cancel-recovery">Şimdi Değil</button>
 </div>
 </div>
-<div id="previewModal"><div class="card" style="max-width:960px;width:100%;max-height:82vh;display:flex;flex-direction:column">
+<dialog id="previewModal" aria-labelledby="pvTitle"><div class="card" style="max-width:960px;width:100%;max-height:82vh;display:flex;flex-direction:column">
  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><b id="pvTitle">Önizleme</b><button class="btn sm red" data-dg-export-action="close-preview">✕ Kapat</button></div>
  <div id="pvBody" tabindex="0" class="tblwrap" style="overflow:auto;flex:1"></div>
  <button class="btn" style="margin-top:12px" id="pvDownload">📥 İndir</button>
-</div></div>
+</div></dialog>
 <script src="src/ui/state.js?v=58254709" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/toast-message-content.js?v=853288dd" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/toast.js?v=34110887" type="application/x-dendrogeo-module" defer></script>
@@ -1925,7 +1925,7 @@
 <script src="src/ui/live-map-controls.js?v=bbdf7639" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/measurement-form-actions.js?v=a8d5fe62" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/project-edit-actions.js?v=cb9f425d" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/export-view-actions.js?v=024bf656" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/export-view-actions.js?v=4acfe40f" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/data-request-actions.js?v=a73c94ad" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/admin-export-actions.js?v=50a04883" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-invites-actions.js?v=9d23aab8" type="application/x-dendrogeo-module" defer></script>
@@ -1990,7 +1990,7 @@
 <script src="src/ui/park-export-lazy-class-bridge.js?v=38c67f2d" type="application/x-dendrogeo-module" defer></script>
 
 <script src="src/ui/operation-help-content.js?v=c5443e84" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/operation-help.js?v=26502047" type="application/x-dendrogeo-module" defer></script>
-<script src="/src/bootstrap/app-runtime.js?v=9c6bf14e" defer></script>
+<script src="src/ui/operation-help.js?v=e473f17a" type="application/x-dendrogeo-module" defer></script>
+<script src="/src/bootstrap/app-runtime.js?v=d64bdaf7" defer></script>
 </body>
 </html>

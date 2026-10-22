@@ -10667,6 +10667,72 @@
           "sha256": "50f6cdd7115ac805b78ae7b34661d778c1c3752d147d79fa6fe81bbfc3ea901d"
         }
       ]
+    },
+    {
+      "date": "2026-10-22",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: repair live export preview close action, keyboard/focus/scroll behavior, QGIS preview filename and CSV display parsing; keep helper text out of accessible field names. Exercise real preview downloads and shared park-report presentation in both browser jobs. Preserve serializers, scientific calculations, data access and report contents.",
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "50f6cdd7115ac805b78ae7b34661d778c1c3752d147d79fa6fe81bbfc3ea901d",
+          "sha256": "a2a8a92c49e076241499e4781157fb893625278a90d82289c0d5a1d7cb336f9e"
+        },
+        {
+          "path": "css/style.css",
+          "previous_sha256": "a88da8f3e333f615766a5be254f5802e1cfaf505acdca43e3b87cb175367b44e",
+          "sha256": "13f4f3f92f62798521b0528c5a4ddde7dc02afd97e4573a0938a9149cc55cc47"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "b8be167acbffb82b8247529685c412d46c5a2ce3555e7b3e1091c4f82b9b16fe",
+          "sha256": "dc0eba9564244b200a564a149c6479e8f94882e1b9af629c6f54a3510b2aa096"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "b8ce0dad7d9cd230380ab6590927744b2ae253d292f720e2236bb64e2addebab",
+          "sha256": "0faa809fb9d89aa6432c06772a9499630caaeeb338a36b4f24acc0f5f7c710b2"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "d3c5fc2ee37ecf99a9dcb91825012ab909113be2a5151a42bdbdad889d8a462e",
+          "sha256": "68a2da6f383a2502558f82d131406c0b30c499125461768f506da150bcbda937"
+        },
+        {
+          "path": "src/ui/export-view-actions.js",
+          "previous_sha256": "18ed0138fde03e955914b29430790694d2b2c2b32c7e7d5175ec3e64515cc5d7",
+          "sha256": "041f90010f4fe4f2590e2268cd7e0ce343441086b640c56bb939fbcfbc37776c"
+        },
+        {
+          "path": "src/ui/park-report-preview.js",
+          "previous_sha256": "fa2dd513427efbc9f9f882996dc170cfe1eba4c6ee391d0ddf9f80bf45746642",
+          "sha256": "1b1ac67f080998d1558fc62aa2130e7e07c790e9a7bee51126a90143fa5f694f"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-22",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: contain the Escape key release while closing an export preview so background map keyboard handlers are not invoked. Browser regression asserts both key phases stay inside the preview; map logic remains unchanged.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "dc0eba9564244b200a564a149c6479e8f94882e1b9af629c6f54a3510b2aa096",
+          "sha256": "6c499a04187d0c943cdbef490cbc2b9af733ddf05342293e101097ac1700e29f"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-22",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: apply the verified Ubuntu main-archive selection to Chromium CI dependency installation as well as WebKit after the phone job stalls in the same installation phase. Preserve browser versions, checks and time limits.",
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "a2a8a92c49e076241499e4781157fb893625278a90d82289c0d5a1d7cb336f9e",
+          "sha256": "63a136808492f7f785fa5828a620375c11689b0f9ef84c33e7133dffedb184b1"
+        }
+      ]
     }
   ]
 }
