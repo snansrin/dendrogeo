@@ -10643,6 +10643,18 @@
           "sha256": "b8ce0dad7d9cd230380ab6590927744b2ae253d292f720e2236bb64e2addebab"
         }
       ]
+    },
+    {
+      "date": "2026-10-22",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: use the official Ubuntu main archive for WebKit CI dependency installation after the runner Azure mirror exceeded the job limit. Retain all browser assertions, job gates, package suites and signing keys; production code is unaffected.",
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "337977606da78f5b37ee62c660f9d5af540ed5b9fde4131b9cbaf5e1ddfe49f0",
+          "sha256": "a2c75f69b0e7042fa7c116ab5e7bae2efa2cf344e4da328bd401f1cb7e571f60"
+        }
+      ]
     }
   ]
 }

@@ -37,7 +37,15 @@ jobs:
           node-version: 20
       - run: npm ci
       - name: WebKit
-        run: npx --yes --package=playwright@1.62.1 playwright install --with-deps webkit
+        run: |
+          # The runner's Azure mirror can stall dependency downloads past the job limit.
+          # Use Ubuntu's main archive with the existing suites and signature keys.
+          for source in /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources; do
+            if [ -f "$source" ]; then
+              sudo sed -i 's|azure.archive.ubuntu.com|archive.ubuntu.com|g' "$source"
+            fi
+          done
+          npx --yes --package=playwright@1.62.1 playwright install --with-deps webkit
       - name: WebKit profil ve sekme regresyonları
         env:
           DG_UI_BROWSER: webkit
