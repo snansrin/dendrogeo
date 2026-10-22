@@ -10655,6 +10655,18 @@
           "sha256": "a2c75f69b0e7042fa7c116ab5e7bae2efa2cf344e4da328bd401f1cb7e571f60"
         }
       ]
+    },
+    {
+      "date": "2026-10-22",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: include GitHub runner apt-mirrors list files in the WebKit Ubuntu mirror substitution, as confirmed by the installation log. Keep all test assertions and publication gates.",
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "a2c75f69b0e7042fa7c116ab5e7bae2efa2cf344e4da328bd401f1cb7e571f60",
+          "sha256": "50f6cdd7115ac805b78ae7b34661d778c1c3752d147d79fa6fe81bbfc3ea901d"
+        }
+      ]
     }
   ]
 }
