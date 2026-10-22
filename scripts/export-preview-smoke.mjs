@@ -13,12 +13,14 @@ try{for(const width of [360,390,430,1280]){
  await page.locator('#side [data-dg-view="export"]').click();
  await page.locator('.export-panel').filter({has:page.locator('[data-dg-export-action="csv-preview"]')}).locator('summary').click();
  const modal=page.getByRole('dialog'),csv=page.locator('[data-dg-export-action="csv-preview"]');
+ await page.evaluate(()=>{window.__previewBackgroundEsc=0;for(const name of ['keydown','keyup'])document.addEventListener(name,event=>{if(event.key==='Escape')__previewBackgroundEsc++;});});
  await csv.click();await modal.waitFor({state:'visible'});
  assert.match(await modal.innerText(),/Önizlenecek ölçüm kaydı yok/);
  assert.equal(await page.evaluate(()=>document.querySelector('#previewModal').contains(document.activeElement)),true,'focus enters preview');
  assert.equal(await page.evaluate(()=>document.body.style.overflow),'hidden');
  for(let i=0;i<5;i++){await page.keyboard.press('Tab');assert.equal(await page.evaluate(()=>document.querySelector('#previewModal').contains(document.activeElement)),true,'Tab stays in preview');}
  await page.keyboard.press('Escape');await modal.waitFor({state:'hidden'});
+ assert.equal(await page.evaluate(()=>__previewBackgroundEsc),0,'closing a preview must not invoke background Escape shortcuts');
  assert.equal(await csv.evaluate(el=>el===document.activeElement),true,'focus returns to preview trigger');
  assert.notEqual(await page.evaluate(()=>document.body.style.overflow),'hidden');
  const expected=await page.evaluate(()=>{

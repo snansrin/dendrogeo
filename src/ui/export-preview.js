@@ -1,6 +1,8 @@
 "use strict";
 (function(root){
  const bound=new WeakSet(),locks=new WeakMap(),triggers=new WeakMap();
+ let escapePending=false;
+ root.addEventListener?.('keyup',event=>{if(escapePending&&event.key==='Escape'){escapePending=false;event.stopPropagation();}},true);
  function csvRows(content){
   const rows=[];let row=[],cell='',quoted=false;
   const finish=()=>{if(cell||row.length){row.push(cell);rows.push(row);}row=[];cell='';};
@@ -33,7 +35,7 @@
     if(event.shiftKey&&active===first){event.preventDefault();last?.focus();}
     else if(!event.shiftKey&&active===last){event.preventDefault();first?.focus();}
    });
-   for(const name of ['keydown','keyup'])modal.addEventListener(name,event=>{if(event.key==='Escape')event.stopPropagation();});
+   modal.addEventListener('keydown',event=>{if(event.key==='Escape'){escapePending=true;event.stopPropagation();}});
    modal.addEventListener('click',event=>{if(event.target===modal)close(modal.ownerDocument);});
   }
   if(!locks.has(modal)){

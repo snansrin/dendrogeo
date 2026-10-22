@@ -10709,6 +10709,18 @@
           "sha256": "1b1ac67f080998d1558fc62aa2130e7e07c790e9a7bee51126a90143fa5f694f"
         }
       ]
+    },
+    {
+      "date": "2026-10-22",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: contain the Escape key release while closing an export preview so background map keyboard handlers are not invoked. Browser regression asserts both key phases stay inside the preview; map logic remains unchanged.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "dc0eba9564244b200a564a149c6479e8f94882e1b9af629c6f54a3510b2aa096",
+          "sha256": "6c499a04187d0c943cdbef490cbc2b9af733ddf05342293e101097ac1700e29f"
+        }
+      ]
     }
   ]
 }
