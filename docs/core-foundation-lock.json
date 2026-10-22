@@ -10721,6 +10721,18 @@
           "sha256": "6c499a04187d0c943cdbef490cbc2b9af733ddf05342293e101097ac1700e29f"
         }
       ]
+    },
+    {
+      "date": "2026-10-22",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: apply the verified Ubuntu main-archive selection to Chromium CI dependency installation as well as WebKit after the phone job stalls in the same installation phase. Preserve browser versions, checks and time limits.",
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "a2a8a92c49e076241499e4781157fb893625278a90d82289c0d5a1d7cb336f9e",
+          "sha256": "63a136808492f7f785fa5828a620375c11689b0f9ef84c33e7133dffedb184b1"
+        }
+      ]
     }
   ]
 }
