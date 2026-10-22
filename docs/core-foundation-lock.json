@@ -10626,6 +10626,23 @@
           "sha256": "55e18b6e12d8ad28629db0b481505c654d176f01790be6c3189de3eb24ed52e6"
         }
       ]
+    },
+    {
+      "date": "2026-10-22",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: route the authenticated app brand through existing dashboard navigation instead of public landing. Preserve session, unsaved measurements, scientific and map engines.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "55e18b6e12d8ad28629db0b481505c654d176f01790be6c3189de3eb24ed52e6",
+          "sha256": "b8be167acbffb82b8247529685c412d46c5a2ce3555e7b3e1091c4f82b9b16fe"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "9e15628120588385c5b171b74d7bdeb6eaba15a4396317926c67848db7c272d3",
+          "sha256": "b8ce0dad7d9cd230380ab6590927744b2ae253d292f720e2236bb64e2addebab"
+        }
+      ]
     }
   ]
 }

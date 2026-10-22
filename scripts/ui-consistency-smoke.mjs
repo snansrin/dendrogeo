@@ -117,6 +117,25 @@ try{for(const width of [320,360,390,430,768,1280]){
   await auditView('#v-map');
  }
  await page.locator('#parkSurfaceAction').screenshot({path:join(output,'park-analysis-'+width+'.png')});
+ // The app brand returns to the dashboard, preserving session and unsaved input.
+ const beforeBrand=await page.evaluate(()=>{
+  window.__brandLogoutCalls=0;window.logout=()=>{__brandLogoutCalls++;};
+  document.getElementById('mDbh').value='110';
+  return {user:USER.id,url:location.href};
+ });
+ for(const keyboard of [false,true]){
+  await page.locator('#side [data-dg-view="records"]').click();
+  const brand=page.locator('#apptop .logo');
+  if(keyboard){await brand.focus();await page.keyboard.press('Enter');}else await brand.locator('img').click();
+  await page.locator('#v-dash.on').waitFor({state:'visible'});
+  assert.equal(await page.locator('#shell').isVisible(),true);
+  assert.equal(await page.locator('#landing').isVisible(),false);
+  assert.deepEqual(await page.evaluate(()=>({user:USER.id,url:location.href})),beforeBrand);
+  assert.equal(await page.locator('#mDbh').inputValue(),'110');
+  assert.equal(await page.evaluate(()=>__brandLogoutCalls),0,'brand must not invoke sign-out');
+ }
+ await page.locator('[data-dg-chrome-action="logout"]').click();
+ assert.equal(await page.evaluate(()=>__brandLogoutCalls),1,'only the explicit exit button invokes sign-out');
  assert.deepEqual(errors,[]);
  console.log(JSON.stringify({width,tabs:await tabs.count(),disclosures,buttons,cardContained:true,bilingual:true,noPageErrors:true}));
  await page.close();
