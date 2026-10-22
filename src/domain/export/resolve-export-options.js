@@ -2,7 +2,7 @@
 (function(root){
  const options={
   csv:{activity:"CSV",fileName:"dendrogeo.csv",previewTitle:"CSV Önizleme (ilk 100 satır)",isCSV:true},
-  qgis:{activity:"QGIS",fileName:"dendrogeo_qgis.csv",isCSV:true},
+  qgis:{activity:"QGIS",fileName:"dendrogeo_qgis.csv",previewTitle:"QGIS CSV Önizleme (ilk 100 satır)",isCSV:true},
   geojson:{activity:"GeoJSON",fileName:"dendrogeo.geojson",previewTitle:"GeoJSON Önizleme",isCSV:false}
  };
  function resolve(format){

@@ -1,7 +1,7 @@
 "use strict";
 /* Add read-only help beside controls without moving or invoking the controls. */
 (function(root){
- const pairs=new Map();let dialog,lastTrigger,scheduled=false,observer,escapePending=false;
+ const pairs=new Map(),fieldNames=new Map();let dialog,lastTrigger,scheduled=false,observer,escapePending=false;
  const anchors=[
   ['.waypoint-target-copy>.lbl','navActions'],['#waypointListTitle','pointList'],['#waypointFileTitle','pointUpload'],
   ['#measureLocationTitle','gps'],['#measureTreeTitle','measure'],['.measure-photo h4','photo'],
@@ -27,6 +27,9 @@
   return null;
  }
  function content(control){return root.DG_OPERATION_HELP_CONTENT.get(topic(control),language());}
+ function fieldName(control){
+  const target=fieldNames.get(control);if(target)target.setAttribute('aria-label',control.textContent.replace(/\s+/g,' ').trim());
+ }
  function makeDialog(){
   if(dialog)return dialog;
   const doc=root.document;dialog=doc.createElement('dialog');dialog.id='dgOperationHelp';dialog.className='dg-operation-help-dialog';
@@ -58,6 +61,10 @@
   button.setAttribute('aria-label',content(control).title+' — '+t('Nasıl kullanılır?','How to use'));
   button.setAttribute('aria-haspopup','dialog');button.setAttribute('aria-controls','dgOperationHelp');
   button.title=t('Kullanım talimatları','Instructions');
+  if(control.matches('label[for]')){
+   const field=doc.getElementById(control.htmlFor);
+   if(field&&!field.hasAttribute('aria-label')&&!field.hasAttribute('aria-labelledby')){fieldNames.set(control,field);fieldName(control);}
+  }
   control.append(button);pairs.set(control,button);
  }
  function scan(node=root.document.getElementById('shell')){
@@ -68,7 +75,7 @@
  function schedule(nodes){
   for(const node of nodes)scan(node);
   if(scheduled)return;scheduled=true;
-  root.requestAnimationFrame(()=>{scheduled=false;for(const[control,button]of pairs)if(!control.isConnected){button.remove();pairs.delete(control);}});
+  root.requestAnimationFrame(()=>{scheduled=false;for(const[control,button]of pairs)if(!control.isConnected){button.remove();pairs.delete(control);fieldNames.delete(control);}});
  }
  function init(){
   const doc=root.document;if(!root.DG_OPERATION_HELP_CONTENT||root._dgOperationHelpBound||typeof root.MutationObserver!=='function'||typeof doc.body?.append!=='function')return;
@@ -87,7 +94,7 @@
   },true);
   root.addEventListener('keydown',event=>{if(dialog?.open&&event.key==='Escape'){escapePending=true;event.stopPropagation();}},true);
   root.addEventListener('keyup',event=>{if(escapePending&&event.key==='Escape'){escapePending=false;event.stopPropagation();}},true);
-  root.addEventListener('dg:lang',()=>{for(const[control,button]of pairs){button.setAttribute('aria-label',content(control).title+' — '+t('Nasıl kullanılır?','How to use'));button.title=t('Kullanım talimatları','Instructions');if(dialog?.open&&lastTrigger===button)open(control,button);}});
+  root.addEventListener('dg:lang',()=>{for(const[control,button]of pairs){fieldName(control);button.setAttribute('aria-label',content(control).title+' — '+t('Nasıl kullanılır?','How to use'));button.title=t('Kullanım talimatları','Instructions');if(dialog?.open&&lastTrigger===button)open(control,button);}});
   observer=new root.MutationObserver(records=>{const nodes=[];for(const record of records)for(const node of record.addedNodes)if(node.nodeType===1&&!node.matches('.dg-operation-help'))nodes.push(node);if(nodes.length||records.some(record=>record.removedNodes.length))schedule(nodes);});
   const shell=doc.getElementById('shell');if(shell)observer.observe(shell,{childList:true,subtree:true});
  }

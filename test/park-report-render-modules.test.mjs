@@ -35,6 +35,7 @@ test('park report UI keeps cards, species labels, translated header and CSV iden
 
 test('park report preview assigns content, download and modal using supplied DOM ports',()=>{
  const w=app(),title={},body={},download={},modal={classList:{value:'',add(value){this.value=value;}}};let saved;
+ w.DG_EXPORT_PREVIEW_UI={open:element=>{assert.equal(element,modal);element.classList.add('on');}};
  w.DG_PARK_REPORT_PREVIEW_UI.show({title:'📄 Park',body:'<table/>',csv:'data',fileName:'park.csv',elements:{title,body,download,modal},download:(...args)=>{saved=args;}});
  assert.equal(title.textContent,'📄 Park');assert.equal(body.innerHTML,'<table/>');download.onclick();assert.deepEqual(saved,['data','park.csv']);assert.equal(modal.classList.value,'on');
 });

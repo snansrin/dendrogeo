@@ -256,7 +256,7 @@
      <div class="export-format-grid">
       <article class="export-format-card"><div class="export-format-top"><span class="export-format-icon">📥</span><span class="badge on">TABLO</span></div><h3>Standart CSV</h3><p>Ham çevre, türetilmiş DBH, AGB/BHB, karbon, koordinat ve fotoğraf alanlarını içeren bilimsel tablo.</p><div class="export-actions"><button type="button" class="btn sm" data-dg-export-action="csv-download">⬇ İndir</button><button type="button" class="btn sm ghost" data-dg-export-action="csv-preview">👁 Önizle</button></div></article>
       <article class="export-format-card"><div class="export-format-top"><span class="export-format-icon">🗺️</span><span class="badge admin">GIS</span></div><h3>GeoJSON</h3><p>QGIS ve web haritalarında doğrudan kullanılabilen nokta geometrisi ve temel envanter öznitelikleri.</p><div class="export-actions"><button type="button" class="btn sm blue" data-dg-export-action="geo-download">⬇ İndir</button><button type="button" class="btn sm ghost" data-dg-export-action="geo-preview">👁 Önizle</button></div></article>
-      <article class="export-format-card"><div class="export-format-top"><span class="export-format-icon">🧭</span><span class="badge">QGIS</span></div><h3>QGIS CSV</h3><p>EPSG:4326 koordinatları ve fotoğraf alanlarıyla QGIS saha/masaüstü iş akışına hazır CSV.</p><div class="export-actions"><button type="button" class="btn sm amber" data-dg-export-action="qgis-download">⬇ İndir</button><button type="button" class="btn sm ghost" data-dg-export-action="csv-preview">👁 Önizle</button></div></article>
+      <article class="export-format-card"><div class="export-format-top"><span class="export-format-icon">🧭</span><span class="badge">QGIS</span></div><h3>QGIS CSV</h3><p>EPSG:4326 koordinatları ve fotoğraf alanlarıyla QGIS saha/masaüstü iş akışına hazır CSV.</p><div class="export-actions"><button type="button" class="btn sm amber" data-dg-export-action="qgis-download">⬇ İndir</button><button type="button" class="btn sm ghost" data-dg-export-action="qgis-preview">👁 Önizle</button></div></article>
      </div>
     </div>
    </details>
@@ -537,8 +537,8 @@
 <button class="dg-png-btn ghost" style="margin-top:8px" data-dg-account-action="cancel-recovery">Şimdi Değil</button>
 </div>
 </div>
-<div id="previewModal"><div class="card" style="max-width:960px;width:100%;max-height:82vh;display:flex;flex-direction:column">
+<dialog id="previewModal" aria-labelledby="pvTitle"><div class="card" style="max-width:960px;width:100%;max-height:82vh;display:flex;flex-direction:column">
  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><b id="pvTitle">Önizleme</b><button class="btn sm red" data-dg-export-action="close-preview">✕ Kapat</button></div>
  <div id="pvBody" tabindex="0" class="tblwrap" style="overflow:auto;flex:1"></div>
  <button class="btn" style="margin-top:12px" id="pvDownload">📥 İndir</button>
-</div></div>
+</div></dialog>

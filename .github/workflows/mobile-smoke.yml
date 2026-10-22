@@ -62,3 +62,4 @@ jobs:
           node scripts/park-analysis-interaction-smoke.mjs
           node scripts/surface-menu-smoke.mjs
           node scripts/operation-help-smoke.mjs
+          node scripts/export-preview-smoke.mjs

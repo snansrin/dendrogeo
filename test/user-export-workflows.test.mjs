@@ -19,7 +19,7 @@ function load(){
 test('export options preserve current filenames, activity labels and preview titles',()=>{
  const api=load().DG_RESOLVE_EXPORT_OPTIONS;
  assert.deepEqual(JSON.parse(JSON.stringify(api.resolve('csv'))),{activity:'CSV',fileName:'dendrogeo.csv',previewTitle:'CSV Önizleme (ilk 100 satır)',isCSV:true});
- assert.deepEqual(JSON.parse(JSON.stringify(api.resolve('qgis'))),{activity:'QGIS',fileName:'dendrogeo_qgis.csv',isCSV:true});
+ assert.deepEqual(JSON.parse(JSON.stringify(api.resolve('qgis'))),{activity:'QGIS',fileName:'dendrogeo_qgis.csv',previewTitle:'QGIS CSV Önizleme (ilk 100 satır)',isCSV:true});
  assert.deepEqual(JSON.parse(JSON.stringify(api.resolve('geojson'))),{activity:'GeoJSON',fileName:'dendrogeo.geojson',previewTitle:'GeoJSON Önizleme',isCSV:false});
  assert.equal(api.resolve('unknown'),null);
 });
