@@ -10626,6 +10626,47 @@
           "sha256": "55e18b6e12d8ad28629db0b481505c654d176f01790be6c3189de3eb24ed52e6"
         }
       ]
+    },
+    {
+      "date": "2026-10-22",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: route the authenticated app brand through existing dashboard navigation instead of public landing. Preserve session, unsaved measurements, scientific and map engines.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "55e18b6e12d8ad28629db0b481505c654d176f01790be6c3189de3eb24ed52e6",
+          "sha256": "b8be167acbffb82b8247529685c412d46c5a2ce3555e7b3e1091c4f82b9b16fe"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "9e15628120588385c5b171b74d7bdeb6eaba15a4396317926c67848db7c272d3",
+          "sha256": "b8ce0dad7d9cd230380ab6590927744b2ae253d292f720e2236bb64e2addebab"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-22",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: use the official Ubuntu main archive for WebKit CI dependency installation after the runner Azure mirror exceeded the job limit. Retain all browser assertions, job gates, package suites and signing keys; production code is unaffected.",
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "337977606da78f5b37ee62c660f9d5af540ed5b9fde4131b9cbaf5e1ddfe49f0",
+          "sha256": "a2c75f69b0e7042fa7c116ab5e7bae2efa2cf344e4da328bd401f1cb7e571f60"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-22",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: include GitHub runner apt-mirrors list files in the WebKit Ubuntu mirror substitution, as confirmed by the installation log. Keep all test assertions and publication gates.",
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "a2c75f69b0e7042fa7c116ab5e7bae2efa2cf344e4da328bd401f1cb7e571f60",
+          "sha256": "50f6cdd7115ac805b78ae7b34661d778c1c3752d147d79fa6fe81bbfc3ea901d"
+        }
+      ]
     }
   ]
 }

@@ -7,7 +7,12 @@
     root._dgShellNavActionsBound=true;
     const itemFrom=target=>target&&typeof target.closest==="function"?target.closest("[data-dg-view]"):null;
     document.addEventListener("click",event=>{
-      const item=itemFrom(event.target);if(item)navigate(item.dataset.dgView);
+      const item=itemFrom(event.target);if(!item)return;
+      if(item.matches?.('a[href]')){
+        if(event.ctrlKey||event.metaKey||event.shiftKey||event.altKey||event.button>0)return;
+        event.preventDefault();
+      }
+      navigate(item.dataset.dgView);
     });
     document.addEventListener("keydown",event=>{
       if(event.key!=="Enter"&&event.key!==" ")return;
