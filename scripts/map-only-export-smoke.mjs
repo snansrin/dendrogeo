@@ -12,16 +12,16 @@ try{for(const width of [360,390,430,1280]){
   const dialog=page.locator('#dgSurfaceExportDialog');await dialog.waitFor({state:'visible'});await dialog.locator('[name="mapOnly"]').check();
   assert.equal(await dialog.locator('[name="surface"]').isChecked(),false);assert.equal(await dialog.locator('[name="park"]').isChecked(),true);
   assert.equal(await dialog.locator('[name="grid"]').isDisabled(),true);
-  await dialog.locator('#dgExportColorToggle').click();await dialog.locator('#dgExportColorHex').fill('#ff0000');
-  for(const id of ['Hue','Saturation','Lightness']){const range=dialog.locator('#dgExportColor'+id);await range.focus();await page.keyboard.press('Home');assert.equal(await range.inputValue(),'0');await page.keyboard.press('End');assert.equal(await range.inputValue(),id==='Hue'?'360':'100');}
-  await dialog.locator('#dgExportColorHex').fill('#ff0000');
-  await page.addScriptTag({content:axe.source});assert.deepEqual(await page.evaluate(async()=> (await axe.run(document.getElementById('dgSurfaceExportDialog'))).violations.map(v=>v.id)),[]);
-  if(process.env.DG_QA_SCREENSHOT_DIR)await page.screenshot({animations:'disabled',path:join(process.env.DG_QA_SCREENSHOT_DIR,'map-palette-'+theme+'-'+width+'.png')});
-  await dialog.locator('#dgExportColorDone').click();assert.equal(await dialog.locator('#dgExportColorPanel').isVisible(),false);assert.equal(await dialog.locator('[name="boundaryColor"]').inputValue(),'#ff0000');
-  await dialog.locator('#dgExportColorToggle').click();await dialog.locator('#dgExportColorHex').fill('#00ff00');await page.keyboard.press('Escape');assert.equal(await dialog.locator('[name="boundaryColor"]').inputValue(),'#ff0000');
-  await dialog.locator('#dgExportColorToggle').click();await dialog.locator('#dgExportColorHex').fill('#oops');assert.equal(await dialog.locator('#dgExportColorDone').isDisabled(),true);await dialog.locator('#dgExportColorCancel').click();
+  const color=dialog.locator('[name="boundaryColor"]');assert.equal(await color.getAttribute('type'),'color');assert.equal(await dialog.locator('#dgExportColorPanel,input[type="range"]').count(),0);
+  await color.fill('#ff0000');await color.click();
+  const nativeOpen=await color.evaluate(el=>CSS.supports('selector(input:open)')?el.matches(':open'):null);
+  if(process.env.DG_QA_SCREENSHOT_DIR)await page.screenshot({animations:'disabled',path:join(process.env.DG_QA_SCREENSHOT_DIR,'native-palette-'+theme+'-'+width+'.png')});
+  await dialog.locator('#dgExportColorDone').click();assert.equal(await color.inputValue(),'#ff0000');assert.equal(await dialog.isVisible(),true);
+  if(nativeOpen)await page.waitForFunction(()=>!document.getElementById('dgExportBoundaryColor').matches(':open'));
+  await dialog.locator('#dgExportColorDone').focus();await page.keyboard.press('Enter');assert.equal(await color.inputValue(),'#ff0000');
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
   const box=await dialog.boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width+1);
+  assert.equal(await dialog.evaluate(el=>el.scrollWidth<=el.clientWidth+1),true,'dialog content must not scroll horizontally');
   await page.addScriptTag({content:axe.source});
   assert.deepEqual(await page.evaluate(async()=> (await axe.run(document.getElementById('dgSurfaceExportDialog'))).violations.map(v=>v.id)),[]);
   if(process.env.DG_QA_SCREENSHOT_DIR)await page.screenshot({animations:'disabled',path:join(process.env.DG_QA_SCREENSHOT_DIR,'map-options-'+theme+'-'+width+'.png')});
