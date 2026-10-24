@@ -69,3 +69,4 @@ jobs:
           node scripts/surface-menu-smoke.mjs
           node scripts/operation-help-smoke.mjs
           node scripts/export-preview-smoke.mjs
+          node scripts/map-only-export-smoke.mjs

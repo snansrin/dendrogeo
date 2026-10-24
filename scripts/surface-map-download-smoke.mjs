@@ -3,12 +3,14 @@ import {readFileSync} from 'node:fs';
 import {gunzipSync} from 'node:zlib';
 import {serveFixture,isolateAccount} from './lib/browser-acceptance-fixture.mjs';
 import {loadChromium} from './lib/playwright-runtime.mjs';
+import {mockExportTiles} from './lib/export-tile-fixture.mjs';
 const input=JSON.parse(gunzipSync(readFileSync(new URL('../test/fixtures/harikalar-grid-surface.json.gz',import.meta.url))));
 const engine=process.env.DG_UI_BROWSER==='webkit'?(await import('playwright-core')).webkit:await loadChromium();
 const server=await serveFixture(),browser=await engine.launch({headless:true});
 try{
  const page=await browser.newPage({viewport:{width:390,height:844},serviceWorkers:'block',acceptDownloads:true});await isolateAccount(page);await page.goto(server.url);
  await page.waitForFunction(()=>document.getElementById('dgStartupScreen').hidden);await page.evaluate(async()=>{await dgEnsureLulc();});
+ await mockExportTiles(page);
  for(const accepted of [false,true]){
   const result=await page.evaluate(async({input,accepted})=>{
    let captureDownload;const captured=new Promise(resolve=>{captureDownload=resolve;});

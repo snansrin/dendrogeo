@@ -461,6 +461,8 @@
 .dg-export-dialog{width:min(420px,calc(100% - 32px));max-height:calc(100dvh - 40px);overflow:auto;color:var(--ink);background:var(--surface);border:1px solid var(--line);margin:auto}
 .dg-export-dialog::backdrop{background:#0008}
 .dg-export-dialog .measure-share{padding:10px 0}
+.dg-export-dialog input[type="color"]{display:block;width:100%;height:44px;min-height:44px;padding:4px;border:1px solid var(--line);border-radius:6px;background:var(--surface);cursor:pointer}
+.dg-export-dialog input[type="color"]:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 
 
 /* Paint-style controls live directly below the marker refresh action. */

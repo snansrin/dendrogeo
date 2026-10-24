@@ -1079,6 +1079,13 @@
       "src/ui/guided-map-demo-adapter.js",
       "src/ui/guided-map-demo.js",
       "test/surface-road-autoclassification.test.mjs"
+    ],
+    "surface_map_only_export_2026_10_24": [
+      "src/ui/draw-surface-export-basemap.js",
+      "test/map-only-export.test.mjs",
+      "test/surface-export-basemap.test.mjs",
+      "scripts/map-only-export-smoke.mjs",
+      "scripts/lib/export-tile-fixture.mjs"
     ]
   },
   "sha256": {
@@ -2106,7 +2113,12 @@
     "css/guided-map-demo.css": "d40e52583716231472b23c0f3d6e4e7bc96fb7a4667d0d2594bc5a26481c024f",
     "src/ui/guided-map-demo-adapter.js": "f3bb6d852c81fcbc03576a88fcadc51a8b091684000b97ff55cc01462424f62a",
     "src/ui/guided-map-demo.js": "2e9e8e3eccac5c75d99f3c188b012f1a32af55ca72ccd54f36979135405ff453",
-    "test/surface-road-autoclassification.test.mjs": "6c666e25d8cb84cb565df1d8e5c42b0136d88aae05784cdb0e4e3a698ef579ad"
+    "test/surface-road-autoclassification.test.mjs": "6c666e25d8cb84cb565df1d8e5c42b0136d88aae05784cdb0e4e3a698ef579ad",
+    "src/ui/draw-surface-export-basemap.js": "3f681eeaf60f5dc882b940f8453782ef6ab19dea0800c9265eb6f08a297e82e0",
+    "test/map-only-export.test.mjs": "794f758b0182e1a08048298b0294371abeeed0b64d7e65838b627c37f4f8f50d",
+    "test/surface-export-basemap.test.mjs": "9fcc57abb9918caed5bac291e35981f283c1b664c84960541b4ce467d0353358",
+    "scripts/map-only-export-smoke.mjs": "292729d31932c0970d205d5c0f13e298b88761e9b339da304a2744e97230a408",
+    "scripts/lib/export-tile-fixture.mjs": "c0e6c6d37669fec21aa0364e269f055920048bbb875e79ddf77142b2173069f5"
   },
   "authorized_modularizations": [
     {
@@ -10732,6 +10744,80 @@
           "previous_sha256": "a2a8a92c49e076241499e4781157fb893625278a90d82289c0d5a1d7cb336f9e",
           "sha256": "63a136808492f7f785fa5828a620375c11689b0f9ef84c33e7133dffedb184b1"
         }
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: fix blank park PNG background, offer Map only without report framing, and choose park outline color while preserving theme, calculations, analysis engines and stored tables. User explicitly approved OSM/Esri/OpenTopoMap tile retrieval for the selected park. Add read-only basemap composition, bounded CORS tile loading, missing-tile refusal, output epoch guard, presentation controls and deterministic browser regressions. No calculation, species, allometry, raster, accepted geometry, stored report or database module changed. Integration updates are limited to generated index, lazy loading, offline precache, browser CI and prior/new SHA audit.",
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "63a136808492f7f785fa5828a620375c11689b0f9ef84c33e7133dffedb184b1",
+          "sha256": "e7eb56251abf9a5288ee8dc83bdad2c2e4962d5be84a620c98aba580ddaeb62c"
+        },
+        {
+          "path": "css/park-panel.css",
+          "previous_sha256": "127c270d1436dc87426a80570bf4ae0d82b9e7ca6900a31b96ddaab102c016ad",
+          "sha256": "563f7294a960423050ea7268e03934f6115eae9aabf16e05e3322da796a2a8ad"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "6c499a04187d0c943cdbef490cbc2b9af733ddf05342293e101097ac1700e29f",
+          "sha256": "baa01d5e038b0adffa3fbf5605cee76b6de0a2b0d799daf67e42528e19f2c8b4"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "68a2da6f383a2502558f82d131406c0b30c499125461768f506da150bcbda937",
+          "sha256": "499f3090dbf78f23b56717e7e4cf34fd7173027b001c098875bb1e6ca6dbc6b8"
+        },
+        {
+          "path": "scripts/surface-map-download-smoke.mjs",
+          "previous_sha256": "cdaf7a40bc436a5d66a63487115b96653703d4e8397ce111490e5c5c195219fb",
+          "sha256": "74f49ff7793321ae12f1b931b2044309737759000e5cafd14bee7e35eaf8ddcd"
+        },
+        {
+          "path": "src/ui/draw-surface-export-map-layers.js",
+          "previous_sha256": "d2f9a26615cb49dc3ac2d9462db8c9980c2c9475a15ab44e0688455860131f99",
+          "sha256": "f799dae00bdd05509c818d571d4135ac6870b6c8e7cfe5f58cdbec3c7803d6a0"
+        },
+        {
+          "path": "src/ui/gis-export-events.js",
+          "previous_sha256": "6fb6f172049e8f512022da08a5c2f44e7e660979587ba2fbfd01bea90bf9d39a",
+          "sha256": "ffe9bf4e8278f8bce4b905a4094106ccedc6df38d78968c99d4e5a85d97604da"
+        },
+        {
+          "path": "src/ui/gis-export-verified-layers.js",
+          "previous_sha256": "9530d0be49cfb14b0156604710d446d9be8cd879627947dc69b4496898f07857",
+          "sha256": "716f9cb4a6aec6fd1dd91a5534c463f5853af824c86022d55c1c38a4c53d8d68"
+        },
+        {
+          "path": "src/ui/render-surface-export-layer-dialog.js",
+          "previous_sha256": "f702222ac85ffbba0936e0e5052864fc616b109d199925dbc1591e2bbfacdab7",
+          "sha256": "ac2e8d1fdc140b2319c781d96b21dfaa10250169a6a101944d1e53b84900b64a"
+        },
+        {
+          "path": "src/ui/render-verified-surface-map-export.js",
+          "previous_sha256": "8979754647d4c1652ab57b4d8512894acbb15c9933c5716fe528791913e4c7ba",
+          "sha256": "fa7c266bbec0e606d9c1e9e8e4753a05924ce040afbbd817b250a4b17b0dee7c"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "498ec9aadca3717b030cece7d5f4712e45642c479f8a816dfde6002a8f2dd91c",
+          "sha256": "45a30a55732422b9975415a88fcc61d228f83ecf135f3c75e8fe16ee347519d6"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "064a78d96bda2bd9d1502ce09529b602cb12f7bb18ec2d324e337364a810f977",
+          "sha256": "f90f5a74bc86b4c97d8eaf58e28108ee76b2f41d0cca8da8c8a29c81151395fd"
+        }
+      ],
+      "added_protected_files": [
+        "src/ui/draw-surface-export-basemap.js",
+        "test/map-only-export.test.mjs",
+        "test/surface-export-basemap.test.mjs",
+        "scripts/map-only-export-smoke.mjs",
+        "scripts/lib/export-tile-fixture.mjs"
       ]
     }
   ]

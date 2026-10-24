@@ -1,5 +1,6 @@
 import {spawnSync} from 'node:child_process';
 import {serveFixture} from './lib/browser-acceptance-fixture.mjs';
+const mapExport=spawnSync(process.execPath,['scripts/map-only-export-smoke.mjs'],{stdio:'inherit'});if(mapExport.status!==0)process.exit(mapExport.status||1);
 // Each interaction script owns its server; layout scripts share one afterwards.
 for(const script of ['export-preview-smoke','operation-help-smoke','road-width-smoke','park-boundary-recovery-smoke','grid-menu-smoke','harikalar-grid-smoke','surface-map-download-smoke','scientific-species-select-smoke','public-page-theme-smoke','landing-showcase-smoke','visitor-analytics-smoke','startup-smoke','profile-smoke','projects-workspace-smoke','shared-park-surface-smoke','appearance-smoke','ui-consistency-smoke','report-form-smoke','field-methods-smoke','park-admin-smoke','brush-smoke','drawing-smoke','park-draw-smoke','osm-map-recovery-smoke','park-analysis-interaction-smoke','surface-menu-smoke','mobile-tools-language-smoke','measurement-save-smoke']){
  const result=spawnSync(process.execPath,['scripts/'+script+'.mjs'],{stdio:'inherit'});if(result.status!==0)process.exit(result.status||1);

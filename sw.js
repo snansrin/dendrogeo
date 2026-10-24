@@ -1050,6 +1050,7 @@ const CORE_ASSETS = [
     '/src/domain/surface/build-surface-export-data.js',
     '/src/domain/surface/prepare-surface-export-map-frame.js',
     '/src/ui/render-surface-export-layer-dialog.js',
+    '/src/ui/draw-surface-export-basemap.js',
     '/src/ui/render-verified-surface-map-export.js',
     '/src/ui/draw-surface-export-map-layers.js',
     '/src/ui/render-surface-export-infographic.js',

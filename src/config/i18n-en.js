@@ -1885,3 +1885,10 @@ Object.assign(DG_I18N_EN,{
 });
 
 Object.assign(DG_I18N_EN,{"Ağ konumuna dayalı yaklaşık ülke; VPN ve proxy sonucu değiştirebilir.":"Approximate country based on network location; VPNs and proxies may affect the result."});
+Object.assign(DG_I18N_EN,{
+ "Sadece harita":"Map only",
+ "Rapor başlığı ve alan özeti olmadan indir.":"Download without the report heading and area summary.",
+ "Park sınırı rengi":"Park boundary color",
+ "Harita altlığı ekrandaki görünümden alınır.":"The basemap follows the current map view.",
+ "✓ Harita PNG indirildi.":"✓ Map PNG downloaded."
+});
