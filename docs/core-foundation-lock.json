@@ -11231,6 +11231,28 @@
         "test/park-stage-assisted-ui.test.mjs",
         "test/fixtures/park-stages/dikmen-boundary.json"
       ]
+    },
+    {
+      "date": "2026-10-24",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: assisted-stage-first-anchor-feedback-20261024. Complete the requested two-point stage selection by restoring the second-point instruction when the first anchor is dragged before the second point exists. Add a focused regression assertion and refresh generated module hashes. No geometry, database, science, analysis or saved record behavior changes.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "224400e7f1cdd90a1a234d98bb1cd3bbf6a49e935f5132d60c0479f2aeb815b3",
+          "sha256": "ebbd4cc1375fc15d36f3f70fd5347a6f8582e8a40bf0024bb40ac929868c5c3a"
+        },
+        {
+          "path": "src/ui/park-stage-assisted-selection.js",
+          "previous_sha256": "063e1ce1b1c6c5b72582fac27c14b93bc084932ff1259e01f7e167941a5db11b",
+          "sha256": "ed7054e559d8e42685ec76cfeca6273d0c81df8df99772105b8455354fcaba7f"
+        },
+        {
+          "path": "test/park-stage-assisted-ui.test.mjs",
+          "previous_sha256": "6db9eaf341240548c5d37af06493686813c98403208f53a960145312ca8f110a",
+          "sha256": "5bd1096d39d3cd13bc9dc0dae1cce63c96d6db3bcb87c18d0d1dd5acbe2f0e10"
+        }
+      ]
     }
   ]
 }

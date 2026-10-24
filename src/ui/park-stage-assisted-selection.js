@@ -18,7 +18,7 @@
    if(result.lines?.length)lineLayer=ports.leaflet.layerGroup(result.lines.map(line=>ports.leaflet.polyline(line,{color:"#f97316",weight:3,dashArray:"7 5",interactive:false}))).addTo(map);
   }
   async function update(){
-   if(points.length!==2)return;
+   if(points.length!==2){ports.status("Başlangıç noktası ayarlandı. Bitiş noktasını seçin.");return;}
    const token=++epoch,snapshot=points.map(p=>[...p]);ports.status("İki sınır arasındaki park alanı hazırlanıyor…");
    try{const result=await ports.between(snapshot);if(token!==epoch||!map)return;drawPreview(result);ports.onPreview(result);}
    catch(error){if(token===epoch){removePreview();ports.onInvalid();ports.status(error.message);}}

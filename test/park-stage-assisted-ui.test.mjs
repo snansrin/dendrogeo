@@ -1,16 +1,17 @@
 import test from 'node:test';import assert from 'node:assert/strict';import vm from 'node:vm';import{readFileSync}from'node:fs';
 function load(path,root={}){const ctx=vm.createContext({window:root});vm.runInContext(readFileSync(new URL('../'+path,import.meta.url),'utf8'),ctx);return root;}
 test('Assisted selection cancels stale previews, restores map ownership and locks draggable cut points during save',async()=>{
- const root=load('src/ui/park-stage-assisted-selection.js'),listeners={},layers=new Set();let mode=true,guard=false,zoom=true,release,previews=0;
+ const root=load('src/ui/park-stage-assisted-selection.js'),listeners={},layers=new Set(),messages=[];let mode=true,guard=false,zoom=true,release,previews=0;
  const container={addEventListener:(type,fn)=>{listeners[type]=fn;},removeEventListener:type=>delete listeners[type]};
  const document={addEventListener:(type,fn)=>{listeners[type]=fn;},removeEventListener:type=>delete listeners[type]};
  const map={getContainer:()=>container,mouseEventToLatLng:e=>({lat:e.point[0],lng:e.point[1]}),fitBounds(){},removeLayer:layer=>layers.delete(layer),doubleClickZoom:{enabled:()=>zoom,disable:()=>{zoom=false;},enable:()=>{zoom=true;}}};
  const layer=()=>({addTo(){layers.add(this);return this;},getBounds(){return {};}});
  const marker=(point)=>({...layer(),point,callbacks:{},dragging:{enabled:true,disable(){this.enabled=false;},enable(){this.enabled=true;}},on(type,fn){this.callbacks[type]=fn;},getLatLng(){return{lat:this.point[0],lng:this.point[1]};}});
- const tool=root.DG_PARK_STAGE_ASSISTED_UI.create({document,leaflet:{polygon:layer,polyline:layer,marker,layerGroup:layer},getMap:()=>map,getMode:()=>mode,setMode:v=>{mode=v;},getGuard:()=>guard,setGuard:v=>{guard=v;},parentGeometry:()=>({outer:[[[39,32],[40,32],[40,33],[39,32]]],inner:[]}),status(){},onPreview:()=>{previews++;},onInvalid(){},onCancel(){},between:()=>new Promise(resolve=>{release=resolve;})});
+ const tool=root.DG_PARK_STAGE_ASSISTED_UI.create({document,leaflet:{polygon:layer,polyline:layer,marker,layerGroup:layer},getMap:()=>map,getMode:()=>mode,setMode:v=>{mode=v;},getGuard:()=>guard,setGuard:v=>{guard=v;},parentGeometry:()=>({outer:[[[39,32],[40,32],[40,33],[39,32]]],inner:[]}),status:message=>messages.push(message),onPreview:()=>{previews++;},onInvalid:()=>messages.push('updating'),onCancel(){},between:()=>new Promise(resolve=>{release=resolve;})});
  tool.start();assert.equal(mode,false);assert.equal(guard,true);assert.equal(zoom,false);
  const click=point=>listeners.click({point,target:{closest:()=>null},preventDefault(){},stopImmediatePropagation(){}});
- click([39.1,32]);click([39.5,32]);const markers=[...layers].filter(l=>l.dragging);assert.equal(markers.length,2);
+ click([39.1,32]);const first=[...layers].find(l=>l.dragging);first.callbacks.dragstart();first.callbacks.dragend();assert.match(messages.at(-1),/Bitiş noktasını seçin/);
+ click([39.5,32]);const markers=[...layers].filter(l=>l.dragging);assert.equal(markers.length,2);
  tool.setLocked(true);assert.ok(markers.every(m=>!m.dragging.enabled));tool.setLocked(false);assert.ok(markers.every(m=>m.dragging.enabled));
  tool.clear();release({geometry:{outer:[],inner:[]},lines:[]});await Promise.resolve();await Promise.resolve();
  assert.equal(previews,0);assert.equal(layers.size,0);assert.equal(mode,true);assert.equal(guard,false);assert.equal(zoom,true);assert.deepEqual(Object.keys(listeners),[]);
