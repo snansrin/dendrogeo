@@ -36,8 +36,8 @@
  function fence(fix,park,config,contains){
   if(!String(park?.osm_key||"").startsWith("stage/"))return null;
   const result={ok:false,verified:false,inside:false,reason:"outside",distM:null,acc:fix?.acc??null};
-  if(!fix||!Number.isFinite(+fix.lat)||!Number.isFinite(+fix.lon))return {...result,reason:"no-fix"};
-  if(!Number.isFinite(+fix.acc)||+fix.acc>config.ACC_MAX_M)return {...result,reason:"acc"};
+  if(!fix||!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)||Math.abs(fix.lat)>90||Math.abs(fix.lon)>180)return {...result,reason:"no-fix"};
+  if(!Number.isFinite(fix.acc)||fix.acc<0||fix.acc>config.ACC_MAX_M)return {...result,reason:"acc"};
   if(!park.geom_json?.stage_scope||!park.geom_json?.outer?.length)return {...result,reason:"no-geom"};
   return contains(+fix.lat,+fix.lon,park.geom_json)?{...result,ok:true,verified:true,inside:true,reason:"inside"}:result;
  }

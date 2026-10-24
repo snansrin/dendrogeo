@@ -2,6 +2,8 @@
 /* Bounded, parent-specific reads and explicit stage creation; never near-match. */
 (function(root){
  function create(getClient){
+  const canonical=value=>Array.isArray(value)?value.map(canonical):value&&typeof value==="object"?Object.fromEntries(Object.keys(value).sort().map(key=>[key,canonical(value[key])])):value;
+  const same=(a,b)=>JSON.stringify(canonical(a))===JSON.stringify(canonical(b));
   return Object.freeze({
    async ready(){const {data,error}=await getClient().rpc("dg_park_stage_ready");return !error&&data===1;},
    async list(parentId){
@@ -19,8 +21,8 @@
     const {data,error}=await getClient().from("parks").select("*").eq("id",row.id).eq("osm_key",row.osm_key).single();
     if(error)throw error;
     if(!data)throw Error("Etap kaydı bulunamadı.");
-    if(JSON.stringify(data.geom_json)!==JSON.stringify(row.geom_json))throw Error("Etap sınırı değişmiş; yeniden seçin.");
-    if(JSON.stringify(candidate.rings)!==JSON.stringify({outer:data.geom_json.outer,inner:data.geom_json.inner||[]}))throw Error("Etap çizimi kayıtla eşleşmiyor.");
+    if(!same(data.geom_json,row.geom_json))throw Error("Etap sınırı değişmiş; yeniden seçin.");
+    if(!same(candidate.rings,{outer:data.geom_json.outer,inner:data.geom_json.inner||[]}))throw Error("Etap çizimi kayıtla eşleşmiyor.");
     return data;
    }
   });

@@ -42,7 +42,18 @@ try{for(const width of [360,390,430]){
  }
  await host.locator('[data-stage-action="edit"]').click();await host.locator('#dgStageName').fill('1. etap');
  await host.locator('[data-stage-action="draw"]').click();
- await page.evaluate(()=>{for(const [lat,lng] of [[39.001,32.001],[39.001,32.009],[39.009,32.009],[39.009,32.001]])map.fire('click',{latlng:L.latLng(lat,lng)});});
+ await page.locator('#map').scrollIntoViewIfNeeded();
+ const corners=await page.evaluate(()=>{
+  map.stop();map.fitBounds(L.latLngBounds(__parentCandidate.rings.outer),{animate:false,padding:[20,20]});
+  window.__interceptedSurfaceClicks=0;window.__blockingSurface=L.polygon(__parentCandidate.rings.outer,{fillOpacity:.1}).addTo(map);
+  __blockingSurface.on('click',event=>{window.__interceptedSurfaceClicks++;L.DomEvent.stopPropagation(event);});
+  const box=map.getContainer().getBoundingClientRect();
+  return [[39.001,32.001],[39.001,32.009],[39.009,32.009],[39.009,32.001]].map(point=>{const p=map.latLngToContainerPoint(point);return{x:box.left+p.x,y:box.top+p.y};});
+ });
+ for(const point of corners)await page.mouse.click(point.x,point.y);
+ assert.match(await host.locator('#dgStageStatus').textContent(),/4 köşe/);
+ assert.equal(await page.evaluate(()=>__interceptedSurfaceClicks),0);
+ await page.evaluate(()=>map.removeLayer(__blockingSurface));
  await host.locator('[data-stage-action="save"]').click();await page.waitForFunction(()=>typeof DG_PARK!=='undefined'&&DG_PARK?.id===9002);
  const result=await page.evaluate(()=>({id:DG_PARK.id,rings:PARK_POLY,gridOptions:[...document.getElementById('gridProject').options].map(o=>o.value),parent:DG_PARK_SESSION.get('way/990001'),writes:__stageFixture.writes,mode:PARK_MODE,guard:!!window._dgSensGuard,name:DG_PARK.name,
   gate:DG_PARK_STAGE_GEOMETRY.measurementGate({park:DG_PARK,project:PROJ_LIST[0]}),inheritedPoints:WP.length+LAST_WP_ROWS.length}));
@@ -67,6 +78,9 @@ try{for(const width of [360,390,430]){
  if(process.env.DG_STAGE_SCREENSHOT_DIR)await host.screenshot({path:join(process.env.DG_STAGE_SCREENSHOT_DIR,'etap-secimi-'+width+'.png')});
  await page.addScriptTag({content:axe.source});
  const violations=await page.evaluate(async()=>(await axe.run(document.getElementById('dgParkStageWorkspace'))).violations.map(v=>v.id));assert.deepEqual(violations,[]);
+ await page.evaluate(()=>{DG_LC_SENS.state.brush={diameter:20};});
+ await host.locator('[data-stage-action="edit"]').click();assert.match(await host.locator('#dgStageStatus').textContent(),/fırça/);
+ assert.equal(await host.locator('#dgStageName').count(),0);await page.evaluate(()=>{DG_LC_SENS.state.brush=null;});
  await host.locator('#dgStageSelect').selectOption('whole');await host.locator('[data-stage-action="apply"]').click();
  await page.waitForFunction(()=>DG_PARK?.id===9001);
  assert.equal(await page.evaluate(()=>JSON.stringify(PARK_POLY)===JSON.stringify(__parentCandidate.rings.outer)),true);

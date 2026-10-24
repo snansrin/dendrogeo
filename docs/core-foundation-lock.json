@@ -11084,6 +11084,58 @@
         "test/park-stage-postgres.test.mjs",
         "supabase/migrations/20261024190000_park_stage_scopes.sql"
       ]
+    },
+    {
+      "date": "2026-10-24",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: stage-interaction-race-fix. Continue development and fix observed stage issues. Capture real map clicks before interactive surface layers, ignore controls/drags and remove listeners on cancel. Block conflicting surface/map tools and busy scans. Recheck epoch/busy after each transition wait; stale callbacks cannot save a new park draft, clear its navigation, overwrite status or unlock its controls. Compare equivalent JSON structurally and reject null/invalid GPS readings. Extend deterministic race tests and three-width real-pointer regression. Only new stage modules, their tests and the generated index change; old engines, tables, accepted results and allometry remain unchanged.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "91c7a8bfde646482807f14769d77fc9b0c79924d6f410d0f3d7d5209d525f1aa",
+          "sha256": "e8b9cf68ed59f8126c069e4e09e0c523f8a0920d4d9847193f73fd278c53e182"
+        },
+        {
+          "path": "src/domain/parks/stage-geometry.js",
+          "previous_sha256": "03b04b560fb9203b06551d5abab03ce68a7a15b85ed433099913225c9323b5e8",
+          "sha256": "b4a95a36e658eb31414d7e9f231035dcada822051f22bbfd3428fbf80f8953b5"
+        },
+        {
+          "path": "src/application/parks/activate-stage-scope.js",
+          "previous_sha256": "c8dbbeded50a41b8c5c3bbb4dc335454032e4806fcf22528083efcd16cb34dec",
+          "sha256": "942a219d39855df9b944eef6d06cc10189317fcf3e7e38ad0e8d3b916c106ad4"
+        },
+        {
+          "path": "src/adapters/parks/stage-store.js",
+          "previous_sha256": "d1a22b2498ead14dcd55625b3d6187d5d38075dd98f6106d1023793de63db688",
+          "sha256": "fdaa3fdb2888240854d9624ef21713d6620878ff1a540ccc66a9bd9c869990cf"
+        },
+        {
+          "path": "src/ui/park-stage-drawing.js",
+          "previous_sha256": "62d2892025d3c7718ccd7906ec1d56c9b6848fcb85f24f9f147644ee5fb19b45",
+          "sha256": "5864fd0e09ea60ce9da193274b12991caf8db5da5c48641e9c2aed87d03d821f"
+        },
+        {
+          "path": "src/ui/park-stage-workspace.js",
+          "previous_sha256": "9d8b0431b94413e4366f3ca4c22860bca16d8e66cc5cab2989d772a49383bd58",
+          "sha256": "9113855a257cf3bb48cb8c5293ffb262106fd18f68baa4a3ccc6a8c5b3dd6e0b"
+        },
+        {
+          "path": "src/bootstrap/park-stage-workspace.js",
+          "previous_sha256": "829f955d239683227cc50a0a88aca536d0754671aa693843c1b493fe529e3753",
+          "sha256": "54224b749909a21c3647da906b9c996269b8912c24cd506b140ded36375bb960"
+        },
+        {
+          "path": "scripts/park-stage-workspace-smoke.mjs",
+          "previous_sha256": "0c50ea0441ff06fd3d3a6473f075b2d27cf9a97645265db45005a51b03161005",
+          "sha256": "9f9fdcba805a8c217d2e6075cf993c8e7bdbd070afc6aa78a3a17302e036368b"
+        },
+        {
+          "path": "test/park-stage-workspace.test.mjs",
+          "previous_sha256": "f3a2282f71a25d41783b9a31885317dd5f2da2a39b9bb2a3e0f94f881f47b8d1",
+          "sha256": "0f33d50880d076283c80306596700f28e9eef91f11b710caa30358eb58a8aab4"
+        }
+      ]
     }
   ]
 }

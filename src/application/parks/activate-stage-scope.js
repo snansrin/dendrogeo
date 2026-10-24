@@ -8,10 +8,10 @@
    busy=true;
    try{
     if(ports.validate)await ports.validate(candidate);
+    if(!ports.isCurrent()||ports.isBusy())return false;
     if(!await ports.approveTransition())return false;
-    if(!ports.isCurrent())return false;
-    await ports.draw(candidate);
-    return true;
+    if(!ports.isCurrent()||ports.isBusy())return false;
+    return await ports.draw(candidate)!==false;
    }finally{busy=false;}
   };
  }

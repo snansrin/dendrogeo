@@ -78,3 +78,18 @@ etap kayıtlarını korumaya devam eder. Eski ana park kayıtlarına restore uyg
   hata döner. Birden fazla dış parça ve boşluklar gerçek geometrileriyle kalır;
   konveks zarf/bbox köprüsü üretilmez. Otomatik etap birleşimi bu sürümde yoktur.
 - İsim adayı ve resmî sınır doğrulaması için önceki araştırma belgeleri geçerlidir.
+
+## Yayın öncesi ek denetim
+
+Analiz katmanları tıklamayı kendi üzerinde durdurabildiğinden etap çizimi gerçek
+DOM tıklamasını harita container'ında capture aşamasında alır. Kontroller ve
+sürükleme atlanır; Escape/iptal sonrasında dinleyici kaldırılır. Telefon testi
+artık programatik `map.fire` yerine etkileşimli bir yüzey polygonunun üzerinde
+gerçek fare tıklamalarıyla dört köşeyi doğrular.
+
+Aktif fırça, bitmemiş yüzey çizimi, nesne seçimi, analiz taraması veya harita
+ölçümü sürerken etap eylemi açıklamalı olarak durur; mevcut işlem silinmez.
+Doğrulama ve taslak kaydı sonrasında park oturumu tekrar denetlenir. Eski isteğin
+hata/başarı yanıtı yeni parkın durumunu, butonlarını veya navigasyonunu değiştiremez.
+Geçerli geometri JSON nesne anahtar sırası farklı diye reddedilmez. Eksik/null,
+aralık dışı GPS koordinatı ve eksik/negatif hassasiyet etap doğrulaması alamaz.
