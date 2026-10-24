@@ -1900,3 +1900,22 @@ Object.assign(DG_I18N_EN,{
  "Açıklık":"Lightness",
  "Altı haneli bir HEX rengi girin.":"Enter a six-digit HEX color."
 });
+Object.assign(DG_I18N_EN,{
+ "ÇALIŞMA KAPSAMI":"WORKING SCOPE",
+ "Etap seçimi":"Stage selection",
+ "ETAP / PARK ALANI":"STAGE / PARK AREA",
+ "Ana parkın tamamı":"Entire parent park",
+ "Seçili alanla çalış":"Work in selected area",
+ "Yeni etap tanımla":"Define a new stage",
+ "ETAP ADI":"STAGE NAME",
+ "Sınır çizmeye başla":"Start drawing boundary",
+ "Son köşeyi geri al":"Undo last vertex",
+ "Sınırı kabul et ve kaydet":"Accept and save boundary",
+ "Resmî etap sınırları doğrulanmadan otomatik bölünmez. Çizdiğiniz alan kullanıcı tanımlı olarak belirtilir.":"No automatic subdivision is made without verified official stage boundaries. Your drawing is labelled user-defined.",
+ "Etap sınırını seçtikten sonra bu etap için yeni proje oluşturun.":"Create a new project for this stage after selecting its boundary.",
+ "Etap kaydı için sunucu kapsam koruması henüz etkin değil.":"Server scope protection is not enabled for stage registration yet.",
+ "Etap sınırı doğrulanıyor…":"Validating stage boundary…",
+ "Çalışma kapsamı değiştiriliyor…":"Changing working scope…",
+ "Etap çizimi iptal edildi.":"Stage drawing cancelled.",
+ "Seçili etap için yeni proje oluşturun veya bu etaba bağlı projeyi seçin.":"Create a new project for the selected stage or choose a project linked to this stage."
+});

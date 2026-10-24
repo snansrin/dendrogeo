@@ -254,9 +254,10 @@ async function dgSaveMeasInner(){
       return window.DG_SUBMIT_MEASUREMENT.run({form,editId:EDIT_ID},{
         validation:{
           validateForm:value=>window.DG_VALIDATE_MEASUREMENT_SAVE_FORM.validate({form:value,element:$,validator:DG_TREE_MEASUREMENT_VALIDATOR,errors:DG_TREE_MEASUREMENT_ERRORS,translate:_tms}),
-          resolveGates:value=>window.DG_RESOLVE_MEASUREMENT_SAVE_GATES.resolve({projectId:value.form.projectId,editId:EDIT_ID,projects:PROJ_LIST,parkSchemaOk:DG_PARK_SCHEMA_OK,gps:GPS,photoValid:!($("mPhoto").files[0]&&!photoOk)})
+          resolveGates:value=>window.DG_PARK_STAGE_GEOMETRY?.measurementGate({park:typeof DG_PARK==="undefined"?null:DG_PARK,project:PROJ_LIST.find(p=>p.id===value.form.projectId),editId:EDIT_ID})||window.DG_RESOLVE_MEASUREMENT_SAVE_GATES.resolve({projectId:value.form.projectId,editId:EDIT_ID,projects:PROJ_LIST,parkSchemaOk:DG_PARK_SCHEMA_OK,gps:GPS,photoValid:!($("mPhoto").files[0]&&!photoOk)})
         },
         stopForValidation:result=>{
+          if(result.reason==="stage-project-required")return dgMeasureInvalid("mProject",_tms("Seçili etap için yeni proje oluşturun veya bu etaba bağlı projeyi seçin."));
           if(result.reason==="form")return dgMeasureInvalid(result.validation.focusId,result.validation.message);
           if(result.reason==="calculation")return dgMeasureInvalid("mSpecies",_tms("Kilitli yoğunluk tablosu bu ölçüm için karbon hesabına izin vermiyor."));
           if(result.reason==="park-required"){

@@ -70,3 +70,4 @@ jobs:
           node scripts/operation-help-smoke.mjs
           node scripts/export-preview-smoke.mjs
           node scripts/map-only-export-smoke.mjs
+          node scripts/park-stage-workspace-smoke.mjs
