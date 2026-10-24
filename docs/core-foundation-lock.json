@@ -11253,6 +11253,90 @@
           "sha256": "5bd1096d39d3cd13bc9dc0dae1cce63c96d6db3bcb87c18d0d1dd5acbe2f0e10"
         }
       ]
+    },
+    {
+      "date": "2026-10-24",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: independent-stage-cut-planes-20261024. User explicitly requests separately positioned and oriented start/end boundaries aligned to bridges, more reference points, a persistent left selection panel, explicit automatic proposal choice, and naming the resulting park stage. Replace shared two-anchor direction in the stage UI with four draggable references and two independent half-plane cuts intersected with the existing park; reject ambiguous crossings inside the park. Keep read-only preview, snapshot-on-save, stale epoch guards, stage identity/geofence/project isolation and existing free drawing. Add compact numbered reference markers and synthetic three-width real-pointer/drag/axe regressions. No database/schema, analysis engine, raster, allometry, stored record or published report changes.",
+      "files": [
+        {
+          "path": "css/park-stage.css",
+          "previous_sha256": "295cdf48e567d2043317c2616d03ffa47294bb587eb7624ddaefe79b7ad98203",
+          "sha256": "3e0839fbbfc1fc1892c38c6e380ff29548997e10ece536283983e4da8d2fa9af"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "ebbd4cc1375fc15d36f3f70fd5347a6f8582e8a40bf0024bb40ac929868c5c3a",
+          "sha256": "10fe69f1b353fbfe806ff4179c899e751e7b0f3d91de00269534fb9556ffd86b"
+        },
+        {
+          "path": "scripts/park-stage-assisted-smoke.mjs",
+          "previous_sha256": "0b7acb545ccd3d9341bb1ae5b7fd3b97225f80e695364d38db628498de7a7b5d",
+          "sha256": "16bb379b90caf899036cd242b709a2b660398872a5fb7725aa99cdbe0c2cac2c"
+        },
+        {
+          "path": "src/domain/parks/stage-cut-geometry.js",
+          "previous_sha256": "542713198f2b2e14680b9f221bbc3ef66e2771c7e578e3a0eb7b136a041cda91",
+          "sha256": "91f244468e0161aff3505c0781f6e57224286c24a2ff78ede54192c7c18fb29a"
+        },
+        {
+          "path": "src/ui/park-stage-assisted-selection.js",
+          "previous_sha256": "ed7054e559d8e42685ec76cfeca6273d0c81df8df99772105b8455354fcaba7f",
+          "sha256": "4e856e21d3b2a89736f2e3ea4310f0bd6e76dcade169a165474438ac3d6ea42f"
+        },
+        {
+          "path": "src/ui/park-stage-menu.js",
+          "previous_sha256": "1e865c40132701fe3e16d3fd2b7a508d0a21c429a1bfae8aa8a1a35515227940",
+          "sha256": "4da0de76989d1d09cafa886280c7c281acc96d14862f00795ee43a6374218b6c"
+        },
+        {
+          "path": "src/ui/park-stage-view.js",
+          "previous_sha256": "e571ca4eff5462f7bf6f78286a2cf706f5d9ec7acd672606f275e140ccc900da",
+          "sha256": "76ad4a4be6ff2d18470ed026fad078b881fc80a115ddeb461731acc323bc2f20"
+        },
+        {
+          "path": "src/ui/park-stage-workspace.js",
+          "previous_sha256": "005bea3fcabbbaab1b59dbf5f3eec52c8b74ed62746f9c8bd163583bc4c5beba",
+          "sha256": "1f7e63923cc70e97ba644cef226d03911a523546327423ecc129aa2b400948f4"
+        },
+        {
+          "path": "test/park-stage-assisted-ui.test.mjs",
+          "previous_sha256": "5bd1096d39d3cd13bc9dc0dae1cce63c96d6db3bcb87c18d0d1dd5acbe2f0e10",
+          "sha256": "7a9683c5f685a80530fa08ec928895c5b41a5ec7d1b0b9d9fbd39529bb86a769"
+        },
+        {
+          "path": "test/park-stage-cut.test.mjs",
+          "previous_sha256": "c2085383a73eb116e40dc0333fb4d2f5e3fabdf7ee89d701880f3e5b836c6775",
+          "sha256": "8dace1780e05a03d58193e79ee836211a31415946671ae1efa890235a1ae3153"
+        },
+        {
+          "path": "test/park-stage-workspace.test.mjs",
+          "previous_sha256": "2a81f64268343b4cfe75d32a9e2ec6d3729775ada91c37f632cfaa9abecbe105",
+          "sha256": "b5be948112e9010b2b72db7de042a8eaad5221aaba69e6f4203abd078912d338"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: independent-stage-cut-save-lock-20261024. Complete the independent stage reference save lock by guarding Escape while an explicitly requested stage save is in flight. Otherwise Escape could imply cancellation after a write started. Add a regression that the locked session and all four references remain active; retain normal Escape cancellation after unlock. Refresh generated module hashes. No geometry, science, backend or stored-record changes.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "10fe69f1b353fbfe806ff4179c899e751e7b0f3d91de00269534fb9556ffd86b",
+          "sha256": "c8bc7f2e7cc7464f59c8e4a2fa51160f496d4298480e0a9db5968452d339d99b"
+        },
+        {
+          "path": "src/ui/park-stage-assisted-selection.js",
+          "previous_sha256": "4e856e21d3b2a89736f2e3ea4310f0bd6e76dcade169a165474438ac3d6ea42f",
+          "sha256": "dcd321b3063ec43a0af50edee8c746c2cf8056a7a3f8d8daee49c96bc4abf299"
+        },
+        {
+          "path": "test/park-stage-assisted-ui.test.mjs",
+          "previous_sha256": "7a9683c5f685a80530fa08ec928895c5b41a5ec7d1b0b9d9fbd39529bb86a769",
+          "sha256": "19587b6171d1ec49d3c70fe46c827a946dfcd062774e6ec877e03b0f11bdac85"
+        }
+      ]
     }
   ]
 }

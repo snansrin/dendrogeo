@@ -136,7 +136,7 @@ test('A stale workspace action cannot draw, overwrite status or unlock controls 
   const document={getElementById:()=>({append:host=>hosts.push(host)}),createElement:()=>{
    const host={status:{textContent:''},attrs:{},innerHTML:'',className:'',listeners:{},setAttribute(k,v){this.attrs[k]=v;},addEventListener(k,fn){this.listeners[k]=fn;},querySelectorAll:()=>[],querySelector(selector){return selector==='#dgStageSelect'?{value:'102'}:selector==='#dgStageStatus'?this.status:{focus(){}};}};return host;
   }};
-  const root={DG_PARK_STAGE_DRAWING_UI:{create:()=>({cancel(){},ring:()=>[]})},DG_PARK_STAGE_MENU_UI:{create:()=>({mount:host=>hosts.push(host),clear(){},status(){},refresh(){},hideHint(){},setBusy(){}})},DG_PARK_STAGE_ASSISTED_UI:{create:()=>({clear(){},setLocked(){}})},DG_PARK_STAGE_VIEW:{render:model=>{models.push(model);return ''; }},DG_ACTIVATE_STAGE_SCOPE:context.window.DG_ACTIVATE_STAGE_SCOPE,DG_PARK_STAGE_GEOMETRY:api};
+  const root={DG_PARK_STAGE_DRAWING_UI:{create:()=>({cancel(){},ring:()=>[]})},DG_PARK_STAGE_MENU_UI:{create:()=>({mount:host=>hosts.push(host),clear(){},status(){},refresh(){},hideHint(){},hideCuts(){},setBusy(){}})},DG_PARK_STAGE_ASSISTED_UI:{create:()=>({clear(){},setLocked(){}})},DG_PARK_STAGE_VIEW:{render:model=>{models.push(model);return ''; }},DG_ACTIVATE_STAGE_SCOPE:context.window.DG_ACTIVATE_STAGE_SCOPE,DG_PARK_STAGE_GEOMETRY:api};
   const ctx=vm.createContext({window:root,console});
   vm.runInContext(readFileSync(new URL('../src/ui/park-stage-workspace.js',import.meta.url),'utf8'),ctx);
   const workspace=root.DG_PARK_STAGE_WORKSPACE_UI.create({document,escape:String,drawing:{},geometry:()=>({outer:row.geom_json.outer,inner:[]}),isBusy:()=>false,

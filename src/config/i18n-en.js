@@ -1935,3 +1935,12 @@ Object.assign(DG_I18N_EN,{
  "Öneriler parkın şekline göredir; resmî etap sınırı değildir. Onayladığınız alan kullanıcı tanımlı etap olarak kaydedilir.":"Suggestions follow the park shape and are not official stage boundaries. The area you approve is saved as a user-defined stage.",
  "Etap kaydediliyor…":"Saving stage…"
 });
+Object.assign(DG_I18N_EN,{
+ "Başlangıç ve bitiş çizgilerini ayarla":"Adjust start and end lines",
+ "Her sınırı iki referansla köprüye göre yönlendirin. Parkın çevresi otomatik alınır.":"Align each boundary with the bridge using two references. The existing park outline is reused.",
+ "Çalışacağınız bölümü seçin":"Choose the section to work on",
+ "Etap sınırları":"Stage boundaries",
+ "Küçült":"Minimize",
+ "Sınırları aç":"Show boundaries",
+ "1–2 başlangıç, 3–4 bitiş. Noktaları köprü boyunca yerleştirin.":"1–2 start, 3–4 end. Place the points along the bridge."
+});

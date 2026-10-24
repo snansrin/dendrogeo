@@ -32,13 +32,16 @@ ve iki dokunuşla **iki kesit arasındaki alanı alma** verilir; onay açıkça 
 1. Park algılandıktan sonra üst menüde **🧩 Araçlar → Yeni etap oluştur**.
 2. **Otomatik bölüm öner:** ayrık park alanları varsa bunları ayrı seçenek yapar.
    Tek bağlı alanda kullanıcının seçtiği 2/3/4 geometrik bölüm önerisi çıkarır.
-   Listeden seçilen öneri haritada önizlenir; gerçek alanı ha olarak görünür.
-3. **Başlangıç ve bitiş seç:** haritada iki nokta. Bu iki konumdan geçen,
-   aralarındaki doğrultuya dik iki kesit otomatik oluşturulur; aradaki bölge
-   mevcut park sınırıyla kesiştirilir. Yan çevreyi yeniden çizmek gerekmez.
-   İki işaret sürüklenerek konum ve ortak doğrultu değiştirilebilir.
-4. Haritanın dışındaki durum çubuğundan **Ad ver ve kaydet**; isim girip
-   **Etap olarak kaydet**. Önizleme kayda/analize kendiliğinden geçmez.
+   Hiçbir bölüm kendiliğinden seçilmez. Haritadan veya listeden seçilen öneri
+   önizlenir; gerçek alanı ha olarak görünür.
+3. **Başlangıç ve bitiş çizgilerini ayarla:** soldaki sabit panelden başlangıç
+   ve bitiş sınırları ayrı ayrı yerleştirilir. Her sınır için köprü doğrultusunda
+   iki nokta seçilir. Dört referans ayrı ayrı sürüklenebilir; çizgiler paralel
+   olmaya zorlanmaz. Bir sınırı yeniden seçmek diğerini korur. İki çizginin
+   arasındaki bölge gerçek park sınırıyla kesiştirilir; çevre çizilmez.
+4. Sol panelde isim girip **Etap olarak kaydet**. Menü üzerinden öneri seçildiyse
+   **Ad ver ve kaydet** ile isim alanına dönülür. Önizleme kayda/analize
+   kendiliğinden geçmez. Kayıttan sonra ad ana park adıyla birlikte gösterilir.
 5. Eski serbest çizim yalnız **Gelişmiş** altında isteğe bağlı kalır.
    Kayıtlı etap seçimi aynı üst menüdedir. İptal/Escape seçimi kaldırır.
 
@@ -53,7 +56,9 @@ ve iki dokunuşla **iki kesit arasındaki alanı alma** verilir; onay açıkça 
 - Maskeler geçici kesme araçlarıdır. Son geometri yalnız gerçek parkla
   kesişimdir; bbox/konveks zarf park alanı olmaz. Boşluk, konkav kenar ve ayrık
   parçalar korunur. Kaynak sınırındaki köşeler yeniden çizdirilmez.
-- İki nokta en az 2 m ayrı olmalı. Boş kesişim reddedilir. Aynı kesit arasında
+- Her çizginin iki referansı en az 2 m ayrı olmalı. Başlangıç/bitiş çizgileri
+  parkın içinde kesişiyorsa belirsiz bir dilim seçmek yerine düzeltme istenir.
+  Boş kesişim reddedilir. Aynı kesit arasında
   parkın birden fazla parçası kalırsa tamamı önizlenir; parça sessizce atılmaz.
 - Ağır geometri ve kayıt boyunca seçim denetimleri/işaretler kilitlenir.
   Bekleyen eski hesap, yeni parkın veya yeni işaretlerin önizlemesini değiştiremez.

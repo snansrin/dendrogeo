@@ -10,9 +10,9 @@ test('Assisted selection cancels stale previews, restores map ownership and lock
  const tool=root.DG_PARK_STAGE_ASSISTED_UI.create({document,leaflet:{polygon:layer,polyline:layer,marker,layerGroup:layer},getMap:()=>map,getMode:()=>mode,setMode:v=>{mode=v;},getGuard:()=>guard,setGuard:v=>{guard=v;},parentGeometry:()=>({outer:[[[39,32],[40,32],[40,33],[39,32]]],inner:[]}),status:message=>messages.push(message),onPreview:()=>{previews++;},onInvalid:()=>messages.push('updating'),onCancel(){},between:()=>new Promise(resolve=>{release=resolve;})});
  tool.start();assert.equal(mode,false);assert.equal(guard,true);assert.equal(zoom,false);
  const click=point=>listeners.click({point,target:{closest:()=>null},preventDefault(){},stopImmediatePropagation(){}});
- click([39.1,32]);const first=[...layers].find(l=>l.dragging);first.callbacks.dragstart();first.callbacks.dragend();assert.match(messages.at(-1),/Bitiş noktasını seçin/);
- click([39.5,32]);const markers=[...layers].filter(l=>l.dragging);assert.equal(markers.length,2);
- tool.setLocked(true);assert.ok(markers.every(m=>!m.dragging.enabled));tool.setLocked(false);assert.ok(markers.every(m=>m.dragging.enabled));
+ click([39.1,32]);const first=[...layers].find(l=>l.dragging);first.callbacks.dragstart();first.callbacks.dragend();assert.match(messages.at(-1),/Başlangıç sınırı/);
+ click([39.1,32.2]);assert.match(messages.at(-1),/Bitiş sınırı/);click([39.5,32]);click([39.6,32.2]);const markers=[...layers].filter(l=>l.dragging);assert.equal(markers.length,4);
+ tool.setLocked(true);assert.ok(markers.every(m=>!m.dragging.enabled));listeners.keydown({key:'Escape'});assert.equal(tool.isActive(),true,'Escape cannot cancel an in-flight explicit save');assert.equal([...layers].filter(l=>l.dragging).length,4);tool.setLocked(false);assert.ok(markers.every(m=>m.dragging.enabled));
  tool.clear();release({geometry:{outer:[],inner:[]},lines:[]});await Promise.resolve();await Promise.resolve();
  assert.equal(previews,0);assert.equal(layers.size,0);assert.equal(mode,true);assert.equal(guard,false);assert.equal(zoom,true);assert.deepEqual(Object.keys(listeners),[]);
 });

@@ -6,6 +6,21 @@ const rect=(a,b,h,w)=>[[a,b],[a,b+w],[a+h,b+w],[a+h,b],[a,b]],flip=r=>r.map(p=>[
 function mp(g){let result=polygon.union(...g.outer.map(r=>[flip(r)]));return g.inner.length?polygon.difference(result,...g.inner.map(r=>[flip(r)])):result;}
 function area(polys){return polys.reduce((s,p)=>s+p.reduce((sum,r,i)=>sum+(i?-1:1)*Math.abs(r.slice(0,-1).reduce((v,a,j)=>v+a[0]*r[j+1][1]-r[j+1][0]*a[1],0)/2),0),0);}
 const parent={outer:[rect(39,32,.006,.002)],inner:[rect(39.002,32.0005,.001,.0005)]};
+
+test('Independent bridge references preserve both different line directions, holes and the real park',()=>{
+ const cuts=[[[39.001,31.999],[39.0016,32.003]],[[39.0045,31.999],[39.004,32.003]]],before=JSON.stringify(parent),result=api.betweenCuts(parent,cuts,ports);
+ assert.equal(result.method,'independent-cuts');assert.equal(result.geometry.inner.length,1);assert.equal(result.lines.length,2);
+ assert.ok(area(polygon.difference(mp(result.geometry),mp(parent)))<1e-10);assert.equal(JSON.stringify(parent),before);
+ for(let i=0;i<2;i++){const [a,b]=cuts[i],[x,y]=result.lines[i];assert.ok(Math.abs((b[0]-a[0])*(y[1]-x[1])-(b[1]-a[1])*(y[0]-x[0]))<1e-12,'cut follows its own bridge references');}
+ const reverse=api.betweenCuts(parent,cuts.map(line=>[...line].reverse()).reverse(),ports);
+ assert.ok(area(polygon.xor(mp(result.geometry),mp(reverse.geometry)))<1e-10);
+});
+test('Independent cuts reject crossing park planes, incomplete and coincident references',()=>{
+ for(const cuts of [[],[[[39,32],[39,32]]],[[[39,32],[39,32]],[[39.004,32],[39.004,32.002]]]])assert.throws(()=>api.betweenCuts(parent,cuts,ports));
+ assert.throws(()=>api.betweenCuts(parent,[[[39.001,32],[39.005,32.002]],[[39.005,32],[39.001,32.002]]],ports),/kesişiyor|ayırın/);
+ const result=api.betweenCuts(parent,[[[39.001,32],[39.001,32.002]],[[39.004,32],[39.004,32.002]]],ports);
+ for(const p of result.geometry.outer.flat())assert.ok(p[0]>=39.001-1e-10&&p[0]<=39.004+1e-10);
+});
 test('Two taps cut the existing park between planes, preserving outer boundary and holes',()=>{
  const before=JSON.stringify(parent),result=api.between(parent,[[39.001,32.001],[39.004,32.001]],ports);
  assert.equal(result.geometry.outer.length,1);assert.equal(result.geometry.inner.length,1);assert.equal(result.lines.length,2);
@@ -54,4 +69,11 @@ test('Real Dikmen two-point strip keeps the original irregular boundary, without
  assert.ok(area(mp(selected.geometry))>0);assert.ok(area(mp(selected.geometry))<area(mp(g)));
  assert.ok(area(polygon.difference(mp(selected.geometry),mp(g)))<1e-10);
  assert.ok(selected.geometry.outer.every(r=>r.length<=301));
+});
+test('Real Dikmen independent cuts retain the park perimeter and fit the existing stage storage guard',()=>{
+ const {geometry:g}=JSON.parse(readFileSync(new URL('./fixtures/park-stages/dikmen-boundary.json',import.meta.url))),points=g.outer.flat();
+ const min=Math.min(...points.map(p=>p[0])),height=Math.max(...points.map(p=>p[0]))-min,left=Math.min(...points.map(p=>p[1])),right=Math.max(...points.map(p=>p[1]));
+ const result=api.betweenCuts(g,[[[min+height*.2,left],[min+height*.25,right]],[[min+height*.8,left],[min+height*.72,right]]],ports);
+ assert.ok(area(mp(result.geometry))>0);assert.ok(area(mp(result.geometry))<area(mp(g)));assert.ok(area(polygon.difference(mp(result.geometry),mp(g)))<1e-10);
+ assert.ok(result.geometry.outer.every(r=>r.length<=301));
 });
