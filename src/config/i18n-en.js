@@ -1944,3 +1944,19 @@ Object.assign(DG_I18N_EN,{
  "Sınırları aç":"Show boundaries",
  "1–2 başlangıç, 3–4 bitiş. Noktaları köprü boyunca yerleştirin.":"1–2 start, 3–4 end. Place the points along the bridge."
 });
+Object.assign(DG_I18N_EN,{
+ "🧩 Etaplar":"🧩 Stages",
+ "Etap yönetimi":"Stage management",
+ "Seçili etapta çalış":"Work in selected stage",
+ "Etap düzenle":"Edit stage",
+ "Detaylı başlangıç / bitiş çiz":"Draw detailed start / end paths",
+ "Başlangıç / bitiş düzenlemesini aç":"Open start / end editor",
+ "Nasıl çizilir?":"How to draw?",
+ "Nokta işlemleri":"Point actions",
+ "Hattı tamamla":"Finish path",
+ "Son noktayı geri al":"Undo last point",
+ "Seçili hattı temizle":"Clear selected path",
+ "Başlangıç ve bitişi nokta nokta çizin. Hattın arasına dokunarak nokta ekleyin; numaraları sürükleyin.":"Draw the start and end paths point by point. Tap a segment to insert a point; drag numbered handles.",
+ "Yeni etap sürümü kaydedilir; önceki ölçümler korunur.":"A new stage version is saved; previous measurements are preserved.",
+ "Düzenleme yeni etap sürümü olarak kaydedilir. Ana park ve önceki ölçümler korunur.":"Editing saves a new stage version. The parent park and previous measurements are preserved."
+});

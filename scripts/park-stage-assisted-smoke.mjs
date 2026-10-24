@@ -47,5 +47,22 @@ try{for(const width of [360,390,430]){
  assert.equal(saved.writes,1);assert.match(saved.name,/Köprüler arası etap/);assert.equal(saved.hint,false);assert.equal(saved.panel,false);
  const cuts=['Başlangıç','Bitiş'].map(title=>preview.anchors.filter(a=>a.title.startsWith(title)).map(a=>a.point));
  for(let i=0;i<2;i++){const [a,b]=cuts[i],middle=cuts[1-i].reduce((s,p)=>[s[0]+p[0]/2,s[1]+p[1]/2],[0,0]),cross=p=>(b[0]-a[0])*(p[1]-a[1])-(b[1]-a[1])*(p[0]-a[0]),sign=Math.sign(cross(middle));for(const p of saved.geometry.flat())assert.ok(cross(p)*sign>=-1e-10,'saved area follows each independently oriented cut');}
- assert.deepEqual(errors,[]);console.log(JSON.stringify({width,upperTools:true,noAutomaticChoice:true,fourReferences:true,independentCuts:true,previewReadOnly:true,savedStage:saved.id,errors}));await page.close();
+ // Edit only the two recovered caps. Inserting and dragging a numbered point
+ // must create a new stage identity, leaving the original and parent untouched.
+ await summary.click();assert.equal(await summary.textContent(),'🧩 Etaplar');assert.equal(await host.locator('[data-stage-action="apply"]').textContent(),'Seçili etapta çalış');
+ const original=await page.evaluate(()=>JSON.stringify(__stageFixture.rows[0]));
+ await host.locator('[data-stage-action="revise"]').click();await page.locator('#map').scrollIntoViewIfNeeded();await page.waitForFunction(()=>!document.querySelector('[data-cut-action="save"]').disabled);
+ assert.equal(await host.locator('[data-stage-action="draw"]').count(),0);assert.equal(await host.locator('[data-stage-action="suggest"]').count(),0);
+ const segment=await page.evaluate(()=>{map.stop();const line=Object.values(map._layers).find(l=>l.options?.className==='dg-stage-cut-segment'),points=line.getLatLngs(),p=map.latLngToContainerPoint(L.latLng((points[0].lat+points[1].lat)/2,(points[0].lng+points[1].lng)/2)),box=map.getContainer().getBoundingClientRect();return{x:box.left+p.x,y:box.top+p.y};});
+ await page.mouse.click(segment.x,segment.y);await page.waitForFunction(()=>document.querySelectorAll('.dg-stage-reference').length===5);
+ const midpoint=await page.locator('.dg-stage-reference[title="Başlangıç · referans 2"]').boundingBox();await page.mouse.move(midpoint.x+22,midpoint.y+22);await page.mouse.down();await page.mouse.move(midpoint.x+22,midpoint.y+14,{steps:5});await page.mouse.up();await page.waitForFunction(()=>!document.querySelector('[data-cut-action="save"]').disabled);
+ await panel.locator('[data-cut-boundary="0"]').click();assert.equal(await panel.locator('[data-cut-action="save"]').isDisabled(),true);await panel.locator('[data-cut-edit="finish"]').click();await page.waitForFunction(()=>!document.querySelector('[data-cut-action="save"]').disabled);
+ assert.match(await panel.locator('[data-cut-boundary="0"]').textContent(),/3 nokta/);assert.equal(await page.locator('.dg-stage-reference').first().textContent(),'1.1');
+ assert.deepEqual(await page.evaluate(()=>({active:DG_PARK.id,writes:__stageFixture.writes,old:JSON.stringify(__stageFixture.rows[0])})),{active:9002,writes:1,old:original});
+ await panel.locator('#dgStageCutName').fill('Detaylı etap sürümü');await page.addScriptTag({content:axe.source});assert.deepEqual(await page.evaluate(async()=>(await axe.run(document.querySelector('.dg-stage-cut-panel'))).violations.map(v=>v.id)),[]);
+ if(process.env.DG_STAGE_SCREENSHOT_DIR)await page.locator('#surfaceMapWorkspace').screenshot({path:join(process.env.DG_STAGE_SCREENSHOT_DIR,'etap-duzenleme-'+width+'.png')});
+ await panel.locator('[data-cut-action="save"]').click();await page.waitForFunction(()=>DG_PARK?.id===9003);
+ const revision=await page.evaluate(()=>({id:DG_PARK.id,writes:__stageFixture.writes,name:DG_PARK.name,old:JSON.stringify(__stageFixture.rows[0]),parentUnchanged:JSON.stringify(DG_PARK_SESSION.get('way/990001'))===JSON.stringify(__stageFixture.parent)}));
+ assert.equal(revision.writes,2);assert.match(revision.name,/Detaylı etap sürümü/);assert.equal(revision.old,original);assert.equal(revision.parentUnchanged,true);
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({width,upperTools:true,noAutomaticChoice:true,fourReferences:true,independentCuts:true,previewReadOnly:true,savedStage:saved.id,capEditStage:revision.id,numberedInsertion:true,parentAndOriginalUnchanged:true,errors}));await page.close();
 }}finally{await browser.close();await server.close();}

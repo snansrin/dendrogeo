@@ -29,7 +29,7 @@ ve iki dokunuşla **iki kesit arasındaki alanı alma** verilir; onay açıkça 
 
 ## Kullanım
 
-1. Park algılandıktan sonra üst menüde **🧩 Araçlar → Yeni etap oluştur**.
+1. Park algılandıktan sonra üst menüde **🧩 Etaplar → Yeni etap oluştur**.
 2. **Otomatik bölüm öner:** ayrık park alanları varsa bunları ayrı seçenek yapar.
    Tek bağlı alanda kullanıcının seçtiği 2/3/4 geometrik bölüm önerisi çıkarır.
    Hiçbir bölüm kendiliğinden seçilmez. Haritadan veya listeden seçilen öneri
@@ -46,6 +46,9 @@ ve iki dokunuşla **iki kesit arasındaki alanı alma** verilir; onay açıkça 
    Kayıtlı etap seçimi aynı üst menüdedir. İptal/Escape seçimi kaldırır.
 
 ## Geometri sözleşmesi
+
+Kayıtlı etabın başlangıç/bitişini çok noktalı düzenlemek için
+[Etap düzenleme kılavuzu](ETAP-SINIR-DUZENLEME-2026-10-25.md) kullanılır.
 
 - Ayrık parçalar, dış halkaların birleşiminden boşluklar çıkarıldıktan sonra
   bağlı bileşenler olarak bulunur. Sayıları resmî etap sayısı diye sunulmaz.

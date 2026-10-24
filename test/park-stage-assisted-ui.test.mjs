@@ -25,6 +25,23 @@ class Node{
  querySelectorAll(selector){if(selector.includes('details[open]'))return this.children.filter(n=>n.tag==='details'&&n.open);return this.children.flatMap(n=>[...(n.tag==='button'?[n]:[]),...n.querySelectorAll(selector)]);}
  querySelector(selector){return this.children.find(n=>selector.includes('dg-editor-menu-body')?n.className==='dg-editor-menu-body':Object.hasOwn(n.dataset,'stageHint'))||this.children.map(n=>n.querySelector(selector)).find(Boolean);}
 }
+
+test('Detailed cap drawing retains the other line, supports insertion and undo, and ignores removed handles',async()=>{
+ const root=load('src/ui/park-stage-assisted-selection.js'),events={},layers=new Set();let preview=null;
+ const node={addEventListener:(k,fn)=>events[k]=fn,removeEventListener:k=>delete events[k]},map={getContainer:()=>node,mouseEventToLatLng:e=>({lat:e.p[0],lng:e.p[1]}),removeLayer:l=>layers.delete(l),fitBounds(){},doubleClickZoom:{enabled:()=>false,disable(){}}};
+ const layer=()=>({callbacks:{},addTo(){layers.add(this);return this;},on(k,fn){this.callbacks[k]=fn;return this;},getBounds:()=>({})});
+ const marker=p=>({...layer(),point:p,dragging:{disable(){},enable(){}},getLatLng(){return{lat:this.point[0],lng:this.point[1]};}});
+ const tool=root.DG_PARK_STAGE_ASSISTED_UI.create({document:node,leaflet:{marker,polygon:layer,polyline:(points,options)=>({...layer(),points,options}),layerGroup:children=>({...layer(),children})},getMap:()=>map,getMode:()=>false,setMode(){},getGuard:()=>false,setGuard(){},parentGeometry:()=>({outer:[[[39,32],[39,33],[40,33],[39,32]]]}),status(){},onInvalid(){},onProgress(){},onPreview:r=>{preview=r;},onCancel(){},between:async cuts=>({geometry:{outer:[],inner:[]},lines:[],cuts})});
+ const click=p=>events.click({p,target:{closest:()=>null},preventDefault(){},stopImmediatePropagation(){}});
+ const flush=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
+ tool.start(null,true);for(const p of [[39,32],[39.01,32.1],[39,32.2]])click(p);tool.finishBoundary();for(const p of [[39.1,32],[39.11,32.1],[39.1,32.2]])click(p);tool.finishBoundary();await flush();
+ assert.equal(preview.cuts[0].length,3);assert.equal(preview.cuts[1].length,3);
+ const old=[...layers].find(l=>l.dragging),segment=[...layers].find(l=>l.children?.some(n=>n.options?.className==='dg-stage-cut-segment')).children[0];
+ segment.callbacks.click({latlng:{lat:39.005,lng:32.05}});await flush();assert.equal(preview.cuts[0].length,4);assert.equal(preview.cuts[1].length,3);
+ old.point=[0,0];old.callbacks.dragend();await flush();assert.equal(preview.cuts[0][0][0],39,'a removed reference cannot change the current cap');
+ tool.selectBoundary(0);tool.undo();tool.finishBoundary();await flush();assert.equal(preview.cuts[0].length,3);assert.equal(preview.cuts[1].length,3);
+ tool.clear();segment.callbacks.click({latlng:{lat:0,lng:0}});assert.equal(layers.size,0);
+});
 test('Upper Tools menu retains its real host, closes sibling menus and puts selection hints outside the map',()=>{
  const bar=new Node('nav'),legacy=new Node('details');legacy.dataset.menuOrder='20';legacy.open=true;bar.append(legacy);
  const page=new Node('main'),workspace=new Node('div'),map=new Node('div');page.append(workspace);workspace.append(map);

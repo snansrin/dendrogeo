@@ -23,3 +23,5 @@
 .dg-stage-cut-body[hidden]{display:none}
 .dg-stage-reference{display:grid;place-items:center;background:transparent;border:0;font-family:var(--f-ui)}
 .dg-stage-reference span{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--surface);color:var(--ink);border:3px solid #e9a23b;box-shadow:0 2px 7px #0008;font-weight:700}
+.dg-stage-point-actions>summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-family:var(--f-ui)}
+.dg-stage-cut-segment{cursor:copy}

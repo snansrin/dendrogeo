@@ -551,6 +551,7 @@ const CORE_ASSETS = [
     '/src/domain/parks/distance-to-park-boundary.js',
     '/src/domain/parks/stage-geometry.js',
     '/src/domain/parks/stage-cut-geometry.js',
+    '/src/domain/parks/stage-boundary-paths.js',
     '/src/adapters/parks/stage-store.js',
     '/src/application/parks/activate-stage-scope.js',
     '/src/domain/parks/decide-park-geofence.js',
