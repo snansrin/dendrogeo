@@ -19,7 +19,7 @@
   }
   async function update(){
    ports.onProgress?.({counts:cuts.map(line=>line.length),active,detailed,finished:[...finished]});
-   if(!finished.every(Boolean)){removePreview();lineLayer=ports.leaflet.layerGroup(cuts.filter(line=>line.length>=2).map(line=>ports.leaflet.polyline(line,{color:"#f97316",weight:3,dashArray:"7 5",interactive:false}))).addTo(map);ports.status((active?"Bitiş":"Başlangıç")+(detailed?" hattına sırayla nokta ekleyin; sonra Hattı tamamla düğmesine basın.":" sınırı için köprü boyunca iki referans seçin."));return;}
+   if(!cuts.every(line=>line.length>=2)){removePreview();lineLayer=ports.leaflet.layerGroup(cuts.filter(line=>line.length>=2).map(line=>ports.leaflet.polyline(line,{color:"#f97316",weight:3,dashArray:"7 5",interactive:false}))).addTo(map);const missing=cuts.findIndex(line=>line.length<2);ports.status((missing?"Bitiş":"Başlangıç")+(detailed?" hattına en az iki nokta koyun. Hat düğmeleriyle diğer sınıra geçebilirsiniz.":" sınırı için köprü boyunca iki referans seçin."));return;}
    const token=++epoch,snapshot=cuts.map(line=>line.map(p=>[...p]));ports.status("İki sınır arasındaki park alanı hazırlanıyor…");
    try{const result=await ports.between(snapshot,{detailed});if(token!==epoch||!map)return;drawPreview(result);ports.onPreview(result);}
    catch(error){if(token===epoch){removePreview();ports.onInvalid();ports.status(error.message);}}
@@ -43,7 +43,7 @@
    references();void update();
   }
   function capture(event){
-   if(!map||locked||(!detailed&&cuts[active].length===2)||(detailed&&finished[active])||event.target?.closest?.(".leaflet-control,.leaflet-marker-icon,.dg-stage-cut-panel,.dg-stage-cut-segment")||map.dragging?.moved?.()||map.boxZoom?.moved?.())return;
+   if(!map||locked||(!detailed&&cuts[active].length===2)||event.target?.closest?.(".leaflet-control,.leaflet-marker-icon,.dg-stage-cut-panel,.dg-stage-cut-segment")||map.dragging?.moved?.()||map.boxZoom?.moved?.())return;
    event.preventDefault();event.stopImmediatePropagation();const p=map.mouseEventToLatLng(event);add([p.lat,p.lng]);
   }
   function prepare(){

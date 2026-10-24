@@ -36,8 +36,9 @@ ve iki dokunuşla **iki kesit arasındaki alanı alma** verilir; onay açıkça 
    önizlenir; gerçek alanı ha olarak görünür.
 3. **Başlangıç ve bitiş çizgilerini ayarla:** Etaplar araç menüsünden başlangıç
    ve bitiş sınırları ayrı ayrı yerleştirilir. Her sınır için köprü doğrultusunda
-   iki nokta seçilir. Dört referans ayrı ayrı sürüklenebilir; çizgiler paralel
-   olmaya zorlanmaz. Bir sınırı yeniden seçmek diğerini korur. İki çizginin
+   en az iki numaralı nokta seçilir; ihtiyaç kadar nokta eklenebilir (hat başına
+   en fazla 40). Noktalar ayrı ayrı sürüklenebilir; hatlar paralel olmaya
+   zorlanmaz. Bir sınırı seçmek diğerini korur. İki hattın
    arasındaki bölge gerçek park sınırıyla kesiştirilir; çevre çizilmez.
 4. Araç menüsündeki panelde isim girip **Etap olarak kaydet**. Öneri seçildiyse
    **Ad ver ve kaydet** ile isim alanına dönülür. Önizleme kayda/analize
@@ -59,7 +60,7 @@ Kayıtlı etabın başlangıç/bitişini çok noktalı düzenlemek için
 - Maskeler geçici kesme araçlarıdır. Son geometri yalnız gerçek parkla
   kesişimdir; bbox/konveks zarf park alanı olmaz. Boşluk, konkav kenar ve ayrık
   parçalar korunur. Kaynak sınırındaki köşeler yeniden çizdirilmez.
-- Her çizginin iki referansı en az 2 m ayrı olmalı. Başlangıç/bitiş çizgileri
+- Her hattın ardışık noktaları en az 2 m ayrı olmalı. Başlangıç/bitiş hatları
   parkın içinde kesişiyorsa belirsiz bir dilim seçmek yerine düzeltme istenir.
   Boş kesişim reddedilir. Aynı kesit arasında
   parkın birden fazla parçası kalırsa tamamı önizlenir; parça sessizce atılmaz.

@@ -14,12 +14,18 @@ ve ad korunur. Panelin kendi küçültme düğmesi de kullanılabilir.
   alınır. Analiz motoru, bilimsel alan hesabı veya ana park kaydı değiştirilmez.
 - Her hatta 2–40 nokta kullanılabilir. Başlangıç noktaları `1.1, 1.2, …`, bitiş
   noktaları `2.1, 2.2, …` olarak numaralanır. İşaretler sürüklenebilir.
-- Sınır hattının arasına dokunmak ara nokta ekler. Etaplar araç menüsünden hat seçilir;
-  seçmek diğer hattı silmez. **Hattı tamamla**, **Son noktayı geri al** ve
-  **Seçili hattı temizle** yalnız seçilen hatla ilgilenir.
-- Baştan çizimde başlangıç noktaları sırayla yerleştirilir; **Hattı tamamla**
-  bitiş hattına geçirir. İkinci hat tamamlanınca alan önizlenir. Katlanan,
-  kesişen, çok yakın veya parkla kesişmeyen hatlar kaydedilemez.
+- Yeni etapta **Başlangıç ve bitiş çizgilerini ayarla** da aynı çok noktalı
+  düzenleyiciyi açar. Ayrı hızlı/detaylı mod seçmek gerekmez; iki noktada durmaz.
+- Sınır hattının arasına dokunmak ara nokta ekler. Etaplar araç menüsündeki
+  **Başlangıç / Bitiş** düğmeleri hattı seçer; diğer hattı silmez.
+  **Son noktayı geri al** ve **Seçili hattı temizle** yalnız seçilen hattı etkiler.
+- Her iki hatta en az iki nokta yerleştirilince geçerli alan kendiliğinden
+  önizlenir ve kaydedilebilir. Ayrı **Hattı tamamla** onayı gerekmez. Nokta ekleme
+  ve sürükleme önizlemeyi yeniler; hesap güncel değilken kayıt kapalı kalır.
+- Katlanan, park içinde kesişen, çok yakın veya parkla kesişmeyen hatlar
+  kaydedilemez. İçbükey parkın dışındaki uzantı kesişmesi ise parklı bölüm için
+  yanlış hata üretmez. Bu durumda tutarlı yöndeki şeritler gerçek parkla
+  kesiştirilir; ters tarafta başka bir park parçası kendiliğinden seçilmez.
 - Kayıtlı geometriden iki uç hattı güvenle ayrılabiliyorsa bunlar açılır.
   Eski etapta kopuk uç parçaları veya belirsiz geometri varsa birleştirme
   uydurulmaz: kullanıcıya yalnız iki uç hattını yeniden yerleştirmesi söylenir.
@@ -45,5 +51,5 @@ Gerçek Dikmen geometrisi ve sentetik boşluklu parkla uç eğrileri, dışarı 
 mevcut nokta limitleri, yan çevrenin korunması, eski kaydın değişmemesi ve
 başlangıç/bitiş geri kazanımı test edilir. Gerçek tarayıcı akışı 360/390/430 px
 boyutlarında etap açma, ara nokta ekleme, sürükleme, hattı tamamlama, erişilebilirlik
-ve yeni kimlikle kayıt işlemlerini çalıştırır. Eski iki referanslı hızlı seçim,
+ve yeni kimlikle kayıt işlemlerini çalıştırır. Önceki iki referanslı geometriyle uyum,
 serbest çizim, etap analizi/PNG kapsamı ve ana parka dönüş regresyonları korunur.

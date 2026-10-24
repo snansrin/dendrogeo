@@ -15,8 +15,33 @@
   const all=[...parent.outer.flat().map(p=>uv(f.xy(p))),...lines.flat()],low=Math.min(...all.map(p=>p[0]))-10,high=Math.max(...all.map(p=>p[0]))+10;
   const extended=lines.map(line=>{const a=line[0],b=line[1],c=line.at(-2),d=line.at(-1);return [[low,a[1]+(low-a[0])*(b[1]-a[1])/(b[0]-a[0])],...line,[high,d[1]+(high-d[0])*(d[1]-c[1])/(d[0]-c[0])]];});
   const ring=[...extended[0],...extended[1].slice().reverse()].map(ll);ring.push([...ring[0]]);
-  if(!root.DG_PARK_STAGE_GEOMETRY.validateRing(ring))throw Error("Başlangıç ve bitiş hatları kesişiyor. Numaralı noktaları düzeltin.");
-  return {geometry:clip(ring,parent,polygon),lines:extended.map(line=>line.map(ll)),cuts:cuts.map(line=>line.map(p=>[...p])),method:"boundary-paths",label:"Başlangıç ve bitiş hatları arasındaki etap"};
+  const geometry=root.DG_PARK_STAGE_GEOMETRY.validateRing(ring)?clip(ring,parent,polygon):crossingBand(parent,extended,ll,polygon);
+  return {geometry,lines:extended.map(line=>line.map(ll)),cuts:cuts.map(line=>line.map(p=>[...p])),method:"boundary-paths",label:"Başlangıç ve bitiş hatları arasındaki etap"};
+ }
+ function crossingBand(parent,lines,ll,polygon){
+  const value=(line,u)=>{let i=1;while(i<line.length-1&&line[i][0]<u)i++;const a=line[i-1],b=line[i];return a[1]+(u-a[0])*(b[1]-a[1])/(b[0]-a[0]);};
+  const inside=p=>{const contains=ring=>{let yes=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const a=ring[i],b=ring[j];if((a[0]>p[0])!==(b[0]>p[0])&&p[1]<(b[1]-a[1])*(p[0]-a[0])/(b[0]-a[0])+a[1])yes=!yes;}return yes;};return parent.outer.some(contains)&&!(parent.inner||[]).some(contains);};
+  const breaks=[...new Set(lines.flat().map(p=>p[0]))].sort((a,b)=>a-b),crossings=[];
+  const delta=u=>value(lines[0],u)-value(lines[1],u);
+  for(let i=1;i<breaks.length;i++){
+   const a=breaks[i-1],b=breaks[i],da=delta(a),db=delta(b);
+   if(Math.abs(da)<1e-8&&inside(ll([a,value(lines[0],a)]))||Math.abs(db)<1e-8&&inside(ll([b,value(lines[0],b)]))||Math.abs(da)<1e-8&&Math.abs(db)<1e-8&&inside(ll([(a+b)/2,value(lines[0],(a+b)/2)])))throw Error("Başlangıç ve bitiş hatları park içinde kesişiyor. Numaralı noktaları düzeltin.");
+   if(da*db<0){const u=a+(b-a)*da/(da-db);if(inside(ll([u,value(lines[0],u)])))throw Error("Başlangıç ve bitiş hatları park içinde kesişiyor. Numaralı noktaları düzeltin.");crossings.push(u);}
+  }
+  // Keep one consistent ordering; an outside crossing never selects a second,
+  // inverted wedge on the other side of the park.
+  const probe=lines.reduce((n,line)=>n+(line[1][0]+line.at(-2)[0])/4,0),order=Math.sign(delta(probe));
+  if(!order)throw Error("Başlangıç ve bitiş hatlarını birbirinden ayırın.");
+  const knots=[...new Set([...breaks,...crossings])].sort((a,b)=>a-b),masks=[],flip=ring=>ring.map(p=>[p[1],p[0]]);
+  for(let i=1;i<knots.length;i++){
+   const a=knots[i-1],b=knots[i];if(delta((a+b)/2)*order<=0)continue;
+   const at=u=>{const x=value(lines[0],u),y=value(lines[1],u);return Math.abs(x-y)<1e-8?[(x+y)/2,(x+y)/2]:[x,y];},[a0,a1]=at(a),[b0,b1]=at(b);
+   const ring=[[a,a0],[b,b0],[b,b1],[a,a1],[a,a0]].map(ll);masks.push([flip(ring)]);
+  }
+  if(!masks.length)throw Error("İki sınır arasında park alanı bulunamadı.");
+  let park=polygon.union(...parent.outer.map(r=>[flip(r)]));if(parent.inner?.length)park=polygon.difference(park,...parent.inner.map(r=>[flip(r)]));
+  const result=polygon.intersection(polygon.union(...masks),park);if(!result.length)throw Error("Etap park alanıyla kesişmiyor.");
+  const geometry={outer:[],inner:[]};for(const part of result){geometry.outer.push(flip(part[0]));for(const hole of part.slice(1))geometry.inner.push(flip(hole));}return geometry;
  }
  function recover(parent,stage){
   const f=frame(parent),edges=[...parent.outer,...(parent.inner||[])].flatMap(r=>r.slice(1).map((p,i)=>[f.xy(r[i]),f.xy(p)]));
