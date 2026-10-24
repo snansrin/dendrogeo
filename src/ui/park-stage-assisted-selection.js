@@ -10,7 +10,7 @@
    for(const marker of markers.flat())map.removeLayer(marker);markers=[[],[]];if(parentLayer)map.removeLayer(parentLayer);parentLayer=null;if(proposalLayer)map.removeLayer(proposalLayer);proposalLayer=null;
    if(previousZoom)map.doubleClickZoom.enable();ports.setMode(previousMode);ports.setGuard(previousGuard);map=null;cuts=[[],[]];active=0;locked=false;
   }
-  function key(event){if(event.key==="Escape"){clear();ports.status("Bölüm seçimi iptal edildi.");ports.onCancel();}}
+  function key(event){if(event.key==="Escape"&&!locked){clear();ports.status("Bölüm seçimi iptal edildi.");ports.onCancel();}}
   function drawPreview(result){
    if(!map)return;removePreview();
    const rings=[...result.geometry.outer,...(result.geometry.inner||[])];

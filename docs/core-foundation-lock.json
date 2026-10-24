@@ -11315,6 +11315,28 @@
           "sha256": "b5be948112e9010b2b72db7de042a8eaad5221aaba69e6f4203abd078912d338"
         }
       ]
+    },
+    {
+      "date": "2026-10-24",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: independent-stage-cut-save-lock-20261024. Complete the independent stage reference save lock by guarding Escape while an explicitly requested stage save is in flight. Otherwise Escape could imply cancellation after a write started. Add a regression that the locked session and all four references remain active; retain normal Escape cancellation after unlock. Refresh generated module hashes. No geometry, science, backend or stored-record changes.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "10fe69f1b353fbfe806ff4179c899e751e7b0f3d91de00269534fb9556ffd86b",
+          "sha256": "c8bc7f2e7cc7464f59c8e4a2fa51160f496d4298480e0a9db5968452d339d99b"
+        },
+        {
+          "path": "src/ui/park-stage-assisted-selection.js",
+          "previous_sha256": "4e856e21d3b2a89736f2e3ea4310f0bd6e76dcade169a165474438ac3d6ea42f",
+          "sha256": "dcd321b3063ec43a0af50edee8c746c2cf8056a7a3f8d8daee49c96bc4abf299"
+        },
+        {
+          "path": "test/park-stage-assisted-ui.test.mjs",
+          "previous_sha256": "7a9683c5f685a80530fa08ec928895c5b41a5ec7d1b0b9d9fbd39529bb86a769",
+          "sha256": "19587b6171d1ec49d3c70fe46c827a946dfcd062774e6ec877e03b0f11bdac85"
+        }
+      ]
     }
   ]
 }
