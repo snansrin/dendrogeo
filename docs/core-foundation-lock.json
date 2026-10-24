@@ -10819,6 +10819,18 @@
         "scripts/map-only-export-smoke.mjs",
         "scripts/lib/export-tile-fixture.mjs"
       ]
+    },
+    {
+      "date": "2026-10-24",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: synchronize the new map-only browser fixture with the native dialog close event before opening its next theme case. GitHub Chromium exposed the test-only close/removal race without screenshot delays. Keep all assertions and timeouts; production and scientific code unchanged.",
+      "files": [
+        {
+          "path": "scripts/map-only-export-smoke.mjs",
+          "previous_sha256": "292729d31932c0970d205d5c0f13e298b88761e9b339da304a2744e97230a408",
+          "sha256": "4a41a74775f4a32cda4e1b5f9361c44c47b21b383b48e6bf6f7fae8d9b30511e"
+        }
+      ]
     }
   ]
 }

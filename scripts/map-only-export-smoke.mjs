@@ -18,6 +18,7 @@ try{for(const width of [360,390,430,1280]){
   assert.deepEqual(await page.evaluate(async()=> (await axe.run(document.getElementById('dgSurfaceExportDialog'))).violations.map(v=>v.id)),[]);
   if(process.env.DG_QA_SCREENSHOT_DIR)await page.screenshot({animations:'disabled',path:join(process.env.DG_QA_SCREENSHOT_DIR,'map-options-'+theme+'-'+width+'.png')});
   await dialog.locator('#dgExportDownload').click();assert.deepEqual(await page.evaluate(()=>__mapDownload),{park:true,surface:false,grid:false,waypoints:false,mapOnly:true,boundaryColor:'#ff0000'});
+  await dialog.waitFor({state:'detached'});
  }
  console.log(JSON.stringify({width,themes:['light','dark'],mapOnly:true,boundaryColor:true,noOverflow:true}));await page.close();
 }
