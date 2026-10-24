@@ -11426,6 +11426,28 @@
           "sha256": "1e334cf9d683a5a766fc4a76bd7ada279172b6d6783d9b60977f3deabbacd669"
         }
       ]
+    },
+    {
+      "date": "2026-10-25",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: stage-editor-click-stability-20261025. User reports the post-merge mobile test failure. Reproduced under 4x CPU slowdown: logical Leaflet target pixels were ahead of the animated SVG, so segment insertion hit the map and timed out. Open the stage editor with animate:false for its initial framing only; keep general map behavior unchanged. The real-pointer browser test waits for the painted zoom transition to finish and clicks the stable SVG segment via normal actionability checks instead of a future projected coordinate. Retain all point-count, insertion/drag, old-stage/parent immutability, save, geometry and accessibility assertions; no forced click, retry, skip or timeout increase. No scientific engine, geometry policy, database or stored record changes.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "610a09f79422aada23e30ba8c35437083c8ff2dd79c08b6042765eb934fd9873",
+          "sha256": "99e01c5023a87d7d2c0bad3a226a9b65f161da65119dfd44dbcc13d9477d26f7"
+        },
+        {
+          "path": "scripts/park-stage-assisted-smoke.mjs",
+          "previous_sha256": "53789532027744fbd22d312c9c4b0584b445873808c9990e211a3f97334f01f2",
+          "sha256": "a0cde9ecbd2bdc2dd798c490726bdf4c35e31a9ff6315948ac144ac3bfe974b3"
+        },
+        {
+          "path": "src/ui/park-stage-assisted-selection.js",
+          "previous_sha256": "78a387a54dc09ffc16c0897f54c8cdc02fdf4a8bf2245051aab45c3f1ca42908",
+          "sha256": "a57dedd93c2f0179e565b2dc40c3f4ea5b818700bd235029e2363887b97cb6ce"
+        }
+      ]
     }
   ]
 }

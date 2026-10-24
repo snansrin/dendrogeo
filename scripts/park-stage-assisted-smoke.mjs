@@ -53,8 +53,10 @@ try{for(const width of [360,390,430]){
  const original=await page.evaluate(()=>JSON.stringify(__stageFixture.rows[0]));
  await host.locator('[data-stage-action="revise"]').click();await page.locator('#map').scrollIntoViewIfNeeded();await page.waitForFunction(()=>!document.querySelector('[data-cut-action="save"]').disabled);
  assert.equal(await host.locator('[data-stage-action="draw"]').count(),0);assert.equal(await host.locator('[data-stage-action="suggest"]').count(),0);
- const segment=await page.evaluate(()=>{map.stop();const line=Object.values(map._layers).find(l=>l.options?.className==='dg-stage-cut-segment'),points=line.getLatLngs(),p=map.latLngToContainerPoint(L.latLng((points[0].lat+points[1].lat)/2,(points[0].lng+points[1].lng)/2)),box=map.getContainer().getBoundingClientRect();return{x:box.left+p.x,y:box.top+p.y};});
- await page.mouse.click(segment.x,segment.y);await page.waitForFunction(()=>document.querySelectorAll('.dg-stage-reference').length===5);
+ // Leaflet's logical projection can reach its target before the SVG zoom
+ // transition finishes. Click the stable, painted segment, not a future pixel.
+ await page.waitForFunction(()=>!document.querySelector('#map .leaflet-zoom-anim'));
+ await page.locator('path.dg-stage-cut-segment').first().click();await page.waitForFunction(()=>document.querySelectorAll('.dg-stage-reference').length===5);
  const midpoint=await page.locator('.dg-stage-reference[title="Başlangıç · referans 2"]').boundingBox();await page.mouse.move(midpoint.x+22,midpoint.y+22);await page.mouse.down();await page.mouse.move(midpoint.x+22,midpoint.y+14,{steps:5});await page.mouse.up();await page.waitForFunction(()=>!document.querySelector('[data-cut-action="save"]').disabled);
  await panel.locator('[data-cut-boundary="0"]').click();assert.equal(await panel.locator('[data-cut-action="save"]').isDisabled(),true);await panel.locator('[data-cut-edit="finish"]').click();await page.waitForFunction(()=>!document.querySelector('[data-cut-action="save"]').disabled);
  assert.match(await panel.locator('[data-cut-boundary="0"]').textContent(),/3 nokta/);assert.equal(await page.locator('.dg-stage-reference').first().textContent(),'1.1');
