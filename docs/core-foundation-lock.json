@@ -11475,6 +11475,63 @@
           "sha256": "23bcd81b31873a375ccbe666cf6ac673c079af4d8b52f5dbe5bd498928b8f20c"
         }
       ]
+    },
+    {
+      "date": "2026-10-25",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: stage-save-multipoint-20261025. User reports edits cannot be saved and requests the same numbered multi-point paths in the normal new-stage start/end action. Reproduce a previously valid concave stage whose recovered cut extensions cross outside the real park. Preserve the existing successful simple-mask path; for an invalid closed mask, split monotone cut graphs at crossings, reject real inside-park crossings, keep one consistent ordering, union valid bands and intersect the unchanged park/holes. Do not select an inverted wedge or another component. Add regression for holes, another park component, actual inside-cross rejection and reopening equality. New-stage and revision entry both use detailed paths; remove the compulsory Finish UI, compute current preview after both paths have two points, allow continued placement on reopened caps, and keep save disabled during invalid/pending updates. Retain max controls, actual stage API, immutable old identity, project/geofence/transition/save locks. Extend three-width real-pointer tests to 3+ points per cap, create/edit save without Finish, and actual browser save of the formerly blocked stored concave stage. Preserve docked tool menu readability and existing manual analysis/PNG flow. No allometry, scientific area/raster engine, database/schema/RPC, stored record or published report changes.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "c6c1223b57c3c97d59eb822e3370952da31a02aea8a84b8f51e96b940c09e077",
+          "sha256": "38b76cdefbd850af3812557e007b404db789b3ed963f52914206cf2d542972b3"
+        },
+        {
+          "path": "scripts/lib/park-stage-browser-fixture.mjs",
+          "previous_sha256": "46172744840ba614c675e0f21ffc6da77de5d0ca1dbd3e7a3453414120e99be7",
+          "sha256": "acbb2d48fe27afc1a453f8035ca6921738a38c74089b7367419429f9dbfdda43"
+        },
+        {
+          "path": "scripts/park-stage-assisted-smoke.mjs",
+          "previous_sha256": "88adc83c0643257fa6433ff2ac725ebfb872e8bd92295ac7f9b47b9622f30bec",
+          "sha256": "9756de405a2e3e3fc929837ab00583f1174273b8c1f64087cea0dc3272231e14"
+        },
+        {
+          "path": "src/domain/parks/stage-boundary-paths.js",
+          "previous_sha256": "ea1ad82d6c620b9fac2e979ab8f8561d57ff5c0c1303fed3530e4720797847e5",
+          "sha256": "392e821425df062856e6a45fcabfb44bca142f2883d83eea0b8682ed9be14e82"
+        },
+        {
+          "path": "src/ui/park-stage-assisted-selection.js",
+          "previous_sha256": "a57dedd93c2f0179e565b2dc40c3f4ea5b818700bd235029e2363887b97cb6ce",
+          "sha256": "1754b5f0dfef9f6291dbb317b9448bc508248893d08e9e9af70f95348530db85"
+        },
+        {
+          "path": "src/ui/park-stage-menu.js",
+          "previous_sha256": "23bcd81b31873a375ccbe666cf6ac673c079af4d8b52f5dbe5bd498928b8f20c",
+          "sha256": "022c174094c9e7c79700988f454c31946fae9b243bf46fb886483501831214a9"
+        },
+        {
+          "path": "src/ui/park-stage-view.js",
+          "previous_sha256": "923ba8aa9acecfb43482edef4b371e418a12e3786c3aa2f1b522305c4cc0297a",
+          "sha256": "7f9c69c81e51ad1edec68134c0c740b749f7011669ecbdfd6493660af0fc8b67"
+        },
+        {
+          "path": "src/ui/park-stage-workspace.js",
+          "previous_sha256": "796afcd3386b25c3841389628629c2ebb01cf14cae49c3103561b97707daf46c",
+          "sha256": "f67a0b2a71f39b88011826be7ee98979ffb826066750b33668311784d8f99a63"
+        },
+        {
+          "path": "test/park-stage-assisted-ui.test.mjs",
+          "previous_sha256": "519b7ccd3218d00cc9f80139a34ca04ea81f092b1a1100d177167021989ebc60",
+          "sha256": "fa9d12c7214d7e50aaf1a3e1a39f9b66a04ae20dfe6d2e5b2e336f4a05c39d6b"
+        },
+        {
+          "path": "test/park-stage-boundary-paths.test.mjs",
+          "previous_sha256": "1e334cf9d683a5a766fc4a76bd7ada279172b6d6783d9b60977f3deabbacd669",
+          "sha256": "a7b40d81b91a87aa6b3b05d9f92027ff64f325fd401913adddb472a827778c6c"
+        }
+      ]
     }
   ]
 }

@@ -54,9 +54,9 @@
    if(name==="edit"){if(!ready)return;editSource=null;editing=true;render();host.querySelector("#dgStageName")?.focus();return;}
    if(name==="revise"){if(!ready)return;const value=host.querySelector("#dgStageSelect")?.value;editSource=rows.find(row=>String(row.id)===value);if(!editSource)throw Error("Düzenlemek için kayıtlı bir etap seçin.");editing=true;draftName=String(editSource.geom_json.stage_scope.label).slice(0,65)+" · düzenleme";render();name="pick-detail";}
    if(name==="pick"||name==="pick-detail"){
-    const detailed=name==="pick-detail",initial=editSource?root.DG_PARK_STAGE_BOUNDARY_PATHS.recover(ports.geometry(base.park),editSource.geom_json):null;
+    const detailed=true,initial=editSource?root.DG_PARK_STAGE_BOUNDARY_PATHS.recover(ports.geometry(base.park),editSource.geom_json):null;
     drawing.cancel();assisted.clear();menu.hideHint();preview=null;proposals=[];freeDrawing=false;cutEditing=true;render();menu.close();const token=epoch;
-    menu.showCuts({name:draftName,detailed,revision:!!editSource,onName:value=>{draftName=value;const input=host?.querySelector("#dgStageName");if(input)input.value=value;},select:index=>assisted.selectBoundary(index),finish:()=>assisted.finishBoundary(),undo:()=>assisted.undo(),reset:()=>assisted.resetBoundary(),save:()=>void action("save").catch(error=>{if(token===epoch)status(error.message);}),cancel:()=>void action("cancel")});assisted.start(initial,detailed);
+    menu.showCuts({name:draftName,detailed,revision:!!editSource,onName:value=>{draftName=value;const input=host?.querySelector("#dgStageName");if(input)input.value=value;},select:index=>assisted.selectBoundary(index),undo:()=>assisted.undo(),reset:()=>assisted.resetBoundary(),save:()=>void action("save").catch(error=>{if(token===epoch)status(error.message);}),cancel:()=>void action("cancel")});assisted.start(initial,detailed);
     if(editSource&&!initial)status("İki sınır hattı ayrılamadı. Başlangıç ve bitişi yeniden yerleştirin; ana park değişmez.");return;
    }
    if(name==="suggest"){

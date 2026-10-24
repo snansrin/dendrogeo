@@ -25,6 +25,13 @@ test('Recover only stage cap paths; parent perimeter and parent hole edges never
 test('Detailed cap validation rejects crossing, backtracking, duplicate, missing or excessive controls',()=>{
  for(const paths of [[],[cuts[0]],[[cuts[0][0],cuts[0][0]],cuts[1]],[[...cuts[0],cuts[0][1]],cuts[1]],[[...Array(41)].map((_,i)=>[39.002,32+i*.0001]),cuts[1]],[[[39.001,32],[39.009,32.02]],[[39.009,32],[39.001,32.02]]]])assert.throws(()=>api.between(parent,paths,ports));
 });
+test('A stored stage can be edited when cut extensions cross only outside the actual concave park',()=>{
+ const g={outer:[[[39,32],[39,32.02],[39.004,32.02],[39.004,32.006],[39.01,32.006],[39.01,32],[39,32]],rect(39.007,32.017,.001,.002)],inner:[rect(39.0045,32.003,.0002,.0002)]},lines=[[[39.006,32],[39.006,32.02]],[[39.002,32],[39.008,32.02]]];
+ const stored=ctx.window.DG_PARK_STAGE_CUT_GEOMETRY.betweenCuts(g,lines,ports).geometry,recovered=api.recover(g,stored);assert.equal(recovered.length,2);
+ const reopened=api.between(g,recovered,ports);assert.deepEqual(polygon.xor(mp(reopened.geometry),mp(stored)),[]);assert.deepEqual(polygon.difference(mp(reopened.geometry),mp(g)),[]);
+ assert.equal(reopened.geometry.inner.length,1);assert.equal(reopened.geometry.outer.length,1,'an inverted wedge must not select the other park component');
+ assert.throws(()=>api.between(parent,lines,ports),/park içinde kesişiyor/,'the same crossing inside a full park still blocks saving');
+});
 test('Real Dikmen detailed cut edit preserves the real irregular perimeter and existing storage limit',()=>{
  const {geometry:g}=JSON.parse(readFileSync(new URL('./fixtures/park-stages/dikmen-boundary.json',import.meta.url))),points=g.outer.flat(),left=Math.min(...points.map(p=>p[1])),right=Math.max(...points.map(p=>p[1])),lo=Math.min(...points.map(p=>p[0])),h=Math.max(...points.map(p=>p[0]))-lo;
  const paths=[[[lo+h*.2,left],[lo+h*.24,(left+right)/2],[lo+h*.2,right]],[[lo+h*.8,left],[lo+h*.75,(left+right)/2],[lo+h*.8,right]]],result=api.between(g,paths,ports);
