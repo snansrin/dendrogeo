@@ -4,7 +4,7 @@
  function create({document,windowRef,getMap}){
   let menu=null,host=null,hint=null,cutPanel=null;
   const layout=root.DG_GIS_WORKSPACE_MENU_POSITION?.create({windowRef});
-  function hideCuts(){if(!cutPanel)return;cutPanel.remove();cutPanel=null;getMap?.()?.invalidateSize?.({pan:false});}
+  function hideCuts(){if(!cutPanel)return;cutPanel.remove();cutPanel=null;if(host)host.hidden=false;layout?.position(menu);}
   function clear(){menu?.remove();hint?.remove();hideCuts();menu=null;host=null;hint=null;}
   function mount(element){
    clear();host=element;const bar=document.getElementById("surfaceMenuBar");
@@ -25,7 +25,7 @@
    hint.append(note,buttons);for(const type of ["click","pointerdown","dblclick"])hint.addEventListener(type,event=>event.stopPropagation());(document.getElementById("surfaceMapWorkspace")||container).before(hint);
   }
   function showCuts({name,onName,select,save,cancel,detailed=false,finish,undo,reset,revision=false}){
-   hideCuts();const workspace=document.getElementById("surfaceMapWorkspace");if(!workspace)return;
+   hideCuts();const dock=menu?.querySelector(".dg-editor-menu-body")||document.getElementById("parkInfo");if(!dock)return;
    cutPanel=document.createElement("aside");cutPanel.className="dg-stage-cut-panel dg-png-card";cutPanel.setAttribute("aria-label","Başlangıç ve bitiş sınırları");
    const title=document.createElement("strong");title.textContent="Etap sınırları";
    const toggle=document.createElement("button");toggle.type="button";toggle.className="dg-png-btn";toggle.textContent="Küçült";toggle.setAttribute("aria-expanded","true");
@@ -40,9 +40,9 @@
    const input=document.createElement("input");input.id="dgStageCutName";input.className="dg-png-input";input.maxLength=80;input.value=name;input.placeholder="Örn. 1. etap";input.addEventListener("input",()=>onName(input.value));body.append(label,input);
    if(revision){const info=document.createElement("p");info.className="dg-meta";info.textContent="Yeni etap sürümü kaydedilir; önceki ölçümler korunur.";body.append(info);}
    for(const [text,callback,key] of [["Etap olarak kaydet",save,"save"],["Vazgeç",cancel,"cancel"]]){const button=document.createElement("button");button.type="button";button.className="dg-png-btn"+(key==="save"?" primary":"");button.textContent=text;button.dataset.cutAction=key;button.disabled=key==="save";button.addEventListener("click",callback);body.append(button);}
-   cutPanel.append(title,toggle,body);for(const type of ["click","dblclick","pointerdown","wheel"])cutPanel.addEventListener(type,event=>event.stopPropagation());workspace.append(cutPanel);getMap?.()?.invalidateSize?.({pan:false});
+   cutPanel.append(title,toggle,body);for(const type of ["click","dblclick","pointerdown","wheel"])cutPanel.addEventListener(type,event=>event.stopPropagation());if(host)host.hidden=true;dock.append(cutPanel);open();
   }
-  return Object.freeze({mount,clear,open,showHint,showCuts,hideCuts,cutProgress({counts,active,detailed,finished}){cutPanel?.querySelectorAll("[data-cut-boundary]").forEach(button=>{const i=Number(button.dataset.cutBoundary);button.textContent=(i?"Bitiş":"Başlangıç")+" sınırı · "+counts[i]+(detailed?" nokta"+(finished[i]?" ✓":""):"/2");button.setAttribute("aria-pressed",String(i===active));});},cutReady(value){const button=cutPanel?.querySelector('[data-cut-action="save"]');if(button)button.disabled=!value;},cutPadding(){return [cutPanel?cutPanel.getBoundingClientRect().width+28:24,24];},setBusy(value){for(const node of [hint,cutPanel])node?.querySelectorAll("button,input").forEach(button=>{if(value){button.dataset.stageDisabled=button.disabled?"1":"0";button.disabled=true;}else if(button.dataset.stageDisabled!==undefined){button.disabled=button.dataset.stageDisabled==="1";delete button.dataset.stageDisabled;}});},hideHint(){hint?.remove();hint=null;},status(text){for(const node of [hint?.querySelector("[data-stage-hint]"),cutPanel?.querySelector("[data-cut-status]")])if(node)node.textContent=text;},close(){if(menu)menu.open=false;},refresh(){layout?.position(menu);}});
+  return Object.freeze({mount,clear,open,showHint,showCuts,hideCuts,cutProgress({counts,active,detailed,finished}){cutPanel?.querySelectorAll("[data-cut-boundary]").forEach(button=>{const i=Number(button.dataset.cutBoundary);button.textContent=(i?"Bitiş":"Başlangıç")+" sınırı · "+counts[i]+(detailed?" nokta"+(finished[i]?" ✓":""):"/2");button.setAttribute("aria-pressed",String(i===active));});},cutReady(value){const button=cutPanel?.querySelector('[data-cut-action="save"]');if(button)button.disabled=!value;},cutPadding(){return [24,24];},setBusy(value){for(const node of [hint,cutPanel])node?.querySelectorAll("button,input").forEach(button=>{if(value){button.dataset.stageDisabled=button.disabled?"1":"0";button.disabled=true;}else if(button.dataset.stageDisabled!==undefined){button.disabled=button.dataset.stageDisabled==="1";delete button.dataset.stageDisabled;}});},hideHint(){hint?.remove();hint=null;},status(text){for(const node of [hint?.querySelector("[data-stage-hint]"),cutPanel?.querySelector("[data-cut-status]")])if(node)node.textContent=text;},close(){if(menu)menu.open=false;},refresh(){layout?.position(menu);}});
  }
  root.DG_PARK_STAGE_MENU_UI=Object.freeze({create});
 })(window);

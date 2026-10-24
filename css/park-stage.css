@@ -13,9 +13,8 @@
 #dgStageToolsMenu .dg-stage-workspace,#dgStageToolsMenu .dg-stage-form,#dgStageToolsMenu .dg-stage-actions{width:100%;max-width:100%;min-width:0;box-sizing:border-box;overflow-wrap:anywhere}
 #dgStageToolsMenu .dg-stage-workspace .dg-png-btn{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
 @media(max-width:430px){.dg-stage-actions .dg-png-btn{flex-basis:100%}}
-#surfaceMapWorkspace:has(>.dg-stage-cut-panel){position:relative}
-#surfaceMapWorkspace:has(>.dg-stage-cut-panel) #map{min-height:560px}
-.dg-stage-cut-panel{position:absolute;z-index:800;left:8px;top:8px;width:clamp(148px,25vw,230px);max-width:calc(100% - 56px);max-height:calc(100% - 16px);overflow:auto;box-sizing:border-box;margin:0;padding:10px;background:var(--surface);color:var(--ink);border:1px solid var(--line);font-family:var(--f-ui);box-shadow:0 4px 18px #0003}
+.dg-stage-cut-panel{position:static;width:100%;max-width:100%;min-width:0;overflow-wrap:anywhere;box-sizing:border-box;margin:0;padding:3px;background:var(--surface);color:var(--ink);border:0;font-family:var(--f-ui);box-shadow:none}
+#dgStageToolsMenu .dg-stage-workspace[hidden]{display:none}
 .dg-stage-cut-panel .dg-png-btn,.dg-stage-cut-panel input{width:100%;min-width:0;min-height:44px;box-sizing:border-box;white-space:normal;margin:4px 0}
 .dg-stage-cut-panel .dg-meta{white-space:normal;overflow-wrap:anywhere;margin:6px 0}
 .dg-stage-cut-panel .lbl{display:block;margin-top:8px}

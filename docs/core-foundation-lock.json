@@ -11448,6 +11448,33 @@
           "sha256": "a57dedd93c2f0179e565b2dc40c3f4ea5b818700bd235029e2363887b97cb6ce"
         }
       ]
+    },
+    {
+      "date": "2026-10-25",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: stage-panel-tools-dock-20261025. User reports that the map tool rail covers stage text and asks to attach the collapsible panel to tools. Mount the existing cut panel inside the upper stage tools menu, temporarily hide its duplicate stage form while retaining the real state host, restore it on close/clear, and use the existing menu layout and stacking. Preserve internal collapse and native menu open/close without losing references or name. Remove only the floating map overlay CSS and its stage-specific map height; menu controls use full readable width and no longer reserve map padding. Extend the existing browser flow with the actual rendered surface tool rail, two themes, readable widths, hit-testing, collapse and map/menu transitions while retaining all insertion/drag/save/immutability assertions. No analysis engine, geometry, allometry, raster, database or stored record changes.",
+      "files": [
+        {
+          "path": "css/park-stage.css",
+          "previous_sha256": "55123ec76f4a11d80feba9ad94f4b3145e4e0654ecb7e91fa1b6d3bed79a654a",
+          "sha256": "a0c6d258b9290eae3ec2b338ecf5c11696c09628373f6e823b4bffe62f9aa39e"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "99e01c5023a87d7d2c0bad3a226a9b65f161da65119dfd44dbcc13d9477d26f7",
+          "sha256": "c6c1223b57c3c97d59eb822e3370952da31a02aea8a84b8f51e96b940c09e077"
+        },
+        {
+          "path": "scripts/park-stage-assisted-smoke.mjs",
+          "previous_sha256": "a0cde9ecbd2bdc2dd798c490726bdf4c35e31a9ff6315948ac144ac3bfe974b3",
+          "sha256": "88adc83c0643257fa6433ff2ac725ebfb872e8bd92295ac7f9b47b9622f30bec"
+        },
+        {
+          "path": "src/ui/park-stage-menu.js",
+          "previous_sha256": "d09caf96dc64279df528e386fd286ac7fbf4239c2a3e5ac939d770ef7fef2b37",
+          "sha256": "23bcd81b31873a375ccbe666cf6ac673c079af4d8b52f5dbe5bd498928b8f20c"
+        }
+      ]
     }
   ]
 }

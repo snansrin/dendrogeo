@@ -3,6 +3,9 @@
 Üst menü artık **Etaplar** adını taşır. Kayıtlı alanı seçtikten sonra
 **Seçili etapta çalış** veya **Etap düzenle** kullanılabilir. Ana park seçiliyken
 etap düzenle düğmesi kapalıdır. Yeni etap oluşturma aynı menüde devam eder.
+Sınır paneli de bu açılır araç menüsüne bağlıdır; haritanın üzerinde ayrı bir
+pencere değildir. Menü kapatılarak haritada çalışılır, açılınca aynı noktalar
+ve ad korunur. Panelin kendi küçültme düğmesi de kullanılabilir.
 
 ## Noktalarla başlangıç / bitiş
 
@@ -11,7 +14,7 @@ etap düzenle düğmesi kapalıdır. Yeni etap oluşturma aynı menüde devam ed
   alınır. Analiz motoru, bilimsel alan hesabı veya ana park kaydı değiştirilmez.
 - Her hatta 2–40 nokta kullanılabilir. Başlangıç noktaları `1.1, 1.2, …`, bitiş
   noktaları `2.1, 2.2, …` olarak numaralanır. İşaretler sürüklenebilir.
-- Sınır hattının arasına dokunmak ara nokta ekler. Soldaki panelden hat seçilir;
+- Sınır hattının arasına dokunmak ara nokta ekler. Etaplar araç menüsünden hat seçilir;
   seçmek diğer hattı silmez. **Hattı tamamla**, **Son noktayı geri al** ve
   **Seçili hattı temizle** yalnız seçilen hatla ilgilenir.
 - Baştan çizimde başlangıç noktaları sırayla yerleştirilir; **Hattı tamamla**

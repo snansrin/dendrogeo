@@ -34,12 +34,12 @@ ve iki dokunuşla **iki kesit arasındaki alanı alma** verilir; onay açıkça 
    Tek bağlı alanda kullanıcının seçtiği 2/3/4 geometrik bölüm önerisi çıkarır.
    Hiçbir bölüm kendiliğinden seçilmez. Haritadan veya listeden seçilen öneri
    önizlenir; gerçek alanı ha olarak görünür.
-3. **Başlangıç ve bitiş çizgilerini ayarla:** soldaki sabit panelden başlangıç
+3. **Başlangıç ve bitiş çizgilerini ayarla:** Etaplar araç menüsünden başlangıç
    ve bitiş sınırları ayrı ayrı yerleştirilir. Her sınır için köprü doğrultusunda
    iki nokta seçilir. Dört referans ayrı ayrı sürüklenebilir; çizgiler paralel
    olmaya zorlanmaz. Bir sınırı yeniden seçmek diğerini korur. İki çizginin
    arasındaki bölge gerçek park sınırıyla kesiştirilir; çevre çizilmez.
-4. Sol panelde isim girip **Etap olarak kaydet**. Menü üzerinden öneri seçildiyse
+4. Araç menüsündeki panelde isim girip **Etap olarak kaydet**. Öneri seçildiyse
    **Ad ver ve kaydet** ile isim alanına dönülür. Önizleme kayda/analize
    kendiliğinden geçmez. Kayıttan sonra ad ana park adıyla birlikte gösterilir.
 5. Eski serbest çizim yalnız **Gelişmiş** altında isteğe bağlı kalır.
