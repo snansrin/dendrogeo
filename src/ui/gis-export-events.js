@@ -8,10 +8,13 @@
    const sens=window.DG_LC_SENS?.state;
    if(exportAction&&sens?.vegetationView&&!sens.rawView){
     const dialog=exportAction.closest("dialog");
+    if(dialog?.querySelector('[name="mapOnly"]')?.checked)return;
     if(dialog?.id==="dgSurfaceExportDialog"&&dialog.querySelector('[name="surface"]')?.checked){
      const layers=Object.fromEntries(["park","surface","grid","waypoints"].map(key=>[
       key,!!dialog.querySelector("[name=\""+key+"\"]")?.checked
      ]));
+     const boundaryColor=dialog.querySelector('[name="boundaryColor"]')?.value;
+     if(boundaryColor)layers.boundaryColor=boundaryColor;
      event.preventDefault();
      event.stopImmediatePropagation();
      dialog.close();

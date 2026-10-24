@@ -34,7 +34,7 @@
    g.beginPath();
    for(const ring of parkRings)outline(g,pr,ring);
    for(const ring of holes)outline(g,pr,ring);
-   g.strokeStyle="#111827";g.lineWidth=2.5;g.stroke();
+   g.strokeStyle=/^#[0-9a-f]{6}$/i.test(layers.boundaryColor||'')?layers.boundaryColor:'#111827';g.lineWidth=2.5;g.stroke();
   }
   if(layers.surface&&!painted)return{ok:false,message:"Doğrulanmış arazi örtüsü geometrisi çizilemedi. Yanıltıcı PNG oluşturulmadı."};
   return{ok:true};

@@ -3,13 +3,21 @@
   function openDialog({document,grid,waypoints,escape,translate,renderDialog,renderPng}){
     if(document.getElementById('dgSurfaceExportDialog'))return;
     const dialog=document.createElement('dialog');dialog.id='dgSurfaceExportDialog';dialog.className='dg-export-dialog card';
+    dialog.setAttribute?.('aria-label',translate('Harita katmanları'));
     dialog.innerHTML=renderDialog({grid,waypoints:waypoints.length>0,escape,translate});
     document.body.append(dialog);
     dialog.addEventListener('close',()=>dialog.remove());
+    dialog.querySelector('[name="mapOnly"]')?.addEventListener('change',event=>{
+      if(!event.target.checked)return;
+      dialog.querySelector('[name="surface"]').checked=false;
+      dialog.querySelector('[name="park"]').checked=true;
+    });
     dialog.querySelector('#dgExportCancel').addEventListener('click',()=>dialog.close());
     dialog.querySelector('#dgExportDownload').addEventListener('click',()=>{
       const layers=Object.fromEntries(['park','surface','grid','waypoints'].map(key=>[key,dialog.querySelector('[name="'+key+'"]').checked]));
-      if(!Object.values(layers).some(Boolean)){dialog.querySelector('#dgExportError').textContent=translate('En az bir katman seçin.');return;}
+      layers.mapOnly=!!dialog.querySelector('[name="mapOnly"]')?.checked;
+      if(!layers.mapOnly&&!Object.values(layers).some(Boolean)){dialog.querySelector('#dgExportError').textContent=translate('En az bir katman seçin.');return;}
+      layers.boundaryColor=dialog.querySelector('[name="boundaryColor"]')?.value||'#111827';
       dialog.close();renderPng(layers,waypoints);
     });
     dialog.showModal();
@@ -23,24 +31,31 @@
     if(state.exporting)return;
     const epoch=state.epoch;state.exporting=true;redraw();
     try{
-      const parts=getParts(),displayJob=await visualResult(parts);
-      const displayFeatures=displayJob?.displayFeatures||displaySync(parts,epsg,state.parkGeometry);
+      const parts=layers.surface?getParts():[],displayJob=layers.surface?await visualResult(parts):null;
+      const displayFeatures=layers.surface?(displayJob?.displayFeatures||displaySync(parts,epsg,state.parkGeometry)):[];
       if(epoch!==state.epoch)return;
       const parkRings=getParkRings(),frame=prepareFrame({cells,parkRings,epsg});
-      const width=1240,height=1560,canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+      const mapOnly=!!layers.mapOnly,width=1240,height=mapOnly?1240:1560,canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
       const context=canvas.getContext('2d');
       const green='#14532d',muted='#5c6a63',ink='#182420',background='#f7f6f2';
       const palette=Object.assign({green:'#4ade80',water:'#3b82f6',hard:'#64748b',bare:'#8b5a2b',other:'#94a3b8'},colors);
       context.fillStyle=background;context.fillRect(0,0,width,height);
-      const park=getPark(),x=40,y=240,mapWidth=760,mapHeight=1180;
+      const park=getPark(),x=mapOnly?0:40,y=mapOnly?0:240,mapWidth=mapOnly?width:760,mapHeight=mapOnly?height:1180;
       context.fillStyle='#fff';context.fillRect(x,y,mapWidth,mapHeight);
       context.strokeStyle='#dfe5df';context.lineWidth=2;context.strokeRect(x,y,mapWidth,mapHeight);
       const project=(lat,lon)=>frame.canvasProject(lat,lon,{x,y,width:mapWidth,height:mapHeight,margin:20});
+      let attribution='';
+      if(root.DG_DRAW_SURFACE_EXPORT_BASEMAP){
+        attribution=await root.DG_DRAW_SURFACE_EXPORT_BASEMAP.draw({context,project,parkRings,rect:{x,y,width:mapWidth,height:mapHeight},base:state.base||document.getElementById?.('baseLayerSelect')?.value||'osm'});
+        if(epoch!==state.epoch)return;
+      }
       drawLayers({context,layers,displayFeatures,project,parkRings,gridCells:getGridCells(),waypoints,colors:palette,ink});
-      renderInfo({context,width,height,green,muted,ink,colors:palette,park,parkDate:new Date().toISOString().slice(0,10),decisionCount,viewLabel:accepted?'KABUL EDİLMİŞ v'+(record.serverRevision||1):'ÖNİZLEME · HENÜZ KAYDEDİLMEDİ',mapTitle:accepted?'DOĞRULANMIŞ PARK HARİTASI':'PARK ANALİZİ ÖNİZLEMESİ',areasTitle:accepted?'DOĞRULANMIŞ ALANLAR':'ANALİZ ALANLARI',footerNote:accepted?'Kesin hücre geometrisi ve doğrulanmış yüzey sınıfları.':'Kabul edilmemiş analiz önizlemesi; saha doğrulaması değildir.',parkAreaLabel:typeof parkAreaLabel==="function"?parkAreaLabel():parkAreaLabel,edits,layers,areas,ha,labelForClass,fingerprint:record.fingerprint});
+      if(!mapOnly)renderInfo({context,width,height,green,muted,ink,colors:palette,park,parkDate:new Date().toISOString().slice(0,10),decisionCount,viewLabel:accepted?'KABUL EDİLMİŞ v'+(record.serverRevision||1):'ÖNİZLEME · HENÜZ KAYDEDİLMEDİ',mapTitle:accepted?'DOĞRULANMIŞ PARK HARİTASI':'PARK ANALİZİ ÖNİZLEMESİ',areasTitle:accepted?'DOĞRULANMIŞ ALANLAR':'ANALİZ ALANLARI',footerNote:accepted?'Kesin hücre geometrisi ve doğrulanmış yüzey sınıfları.':'Kabul edilmemiş analiz önizlemesi; saha doğrulaması değildir.',parkAreaLabel:typeof parkAreaLabel==="function"?parkAreaLabel():parkAreaLabel,edits,layers,areas,ha,labelForClass,fingerprint:record.fingerprint});
+      if(attribution){context.fillStyle='#ffffffed';context.fillRect(x,y+mapHeight-28,mapWidth,28);context.fillStyle=ink;context.font='12px Arial';context.fillText(attribution,x+8,y+mapHeight-10,mapWidth-16);}
       canvas.toBlob(blob=>{
         if(!blob){toast(translate('PNG üretilemedi.'),'err','🖼️');return;}
-        const url=URL.createObjectURL(blob),anchor=document.createElement('a');anchor.href=url;anchor.download=(accepted?'dendrogeo_dogrulanmis_harita_':'dendrogeo_analiz_onizlemesi_')+(park.id||'park')+'.png';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),1500);toast(translate(accepted?'✓ Doğrulanmış harita PNG indirildi.':'✓ Analiz önizlemesi PNG indirildi.'),'ok','🖼️');
+        if(epoch!==state.epoch)return;
+        const url=URL.createObjectURL(blob),anchor=document.createElement('a');anchor.href=url;anchor.download=(mapOnly?'dendrogeo_harita_':accepted?'dendrogeo_dogrulanmis_harita_':'dendrogeo_analiz_onizlemesi_')+(park.id||'park')+'.png';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),1500);toast(translate(mapOnly?'✓ Harita PNG indirildi.':accepted?'✓ Doğrulanmış harita PNG indirildi.':'✓ Analiz önizlemesi PNG indirildi.'),'ok','🖼️');
       },'image/png');
     }catch(error){if(epoch===state.epoch)toast(escape(String(error.message||error)),'err','🖼️');}
     finally{if(epoch===state.epoch){state.exporting=false;redraw();}}
