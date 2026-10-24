@@ -461,8 +461,16 @@
 .dg-export-dialog{width:min(420px,calc(100% - 32px));max-height:calc(100dvh - 40px);overflow:auto;color:var(--ink);background:var(--surface);border:1px solid var(--line);margin:auto}
 .dg-export-dialog::backdrop{background:#0008}
 .dg-export-dialog .measure-share{padding:10px 0}
-.dg-export-dialog input[type="color"]{display:block;width:100%;height:44px;min-height:44px;padding:4px;border:1px solid var(--line);border-radius:6px;background:var(--surface);cursor:pointer}
-.dg-export-dialog input[type="color"]:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.dg-export-color-toggle{width:100%;justify-content:flex-start;gap:10px;min-height:44px}
+.dg-export-color-toggle>span{display:block;width:38px;height:24px;flex-shrink:0;border:1px solid var(--line);border-radius:4px;background:var(--dg-export-color,#111827)}
+.dg-export-color-panel{margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}
+.dg-export-color-panel[hidden]{display:none}
+#dgExportColorPreview{height:36px;border:1px solid var(--line);border-radius:4px;margin-bottom:10px}
+.dg-export-color-panel input[type="range"]{appearance:none;display:block;width:100%;height:20px;min-height:20px;padding:0;margin:8px 0 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer}
+#dgExportColorHue{background:linear-gradient(to right,red,#ff0,#0f0,#0ff,#00f,#f0f,red)}
+.dg-export-color-panel input[type="range"]::-webkit-slider-thumb{appearance:none;width:24px;height:24px;border:2px solid #fff;border-radius:50%;background:var(--ink);box-shadow:0 0 0 1px #374151}
+.dg-export-color-panel input[type="range"]::-moz-range-thumb{width:20px;height:20px;border:2px solid #fff;border-radius:50%;background:var(--ink)}
+.dg-export-color-panel input:focus-visible,.dg-export-color-toggle:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 
 
 /* Paint-style controls live directly below the marker refresh action. */

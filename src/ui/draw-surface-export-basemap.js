@@ -6,12 +6,10 @@
  function geo(x,y,z){const n=2**z;return[Math.atan(Math.sinh(Math.PI*(1-2*y/n)))*180/Math.PI,x/n*360-180];}
  function load(url){return new Promise((resolve,reject)=>{const img=new root.Image(),timer=setTimeout(()=>finish(new Error('Harita altlığı yüklenemedi. Bağlantınızı kontrol edip yeniden deneyin.')),15000);function finish(error){clearTimeout(timer);img.onload=img.onerror=null;error?reject(error):resolve(img);}img.crossOrigin='anonymous';img.onload=()=>finish();img.onerror=()=>finish(new Error('Harita altlığı yüklenemedi. Bağlantınızı kontrol edip yeniden deneyin.'));img.src=url;});}
  function paint(g,img,project,x,y,z){
-  // Small affine patches preserve the existing UTM projection.
-  const steps=4,size=img.naturalWidth/steps;
-  for(let row=0;row<steps;row++)for(let col=0;col<steps;col++){
-   const a=project(...geo(x+col/steps,y+row/steps,z)),b=project(...geo(x+(col+1)/steps,y+row/steps,z)),c=project(...geo(x+col/steps,y+(row+1)/steps,z));
-   g.save();g.transform((b[0]-a[0])/size,(b[1]-a[1])/size,(c[0]-a[0])/size,(c[1]-a[1])/size,a[0],a[1]);g.drawImage(img,col*size,row*size,size,size,0,0,size+.2,size+.2);g.restore();
-  }
+  // Whole tiles avoid the visible 4x4 crop seams. A one-pixel bleed covers
+  // subpixel joins while keeping the existing UTM display projection.
+  const size=img.naturalWidth,a=project(...geo(x,y,z)),b=project(...geo(x+1,y,z)),c=project(...geo(x,y+1,z));
+  g.save();g.transform((b[0]-a[0])/size,(b[1]-a[1])/size,(c[0]-a[0])/size,(c[1]-a[1])/size,a[0],a[1]);g.drawImage(img,0,0,size,size,0,0,size+1,size+1);g.restore();
  }
  async function draw({context,project,parkRings,rect,base='osm',loadImage=load,resolve=root.DG_RESOLVE_BASE_MAP_LAYER?.resolve}){
   const points=parkRings.flat();if(!points.length)throw Error('Park sınırı bulunamadı.');
@@ -26,7 +24,11 @@
   // Bounded workers; missing tiles abort instead of producing a blank PNG.
   let cursor=0,failed=false;const images=new Array(tiles.length);
   await Promise.all(Array.from({length:Math.min(6,tiles.length)},async()=>{while(!failed&&cursor<tiles.length){const i=cursor++,{x,y}=tiles[i],wrapped=((x%2**z)+2**z)%2**z;try{images[i]=await loadImage(config.url.replace('{s}','a').replace('{z}',z).replace('{x}',wrapped).replace('{y}',y));}catch(error){failed=true;throw error;}}}));
-  context.save();try{context.beginPath();context.rect(rect.x,rect.y,rect.width,rect.height);context.clip();tiles.forEach(({x,y},i)=>paint(context,images[i],project,x,y,z));}finally{context.restore();}
+  context.save();try{
+   context.beginPath();context.rect(rect.x,rect.y,rect.width,rect.height);context.clip();
+   context.beginPath();for(const ring of parkRings){ring.forEach((p,i)=>{const q=project(p[0],p[1]);i?context.lineTo(...q):context.moveTo(...q);});context.closePath();}context.clip('evenodd');
+   tiles.forEach(({x,y},i)=>paint(context,images[i],project,x,y,z));
+  }finally{context.restore();}
   return attribution[kind];
  }
  root.DG_DRAW_SURFACE_EXPORT_BASEMAP=Object.freeze({draw});
