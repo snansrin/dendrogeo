@@ -10935,6 +10935,43 @@
           "sha256": "2eaab137f62e5239637275a9750cd6c969fbb5bc52a2b5988a51a8dd0f0623d1"
         }
       ]
+    },
+    {
+      "date": "2026-10-24",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: restore the original native browser color palette exactly as requested, replacing the unwanted custom HSL panel with the original color input and one external Done button. Keep selected colors unchanged, blur/focus the native chooser on Done, and test native opening/closing, keyboard confirmation, accessibility, no horizontal overflow and unchanged PNG/grid/clipping behavior. No analysis, allometry, raster, stored geometry, database access or record changes.",
+      "files": [
+        {
+          "path": "css/park-panel.css",
+          "previous_sha256": "179f2a330aa25690283eaef09d2097b8e68c53002b2191e969c0cffaaa7ec551",
+          "sha256": "cd0632d6ade01ca56a2aece2121bee9e891250c95773d9fb1ca9e36e86ebb9c8"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "2eaab137f62e5239637275a9750cd6c969fbb5bc52a2b5988a51a8dd0f0623d1",
+          "sha256": "f129d3ad591f506e8efb8f42d4780d3154947922e24c4ce1ee34f1712271ef6c"
+        },
+        {
+          "path": "scripts/map-only-export-smoke.mjs",
+          "previous_sha256": "a26ff8eb58b27d20a05cc25f4a0c3ba73e26ecb2f6da5214f8afc50f5c3fb27b",
+          "sha256": "8b7f5e805cfe8102bc9cfdc22f1402d9bb131861ad99439eeb9f9937c93f68cc"
+        },
+        {
+          "path": "src/ui/render-surface-export-layer-dialog.js",
+          "previous_sha256": "ffa68ba0325be3ebf1b4544bb2f89e297d5df9446ec0140963c759c294c6742e",
+          "sha256": "a5562e1ddd41a5a9096cfd2fea9a72dca52b46d9ab45f5cc96324bddce1bdda9"
+        },
+        {
+          "path": "src/ui/surface-export-color-picker.js",
+          "previous_sha256": "400bba3d436919bdacab24d45d9b6e918ede61b54c7926127310243658b77ad6",
+          "sha256": "f09cfccb796ddff0786481dd2e6c5b3bd51a2209233985ec4ba78c20f7f27cd9"
+        },
+        {
+          "path": "test/surface-export-color-picker.test.mjs",
+          "previous_sha256": "2376bbee675114f8e7fa2c15b34f62f00131bb004cce550c48fd18a3e2243c95",
+          "sha256": "558c55efea9d248ea12288aea5e17ef2fc133b6f17af17c999885ad7eab6be3f"
+        }
+      ]
     }
   ]
 }
