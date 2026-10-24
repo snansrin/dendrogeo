@@ -5,7 +5,7 @@
  const verified=new WeakMap();
  let polygonPromise=null;
  root.DG_PARK_STAGES=root.DG_PARK_STAGE_WORKSPACE_UI.create({
-  document,escape:esc,store,
+  document,windowRef:root,escape:esc,store,area:geometry=>root.DG_PARK_AREA.polyArea(geometry),
   isBusy:()=>{const state=root.DG_LC_SENS?.state;return !!(root._dgLandCoverBusy||state?.busy||state?.saving||state?.exporting||state?.brush||state?.draw||state?.objectPick||state?.objectPreview||document.querySelector?.('#dgUxMapTools [data-tool][aria-pressed="true"]')||typeof dgMeasureSaving!=="undefined"&&dgMeasureSaving);},
   validate:async candidate=>{if(candidate.stageRow)verified.set(candidate,await store.resolve(candidate));},
   approveTransition:async()=>{if(root.DG_LC_SENS?.state?.record&&typeof dgSensSave==="function"&&!await dgSensSave())throw Error("Mevcut taslak kaydedilemedi. Etap değiştirilmedi.");return true;},

@@ -1919,3 +1919,19 @@ Object.assign(DG_I18N_EN,{
  "Etap çizimi iptal edildi.":"Stage drawing cancelled.",
  "Seçili etap için yeni proje oluşturun veya bu etaba bağlı projeyi seçin.":"Create a new project for the selected stage or choose a project linked to this stage."
 });
+Object.assign(DG_I18N_EN,{
+ "🧩 Araçlar":"🧩 Tools",
+ "Etap araçları":"Stage tools",
+ "KAYITLI ETAP / PARK":"SAVED STAGE / PARK",
+ "Yeni etap oluştur":"Create a stage",
+ "OTOMATİK BÖLÜM SAYISI":"NUMBER OF SUGGESTED SECTIONS",
+ "Otomatik bölüm öner":"Suggest sections automatically",
+ "Başlangıç ve bitiş seç · 2 dokunuş":"Choose start and end · 2 taps",
+ "ÖNERİLEN BÖLÜM":"SUGGESTED SECTION",
+ "Etap olarak kaydet":"Save as a stage",
+ "Ad ver ve kaydet":"Name and save",
+ "Gelişmiş: serbest sınır çiz":"Advanced: draw a free boundary",
+ "Parkın çevresi otomatik alınır. İki noktaya dokunun veya bölüm önerilerini kullanın.":"The existing park outline is reused automatically. Tap two points or use the section suggestions.",
+ "Öneriler parkın şekline göredir; resmî etap sınırı değildir. Onayladığınız alan kullanıcı tanımlı etap olarak kaydedilir.":"Suggestions follow the park shape and are not official stage boundaries. The area you approve is saved as a user-defined stage.",
+ "Etap kaydediliyor…":"Saving stage…"
+});

@@ -71,3 +71,4 @@ jobs:
           node scripts/export-preview-smoke.mjs
           node scripts/map-only-export-smoke.mjs
           node scripts/park-stage-workspace-smoke.mjs
+          node scripts/park-stage-assisted-smoke.mjs
