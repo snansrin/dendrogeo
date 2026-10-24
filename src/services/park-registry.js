@@ -152,7 +152,7 @@ const DG_PARK_REGISTER_USE_CASE=window.DG_PARK_REGISTRATION_APPLICATION.create({
   warn:error=>console.warn("DENDROGEO · park kimliği yazılamadı:",error&&error.message),
   notifyWriteFailure:error=>toast(dgCf("Park kimliği sunucuya yazılamadı: ")+esc(error.message),"err","🌳")
 });
-async function dgRegisterPark(cand,opt){return DG_PARK_REGISTER_USE_CASE(cand,opt);}
+async function dgRegisterPark(cand,opt){if(cand?.stageRow)return window.DG_RESOLVE_STAGE_PARK(cand);return DG_PARK_REGISTER_USE_CASE(cand,opt);}
 
 /* =========================================================
    4. ALGILAMA AKIŞI (ölçümden yönlendirme dahil)

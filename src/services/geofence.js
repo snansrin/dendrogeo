@@ -55,6 +55,7 @@ function dgDistToParkM(lat,lon,geom){
  * verified=true yalnızca POLİGON (veya kenar payı) kararıyla damgalanır;
  * miras parkın daire yedeği "ok" olabilir ama "verified" OLMAZ. */
 function dgGeoDecide(fix,park,opt){
+ if(String(park?.osm_key||"").startsWith("stage/"))return window.DG_PARK_STAGE_GEOMETRY.fence(fix,park,DG_GEO,pointInPark);
  if(window.DG_PARK_GEOFENCE_DECISION)return window.DG_PARK_GEOFENCE_DECISION.decide(fix,park,opt,{config:DG_GEO,distanceToPark:dgDistToParkM,hav,pointInPark});
  const cfg=Object.assign({},DG_GEO,opt||{});
  if(!park)return{ok:true,verified:false,inside:false,reason:"no-park",distM:null,acc:fix&&fix.acc};
@@ -170,4 +171,4 @@ const DG_PARK_PERSIST_GEOMETRY_USE_CASE=window.DG_PARK_GEOMETRY_APPLICATION.crea
   else console.warn("DENDROGEO · dgPersistParkGeom:",error);
  }
 });
-async function dgPersistParkGeom(park){return DG_PARK_PERSIST_GEOMETRY_USE_CASE(park);}
+async function dgPersistParkGeom(park){if(String(park?.osm_key||"").startsWith("stage/"))return;return DG_PARK_PERSIST_GEOMETRY_USE_CASE(park);}

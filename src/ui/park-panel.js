@@ -181,7 +181,7 @@ const DG_PARK_RESET_CONTROLLER=window.DG_PARK_RESET_CONTROLLER_UI.create({
  cleanupReview:()=>{if(window.DG_LC_SENS&&typeof window.DG_LC_SENS.cleanup==="function")window.DG_LC_SENS.cleanup();},
  resetSurface:()=>{WATER_RINGS=[];WATER_LINES=[];IMP_RINGS=[];IMP_LINES=[];GRID_BLOCK_LINES=[];}
 });
-function clearPark(){DG_ACCEPTED_PARK_SURFACE.clear();return DG_PARK_RESET_CONTROLLER();}
+function clearPark(){window.DG_PARK_STAGES?.clear();DG_ACCEPTED_PARK_SURFACE.clear();return DG_PARK_RESET_CONTROLLER();}
 
 function switchPark(i){
   const p=PARK_CANDS[i];

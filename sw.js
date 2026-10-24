@@ -4,7 +4,7 @@
 // NOT: Senkronizasyon artık Ana Thread (Supabase JS SDK) tarafından yapılıyor
 // ============================================================
 
-const CACHE_VERSION = 'dendrogeo-sw-v2-r442';
+const CACHE_VERSION = 'dendrogeo-sw-v2-r443';
 
 /* İKİ AYRI STATİK CACHE — bu ayrım bilinçli ve önemli.
  *
@@ -549,6 +549,9 @@ const CORE_ASSETS = [
     '/src/adapters/parks/park-geometry-store.js',
     '/src/application/parks/persist-park-geometry.js',
     '/src/domain/parks/distance-to-park-boundary.js',
+    '/src/domain/parks/stage-geometry.js',
+    '/src/adapters/parks/stage-store.js',
+    '/src/application/parks/activate-stage-scope.js',
     '/src/domain/parks/decide-park-geofence.js',
     '/src/adapters/parks/read-fresh-gps-fix.js',
     '/src/domain/parks/stamp-geofence-decision.js',
@@ -803,6 +806,10 @@ const CORE_ASSETS = [
     '/src/ui/gis-export.js',
     '/src/ui/park-export-lazy-class-bridge.js',
     '/src/ui/operation-help-content.js',
+    '/src/ui/park-stage-view.js',
+    '/src/ui/park-stage-drawing.js',
+    '/src/ui/park-stage-workspace.js',
+    '/src/bootstrap/park-stage-workspace.js',
     '/src/ui/operation-help.js',
     '/src/services/lc-config.js',
     '/src/domain/surface/classify-landcover-code.js',
@@ -1085,6 +1092,7 @@ const CORE_ASSETS = [
     '/css/operation-help.css',
     '/css/park-admin.css',
     '/css/park-panel.css',
+    '/css/park-stage.css',
     '/css/ui-standard.css',
     '/css/surface-drawing.css',
     '/css/gis-workspace.css',
