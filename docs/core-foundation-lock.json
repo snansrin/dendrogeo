@@ -10908,6 +10908,33 @@
         "src/ui/surface-export-color-picker.js",
         "test/surface-export-color-picker.test.mjs"
       ]
+    },
+    {
+      "date": "2026-10-24",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: align the export palette with mandatory dg-range classes and 44px mobile hit areas while retaining a 20px gradient track. Production calculations, data access and geometry unchanged.",
+      "files": [
+        {
+          "path": "css/park-panel.css",
+          "previous_sha256": "9515095a101b47c89aaac13b387c14b5db9a8c39640073541239667204a5c303",
+          "sha256": "179f2a330aa25690283eaef09d2097b8e68c53002b2191e969c0cffaaa7ec551"
+        },
+        {
+          "path": "src/ui/render-surface-export-layer-dialog.js",
+          "previous_sha256": "15d62e55248663ae8c55011f022e3e161d43a8eb82e498f41b216709102461d5",
+          "sha256": "ffa68ba0325be3ebf1b4544bb2f89e297d5df9446ec0140963c759c294c6742e"
+        },
+        {
+          "path": "src/ui/surface-export-color-picker.js",
+          "previous_sha256": "41e9181e392d3e6114a4b0f7e11c89d0b434b695885190859380112520707e62",
+          "sha256": "400bba3d436919bdacab24d45d9b6e918ede61b54c7926127310243658b77ad6"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "04123fd4ec3f616bc2be6da37e19b893945d36a6ed203fd6d5f510204ba104c2",
+          "sha256": "2eaab137f62e5239637275a9750cd6c969fbb5bc52a2b5988a51a8dd0f0623d1"
+        }
+      ]
     }
   ]
 }

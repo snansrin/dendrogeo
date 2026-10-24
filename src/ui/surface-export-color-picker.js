@@ -10,7 +10,7 @@
   function refresh(syncRanges=false){const ok=valid(hex.value);done.disabled=!ok;hex.setAttribute('aria-invalid',String(!ok));status.textContent=ok?'':translate('Altı haneli bir HEX rengi girin.');if(!ok)return;
    if(syncRanges)toHsl(hex.value).forEach((value,i)=>ranges[i].value=String(value));
    const h=Number(ranges[0].value),s=Number(ranges[1].value);preview.style.backgroundColor=hex.value;
-   ranges[1].style.background='linear-gradient(to right,hsl('+h+' 0% 50%),hsl('+h+' 100% 50%))';ranges[2].style.background='linear-gradient(to right,#000,hsl('+h+' '+s+'% 50%),#fff)';
+   ranges[1].style.backgroundImage='linear-gradient(to right,hsl('+h+' 0% 50%),hsl('+h+' 100% 50%))';ranges[2].style.backgroundImage='linear-gradient(to right,#000,hsl('+h+' '+s+'% 50%),#fff)';
   }
   function finish(apply){if(apply&&!valid(hex.value))return;if(apply){field.value=hex.value.toLowerCase();toggle.style.setProperty('--dg-export-color',field.value);}panel.hidden=true;toggle.setAttribute('aria-expanded','false');toggle.focus();}
   toggle.addEventListener('click',()=>{if(!panel.hidden){finish(false);return;}hex.value=field.value;refresh(true);panel.hidden=false;toggle.setAttribute('aria-expanded','true');hex.focus();});
