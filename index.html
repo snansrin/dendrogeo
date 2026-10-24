@@ -244,14 +244,14 @@
 <script src="src/config/wood-density-lock.js?v=cf173b71" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/species.js?v=851bd239" type="application/x-dendrogeo-module" defer></script>
 <!-- DİL KATMANI (0035): sözlük verisi çalışma zamanı çeviricisinden önce yüklenir. -->
-<script src="src/config/i18n-en.js?v=6fe3c81d" type="application/x-dendrogeo-module" defer></script>
+<script src="src/config/i18n-en.js?v=ca7b0f82" type="application/x-dendrogeo-module" defer></script>
 <script src="src/config/i18n.js?v=231e538a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/map/web-mercator-coordinates.js?v=3cc46e81" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/geo.js?v=6387a8e8" type="application/x-dendrogeo-module" defer></script>
 <script src="src/utils/truncation.js?v=c25f80f0" type="application/x-dendrogeo-module" defer></script>
 <!-- Faz 7: geotiff (317 KB) ve chart.js (208 KB) artık SENKRON yüklenmiyor;
      src/utils/lazylibs.js ihtiyaç anında enjekte eder (LULC analizi / panel grafiği). -->
-<script id="dgRuntimeBuild" type="application/json">"373584348b9ba5b4"</script>
+<script id="dgRuntimeBuild" type="application/json">"be0bccd80626c689"</script>
 <!-- Verified fallback OSM water geometry, independent of the lazy raster engine. -->
 <script src="src/adapters/parks/fetch-nominatim-osm-way.js?v=abbb3d6c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/osm-water-backup.js?v=ef938739" type="application/x-dendrogeo-module" defer></script>
@@ -762,6 +762,7 @@
 <script src="src/application/parks/persist-park-geometry.js?v=7e65ab1f" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/distance-to-park-boundary.js?v=57551129" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/stage-geometry.js?v=41f705a0" type="application/x-dendrogeo-module" defer></script>
+<script src="src/domain/parks/stage-cut-geometry.js?v=a729e596" type="application/x-dendrogeo-module" defer></script>
 <script src="src/adapters/parks/stage-store.js?v=1624156c" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/parks/activate-stage-scope.js?v=553dfe1a" type="application/x-dendrogeo-module" defer></script>
 <script src="src/domain/parks/decide-park-geofence.js?v=797d7e8d" type="application/x-dendrogeo-module" defer></script>
@@ -945,7 +946,7 @@
 <script src="src/application/dashboard/load-shell-view-data.js?v=c2e4eeb9" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/dash.js?v=3e83580a" type="application/x-dendrogeo-module" defer></script>
 <link rel="stylesheet" href="css/park-panel.css?v=8972caa5">
-<link rel="stylesheet" href="css/park-stage.css?v=ebd12222">
+<link rel="stylesheet" href="css/park-stage.css?v=f94f633c">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
      ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
      geçerli; kabuk (body.dg-app) yalnız sınıf-bazlı bileşenleri ve sekme
@@ -1994,11 +1995,13 @@
 <script src="src/ui/park-export-lazy-class-bridge.js?v=fe767479" type="application/x-dendrogeo-module" defer></script>
 
 <script src="src/ui/operation-help-content.js?v=552b7912" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-stage-view.js?v=30e39f57" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-stage-view.js?v=90d574f7" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-stage-menu.js?v=90a19d55" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-stage-assisted-selection.js?v=9ea659d2" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/park-stage-drawing.js?v=9539422e" type="application/x-dendrogeo-module" defer></script>
-<script src="src/ui/park-stage-workspace.js?v=9456e16f" type="application/x-dendrogeo-module" defer></script>
-<script src="src/bootstrap/park-stage-workspace.js?v=4af129ba" type="application/x-dendrogeo-module" defer></script>
+<script src="src/ui/park-stage-workspace.js?v=4c72e244" type="application/x-dendrogeo-module" defer></script>
+<script src="src/bootstrap/park-stage-workspace.js?v=8e32b211" type="application/x-dendrogeo-module" defer></script>
 <script src="src/ui/operation-help.js?v=262971b5" type="application/x-dendrogeo-module" defer></script>
-<script src="/src/bootstrap/app-runtime.js?v=8be45341" defer></script>
+<script src="/src/bootstrap/app-runtime.js?v=8b160d52" defer></script>
 </body>
 </html>

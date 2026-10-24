@@ -76,7 +76,7 @@ test('Stage view escapes user content and exposes labelled controls with explici
  vm.runInContext(readFileSync(new URL('../src/ui/park-stage-view.js',import.meta.url),'utf8'),context);
  const render=context.window.DG_PARK_STAGE_VIEW.render,escape=s=>String(s).replaceAll('<','&lt;').replaceAll('>','&gt;');
  const html=render({escape,baseName:'<img src=x>',rows:[{...row,geom_json:{...row.geom_json,stage_scope:{label:'<script>bad</script>'}}}],ready:true,editing:true});
- assert.doesNotMatch(html,/<img|<script>/);assert.match(html,/for="dgStageSelect"/);assert.match(html,/for="dgStageName"/);assert.match(html,/Sınırı kabul et ve kaydet/);assert.match(html,/role="status"/);
+ assert.doesNotMatch(html,/<img|<script>/);assert.match(render({escape,baseName:'Park',rows:[],ready:true,editing:false}),/for="dgStageSelect"/);assert.match(html,/for="dgStageName"/);assert.match(html,/Etap olarak kaydet/);assert.match(html,/role="status"/);
 });
 test('Stage drawing restores detection/guard and removes temporary parent boundary on Escape',()=>{
  vm.runInContext(readFileSync(new URL('../src/ui/park-stage-drawing.js',import.meta.url),'utf8'),context);
@@ -136,7 +136,7 @@ test('A stale workspace action cannot draw, overwrite status or unlock controls 
   const document={getElementById:()=>({append:host=>hosts.push(host)}),createElement:()=>{
    const host={status:{textContent:''},attrs:{},innerHTML:'',className:'',listeners:{},setAttribute(k,v){this.attrs[k]=v;},addEventListener(k,fn){this.listeners[k]=fn;},querySelectorAll:()=>[],querySelector(selector){return selector==='#dgStageSelect'?{value:'102'}:selector==='#dgStageStatus'?this.status:{focus(){}};}};return host;
   }};
-  const root={DG_PARK_STAGE_DRAWING_UI:{create:()=>({cancel(){},ring:()=>[]})},DG_PARK_STAGE_VIEW:{render:model=>{models.push(model);return ''; }},DG_ACTIVATE_STAGE_SCOPE:context.window.DG_ACTIVATE_STAGE_SCOPE,DG_PARK_STAGE_GEOMETRY:api};
+  const root={DG_PARK_STAGE_DRAWING_UI:{create:()=>({cancel(){},ring:()=>[]})},DG_PARK_STAGE_MENU_UI:{create:()=>({mount:host=>hosts.push(host),clear(){},status(){},refresh(){},hideHint(){},setBusy(){}})},DG_PARK_STAGE_ASSISTED_UI:{create:()=>({clear(){},setLocked(){}})},DG_PARK_STAGE_VIEW:{render:model=>{models.push(model);return ''; }},DG_ACTIVATE_STAGE_SCOPE:context.window.DG_ACTIVATE_STAGE_SCOPE,DG_PARK_STAGE_GEOMETRY:api};
   const ctx=vm.createContext({window:root,console});
   vm.runInContext(readFileSync(new URL('../src/ui/park-stage-workspace.js',import.meta.url),'utf8'),ctx);
   const workspace=root.DG_PARK_STAGE_WORKSPACE_UI.create({document,escape:String,drawing:{},geometry:()=>({outer:row.geom_json.outer,inner:[]}),isBusy:()=>false,
