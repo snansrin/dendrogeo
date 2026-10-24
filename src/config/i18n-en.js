@@ -1892,3 +1892,11 @@ Object.assign(DG_I18N_EN,{
  "Harita altlığı ekrandaki görünümden alınır.":"The basemap follows the current map view.",
  "✓ Harita PNG indirildi.":"✓ Map PNG downloaded."
 });
+Object.assign(DG_I18N_EN,{
+ "Renk seç":"Choose color",
+ "Renk paleti":"Color palette",
+ "Ton":"Hue",
+ "Doygunluk":"Saturation",
+ "Açıklık":"Lightness",
+ "Altı haneli bir HEX rengi girin.":"Enter a six-digit HEX color."
+});

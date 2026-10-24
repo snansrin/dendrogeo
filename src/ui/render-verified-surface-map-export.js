@@ -6,6 +6,7 @@
     dialog.setAttribute?.('aria-label',translate('Harita katmanları'));
     dialog.innerHTML=renderDialog({grid,waypoints:waypoints.length>0,escape,translate});
     document.body.append(dialog);
+    root.DG_SURFACE_EXPORT_COLOR_PICKER?.bind({dialog,translate});
     dialog.addEventListener('close',()=>dialog.remove());
     dialog.querySelector('[name="mapOnly"]')?.addEventListener('change',event=>{
       if(!event.target.checked)return;
@@ -15,6 +16,7 @@
     dialog.querySelector('#dgExportCancel').addEventListener('click',()=>dialog.close());
     dialog.querySelector('#dgExportDownload').addEventListener('click',()=>{
       const layers=Object.fromEntries(['park','surface','grid','waypoints'].map(key=>[key,dialog.querySelector('[name="'+key+'"]').checked]));
+      layers.grid=!!grid&&layers.grid&&!dialog.querySelector('[name="grid"]').disabled;
       layers.mapOnly=!!dialog.querySelector('[name="mapOnly"]')?.checked;
       if(!layers.mapOnly&&!Object.values(layers).some(Boolean)){dialog.querySelector('#dgExportError').textContent=translate('En az bir katman seçin.');return;}
       layers.boundaryColor=dialog.querySelector('[name="boundaryColor"]')?.value||'#111827';
@@ -43,15 +45,16 @@
       const park=getPark(),x=mapOnly?0:40,y=mapOnly?0:240,mapWidth=mapOnly?width:760,mapHeight=mapOnly?height:1180;
       context.fillStyle='#fff';context.fillRect(x,y,mapWidth,mapHeight);
       context.strokeStyle='#dfe5df';context.lineWidth=2;context.strokeRect(x,y,mapWidth,mapHeight);
-      const project=(lat,lon)=>frame.canvasProject(lat,lon,{x,y,width:mapWidth,height:mapHeight,margin:20});
+      const drawHeight=mapHeight-44;
+      const project=(lat,lon)=>frame.canvasProject(lat,lon,{x,y,width:mapWidth,height:drawHeight,margin:20});
       let attribution='';
       if(root.DG_DRAW_SURFACE_EXPORT_BASEMAP){
-        attribution=await root.DG_DRAW_SURFACE_EXPORT_BASEMAP.draw({context,project,parkRings,rect:{x,y,width:mapWidth,height:mapHeight},base:state.base||document.getElementById?.('baseLayerSelect')?.value||'osm'});
+        attribution=await root.DG_DRAW_SURFACE_EXPORT_BASEMAP.draw({context,project,parkRings,rect:{x,y,width:mapWidth,height:drawHeight},base:state.base||document.getElementById?.('baseLayerSelect')?.value||'osm'});
         if(epoch!==state.epoch)return;
       }
-      drawLayers({context,layers,displayFeatures,project,parkRings,gridCells:getGridCells(),waypoints,colors:palette,ink});
+      drawLayers({context,layers,displayFeatures,project,parkRings,gridCells:layers.grid?getGridCells():[],waypoints,colors:palette,ink});
       if(!mapOnly)renderInfo({context,width,height,green,muted,ink,colors:palette,park,parkDate:new Date().toISOString().slice(0,10),decisionCount,viewLabel:accepted?'KABUL EDİLMİŞ v'+(record.serverRevision||1):'ÖNİZLEME · HENÜZ KAYDEDİLMEDİ',mapTitle:accepted?'DOĞRULANMIŞ PARK HARİTASI':'PARK ANALİZİ ÖNİZLEMESİ',areasTitle:accepted?'DOĞRULANMIŞ ALANLAR':'ANALİZ ALANLARI',footerNote:accepted?'Kesin hücre geometrisi ve doğrulanmış yüzey sınıfları.':'Kabul edilmemiş analiz önizlemesi; saha doğrulaması değildir.',parkAreaLabel:typeof parkAreaLabel==="function"?parkAreaLabel():parkAreaLabel,edits,layers,areas,ha,labelForClass,fingerprint:record.fingerprint});
-      if(attribution){context.fillStyle='#ffffffed';context.fillRect(x,y+mapHeight-28,mapWidth,28);context.fillStyle=ink;context.font='12px Arial';context.fillText(attribution,x+8,y+mapHeight-10,mapWidth-16);}
+      if(attribution){context.fillStyle='#fff';context.fillRect(x,y+drawHeight,mapWidth,44);context.fillStyle=ink;context.font='bold 14px Arial';context.fillText('© DendroGeo · dendrogeo.org',x+8,y+drawHeight+17,mapWidth-16);context.font='12px Arial';context.fillText(attribution,x+8,y+drawHeight+35,mapWidth-16);}
       canvas.toBlob(blob=>{
         if(!blob){toast(translate('PNG üretilemedi.'),'err','🖼️');return;}
         if(epoch!==state.epoch)return;

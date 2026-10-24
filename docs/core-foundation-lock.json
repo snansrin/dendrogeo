@@ -1086,6 +1086,10 @@
       "test/surface-export-basemap.test.mjs",
       "scripts/map-only-export-smoke.mjs",
       "scripts/lib/export-tile-fixture.mjs"
+    ],
+    "park_export_refinement_2026_10_24": [
+      "src/ui/surface-export-color-picker.js",
+      "test/surface-export-color-picker.test.mjs"
     ]
   },
   "sha256": {
@@ -2118,7 +2122,9 @@
     "test/map-only-export.test.mjs": "794f758b0182e1a08048298b0294371abeeed0b64d7e65838b627c37f4f8f50d",
     "test/surface-export-basemap.test.mjs": "9fcc57abb9918caed5bac291e35981f283c1b664c84960541b4ce467d0353358",
     "scripts/map-only-export-smoke.mjs": "292729d31932c0970d205d5c0f13e298b88761e9b339da304a2744e97230a408",
-    "scripts/lib/export-tile-fixture.mjs": "c0e6c6d37669fec21aa0364e269f055920048bbb875e79ddf77142b2173069f5"
+    "scripts/lib/export-tile-fixture.mjs": "c0e6c6d37669fec21aa0364e269f055920048bbb875e79ddf77142b2173069f5",
+    "src/ui/surface-export-color-picker.js": "41e9181e392d3e6114a4b0f7e11c89d0b434b695885190859380112520707e62",
+    "test/surface-export-color-picker.test.mjs": "2376bbee675114f8e7fa2c15b34f62f00131bb004cce550c48fd18a3e2243c95"
   },
   "authorized_modularizations": [
     {
@@ -10829,6 +10835,104 @@
           "path": "scripts/map-only-export-smoke.mjs",
           "previous_sha256": "292729d31932c0970d205d5c0f13e298b88761e9b339da304a2744e97230a408",
           "sha256": "4a41a74775f4a32cda4e1b5f9361c44c47b21b383b48e6bf6f7fae8d9b30511e"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: retain only the selected park and holes in PNG exports, remove 4x4 tile crop seams resembling grids, keep generated grids opt-in, add an explicit draft/apply/cancel color palette and DendroGeo footer alongside original provider credits. Extend deterministic PNG/palette tests and lazy/offline integration only. Dikmen multi-stage work is research/planning only; park detection, raster/area engines, allometry, species/wood-density inputs, database access and existing stored records are unchanged.",
+      "files": [
+        {
+          "path": "css/park-panel.css",
+          "previous_sha256": "563f7294a960423050ea7268e03934f6115eae9aabf16e05e3322da796a2a8ad",
+          "sha256": "9515095a101b47c89aaac13b387c14b5db9a8c39640073541239667204a5c303"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "baa01d5e038b0adffa3fbf5605cee76b6de0a2b0d799daf67e42528e19f2c8b4",
+          "sha256": "04123fd4ec3f616bc2be6da37e19b893945d36a6ed203fd6d5f510204ba104c2"
+        },
+        {
+          "path": "scripts/lib/export-tile-fixture.mjs",
+          "previous_sha256": "c0e6c6d37669fec21aa0364e269f055920048bbb875e79ddf77142b2173069f5",
+          "sha256": "49e7e29d36cad1810798ee18ff346d010c69c71e4453f3e3908af877b163e726"
+        },
+        {
+          "path": "scripts/map-only-export-smoke.mjs",
+          "previous_sha256": "4a41a74775f4a32cda4e1b5f9361c44c47b21b383b48e6bf6f7fae8d9b30511e",
+          "sha256": "a26ff8eb58b27d20a05cc25f4a0c3ba73e26ecb2f6da5214f8afc50f5c3fb27b"
+        },
+        {
+          "path": "src/ui/draw-surface-export-basemap.js",
+          "previous_sha256": "3f681eeaf60f5dc882b940f8453782ef6ab19dea0800c9265eb6f08a297e82e0",
+          "sha256": "6688787377661b82c1dd5fc385815d9c4831af6a257a8e3a964104c4398dc028"
+        },
+        {
+          "path": "src/ui/draw-surface-export-map-layers.js",
+          "previous_sha256": "f799dae00bdd05509c818d571d4135ac6870b6c8e7cfe5f58cdbec3c7803d6a0",
+          "sha256": "b99d8373d4eee354d02e38121e4cdf9770d0e48048b803e45c5cfe893bdf83a4"
+        },
+        {
+          "path": "src/ui/render-surface-export-layer-dialog.js",
+          "previous_sha256": "ac2e8d1fdc140b2319c781d96b21dfaa10250169a6a101944d1e53b84900b64a",
+          "sha256": "15d62e55248663ae8c55011f022e3e161d43a8eb82e498f41b216709102461d5"
+        },
+        {
+          "path": "src/ui/render-verified-surface-map-export.js",
+          "previous_sha256": "fa7c266bbec0e606d9c1e9e8e4753a05924ce040afbbd817b250a4b17b0dee7c",
+          "sha256": "8749881fbfb8859a3b94eb2a7335c2766d1c49026bcc8d8d4933f0d3d7b011c1"
+        },
+        {
+          "path": "src/utils/lazylibs.js",
+          "previous_sha256": "45a30a55732422b9975415a88fcc61d228f83ecf135f3c75e8fe16ee347519d6",
+          "sha256": "adc25339ed55ce742678914702608089e610c022fcd5aade586e97bf4b29aa4a"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "f90f5a74bc86b4c97d8eaf58e28108ee76b2f41d0cca8da8c8a29c81151395fd",
+          "sha256": "82f2077cea2bbc1a796634e5a2f6d0a1901e824b5fc81d4f53a2ae615317f354"
+        },
+        {
+          "path": "test/map-only-export.test.mjs",
+          "previous_sha256": "794f758b0182e1a08048298b0294371abeeed0b64d7e65838b627c37f4f8f50d",
+          "sha256": "967f5426d3f906ad5ba7ebda6bd15a62265d8691b4bd5bacc4ef381ea829a3e8"
+        },
+        {
+          "path": "test/surface-export-basemap.test.mjs",
+          "previous_sha256": "9fcc57abb9918caed5bac291e35981f283c1b664c84960541b4ce467d0353358",
+          "sha256": "83ecade1673eadbd7253b8e76c87bbba4ab2b0205ae279bf87e903c8b186cdf5"
+        }
+      ],
+      "added_protected_files": [
+        "src/ui/surface-export-color-picker.js",
+        "test/surface-export-color-picker.test.mjs"
+      ]
+    },
+    {
+      "date": "2026-10-24",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: align the export palette with mandatory dg-range classes and 44px mobile hit areas while retaining a 20px gradient track. Production calculations, data access and geometry unchanged.",
+      "files": [
+        {
+          "path": "css/park-panel.css",
+          "previous_sha256": "9515095a101b47c89aaac13b387c14b5db9a8c39640073541239667204a5c303",
+          "sha256": "179f2a330aa25690283eaef09d2097b8e68c53002b2191e969c0cffaaa7ec551"
+        },
+        {
+          "path": "src/ui/render-surface-export-layer-dialog.js",
+          "previous_sha256": "15d62e55248663ae8c55011f022e3e161d43a8eb82e498f41b216709102461d5",
+          "sha256": "ffa68ba0325be3ebf1b4544bb2f89e297d5df9446ec0140963c759c294c6742e"
+        },
+        {
+          "path": "src/ui/surface-export-color-picker.js",
+          "previous_sha256": "41e9181e392d3e6114a4b0f7e11c89d0b434b695885190859380112520707e62",
+          "sha256": "400bba3d436919bdacab24d45d9b6e918ede61b54c7926127310243658b77ad6"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "04123fd4ec3f616bc2be6da37e19b893945d36a6ed203fd6d5f510204ba104c2",
+          "sha256": "2eaab137f62e5239637275a9750cd6c969fbb5bc52a2b5988a51a8dd0f0623d1"
         }
       ]
     }

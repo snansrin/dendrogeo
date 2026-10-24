@@ -15,7 +15,7 @@ test('map-only PNG waits for basemap, omits report, and preserves all inputs',as
  const f=fixture(),before=JSON.stringify([f.args.record,f.args.state,f.args.getAreas()]);
  const window=load([exporter],{DG_DRAW_SURFACE_EXPORT_BASEMAP:{async draw(input){assert.equal(input.base,'sat');assert.equal(input.rect.width,1240);f.order.push('basemap');return 'Tiles © Esri';}}});
  await window.DG_RENDER_VERIFIED_SURFACE_MAP_EXPORT.render(f.args);
- assert.deepEqual(f.order,['basemap','layers']);assert.deepEqual(f.files,['dendrogeo_harita_49.png']);assert.deepEqual(f.texts,['Tiles © Esri']);assert.equal(f.canvas.height,1240);
+ assert.deepEqual(f.order,['basemap','layers']);assert.deepEqual(f.files,['dendrogeo_harita_49.png']);assert.deepEqual(f.texts,['© DendroGeo · dendrogeo.org','Tiles © Esri']);assert.equal(f.canvas.height,1240);
  assert.equal(JSON.stringify([f.args.record,f.args.state,f.args.getAreas()]),before.replace('"base":"sat"','"base":"sat","exporting":false'));
 });
 test('failed basemap refuses a blank download and releases busy state',async()=>{
@@ -24,7 +24,7 @@ test('failed basemap refuses a blank download and releases busy state',async()=>
  assert.deepEqual(f.files,[]);assert.deepEqual(f.order,[]);assert.deepEqual(f.notices,['Tile unavailable']);assert.equal(f.args.state.exporting,false);
 });
 test('park outline uses chosen color with a safe fallback and does not mutate geometry',()=>{
- const window=load(['src/ui/draw-surface-export-map-layers.js']),strokes=[],context={beginPath(){},moveTo(){},lineTo(){},closePath(){},stroke(){strokes.push(this.strokeStyle);}},rings=[[[40,32],[40.01,32],[40,32.01]]],before=JSON.stringify(rings);
+ const window=load(['src/ui/draw-surface-export-map-layers.js']),strokes=[],context={save(){},restore(){},clip(){},beginPath(){},moveTo(){},lineTo(){},closePath(){},stroke(){strokes.push(this.strokeStyle);}},rings=[[[40,32],[40.01,32],[40,32.01]]],before=JSON.stringify(rings);
  for(const boundaryColor of ['#ff0000','invalid'])window.DG_DRAW_SURFACE_EXPORT_MAP_LAYERS.draw({context,layers:{park:true,boundaryColor},project:(lat,lon)=>[lon,lat],parkRings:rings});
  assert.deepEqual(strokes,['#ff0000','#111827']);assert.equal(JSON.stringify(rings),before);
 });
