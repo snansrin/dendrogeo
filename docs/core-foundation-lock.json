@@ -1114,6 +1114,10 @@
       "test/park-stage-cut.test.mjs",
       "test/park-stage-assisted-ui.test.mjs",
       "test/fixtures/park-stages/dikmen-boundary.json"
+    ],
+    "stage_boundary_editor": [
+      "src/domain/parks/stage-boundary-paths.js",
+      "test/park-stage-boundary-paths.test.mjs"
     ]
   },
   "sha256": {
@@ -2168,7 +2172,9 @@
     "scripts/park-stage-assisted-smoke.mjs": "0b7acb545ccd3d9341bb1ae5b7fd3b97225f80e695364d38db628498de7a7b5d",
     "test/park-stage-cut.test.mjs": "c2085383a73eb116e40dc0333fb4d2f5e3fabdf7ee89d701880f3e5b836c6775",
     "test/park-stage-assisted-ui.test.mjs": "6db9eaf341240548c5d37af06493686813c98403208f53a960145312ca8f110a",
-    "test/fixtures/park-stages/dikmen-boundary.json": "6bf55cde9f85d848d68c0896b524f15ded9d621e692c52a9eece238cc1238875"
+    "test/fixtures/park-stages/dikmen-boundary.json": "6bf55cde9f85d848d68c0896b524f15ded9d621e692c52a9eece238cc1238875",
+    "src/domain/parks/stage-boundary-paths.js": "ea1ad82d6c620b9fac2e979ab8f8561d57ff5c0c1303fed3530e4720797847e5",
+    "test/park-stage-boundary-paths.test.mjs": "f78cbdf85a908ec0052a5ed4f5e318bf2a5cffb5b25e65ab12fadefb31074da4"
   },
   "authorized_modularizations": [
     {
@@ -11335,6 +11341,89 @@
           "path": "test/park-stage-assisted-ui.test.mjs",
           "previous_sha256": "7a9683c5f685a80530fa08ec928895c5b41a5ec7d1b0b9d9fbd39529bb86a769",
           "sha256": "19587b6171d1ec49d3c70fe46c827a946dfcd062774e6ec877e03b0f11bdac85"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-25",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: stage-boundary-editor-20261025. User explicitly requests renamed stage tools, Work in selected stage and Edit stage, and detailed numbered draggable points affecting only start/end caps, never the parent perimeter. Add a stage-only path mask intersected with the original park; recover only unambiguous non-parent cap edges, otherwise request two new cap paths without inventing missing connections. Allow 2-40 ordered controls per cap, segment insertion, drag, finish/undo/reset, stale reference guards and existing save locks. Save edits as a separate stage identity through the unchanged immutable stage API so prior measurements/projects/reports remain scoped. Retain quick cuts, automatic proposal choice and free drawing for new stages; prevent general perimeter tools in revision mode. Extend real-pointer three-width synthetic tests with insertion, drag and old-stage/parent immutability, plus real Dikmen/holes geometry tests. No database/schema/RPC, analysis engine, raster, allometry, stored record or published report changes.",
+      "files": [
+        {
+          "path": "css/park-stage.css",
+          "previous_sha256": "3e0839fbbfc1fc1892c38c6e380ff29548997e10ece536283983e4da8d2fa9af",
+          "sha256": "55123ec76f4a11d80feba9ad94f4b3145e4e0654ecb7e91fa1b6d3bed79a654a"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "c8bc7f2e7cc7464f59c8e4a2fa51160f496d4298480e0a9db5968452d339d99b",
+          "sha256": "610a09f79422aada23e30ba8c35437083c8ff2dd79c08b6042765eb934fd9873"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "be9d5c4e47e0a278bf1b82f3a97481440acfdc9946cd0a023aed40662800fbe1",
+          "sha256": "40761e24b02d6d9ef50b0bbced38dd9161cb9af61bca333c0638455f9a626510"
+        },
+        {
+          "path": "scripts/lib/park-stage-browser-fixture.mjs",
+          "previous_sha256": "e45163d98c755c2778499b74a8a33dbf54b66513bfc1c957735b3bfb4fb5acb7",
+          "sha256": "46172744840ba614c675e0f21ffc6da77de5d0ca1dbd3e7a3453414120e99be7"
+        },
+        {
+          "path": "scripts/park-stage-assisted-smoke.mjs",
+          "previous_sha256": "16bb379b90caf899036cd242b709a2b660398872a5fb7725aa99cdbe0c2cac2c",
+          "sha256": "53789532027744fbd22d312c9c4b0584b445873808c9990e211a3f97334f01f2"
+        },
+        {
+          "path": "src/ui/park-stage-assisted-selection.js",
+          "previous_sha256": "dcd321b3063ec43a0af50edee8c746c2cf8056a7a3f8d8daee49c96bc4abf299",
+          "sha256": "78a387a54dc09ffc16c0897f54c8cdc02fdf4a8bf2245051aab45c3f1ca42908"
+        },
+        {
+          "path": "src/ui/park-stage-menu.js",
+          "previous_sha256": "4da0de76989d1d09cafa886280c7c281acc96d14862f00795ee43a6374218b6c",
+          "sha256": "d09caf96dc64279df528e386fd286ac7fbf4239c2a3e5ac939d770ef7fef2b37"
+        },
+        {
+          "path": "src/ui/park-stage-view.js",
+          "previous_sha256": "76ad4a4be6ff2d18470ed026fad078b881fc80a115ddeb461731acc323bc2f20",
+          "sha256": "923ba8aa9acecfb43482edef4b371e418a12e3786c3aa2f1b522305c4cc0297a"
+        },
+        {
+          "path": "src/ui/park-stage-workspace.js",
+          "previous_sha256": "1f7e63923cc70e97ba644cef226d03911a523546327423ecc129aa2b400948f4",
+          "sha256": "796afcd3386b25c3841389628629c2ebb01cf14cae49c3103561b97707daf46c"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "06ece46bf3596ada5190b0bfa570a6f833d3dfedff38b04d0140fd62a1ac9edb",
+          "sha256": "6b1af565c59086d9a45fe07c59ad1e5c0ff1467f69de32b46b0760131cb6d2bc"
+        },
+        {
+          "path": "test/park-stage-assisted-ui.test.mjs",
+          "previous_sha256": "19587b6171d1ec49d3c70fe46c827a946dfcd062774e6ec877e03b0f11bdac85",
+          "sha256": "519b7ccd3218d00cc9f80139a34ca04ea81f092b1a1100d177167021989ebc60"
+        },
+        {
+          "path": "test/park-stage-workspace.test.mjs",
+          "previous_sha256": "b5be948112e9010b2b72db7de042a8eaad5221aaba69e6f4203abd078912d338",
+          "sha256": "587701e53db3601d1717b193344ab6cea4d8ea1bb1b51f52864ed07873a2248b"
+        }
+      ],
+      "added_protected_files": [
+        "src/domain/parks/stage-boundary-paths.js",
+        "test/park-stage-boundary-paths.test.mjs"
+      ]
+    },
+    {
+      "date": "2026-10-25",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: stage-editor-named-test-evidence-20261025. Name the newly added boundary path module explicitly in its existing VM test loader so the repository evidence inventory recognizes the already implemented behavioral tests. Do not add an exception or weaken the evidence guard. No application or scientific code change.",
+      "files": [
+        {
+          "path": "test/park-stage-boundary-paths.test.mjs",
+          "previous_sha256": "f78cbdf85a908ec0052a5ed4f5e318bf2a5cffb5b25e65ab12fadefb31074da4",
+          "sha256": "1e334cf9d683a5a766fc4a76bd7ada279172b6d6783d9b60977f3deabbacd669"
         }
       ]
     }

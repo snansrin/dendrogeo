@@ -12,7 +12,7 @@ export async function installStageFixture(page){
    if(name==='dg_create_park_stage'){
     ++__stageFixture.writes;
     const geom={...args.p_geometry,stage_scope:{schema:'dendrogeo/park-stage/1',parentId:9001,parentKey:parent.osm_key,parentName:parent.name,label:args.p_name,definition:'user-defined'}};
-    const row={id:9002,osm_key:'stage/9001/'+'a'.repeat(32),name:parent.name+' · '+args.p_name+' (kullanıcı tanımlı etap)',geom_json:geom,area_m2:polyArea(args.p_geometry),source:'manual'};
+    const row={id:9002+__stageFixture.rows.length,osm_key:'stage/9001/'+(__stageFixture.rows.length+1).toString(16).padStart(32,'0'),name:parent.name+' · '+args.p_name+' (kullanıcı tanımlı etap)',geom_json:geom,area_m2:polyArea(args.p_geometry),source:'manual'};
     __stageFixture.rows.push(row);return{data:row,error:null};
    }return rpc(name,args);
   };
