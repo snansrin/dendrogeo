@@ -1961,6 +1961,12 @@ Object.assign(DG_I18N_EN,{
  "Düzenleme yeni etap sürümü olarak kaydedilir. Ana park ve önceki ölçümler korunur.":"Editing saves a new stage version. The parent park and previous measurements are preserved."
 });
 Object.assign(DG_I18N_EN,{
+ "Sol etap panelini aç":"Open left stage panel",
+ "NOKTA SEÇ":"SELECT POINT",
+ "Numaralı noktayı seçin":"Select a numbered point",
+ "Seçili noktayı sil":"Delete selected point",
+ "Etap sil":"Delete stage",
+ "Etap":"Stage",
  "Başlangıçta 1.1, 1.2…; bitişte 2.1, 2.2… noktaları ekleyin. Parkın çevresi otomatik alınır.":"Add points 1.1, 1.2… at the start and 2.1, 2.2… at the end. The existing park outline is reused.",
  "Başlangıç / bitiş düğmeleriyle hattı seçin. Nokta ekleyin veya sürükleyin. Her hatta en az iki nokta olunca geçerli alan kaydedilebilir.":"Select a path with the start / end buttons. Add or drag points. A valid area can be saved once each path has at least two points."
 });

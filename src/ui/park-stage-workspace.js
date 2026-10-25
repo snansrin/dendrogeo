@@ -2,7 +2,8 @@
 /* One parent-scoped workspace; switching never reuses the parent's record ID. */
 (function(root){
  function create(ports){
-  let base=null,rows=[],current=null,host=null,epoch=0,ready=false,editing=false,working=false,proposals=[],preview=null,previewIndex=-1,draftName="",partCount=2,freeDrawing=false,cutEditing=false,editSource=null;
+  let base=null,rows=[],current=null,host=null,epoch=0,ready=false,deleteReady=false,editing=false,working=false,proposals=[],preview=null,previewIndex=-1,draftName="",partCount=2,freeDrawing=false,cutEditing=false,editSource=null;
+  const canDelete=row=>{const actor=ports.actor?.();return !!(deleteReady&&row&&(actor?.admin||actor?.id&&actor.id===row.created_by));};
   const menu=root.DG_PARK_STAGE_MENU_UI.create({document:ports.document,windowRef:ports.windowRef,getMap:ports.drawing.getMap});
   const status=message=>{const node=host?.querySelector("#dgStageStatus");if(node)node.textContent=message;menu.status(message);};
   function setWorking(value,token=epoch){
@@ -21,7 +22,7 @@
   function render(){
    if(!host||!base)return;
    draftName=host.querySelector("#dgStageName")?.value??draftName;
-   host.innerHTML=root.DG_PARK_STAGE_VIEW.render({escape:ports.escape,baseName:base.row.name,rows,selectedId:current?.row?.id===base.row.id?null:current?.row?.id,ready,editing,status:"",proposals,previewIndex,previewArea:preview?area(preview.geometry):null,draftName,partCount,canSave:!!preview||freeDrawing,revision:!!editSource});menu.refresh();
+   host.innerHTML=root.DG_PARK_STAGE_VIEW.render({escape:ports.escape,baseName:base.row.name,rows,selectedId:current?.row?.id===base.row.id?null:current?.row?.id,ready,editing,status:"",proposals,previewIndex,previewArea:preview?area(preview.geometry):null,draftName,partCount,canSave:!!preview||freeDrawing,revision:!!editSource,canDelete:canDelete(rows.find(row=>row.id===current?.row?.id))});menu.refresh();
   }
   async function present({park,row}){
    const token=++epoch;drawing.cancel();assisted.clear();menu.clear();proposals=[];preview=null;draftName="";freeDrawing=false;cutEditing=false;editSource=null;editing=false;working=false;current={park,row};
@@ -34,10 +35,10 @@
    host.setAttribute("aria-label","Etap seçimi");host.addEventListener("click",event=>{
     const button=event.target.closest?.("[data-stage-action]");if(!button||button.disabled)return;
     const token=epoch;void action(button.dataset.stageAction).catch(error=>{if(token===epoch)status(error.message||"Etap işlemi tamamlanamadı.");});
-   });host.addEventListener("change",event=>{if(event.target.id==="dgStageProposal"&&event.target.value!=="")selectProposal(Number(event.target.value));if(event.target.id==="dgStageSelect"){const button=host.querySelector('[data-stage-action="revise"]');if(button)button.disabled=!ready||event.target.value==="whole";}});menu.mount(host);ready=false;render();
+   });host.addEventListener("change",event=>{if(event.target.id==="dgStageProposal"&&event.target.value!=="")selectProposal(Number(event.target.value));if(event.target.id==="dgStageSelect"){const button=host.querySelector('[data-stage-action="revise"]');if(button)button.disabled=!ready||event.target.value==="whole";const remove=host.querySelector('[data-stage-action="delete"]');if(remove)remove.disabled=!canDelete(rows.find(row=>String(row.id)===event.target.value));}});menu.mount(host);ready=false;deleteReady=false;render();
    try{
-    const [available,list]=await Promise.all([ports.store.ready(),ports.store.list(base.row.id)]);
-    if(token!==epoch)return;ready=available;rows=list.filter(r=>r.geom_json?.stage_scope?.parentId===base.row.id);render();
+    const [available,list,removeAvailable]=await Promise.all([ports.store.ready(),ports.store.list(base.row.id),ports.store.deleteReady?.()||false]);
+    if(token!==epoch)return;ready=available;deleteReady=removeAvailable;rows=list.filter(r=>r.geom_json?.stage_scope?.parentId===base.row.id);render();
    }catch(error){if(token===epoch)status("Etap listesi alınamadı: "+error.message);}
   }
   async function switchTo(candidate){
@@ -50,13 +51,21 @@
    if(working)return;
    if(name==="cancel"){drawing.cancel();assisted.clear();menu.hideHint();menu.hideCuts();preview=null;proposals=[];freeDrawing=false;cutEditing=false;editSource=null;editing=false;render();return;}
    if(ports.isBusy()){status("Önce açık harita/yüzey işlemini tamamlayın; fırça, sınır çizimi, nesne seçimi veya harita ölçümünü kapatın.");return;}
+   if(name==="delete"){
+    const target=editSource||rows.find(row=>String(row.id)===host.querySelector("#dgStageSelect")?.value);if(!canDelete(target))throw Error("Yalnız kendi boş etabınızı veya yönetici olarak boş etabı silebilirsiniz.");
+    if(!ports.confirmDelete(target))return;const token=epoch,wasActive=current.row.id===target.id,parent=base;setWorking(true);
+    try{if(wasActive&&await ports.approveTransition()===false)return;if(token!==epoch)return;await ports.store.remove(target);if(token!==epoch)return;ports.forgetStage?.(target.osm_key);rows=rows.filter(row=>row.id!==target.id);drawing.cancel();assisted.clear();menu.hideCuts();menu.hideHint();preview=null;editSource=null;editing=false;cutEditing=false;proposals=[];
+     if(wasActive){await ports.clearAnalysis();if(token!==epoch)return;await ports.draw(parent.park);}else{render();status("Etap silindi. Ana park ve kayıtlı veriler korundu.");}
+    }finally{setWorking(false,token);}return;
+   }
    if(editSource&&["suggest","draw","pick"].includes(name))throw Error("Etap düzenlemede yalnız başlangıç ve bitiş hatları değiştirilir.");
    if(name==="edit"){if(!ready)return;editSource=null;editing=true;render();host.querySelector("#dgStageName")?.focus();return;}
    if(name==="revise"){if(!ready)return;const value=host.querySelector("#dgStageSelect")?.value;editSource=rows.find(row=>String(row.id)===value);if(!editSource)throw Error("Düzenlemek için kayıtlı bir etap seçin.");editing=true;draftName=String(editSource.geom_json.stage_scope.label).slice(0,65)+" · düzenleme";render();name="pick-detail";}
    if(name==="pick"||name==="pick-detail"){
     const detailed=true,initial=editSource?root.DG_PARK_STAGE_BOUNDARY_PATHS.recover(ports.geometry(base.park),editSource.geom_json):null;
     drawing.cancel();assisted.clear();menu.hideHint();preview=null;proposals=[];freeDrawing=false;cutEditing=true;render();menu.close();const token=epoch;
-    menu.showCuts({name:draftName,detailed,revision:!!editSource,onName:value=>{draftName=value;const input=host?.querySelector("#dgStageName");if(input)input.value=value;},select:index=>assisted.selectBoundary(index),undo:()=>assisted.undo(),reset:()=>assisted.resetBoundary(),save:()=>void action("save").catch(error=>{if(token===epoch)status(error.message);}),cancel:()=>void action("cancel")});assisted.start(initial,detailed);
+    const run=name=>void action(name).catch(error=>{if(token===epoch)status(error.message);});
+    menu.showCuts({name:draftName,detailed,revision:!!editSource,onName:value=>{draftName=value;const input=host?.querySelector("#dgStageName");if(input)input.value=value;},select:index=>assisted.selectBoundary(index),selectPoint:index=>assisted.selectPoint(index),deletePoint:()=>assisted.deletePoint(),undo:()=>assisted.undo(),reset:()=>assisted.resetBoundary(),save:()=>run("save"),remove:canDelete(editSource)?()=>run("delete"):null,cancel:()=>void action("cancel")});assisted.start(initial,detailed);
     if(editSource&&!initial)status("İki sınır hattı ayrılamadı. Başlangıç ve bitişi yeniden yerleştirin; ana park değişmez.");return;
    }
    if(name==="suggest"){

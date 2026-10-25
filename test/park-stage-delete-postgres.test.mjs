@@ -1,0 +1,43 @@
+import test from'node:test';import assert from'node:assert/strict';import{readFileSync}from'node:fs';import{PGlite}from'@electric-sql/pglite';
+const migration=readFileSync(new URL('../supabase/migrations/20261024230150_park_stage_safe_delete.sql',import.meta.url),'utf8');
+test('Stage deletion preserves RLS-hidden dependencies, history, ordinary parks and ownership',async()=>{
+ const db=new PGlite(),owner='11111111-1111-4111-8111-111111111111',other='22222222-2222-4222-8222-222222222222';
+ try{
+  await db.exec(`create role authenticated;create role anon;create schema auth;create schema private;
+   create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+   create function private.is_active() returns boolean language sql stable as $$select current_setting('test.active',true) is distinct from 'false'$$;
+   create function private.is_admin() returns boolean language sql stable as $$select current_setting('test.admin',true)='true'$$;
+   grant usage on schema auth,private to authenticated;grant execute on function auth.uid(),private.is_active(),private.is_admin() to authenticated;
+   create table public.parks(id bigint primary key,osm_key text unique,created_by uuid,geom_json jsonb);
+   alter table public.parks enable row level security;create policy parks_select on public.parks for select to authenticated using(true);
+   create policy parks_delete on public.parks for delete to authenticated using(private.is_admin());grant select,delete on public.parks to authenticated;
+   create table projects(id bigint primary key,park_id bigint references parks on delete set null);
+   create table measurements(id bigint primary key,park_id bigint references parks on delete set null);
+   create table surface_reviews(id bigint primary key,park_id bigint references parks on delete cascade);
+   create table report_requests(id bigint primary key,park_id bigint references parks on delete cascade);
+   create table park_invites(id bigint primary key,park_id bigint references parks on delete cascade);
+   create table park_collaborators(id bigint primary key,park_id bigint references parks on delete cascade);
+   create table report_retractions(id bigint primary key,park_id bigint);
+  `);
+  for(const table of ['projects','measurements','surface_reviews','report_requests','park_invites','park_collaborators','report_retractions'])await db.exec(`alter table ${table} enable row level security;create policy hidden on ${table} for select to authenticated using(false);grant select on ${table} to authenticated;`);
+  await db.query("insert into parks values(1,'way/1',$1,'{}')",[owner]);
+  for(let i=10;i<=19;i++)await db.query("insert into parks values($1,$2,$3,$4::jsonb)",[i,'stage/1/'+i.toString(16).padStart(32,'0'),i===19?other:owner,JSON.stringify({stage_scope:{schema:'dendrogeo/park-stage/1',parentId:1}})]);
+  const tables=['projects','measurements','surface_reviews','report_requests','park_invites','park_collaborators','report_retractions'];
+  for(let i=0;i<tables.length;i++)await db.query(`insert into ${tables[i]} values(1,$1)`,[11+i]);
+  await db.exec(migration);await db.exec(migration);
+  await db.exec(`set role authenticated;select set_config('request.jwt.claim.sub','${owner}',false);`);
+  assert.equal((await db.query('select dg_park_stage_delete_ready() ready')).rows[0].ready,1);
+  const key=id=>'stage/1/'+id.toString(16).padStart(32,'0'),remove=id=>db.query('select dg_delete_empty_park_stage($1,$2) id',[id,key(id)]);
+  assert.equal((await remove(10)).rows[0].id,10);
+  for(let id=11;id<=17;id++)await assert.rejects(remove(id),/STAGE_HAS_RECORDS/);
+  await assert.rejects(db.query('delete from parks where id=11'),/STAGE_HAS_RECORDS/,'raw REST deletion cannot bypass dependency protection');
+  await assert.rejects(remove(19),/STAGE_DELETE_FORBIDDEN/);
+  await assert.rejects(db.query("select dg_delete_empty_park_stage(1,'way/1')"),/STAGE_DELETE_TARGET_REQUIRED/);
+  await assert.rejects(db.query("select dg_delete_empty_park_stage(18,'stage/1/wrong')"),/STAGE_DELETE_TARGET_REQUIRED/);
+  await db.exec("select set_config('test.active','false',false)");await assert.rejects(remove(18),/STAGE_DELETE_FORBIDDEN/);await db.exec("select set_config('test.active','true',false)");
+  await db.exec("select set_config('test.admin','true',false)");assert.equal((await remove(19)).rows[0].id,19);await assert.rejects(remove(11),/STAGE_HAS_RECORDS/);
+  await db.exec('reset role;set role anon');await assert.rejects(remove(18),/permission denied/);
+  await db.exec('reset role');for(const table of tables)assert.equal((await db.query(`select park_id from ${table} where id=1`)).rows[0].park_id,11+tables.indexOf(table));
+  assert.equal((await db.query('select count(*)::int n from parks where id=1')).rows[0].n,1);
+ }finally{await db.close();}
+});

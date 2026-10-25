@@ -1,11 +1,11 @@
 "use strict";
 /* Existing theme/font/button classes; this view owns no map or scientific state. */
 (function(root){
- function render({escape:esc,baseName,rows,selectedId,ready,editing,status,proposals=[],previewIndex=-1,previewArea=null,draftName="",partCount=2,canSave=false,revision=false}){
+ function render({escape:esc,baseName,rows,selectedId,ready,editing,status,proposals=[],previewIndex=-1,previewArea=null,draftName="",partCount=2,canSave=false,revision=false,canDelete=false}){
   return `<div class="dg-png-title">Etap yönetimi</div><p class="dg-meta">${esc(baseName)}</p>`+
    (!editing?`<label class="lbl" for="dgStageSelect">KAYITLI ETAP / PARK</label><select id="dgStageSelect" class="dg-png-select"><option value="whole">Ana parkın tamamı</option>`+
    rows.map(row=>`<option value="${Number(row.id)}"${Number(row.id)===Number(selectedId)?" selected":""}>${esc(row.geom_json.stage_scope.label)}</option>`).join("")+`</select>`+
-   `<div class="dg-stage-actions"><button class="dg-png-btn primary" data-stage-action="apply">Seçili etapta çalış</button><button class="dg-png-btn" data-stage-action="revise"${ready&&selectedId?"":" disabled"}>Etap düzenle</button><button class="dg-png-btn" data-stage-action="edit"${ready?"":" disabled"}>Yeni etap oluştur</button></div>`:"")+
+   `<div class="dg-stage-actions"><button class="dg-png-btn primary" data-stage-action="apply">Seçili etapta çalış</button><button class="dg-png-btn" data-stage-action="revise"${ready&&selectedId?"":" disabled"}>Etap düzenle</button><button class="dg-png-btn" data-stage-action="delete"${canDelete?"":" disabled"}>Etap sil</button><button class="dg-png-btn" data-stage-action="edit"${ready?"":" disabled"}>Yeni etap oluştur</button></div>`:"")+
    (editing?`<div class="dg-stage-form">`+(!revision?`<label class="lbl" for="dgStagePartCount">OTOMATİK BÖLÜM SAYISI</label><select id="dgStagePartCount" class="dg-png-select">${[2,3,4].map(n=>`<option value="${n}"${n===partCount?" selected":""}>${n} bölüm</option>`).join("")}</select>`+
    `<div class="dg-stage-actions"><button class="dg-png-btn primary" data-stage-action="suggest">Otomatik bölüm öner</button><button class="dg-png-btn" data-stage-action="pick">Başlangıç ve bitiş çizgilerini ayarla</button></div>`+
    `<p class="dg-meta">Başlangıçta 1.1, 1.2…; bitişte 2.1, 2.2… noktaları ekleyin. Parkın çevresi otomatik alınır.</p>`:`<button class="dg-png-btn" data-stage-action="pick-detail">Başlangıç / bitiş düzenlemesini aç</button>`)+
