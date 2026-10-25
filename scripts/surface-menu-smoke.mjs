@@ -6,14 +6,16 @@ const server=await serveFixture(),browser=await engine.launch({headless:true});
 try{for(const width of [360,390,430]){
  const context=await browser.newContext({viewport:{width,height:900},hasTouch:true,isMobile:true,serviceWorkers:'block'}),page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await isolateAccount(page);await page.goto(server.url+'/');await page.locator('#shell').waitFor({state:'visible'});await page.waitForFunction(()=>document.getElementById('dgStartupScreen').hidden);
- // Keep the browser-side setup promise reachable while CDP awaits lazy modules.
- await page.evaluate(()=>window.__surfaceMenuSetup=(async()=>{await dgEnsureLulc();await go('map');initMaps();map.setView([39.99,32.65],19,{animate:false});map.invalidateSize();
+ // Observe completion in the page instead of pinning a remote Promise handle
+ // across lazy script loading (Chromium can collect that CDP handle).
+ await page.evaluate(()=>{window.__surfaceMenuReady=false;window.__surfaceMenuError=null;window.__surfaceMenuSetup=(async()=>{await dgEnsureLulc();await go('map');initMaps();map.setView([39.99,32.65],19,{animate:false});map.invalidateSize();
   PARK_POLY=[[[39.989,32.649],[39.989,32.651],[39.991,32.651],[39.991,32.649],[39.989,32.649]]];PARK_HOLES=[];
   DG_SENS.epsg=32636;DG_SENS.parkGeometry=dgSurfacePark(PARK_POLY,[],32636);DG_SENS.geometry={};DG_SENS.busy=false;DG_SENS.saving=false;
   const feature={type:'building',osmId:'way/fixture-building',geometry:{type:'MultiPolygon',coordinates:[[[[32.6499,39.9899],[32.6501,39.9899],[32.6501,39.9901],[32.6499,39.9901],[32.6499,39.9899]]]]}};
   DG_SENS.record={features:[],objectFeatures:[feature],corrections:{},brushHistory:[],useObjects:true,period:'ytd',thresholds:{},osmCoverage:{status:'complete'}};
   dgSensRenderPaintTools();
- })());
+ })().then(()=>{window.__surfaceMenuReady=true;},error=>{window.__surfaceMenuError=String(error?.stack||error);});});
+ await page.waitForFunction(()=>window.__surfaceMenuReady||window.__surfaceMenuError);assert.equal(await page.evaluate(()=>window.__surfaceMenuError),null,'surface fixture setup must succeed');
  // Exercise the real loading controller while its raster dependency is deferred.
  await page.evaluate(()=>{window.__pendingAnalysis=DG_PARK_LANDCOVER_UI.create({isBusy:()=>false,setBusy(){},getOuter:()=>PARK_POLY,getHoles:()=>[],parkAreaM2:()=>100,getElement:id=>document.getElementById(id),getButton:()=>null,getReport:()=>null,getLandcover:()=>({analyze:()=>new Promise(resolve=>window.__finishPending=resolve)}),getReportRenderer:()=>null,getSensitivity:()=>null,hasSensitivityRecord:()=>true,toast(){},cf:String,escape:String}).run();});
  assert.equal(await page.locator('#baseLayerSelect').isVisible(),false,'the inline flex style cannot keep a second basemap selector visible during analysis');assert.equal(await page.locator('#dgPendingBaseSelect').isVisible(),true);assert.equal(await page.locator('#v-map .leaflet-container').count(),1,'loading uses the existing live map');await page.evaluate(async()=>{__finishPending({});await __pendingAnalysis;});assert.equal(await page.locator('#surfacePendingTools').isVisible(),false);
