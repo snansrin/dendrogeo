@@ -11675,6 +11675,18 @@
           "sha256": "4b8e7ae4aeb7f37074e977674935360950e290e1219ccbbd1650b7de7ae8e286"
         }
       ]
+    },
+    {
+      "date": "2026-10-25",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: WebKit stage menu test navigation. Scroll the Etaplar summary into the usable viewport before opening it in the synthetic fixture, matching normal page navigation and avoiding WebKit auto-scroll closing an offscreen menu. Keep actual pointer clicks, all layout/hit/save/delete checks and the runtime menu unchanged. Chromium and local WebKit fifteen-point scenarios pass.",
+      "files": [
+        {
+          "path": "scripts/park-stage-assisted-smoke.mjs",
+          "previous_sha256": "4b8e7ae4aeb7f37074e977674935360950e290e1219ccbbd1650b7de7ae8e286",
+          "sha256": "fae91e2e55fa25af66df9806365b731f0d03f3142696793ee189e6afd323c95d"
+        }
+      ]
     }
   ]
 }
