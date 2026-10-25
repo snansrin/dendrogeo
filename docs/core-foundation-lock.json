@@ -11872,6 +11872,18 @@
           "sha256": "7dc51fde09e79bfbf75e2067cdc2c65e4905eb6cd197acd4c1ef0629f3b0a759"
         }
       ]
+    },
+    {
+      "date": "2026-10-25",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: preserve the original direct source injection in the standalone about:blank OSM module fixture, which has no application CSP or HTTP base. Keep every assertion and all application code unchanged. Other application-page fixtures retain scoped CSP enforcement.",
+      "files": [
+        {
+          "path": "scripts/osm-map-recovery-smoke.mjs",
+          "previous_sha256": "48888de5cde6ad19eb4cd68d6e131b8a95fa5a0e812d88e872bd26cbde9db1eb",
+          "sha256": "18fd478ae715d9883066dcd2676d5af4d707eccf31f92e76079e5a4246dcb3f5"
+        }
+      ]
     }
   ]
 }
