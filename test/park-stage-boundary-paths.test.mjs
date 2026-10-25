@@ -1,5 +1,5 @@
 import test from'node:test';import assert from'node:assert/strict';import vm from'node:vm';import{readFileSync}from'node:fs';import polygon from'polygon-clipping';
-const ctx=vm.createContext({window:{}});for(const file of ['src/domain/parks/stage-geometry.js','src/domain/parks/stage-cut-geometry.js','src/domain/parks/stage-boundary-paths.js'])vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),ctx);
+const ctx=vm.createContext({window:{}});for(const file of ['src/domain/parks/stage-geometry.js','src/domain/parks/stage-cut-geometry.js','src/domain/parks/stage-curved-boundaries.js','src/domain/parks/stage-boundary-paths.js'])vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),ctx);
 const api=ctx.window.DG_PARK_STAGE_BOUNDARY_PATHS,ports={polygon,clip:ctx.window.DG_PARK_STAGE_GEOMETRY.clip};
 const rect=(a,b,h,w)=>[[a,b],[a,b+w],[a+h,b+w],[a+h,b],[a,b]],parent={outer:[rect(39,32,.01,.02)],inner:[rect(39.004,32.008,.001,.002)]};
 const cuts=[[[39.002,32],[39.003,32.005],[39.002,32.01],[39.0025,32.02]],[[39.008,32],[39.007,32.01],[39.008,32.02]]];

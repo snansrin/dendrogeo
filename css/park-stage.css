@@ -13,14 +13,25 @@
 #dgStageToolsMenu .dg-stage-workspace,#dgStageToolsMenu .dg-stage-form,#dgStageToolsMenu .dg-stage-actions{width:100%;max-width:100%;min-width:0;box-sizing:border-box;overflow-wrap:anywhere}
 #dgStageToolsMenu .dg-stage-workspace .dg-png-btn{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
 @media(max-width:430px){.dg-stage-actions .dg-png-btn{flex-basis:100%}}
-.dg-stage-cut-panel{position:static;width:100%;max-width:100%;min-width:0;overflow-wrap:anywhere;box-sizing:border-box;margin:0;padding:3px;background:var(--surface);color:var(--ink);border:0;font-family:var(--f-ui);box-shadow:none}
+.dg-stage-side-active #map{min-height:560px}
+.dg-stage-cut-panel{position:absolute;z-index:1000;display:flex;flex-direction:column;min-width:0;overflow:hidden;overflow-wrap:anywhere;box-sizing:border-box;margin:0;padding:10px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:12px;font-family:var(--f-ui);box-shadow:0 4px 18px #0003}
+.dg-stage-cut-head{display:flex;align-items:center;gap:8px;flex-shrink:0;padding-bottom:6px}
+.dg-stage-cut-head strong{flex:1;min-width:0}
+.dg-stage-cut-panel .dg-stage-cut-head .dg-png-btn{width:auto;margin:0;flex-shrink:0}
+.dg-stage-cut-panel[data-collapsed="true"]{padding:4px}
+.dg-stage-cut-panel[data-collapsed="true"] .dg-stage-cut-head{padding:0}
+.dg-stage-cut-panel[data-collapsed="true"] .dg-stage-cut-head strong{display:none}
+.dg-stage-cut-panel[data-collapsed="true"] .dg-stage-cut-head .dg-png-btn{width:100%;padding:4px}
+.dg-stage-cut-body{overflow:auto;overscroll-behavior:contain;min-height:0;scrollbar-gutter:stable;padding-right:3px}
+.dg-stage-cut-footer{flex-shrink:0;padding-top:6px;border-top:1px solid var(--line);background:var(--surface)}
 #dgStageToolsMenu .dg-stage-workspace[hidden]{display:none}
-.dg-stage-cut-panel .dg-png-btn,.dg-stage-cut-panel input{width:100%;min-width:0;min-height:44px;box-sizing:border-box;white-space:normal;margin:4px 0}
+.dg-stage-cut-panel .dg-png-btn,.dg-stage-cut-panel input,.dg-stage-cut-panel select{width:100%;min-width:0;min-height:44px;box-sizing:border-box;white-space:normal;margin:4px 0}
 .dg-stage-cut-panel .dg-meta{white-space:normal;overflow-wrap:anywhere;margin:6px 0}
 .dg-stage-cut-panel .lbl{display:block;margin-top:8px}
 .dg-stage-cut-panel [aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
-.dg-stage-cut-body[hidden]{display:none}
+.dg-stage-cut-body[hidden],.dg-stage-cut-footer[hidden]{display:none}
 .dg-stage-reference{display:grid;place-items:center;background:transparent;border:0;font-family:var(--f-ui)}
 .dg-stage-reference span{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--surface);color:var(--ink);border:3px solid #e9a23b;box-shadow:0 2px 7px #0008;font-weight:700}
+.dg-stage-reference.is-selected span{background:var(--tint);border-color:var(--accent);outline:2px solid var(--ink)}
 .dg-stage-point-actions>summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-family:var(--f-ui)}
 .dg-stage-cut-segment{cursor:copy}

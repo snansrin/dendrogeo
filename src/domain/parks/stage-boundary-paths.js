@@ -9,9 +9,10 @@
  function between(parent,cuts,{polygon,clip}){
   if(!Array.isArray(cuts)||cuts.length!==2||!cuts.every(line=>Array.isArray(line)&&line.length>=2&&line.length<=40&&line.every(p=>p?.length===2&&p.every(Number.isFinite)&&Math.abs(p[0])<=90&&Math.abs(p[1])<=180)))throw Error("Başlangıç ve bitiş için 2–40 nokta yerleştirin.");
   const f=frame(parent),paths=cuts.map(line=>line.map(f.xy)),a=paths[0][0],b=paths[0].at(-1),length=Math.hypot(b[0]-a[0],b[1]-a[1]);
-  if(length<2)throw Error("Sınırın ilk ve son noktası en az 2 metre ayrı olmalı.");
+  if(length<.01)throw Error("Sınırın ilk ve son noktası üst üste gelmemeli.");
   const v=[(b[0]-a[0])/length,(b[1]-a[1])/length],n=[-v[1],v[0]],uv=p=>[p[0]*v[0]+p[1]*v[1],p[0]*n[0]+p[1]*n[1]],ll=p=>f.ll([p[0]*v[0]+p[1]*n[0],p[0]*v[1]+p[1]*n[1]]);
-  const lines=paths.map(line=>{let points=line.map(uv);if(points.at(-1)[0]<points[0][0])points.reverse();for(let i=1;i<points.length;i++)if(points[i][0]-points[i-1][0]<.25||Math.hypot(points[i][0]-points[i-1][0],points[i][1]-points[i-1][1])<2)throw Error("Noktaları sınır boyunca sırayla ve en az 2 metre arayla yerleştirin; hat geriye katlanmamalı.");return points;});
+  let general=false;const lines=paths.map(line=>{let points=line.map(uv);if(points.at(-1)[0]<points[0][0])points.reverse();for(let i=1;i<points.length;i++){if(Math.hypot(points[i][0]-points[i-1][0],points[i][1]-points[i-1][1])<.01)throw Error("Aynı yere iki nokta koymayın; üst üste gelen noktayı geri alın.");if(points[i][0]-points[i-1][0]<.25)general=true;}return points;});
+  if(general){if(!root.DG_PARK_STAGE_CURVED_BOUNDARIES)throw Error("Eğrisel etap aracı yüklenemedi.");return root.DG_PARK_STAGE_CURVED_BOUNDARIES.between(parent,cuts,{polygon,clip});}
   const all=[...parent.outer.flat().map(p=>uv(f.xy(p))),...lines.flat()],low=Math.min(...all.map(p=>p[0]))-10,high=Math.max(...all.map(p=>p[0]))+10;
   const extended=lines.map(line=>{const a=line[0],b=line[1],c=line.at(-2),d=line.at(-1);return [[low,a[1]+(low-a[0])*(b[1]-a[1])/(b[0]-a[0])],...line,[high,d[1]+(high-d[0])*(d[1]-c[1])/(d[0]-c[0])]];});
   const ring=[...extended[0],...extended[1].slice().reverse()].map(ll);ring.push([...ring[0]]);

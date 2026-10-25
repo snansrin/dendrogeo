@@ -6,6 +6,9 @@
  let polygonPromise=null;
  root.DG_PARK_STAGES=root.DG_PARK_STAGE_WORKSPACE_UI.create({
   document,windowRef:root,escape:esc,store,area:geometry=>root.DG_PARK_AREA.polyArea(geometry),
+  actor:()=>({id:typeof USER!=="undefined"?USER?.id:null,admin:typeof dgIsAdmin==="function"&&dgIsAdmin()}),
+  confirmDelete:row=>root.confirm.call(root,'"'+row.geom_json.stage_scope.label+'" etabı silinsin mi? Bağlı proje, ölçüm veya rapor varsa silme engellenir.'),
+  forgetStage:key=>DG_PARK_SESSION.delete(key),
   isBusy:()=>{const state=root.DG_LC_SENS?.state;return !!(root._dgLandCoverBusy||state?.busy||state?.saving||state?.exporting||state?.brush||state?.draw||state?.objectPick||state?.objectPreview||document.querySelector?.('#dgUxMapTools [data-tool][aria-pressed="true"]')||typeof dgMeasureSaving!=="undefined"&&dgMeasureSaving);},
   validate:async candidate=>{if(candidate.stageRow)verified.set(candidate,await store.resolve(candidate));},
   approveTransition:async()=>{if(root.DG_LC_SENS?.state?.record&&typeof dgSensSave==="function"&&!await dgSensSave())throw Error("Mevcut taslak kaydedilemedi. Etap değiştirilmedi.");return true;},

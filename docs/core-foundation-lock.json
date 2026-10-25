@@ -1118,6 +1118,14 @@
     "stage_boundary_editor": [
       "src/domain/parks/stage-boundary-paths.js",
       "test/park-stage-boundary-paths.test.mjs"
+    ],
+    "stage_left_panel_and_delete": [
+      "src/domain/parks/stage-curved-boundaries.js",
+      "src/ui/park-stage-side-layout.js",
+      "supabase/migrations/20261024230150_park_stage_safe_delete.sql",
+      "test/park-stage-curved-boundaries.test.mjs",
+      "test/park-stage-delete-postgres.test.mjs",
+      "test/park-stage-side-layout.test.mjs"
     ]
   },
   "sha256": {
@@ -2174,7 +2182,13 @@
     "test/park-stage-assisted-ui.test.mjs": "6db9eaf341240548c5d37af06493686813c98403208f53a960145312ca8f110a",
     "test/fixtures/park-stages/dikmen-boundary.json": "6bf55cde9f85d848d68c0896b524f15ded9d621e692c52a9eece238cc1238875",
     "src/domain/parks/stage-boundary-paths.js": "ea1ad82d6c620b9fac2e979ab8f8561d57ff5c0c1303fed3530e4720797847e5",
-    "test/park-stage-boundary-paths.test.mjs": "f78cbdf85a908ec0052a5ed4f5e318bf2a5cffb5b25e65ab12fadefb31074da4"
+    "test/park-stage-boundary-paths.test.mjs": "f78cbdf85a908ec0052a5ed4f5e318bf2a5cffb5b25e65ab12fadefb31074da4",
+    "src/domain/parks/stage-curved-boundaries.js": "1c614d1e0c746ada49956395adae3bc779dbb75e13828460570ac22e7f26273e",
+    "src/ui/park-stage-side-layout.js": "328ec558fac8aaddc7c50fdcca3f5fd80813bb7bdd72dd375d0594579abc0b3e",
+    "supabase/migrations/20261024230150_park_stage_safe_delete.sql": "7191a61974fc6ae12449087e5d24b0730983bd6d93e0546166be8e11ec2a740c",
+    "test/park-stage-curved-boundaries.test.mjs": "5bd6a51bab5d014c0255ef0e1e1e28f7963f85c117f6d9eb7d5ff0624e64f7b4",
+    "test/park-stage-delete-postgres.test.mjs": "b6387ba77ebd163f6ed175db8eea43d81cca7cd8851bea3ef1766ce5d81f2fd1",
+    "test/park-stage-side-layout.test.mjs": "f13dcca76ff24cf3d29983fcebb1cdec60d5a4bbc8f19b8a700d031e8d32105d"
   },
   "authorized_modularizations": [
     {
@@ -11531,6 +11545,111 @@
           "previous_sha256": "1e334cf9d683a5a766fc4a76bd7ada279172b6d6783d9b60977f3deabbacd669",
           "sha256": "a7b40d81b91a87aa6b3b05d9f92027ff64f325fd401913adddb472a827778c6c"
         }
+      ]
+    },
+    {
+      "date": "2026-10-25",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: left-stage-panel-and-safe-delete-20261025. User explicitly requests collapsible editing beside the actual left map rail, no overlap or removed save actions, numbered multipoint start/end editing and stage deletion. Add isolated side layout observing the existing rail, fixed save/cancel footer, point selection/deletion and preserved drag/insertion. Retain successful existing stage geometry path and add separate simple curved-cap fallback for projection backtracking, rejecting actual crossings, preserving holes and intersecting unchanged parent. Add authenticated stage-owner-only deletion RPC and private guard against every FK dependency (including RLS-hidden CASCADE/SET NULL) and historical retraction references. No production records deleted. Exact reviewed migration filename added to legacy migration allowlists; numeric/scientific assertions unchanged. Validate isolated PostgreSQL roles/hidden dependencies, three phone widths with actual rail/hit targets, save and guarded deletion, desktop fifteen-point curved save, existing analysis/PNG/menu regressions. No allometry, species/density, OSM park discovery, raster classification/area engines, existing tables or accepted record changes. Direct named side-layout tests also cover rail adjacency, collapse and observer/event cleanup without a coverage exception.",
+      "files": [
+        {
+          "path": "css/park-stage.css",
+          "previous_sha256": "a0c6d258b9290eae3ec2b338ecf5c11696c09628373f6e823b4bffe62f9aa39e",
+          "sha256": "79dcf1557abafaf40180f25ae5c177d18bc554fe7d974c591cd5353af57b4087"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "38b76cdefbd850af3812557e007b404db789b3ed963f52914206cf2d542972b3",
+          "sha256": "9e035556b48b7b358ca9f7b9c5a9c8f02771c6bdae7c8c718f57cf14d405e344"
+        },
+        {
+          "path": "partials/boot.html",
+          "previous_sha256": "8b88e34ab90ca14beb6ee27baf528816b86b29df5ebd01b83bc39e962b65ba93",
+          "sha256": "2f9acb0537bef890774b0f344e4477b67807b2c2dd233762d24fb5e42304d913"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "40761e24b02d6d9ef50b0bbced38dd9161cb9af61bca333c0638455f9a626510",
+          "sha256": "5f4f09f579a3b69e67ec3f9654a2def8d5a9320a9d53d940ca472d5628366ab1"
+        },
+        {
+          "path": "scripts/lib/park-stage-browser-fixture.mjs",
+          "previous_sha256": "acbb2d48fe27afc1a453f8035ca6921738a38c74089b7367419429f9dbfdda43",
+          "sha256": "e061800fbb7544e82d0777911ae19d03a08728a2eb91eb487b3c6384f14ba85a"
+        },
+        {
+          "path": "scripts/park-stage-assisted-smoke.mjs",
+          "previous_sha256": "9756de405a2e3e3fc929837ab00583f1174273b8c1f64087cea0dc3272231e14",
+          "sha256": "714d46657838b1eeebccd2c0d39bb03255cdcfa6bc18648ee6d0de0b3ac4bc70"
+        },
+        {
+          "path": "src/adapters/parks/stage-store.js",
+          "previous_sha256": "fdaa3fdb2888240854d9624ef21713d6620878ff1a540ccc66a9bd9c869990cf",
+          "sha256": "7abff3d11ae7206b00df5e0fbef59742eb54132fcc7df22ae664a5629db7c4b0"
+        },
+        {
+          "path": "src/bootstrap/park-stage-workspace.js",
+          "previous_sha256": "ff0824c06cf58489d9bd516d9ad47991753d9a26c787ffce920e7431dc3dc079",
+          "sha256": "bc721cbac333f2519ae56d8b1a4830c11c2c599e8bf1c361f88cfe28b398edb6"
+        },
+        {
+          "path": "src/domain/parks/stage-boundary-paths.js",
+          "previous_sha256": "392e821425df062856e6a45fcabfb44bca142f2883d83eea0b8682ed9be14e82",
+          "sha256": "a9871a180e4573235a33fa09c62b6c03d317bb1bff82808b89565b95c2d0577a"
+        },
+        {
+          "path": "src/ui/park-stage-assisted-selection.js",
+          "previous_sha256": "1754b5f0dfef9f6291dbb317b9448bc508248893d08e9e9af70f95348530db85",
+          "sha256": "97aee8ae43050c5d733d91720946f39f3f63db23a541ae48cf9c2e5a35dcf183"
+        },
+        {
+          "path": "src/ui/park-stage-menu.js",
+          "previous_sha256": "022c174094c9e7c79700988f454c31946fae9b243bf46fb886483501831214a9",
+          "sha256": "4110b3905c63f4de07dc3d399e809ac30282bdfacf1b9fe8da1cfbba1576ae62"
+        },
+        {
+          "path": "src/ui/park-stage-view.js",
+          "previous_sha256": "7f9c69c81e51ad1edec68134c0c740b749f7011669ecbdfd6493660af0fc8b67",
+          "sha256": "3d2dca88deb73d7bcf5ed8d0ed908ae5d9d50cbefb274ec756b9e2466cdc886f"
+        },
+        {
+          "path": "src/ui/park-stage-workspace.js",
+          "previous_sha256": "f67a0b2a71f39b88011826be7ee98979ffb826066750b33668311784d8f99a63",
+          "sha256": "8df920cf962f127f74bc49c82afe4a53a65352de0d3fdf8f99c8ba1b0aa576b1"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "6b1af565c59086d9a45fe07c59ad1e5c0ff1467f69de32b46b0760131cb6d2bc",
+          "sha256": "e1b1cd86029c772dfbdc53e4d8ad410214230a8a6353511777fd6c9befb2c19d"
+        },
+        {
+          "path": "test/dbh-qa.test.mjs",
+          "previous_sha256": "e67d030f5df6d251ba58fa11902503b04c18b2d53bc289753808407b331468a1",
+          "sha256": "057dc36774d0f1488afb93dc9a1908cecbeda39ddf1302006d41826c3866e87f"
+        },
+        {
+          "path": "test/form-qa.test.mjs",
+          "previous_sha256": "91112edde4f00b9ecb56d4815eab66f0e7cf80190719e130b01cdf76bfd3dd7b",
+          "sha256": "c481a53210452039e05dd8419fa2f3046ee2c6a574453b666842e224be877053"
+        },
+        {
+          "path": "test/park-stage-assisted-ui.test.mjs",
+          "previous_sha256": "fa9d12c7214d7e50aaf1a3e1a39f9b66a04ae20dfe6d2e5b2e336f4a05c39d6b",
+          "sha256": "cc8e7d1e1811175fde4508077203da607a6e255501a0e965d299d26960ad086c"
+        },
+        {
+          "path": "test/park-stage-boundary-paths.test.mjs",
+          "previous_sha256": "a7b40d81b91a87aa6b3b05d9f92027ff64f325fd401913adddb472a827778c6c",
+          "sha256": "a9cd0f7d2ee33fc690c7ddb2739a743dac7ef9f1efce4d8ee1f250d5ada7d112"
+        }
+      ],
+      "added_protected_files": [
+        "src/domain/parks/stage-curved-boundaries.js",
+        "src/ui/park-stage-side-layout.js",
+        "supabase/migrations/20261024230150_park_stage_safe_delete.sql",
+        "test/park-stage-curved-boundaries.test.mjs",
+        "test/park-stage-delete-postgres.test.mjs",
+        "test/park-stage-side-layout.test.mjs"
       ]
     }
   ]

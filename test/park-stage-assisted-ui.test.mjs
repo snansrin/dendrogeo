@@ -41,6 +41,7 @@ test('Detailed cap drawing retains the other line, supports insertion and undo, 
  old.point=[0,0];old.callbacks.dragend();await flush();assert.equal(preview.cuts[0][0][0],39,'a removed reference cannot change the current cap');
  tool.selectBoundary(0);tool.undo();await flush();assert.equal(preview.cuts[0].length,3);assert.equal(preview.cuts[1].length,3);
  tool.start(preview.cuts,true);click([39.01,32.3]);await flush();assert.equal(preview.cuts[0].length,4,'reopening a saved cap does not lock further point placement');assert.equal(preview.cuts[1].length,3);
+ const end=JSON.stringify(preview.cuts[1]),removed=JSON.stringify(preview.cuts[0][1]);tool.selectPoint(1);tool.deletePoint();await flush();assert.equal(preview.cuts[0].length,3);assert.equal(JSON.stringify(preview.cuts[1]),end,'deleting a chosen start control never changes the end');assert.ok(!preview.cuts[0].some(p=>JSON.stringify(p)===removed));
  tool.clear();segment.callbacks.click({latlng:{lat:0,lng:0}});assert.equal(layers.size,0);
 });
 test('Upper Tools menu retains its real host, closes sibling menus and puts selection hints outside the map',()=>{
