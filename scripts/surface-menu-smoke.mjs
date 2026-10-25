@@ -3,7 +3,7 @@ import {serveFixture,isolateAccount} from './lib/browser-acceptance-fixture.mjs'
 import {loadChromium} from './lib/playwright-runtime.mjs';
 const chromium=await loadChromium(),engine=process.env.DG_UI_BROWSER==='webkit'?(await import('playwright-core')).webkit:chromium;
 const server=await serveFixture(),browser=await engine.launch({headless:true});
-try{for(const width of [360,390,430]){
+try{for(const width of [360,390,430,1280]){
  const context=await browser.newContext({viewport:{width,height:900},hasTouch:true,isMobile:true,serviceWorkers:'block'}),page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await isolateAccount(page);await page.goto(server.url+'/');await page.locator('#shell').waitFor({state:'visible'});await page.waitForFunction(()=>document.getElementById('dgStartupScreen').hidden);
  // Observe completion in the page instead of pinning a remote Promise handle
@@ -16,9 +16,14 @@ try{for(const width of [360,390,430]){
   dgSensRenderPaintTools();
  })().then(()=>{window.__surfaceMenuReady=true;},error=>{window.__surfaceMenuError=String(error?.stack||error);});});
  await page.waitForFunction(()=>window.__surfaceMenuReady||window.__surfaceMenuError);assert.equal(await page.evaluate(()=>window.__surfaceMenuError),null,'surface fixture setup must succeed');
+ for(const theme of ['light','dark']){await page.evaluate(t=>document.documentElement.dataset.theme=t,theme);assert.equal(await page.evaluate(()=>{const button=document.getElementById('parkModeBtn').getBoundingClientRect(),base=document.querySelector('.live-map-base').getBoundingClientRect(),bar=document.querySelector('.live-map-tools').getBoundingClientRect();return base.left>=button.right+8&&Math.abs(base.top+base.height/2-button.top-button.height/2)<2&&base.right<=bar.right+1&&document.documentElement.scrollWidth<=innerWidth+1;}),true,'basemap stays beside park mode on phone and desktop');}
+ if(process.env.DG_HEADER_SCREENSHOT_DIR)await page.locator('.live-map-tools').screenshot({path:process.env.DG_HEADER_SCREENSHOT_DIR+'/'+(process.env.DG_UI_BROWSER||'chromium')+'-harita-secimi-'+width+'.png'});
  // Exercise the real loading controller while its raster dependency is deferred.
  await page.evaluate(()=>{window.__pendingAnalysis=DG_PARK_LANDCOVER_UI.create({isBusy:()=>false,setBusy(){},getOuter:()=>PARK_POLY,getHoles:()=>[],parkAreaM2:()=>100,getElement:id=>document.getElementById(id),getButton:()=>null,getReport:()=>null,getLandcover:()=>({analyze:()=>new Promise(resolve=>window.__finishPending=resolve)}),getReportRenderer:()=>null,getSensitivity:()=>null,hasSensitivityRecord:()=>true,toast(){},cf:String,escape:String}).run();});
  assert.equal(await page.locator('#baseLayerSelect').isVisible(),false,'the inline flex style cannot keep a second basemap selector visible during analysis');assert.equal(await page.locator('#dgPendingBaseSelect').isVisible(),true);assert.equal(await page.locator('#v-map .leaflet-container').count(),1,'loading uses the existing live map');await page.evaluate(async()=>{__finishPending({});await __pendingAnalysis;});assert.equal(await page.locator('#surfacePendingTools').isVisible(),false);
+ // The desktop case covers this header/loading layout; the existing touch
+ // drawing workflow below continues to run at all three phone widths.
+ if(width>700){assert.deepEqual(errors,[]);console.log(JSON.stringify({browser:process.env.DG_UI_BROWSER||'chromium',width,adjacentBasemap:true,themes:['light','dark'],singlePendingMap:true,errors}));await context.close();continue;}
  const menu=page.locator('#dgSensBoundaryDetails');await menu.locator('summary').tap();
  assert.equal(await menu.evaluate(el=>el.parentElement.id),'surfaceMenuBar','use the real moved menu, outside its original event host');
  await menu.locator('[data-dg-click="objectPick"]').tap();

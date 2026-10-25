@@ -443,6 +443,12 @@
 .dg-sens-map-tools{display:flex;align-items:center;gap:8px;margin:10px 0;flex-wrap:wrap}
 .dg-sens-map-tools select{flex:1;min-width:110px;max-width:220px;min-height:44px}
 
+.live-map-tools{display:grid;grid-template-columns:minmax(0,max-content) clamp(125px,42vw,190px);align-items:center;gap:8px 10px;margin-bottom:10px}
+.live-map-tools #parkModeBtn{min-width:0;max-width:100%;white-space:normal}
+.live-map-base{display:flex;align-items:center;gap:6px;min-width:0}
+.live-map-base label{flex-shrink:0}
+.live-map-base #baseLayerSelect{flex:1;min-width:0;width:100%;max-width:100%;min-height:44px;background:var(--surface);color:var(--ink)}
+.live-map-tools #parkModeHint{grid-column:1/-1}
 #v-map.surface-review-active .live-map-tools{display:none!important}
 #v-map.surface-review-active #parkSurfaceAction,#v-map.surface-review-active #parkRasterExport{display:none}
 /* Native ranges must not inherit text-input padding or full-row width. */
