@@ -3,7 +3,7 @@
 (function(root){
  const copy=value=>JSON.parse(JSON.stringify(value));
  function validateRing(ring){
-  if(!Array.isArray(ring)||ring.length<4||ring.length>301)return false;
+  if(!Array.isArray(ring)||ring.length<4||ring.length>1001)return false;
   if(!ring.every(p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite)&&Math.abs(p[0])<=90&&Math.abs(p[1])<=180))return false;
   const key=p=>p.join(","),points=ring.slice(0,-1);
   if(key(ring[0])!==key(ring.at(-1))||new Set(points.map(key)).size!==points.length)return false;

@@ -14,6 +14,9 @@ try{for(const width of [360,390,430]){
   DG_SENS.record={features:[],objectFeatures:[feature],corrections:{},brushHistory:[],useObjects:true,period:'ytd',thresholds:{},osmCoverage:{status:'complete'}};
   dgSensRenderPaintTools();
  })());
+ // Exercise the real loading controller while its raster dependency is deferred.
+ await page.evaluate(()=>{window.__pendingAnalysis=DG_PARK_LANDCOVER_UI.create({isBusy:()=>false,setBusy(){},getOuter:()=>PARK_POLY,getHoles:()=>[],parkAreaM2:()=>100,getElement:id=>document.getElementById(id),getButton:()=>null,getReport:()=>null,getLandcover:()=>({analyze:()=>new Promise(resolve=>window.__finishPending=resolve)}),getReportRenderer:()=>null,getSensitivity:()=>null,hasSensitivityRecord:()=>true,toast(){},cf:String,escape:String}).run();});
+ assert.equal(await page.locator('#baseLayerSelect').isVisible(),false,'the inline flex style cannot keep a second basemap selector visible during analysis');assert.equal(await page.locator('#dgPendingBaseSelect').isVisible(),true);assert.equal(await page.locator('#v-map .leaflet-container').count(),1,'loading uses the existing live map');await page.evaluate(async()=>{__finishPending({});await __pendingAnalysis;});assert.equal(await page.locator('#surfacePendingTools').isVisible(),false);
  const menu=page.locator('#dgSensBoundaryDetails');await menu.locator('summary').tap();
  assert.equal(await menu.evaluate(el=>el.parentElement.id),'surfaceMenuBar','use the real moved menu, outside its original event host');
  await menu.locator('[data-dg-click="objectPick"]').tap();

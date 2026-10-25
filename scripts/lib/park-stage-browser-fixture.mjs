@@ -12,6 +12,7 @@ export async function installStageFixture(page,geometry=null){
    if(name==='dg_park_stage_delete_ready')return{data:1,error:null};
    if(name==='dg_delete_empty_park_stage'){if(__stageFixture.blocked.includes(args.p_stage))return{data:null,error:{message:'STAGE_HAS_RECORDS'}};const index=__stageFixture.rows.findIndex(row=>row.id===args.p_stage&&row.osm_key===args.p_key);if(index<0)return{data:null,error:{message:'STAGE_DELETE_TARGET_REQUIRED'}};__stageFixture.rows.splice(index,1);__stageFixture.deletes++;return{data:args.p_stage,error:null};}
    if(name==='dg_create_park_stage'){
+    if(![...(args.p_geometry.outer||[]),...(args.p_geometry.inner||[])].every(r=>DG_PARK_STAGE_GEOMETRY.validateRing(r)))return{data:null,error:{message:'STAGE_INVALID_RING'}};
     ++__stageFixture.writes;
     const geom={...args.p_geometry,stage_scope:{schema:'dendrogeo/park-stage/1',parentId:9001,parentKey:parent.osm_key,parentName:parent.name,label:args.p_name,definition:'user-defined'}};
     const row={id:9002+__stageFixture.rows.length,osm_key:'stage/9001/'+(__stageFixture.rows.length+1).toString(16).padStart(32,'0'),name:parent.name+' · '+args.p_name+' (kullanıcı tanımlı etap)',geom_json:geom,area_m2:polyArea(args.p_geometry),source:'manual',created_by:USER?.id};
