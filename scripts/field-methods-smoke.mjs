@@ -39,7 +39,7 @@ try {
   for(const key of ['x','y','width','height'])assert.ok(Math.abs(before[key]-after[key])<1,`${width}/${theme}/${lang}: modal moved`);
   const overflow=await dialog.evaluate(element=>[element.scrollWidth,element.clientWidth]);
   assert.ok(overflow[0]<=overflow[1]+1);
-  await page.addScriptTag({content:axe.source});
+  await page.evaluate(axe.source);
   const violations=await page.evaluate(async()=>(await axe.run(document.querySelector('.dg-academic-dialog'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})).violations.map(({id,nodes})=>({id,targets:nodes.map(n=>n.target)})));
   assert.deepEqual(violations,[],`${width}/${theme}/${lang}: accessibility`);
   if(width===390)await dialog.screenshot({path:join(out,`form-${theme}-${lang}.png`)});

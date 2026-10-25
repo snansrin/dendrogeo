@@ -1,0 +1,168 @@
+{
+  "source": "Catalog-only authorization snapshot before the 25 October 2026 scope fix; no user rows",
+  "functions": [
+    {
+      "name": "dg_invite_respond",
+      "config": [
+        "search_path=\"\""
+      ],
+      "source": "\r\ndeclare v_uid uuid; v_mail text; v_inv record;\r\nbegin\r\n  v_uid := auth.uid();\r\n  if v_uid is null then\r\n    raise exception 'INVITE_AUTH: giriş gerekli' using errcode = '42501';\r\n  end if;\r\n  v_mail := private.dg_current_verified_email();\r\n  select * into v_inv from public.park_invites i where i.id = p_invite for update;\r\n  if not found then\r\n    raise exception 'INVITE_NOT_FOUND: davet bulunamadı' using errcode = 'P0002';\r\n  end if;\r\n  if v_mail is null or lower(v_inv.email) <> v_mail then\r\n    raise exception 'INVITE_NOT_YOURS: davet bu hesaba ait değil' using errcode = '42501';\r\n  end if;\r\n  if v_inv.status <> 'Beklemede' then\r\n    raise exception 'INVITE_CLOSED: davet zaten kapanmış (%)', v_inv.status using errcode = '23514';\r\n  end if;\r\n  update public.park_invites\r\n     set status = case when p_accept then 'Kabul' else 'Red' end,\r\n         responded_at = now()\r\n   where id = p_invite;\r\n  if p_accept then\r\n    insert into public.park_collaborators (park_id, user_id)\r\n    values (v_inv.park_id, v_uid)\r\n    on conflict (park_id, user_id) do nothing;\r\n  end if;\r\nend ",
+      "definer": true,
+      "anon_execute": false,
+      "member_execute": true
+    },
+    {
+      "name": "dg_invite_revoke",
+      "config": [
+        "search_path=\"\""
+      ],
+      "source": "\r\ndeclare v_uid uuid; v_mail text;\r\nbegin\r\n  v_uid := auth.uid();\r\n  if v_uid is null then\r\n    raise exception 'INVITE_AUTH: giriş gerekli' using errcode = '42501';\r\n  end if;\r\n  if not (public.is_admin() or exists (\r\n        select 1 from public.projects pr\r\n        where pr.park_id = p_park and pr.owner = v_uid)) then\r\n    raise exception 'INVITE_NOT_YOUR_PARK: yalnız park sahibi veya yönetici' using errcode = '42501';\r\n  end if;\r\n  if p_kind = 'invite' then\r\n    update public.park_invites set status = 'İptal', responded_at = now()\r\n     where id = p_target::uuid and park_id = p_park and status = 'Beklemede';\r\n  elsif p_kind = 'collab' then\r\n    delete from public.park_collaborators\r\n     where park_id = p_park and user_id = p_target::uuid;\r\n  else\r\n    raise exception 'INVITE_BAD_KIND: invite|collab' using errcode = '23514';\r\n  end if;\r\nend ",
+      "definer": true,
+      "anon_execute": false,
+      "member_execute": true
+    },
+    {
+      "name": "dg_invite_send",
+      "config": [
+        "search_path=\"\""
+      ],
+      "source": "\r\ndeclare v_uid uuid; v_mail text; v_id uuid;\r\nbegin\r\n  v_uid := auth.uid();\r\n  if v_uid is null then\r\n    raise exception 'INVITE_AUTH: giriş gerekli' using errcode = '42501';\r\n  end if;\r\n  v_mail := lower(trim(coalesce(p_email, '')));\r\n  if v_mail !~ '^[^@[:space:]]+@[^@[:space:]]+\\.[^@[:space:]]+$' then\r\n    raise exception 'INVITE_BAD_EMAIL: geçerli e-posta girin' using errcode = '23514';\r\n  end if;\r\n  -- yetki: parkın projesinin sahibi VEYA yönetici\r\n  if not (public.is_admin() or exists (\r\n        select 1 from public.projects pr\r\n        where pr.park_id = p_park and pr.owner = v_uid)) then\r\n    raise exception 'INVITE_NOT_YOUR_PARK: daveti yalnız park sahibi veya yönetici açabilir'\r\n      using errcode = '42501';\r\n  end if;\r\n  -- kendine davet anlamsız\r\n  if exists (select 1 from public.profiles p where p.id = v_uid and lower(p.email) = v_mail) then\r\n    raise exception 'INVITE_SELF: kendinizi davet edemezsiniz' using errcode = '23514';\r\n  end if;\r\n  -- zaten ortaksa yeni davet yok\r\n  if exists (\r\n      select 1 from public.profiles p\r\n      join public.park_collaborators c on c.user_id = p.id\r\n      where c.park_id = p_park and lower(p.email) = v_mail) then\r\n    raise exception 'INVITE_ALREADY_COLLAB: bu kullanıcı zaten park ortağı' using errcode = '23514';\r\n  end if;\r\n  -- açık (Beklemede) mükerrer davet olmasın\r\n  update public.park_invites set status = 'İptal', responded_at = now()\r\n   where park_id = p_park and lower(email) = v_mail and status = 'Beklemede';\r\n  insert into public.park_invites (park_id, email, note, invited_by)\r\n  values (p_park, v_mail, nullif(trim(coalesce(p_note, '')), ''), v_uid)\r\n  returning id into v_id;\r\n  return v_id;\r\nend ",
+      "definer": true,
+      "anon_execute": false,
+      "member_execute": true
+    },
+    {
+      "name": "dg_is_park_member",
+      "config": [
+        "search_path=\"\""
+      ],
+      "source": "\r\n  select public.is_admin()\r\n      or exists (select 1 from public.projects pr where pr.park_id = pp and pr.owner = auth.uid())\r\n      or exists (select 1 from public.park_collaborators c where c.park_id = pp and c.user_id = auth.uid());\r\n",
+      "definer": true,
+      "anon_execute": false,
+      "member_execute": true
+    }
+  ],
+  "policies": [
+    {
+      "cmd": "DELETE",
+      "name": "meas_delete",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "measurements",
+      "using": "((owner = ( SELECT auth.uid() AS uid)) OR ( SELECT private.is_admin() AS is_admin))"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "meas_insert",
+      "check": "((owner = ( SELECT auth.uid() AS uid)) AND ( SELECT private.is_active() AS is_active))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "measurements",
+      "using": null
+    },
+    {
+      "cmd": "SELECT",
+      "name": "meas_select",
+      "check": null,
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "table": "measurements",
+      "using": "((status = 'Onaylı'::text) OR ((( SELECT auth.role() AS role) = 'authenticated'::text) AND ((owner = ( SELECT auth.uid() AS uid)) OR ( SELECT private.is_admin() AS is_admin) OR ((park_id IS NOT NULL) AND ((EXISTS ( SELECT 1\n   FROM projects pr\n  WHERE ((pr.id = measurements.project_id) AND (pr.park_id = measurements.park_id) AND (pr.owner = ( SELECT auth.uid() AS uid))))) OR (EXISTS ( SELECT 1\n   FROM park_collaborators c\n  WHERE ((c.park_id = measurements.park_id) AND (c.user_id = ( SELECT auth.uid() AS uid))))))))))"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "meas_update",
+      "check": "(((owner = ( SELECT auth.uid() AS uid)) AND ( SELECT private.is_active() AS is_active)) OR ( SELECT private.is_admin() AS is_admin))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "measurements",
+      "using": "(((owner = ( SELECT auth.uid() AS uid)) AND ( SELECT private.is_active() AS is_active)) OR ( SELECT private.is_admin() AS is_admin))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "collab_select",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "park_collaborators",
+      "using": "((user_id = ( SELECT auth.uid() AS uid)) OR ( SELECT private.is_admin() AS is_admin) OR (EXISTS ( SELECT 1\n   FROM projects pr\n  WHERE ((pr.park_id = park_collaborators.park_id) AND (pr.owner = ( SELECT auth.uid() AS uid))))))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "invites_select",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "park_invites",
+      "using": "((invited_by = ( SELECT auth.uid() AS uid)) OR (lower(email) = ( SELECT private.dg_current_verified_email() AS dg_current_verified_email)) OR ( SELECT private.is_admin() AS is_admin) OR (EXISTS ( SELECT 1\n   FROM projects pr\n  WHERE ((pr.park_id = park_invites.park_id) AND (pr.owner = ( SELECT auth.uid() AS uid))))))"
+    },
+    {
+      "cmd": "SELECT",
+      "name": "profiles_select",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "profiles",
+      "using": "((id = ( SELECT auth.uid() AS uid)) OR ( SELECT private.is_admin() AS is_admin))"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "profiles_update",
+      "check": "((id = ( SELECT auth.uid() AS uid)) OR ( SELECT private.is_owner() AS is_owner))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "profiles",
+      "using": "((id = ( SELECT auth.uid() AS uid)) OR ( SELECT private.is_owner() AS is_owner))"
+    },
+    {
+      "cmd": "DELETE",
+      "name": "projects_delete",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "projects",
+      "using": "((owner = ( SELECT auth.uid() AS uid)) OR ( SELECT private.is_owner() AS is_owner))"
+    },
+    {
+      "cmd": "INSERT",
+      "name": "projects_insert",
+      "check": "((owner = ( SELECT auth.uid() AS uid)) AND ( SELECT private.is_active() AS is_active))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "projects",
+      "using": null
+    },
+    {
+      "cmd": "SELECT",
+      "name": "projects_select",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "table": "projects",
+      "using": "((owner = ( SELECT auth.uid() AS uid)) OR ( SELECT private.is_admin() AS is_admin) OR ((park_id IS NOT NULL) AND dg_is_park_member(park_id)))"
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "projects_update",
+      "check": "((owner = ( SELECT auth.uid() AS uid)) OR ( SELECT private.is_owner() AS is_owner) OR ( SELECT private.is_admin() AS is_admin))",
+      "roles": [
+        "authenticated"
+      ],
+      "table": "projects",
+      "using": "((owner = ( SELECT auth.uid() AS uid)) OR ( SELECT private.is_owner() AS is_owner) OR ( SELECT private.is_admin() AS is_admin))"
+    }
+  ]
+}

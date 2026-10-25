@@ -23,11 +23,11 @@ try{
    assert.equal(await page.locator('body').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(16, 17, 19)',path);
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`overflow ${width} ${path}`);
    assert.equal(await page.locator('[data-dg-dark-mode]').count(),1,path);
-   if(width===390){await page.addScriptTag({content:axe.source});const contrast=await page.evaluate(async()=> (await axe.run(document,{runOnly:{type:'rule',values:['color-contrast']}})).violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})));assert.deepEqual(contrast,[],path+' dark contrast');}
+   if(width===390){await page.evaluate(axe.source);const contrast=await page.evaluate(async()=> (await axe.run(document,{runOnly:{type:'rule',values:['color-contrast']}})).violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})));assert.deepEqual(contrast,[],path+' dark contrast');}
    await page.locator('[data-dg-dark-mode]').uncheck();
    await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
    assert.equal(await page.locator('html').getAttribute('data-theme'),'light',path);
-   if(width===390){await page.addScriptTag({content:axe.source});const contrast=await page.evaluate(async()=> (await axe.run(document,{runOnly:{type:'rule',values:['color-contrast']}})).violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})));assert.deepEqual(contrast,[],path+' light contrast');}
+   if(width===390){await page.evaluate(axe.source);const contrast=await page.evaluate(async()=> (await axe.run(document,{runOnly:{type:'rule',values:['color-contrast']}})).violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})));assert.deepEqual(contrast,[],path+' light contrast');}
    await page.locator('[data-dg-dark-mode]').check();
   }
   if(readerSample){

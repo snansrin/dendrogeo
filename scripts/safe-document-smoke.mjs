@@ -16,13 +16,13 @@ try{
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
     assert.equal(await page.locator('h1').count(),1);
     await page.waitForTimeout(400); // Let the existing appearance colour transition finish.
-    await page.addScriptTag({content:axe.source});
+    await page.evaluate(axe.source);
     assert.deepEqual(await page.evaluate(async()=>(await axe.run({runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})).violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))),[]);
    }
   }
   const screenshots=await page.evaluate(async()=>{const manifest=await(await fetch('/manifest.json')).json();return await Promise.all(manifest.screenshots.map(async shot=>{const image=new Image();image.src='/'+shot.src;await image.decode();return {declared:shot.sizes,actual:image.naturalWidth+'x'+image.naturalHeight};}));});
   for(const shot of screenshots)assert.equal(shot.declared,shot.actual);
-  await page.addScriptTag({content:readFileSync('src/ui/toast-message-content.js','utf8')});
+  await page.addScriptTag({url:new URL('/src/ui/toast-message-content.js',page.url()).href});
   const result=await page.evaluate(()=>{
    const div=document.createElement('div');window.DG_TOAST_MESSAGE_CONTENT.render(div,'<b onclick="alert(1)">Safe <em>help</em></b><img src=x onerror=alert(1)><script>alert(1)</script><iframe src=javascript:alert(1)></iframe><a href=javascript:alert(1)>link</a><svg onload=alert(1)></svg><span style=color:red data-private=x>plain</span>');
    return {bold:div.querySelector('b')?.textContent,attributes:div.querySelector('b')?.attributes.length,active:div.querySelectorAll('img,script,iframe,a,svg').length,text:div.textContent,attributeCount:[...div.querySelectorAll('*')].reduce((sum,node)=>sum+node.attributes.length,0)};

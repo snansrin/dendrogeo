@@ -51,7 +51,7 @@ try{for(const width of [360,390,430]){
  const preview=await page.evaluate(()=>({id:DG_PARK.id,writes:__stageFixture.writes,anchors:Object.values(map._layers).filter(layer=>layer instanceof L.Marker&&layer.options.draggable).map(layer=>({title:layer.options.title,point:[layer.getLatLng().lat,layer.getLatLng().lng]}))}));
  assert.equal(preview.id,9001);assert.equal(preview.writes,0);assert.equal(preview.anchors.length,6);
  await openTools();assert.equal(await panel.locator('#dgStageCutName').inputValue(),'Kolay bölüm');await panel.locator('#dgStageCutName').fill('Köprüler arası etap');
- await page.addScriptTag({content:axe.source});assert.deepEqual(await page.evaluate(async()=>(await axe.run(document.querySelector('.dg-stage-cut-panel'))).violations.map(v=>v.id)),[]);
+ await page.evaluate(axe.source);assert.deepEqual(await page.evaluate(async()=>(await axe.run(document.querySelector('.dg-stage-cut-panel'))).violations.map(v=>v.id)),[]);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
  const saveBox=await panel.locator('[data-cut-action="save"]').boundingBox(),panelBox=await panel.boundingBox();assert.ok(saveBox.y>=panelBox.y&&saveBox.y+saveBox.height<=panelBox.y+panelBox.height,'save remains visible in the fixed footer');
  if(process.env.DG_STAGE_SCREENSHOT_DIR)await page.locator('#surfaceMapWorkspace').screenshot({path:join(process.env.DG_STAGE_SCREENSHOT_DIR,'bagimsiz-sinirlar-'+width+'.png')});
@@ -77,7 +77,7 @@ try{for(const width of [360,390,430]){
  await openTools();await panel.locator('[data-cut-boundary="0"]').click();await page.waitForFunction(()=>!document.querySelector('[data-cut-action="save"]').disabled);
  assert.match(await panel.locator('[data-cut-boundary="0"]').textContent(),new RegExp((startHandles+1)+' nokta'));assert.equal(await page.locator('.dg-stage-reference').first().textContent(),'1.1');
  assert.deepEqual(await page.evaluate(()=>({active:DG_PARK.id,writes:__stageFixture.writes,old:JSON.stringify(__stageFixture.rows[0])})),{active:9002,writes:1,old:original});
- await panel.locator('#dgStageCutName').fill('Detaylı etap sürümü');await page.addScriptTag({content:axe.source});assert.deepEqual(await page.evaluate(async()=>(await axe.run(document.querySelector('.dg-stage-cut-panel'))).violations.map(v=>v.id)),[]);
+ await panel.locator('#dgStageCutName').fill('Detaylı etap sürümü');await page.evaluate(axe.source);assert.deepEqual(await page.evaluate(async()=>(await axe.run(document.querySelector('.dg-stage-cut-panel'))).violations.map(v=>v.id)),[]);
  if(process.env.DG_STAGE_SCREENSHOT_DIR)await page.locator('#surfaceMapWorkspace').screenshot({path:join(process.env.DG_STAGE_SCREENSHOT_DIR,'etap-duzenleme-'+width+'.png')});
  await panel.locator('[data-cut-action="save"]').click();await page.waitForFunction(()=>DG_PARK?.id===9003);
  const revision=await page.evaluate(()=>({id:DG_PARK.id,writes:__stageFixture.writes,name:DG_PARK.name,old:JSON.stringify(__stageFixture.rows[0]),parentUnchanged:JSON.stringify(DG_PARK_SESSION.get('way/990001'))===JSON.stringify(__stageFixture.parent)}));

@@ -96,6 +96,7 @@ const ANCHORS = [
   ['boot',   '<script src="src/ui/state.js'],
 ];
 function splitIndex(text) {
+  text=text.replace(/(script-src 'self' https:\/\/challenges\.cloudflare\.com )('[^']+' ?)+;/, '$1__DG_SCRIPT_HASHES__;');
   text=text.replace(/ type="application\/x-dendrogeo-module"/g,'').replace(/<script src="\/src\/bootstrap\/app-runtime\.js[^>]*><\/script>\n?/g,'');
   text=text.replace(/(<script id="dgRuntimeBuild" type="application\/json">)"[a-f0-9]+"(<\/script>)/,'$1"__DG_RUNTIME_BUILD__"$2');
   const pos = {};

@@ -25,7 +25,7 @@ try{for(const width of [360,390,430,1280]){
  await page.reload({waitUntil:'domcontentloaded'});await profile.waitFor();await toggle.waitFor();
  assert.equal(await toggle.isChecked(),true,'preference survives reload and profile mount');
  await page.evaluate(()=>dgAcademicProfileRender());assert.equal(await toggle.isChecked(),true);
- await page.addScriptTag({content:axe.source});
+ await page.evaluate(axe.source);
  const views=width===390?await page.locator('.view').evaluateAll(nodes=>nodes.map(n=>n.id)):['v-dash'];
  for(const id of views){
   await page.evaluate(id=>document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id===id)),id);
