@@ -11749,6 +11749,28 @@
         "supabase/migrations/20261025071344_stage_ring_vertex_limit.sql",
         "test/park-stage-detailed-save.test.mjs"
       ]
+    },
+    {
+      "date": "2026-10-25",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: live-map-selector-adjacent-20261025. User requests the existing Street/Satellite/Topographic selector beside Park Analysis Mode. Group its original label/select, use a bounded two-column header with wrapping button text and put the existing hint beneath. Preserve control IDs, delegated actions, options, font/button classes and theme tokens. Keep analysis-active header hiding. Validate adjacency, viewport bounds and pending-map behavior at 360/390/430/1280 px with light/dark Chromium and WebKit, retaining the existing three phone touch workflows. No map provider, map state, analysis, stage persistence, allometry, database or stored-data changes.",
+      "files": [
+        {
+          "path": "css/park-panel.css",
+          "previous_sha256": "d9283d76867db1ee4259694715e0c8930bc38833e4e165e169d1d498a316d8b6",
+          "sha256": "07a7b9653a267b239f5bd486f1e18ece085bab917c0e2676c830aa3feb3d10c9"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "0faa809fb9d89aa6432c06772a9499630caaeeb338a36b4f24acc0f5f7c710b2",
+          "sha256": "0dbebdc85cff7524c1a922bcde46308ee095bbbbfab03186035b1e325905e0e1"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "e56adffcd49fe56fd58c854d88e81e970ee3f2018ad2400fc2ba13d32c172d4d",
+          "sha256": "4013462bf58666f92596ad10fdef7fe5668517d863d61565c480060ee5909bdf"
+        }
+      ]
     }
   ]
 }

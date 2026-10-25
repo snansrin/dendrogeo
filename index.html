@@ -947,7 +947,7 @@
 <script src="src/application/dashboard/load-world-dashboard.js?v=d9e7b776" type="application/x-dendrogeo-module" defer></script>
 <script src="src/application/dashboard/load-shell-view-data.js?v=c2e4eeb9" type="application/x-dendrogeo-module" defer></script>
 <script src="src/services/dash.js?v=3e83580a" type="application/x-dendrogeo-module" defer></script>
-<link rel="stylesheet" href="css/park-panel.css?v=cfc88375">
+<link rel="stylesheet" href="css/park-panel.css?v=592b66bc">
 <link rel="stylesheet" href="css/park-stage.css?v=430e63ed">
 <!-- TASARIM SİSTEMİ (2026-09-27, 2. deneme): ui-standard.css geri BAĞLANDI
      ama ARTIK eleman seviyesi kuralları yalnız .dg-page (alt sayfalar) altında
@@ -1488,14 +1488,16 @@
   </div>
 
 <div class="view" id="v-map"><h2 class="disp" style="margin-bottom:16px">Canlı Harita</h2>
-<div class="live-map-tools" style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+<div class="live-map-tools">
  <button type="button" class="btn sm blue" id="parkModeBtn" data-dg-map-action="toggle-park-mode">🌳 Park Analizi Modu: KAPALI</button>
- <label style="font-size:.82rem;margin-left:8px">Harita:</label>
+ <div class="live-map-base">
+ <label for="baseLayerSelect" style="font-size:.82rem">Harita:</label>
  <select aria-label="Harita altlığı" id="baseLayerSelect" data-dg-map-action="base-layer" style="font-size:.82rem;padding:4px 8px;border-radius:6px;border:1px solid var(--line)">
   <option value="osm">🗺️ Sokak</option>
   <option value="sat">🛰️ Uydu</option>
   <option value="topo">🏔️ Topoğrafik</option>
  </select>
+ </div>
  <span id="parkModeHint" style="font-size:.78rem;color:var(--mut)">Açınca haritada bir parkın içine tıkla → sınırı otomatik algılanır.</span>
 </div>
 <!-- PARK ALGILAMA EKRANI: ölçüm kapısı buraya yönlendirir (startParkScan).

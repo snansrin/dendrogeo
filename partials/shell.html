@@ -131,14 +131,16 @@
   </div>
 
 <div class="view" id="v-map"><h2 class="disp" style="margin-bottom:16px">Canlı Harita</h2>
-<div class="live-map-tools" style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+<div class="live-map-tools">
  <button type="button" class="btn sm blue" id="parkModeBtn" data-dg-map-action="toggle-park-mode">🌳 Park Analizi Modu: KAPALI</button>
- <label style="font-size:.82rem;margin-left:8px">Harita:</label>
+ <div class="live-map-base">
+ <label for="baseLayerSelect" style="font-size:.82rem">Harita:</label>
  <select aria-label="Harita altlığı" id="baseLayerSelect" data-dg-map-action="base-layer" style="font-size:.82rem;padding:4px 8px;border-radius:6px;border:1px solid var(--line)">
   <option value="osm">🗺️ Sokak</option>
   <option value="sat">🛰️ Uydu</option>
   <option value="topo">🏔️ Topoğrafik</option>
  </select>
+ </div>
  <span id="parkModeHint" style="font-size:.78rem;color:var(--mut)">Açınca haritada bir parkın içine tıkla → sınırı otomatik algılanır.</span>
 </div>
 <!-- PARK ALGILAMA EKRANI: ölçüm kapısı buraya yönlendirir (startParkScan).
