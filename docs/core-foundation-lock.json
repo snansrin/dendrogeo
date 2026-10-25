@@ -11663,6 +11663,18 @@
           "sha256": "518e1d7c13e89474f52a6278f9f08e8434f9b5b77ffff472857a5c9e287ee586"
         }
       ]
+    },
+    {
+      "date": "2026-10-25",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: fifteen-point pointer synchronization. CI mobile caught the desktop regression clicking before Leaflet finished painting a programmatic zoom. Await the real zoom animation and two animation frames after each pan, then require every physical click to increase numbered control count before proceeding. Keep all fifteen-point/save/geometry assertions and actual pointer events; remove unused fit-derived pixels. No runtime code or scientific changes.",
+      "files": [
+        {
+          "path": "scripts/park-stage-assisted-smoke.mjs",
+          "previous_sha256": "714d46657838b1eeebccd2c0d39bb03255cdcfa6bc18648ee6d0de0b3ac4bc70",
+          "sha256": "4b8e7ae4aeb7f37074e977674935360950e290e1219ccbbd1650b7de7ae8e286"
+        }
+      ]
     }
   ]
 }
