@@ -11651,6 +11651,18 @@
         "test/park-stage-delete-postgres.test.mjs",
         "test/park-stage-side-layout.test.mjs"
       ]
+    },
+    {
+      "date": "2026-10-25",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: left-stage-panel test LF consistency. CI identified that the new layout test was hashed with Windows CRLF before Git stored LF. Normalize only this test to repository LF and record its exact Git blob hash; preserve every assertion, prior hash and core guard. No runtime/scientific change.",
+      "files": [
+        {
+          "path": "test/park-stage-side-layout.test.mjs",
+          "previous_sha256": "f13dcca76ff24cf3d29983fcebb1cdec60d5a4bbc8f19b8a700d031e8d32105d",
+          "sha256": "518e1d7c13e89474f52a6278f9f08e8434f9b5b77ffff472857a5c9e287ee586"
+        }
+      ]
     }
   ]
 }
