@@ -43,7 +43,7 @@ try{for(const width of [360,390,430,1280]){
  const saved=await page.evaluate(()=>USER.user_metadata.dendrogeo_profile);
  assert.equal(saved.title,'Korunacak başlık');assert.equal(saved.sampling,'Korunacak örnekleme');assert.equal(saved.institution,'Yeni Araştırma Üniversitesi');
  assert.equal(await editor.getAttribute('open'),null);
- await page.addScriptTag({content:axe.source});
+ await page.evaluate(axe.source);
  const violations=await profile.evaluate(async e=>(await axe.run(e,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}})).violations.map(v=>v.id));assert.deepEqual(violations,[]);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  await page.evaluate(()=>document.getElementById('toastWrap')?.replaceChildren());

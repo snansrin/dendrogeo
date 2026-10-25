@@ -18,7 +18,7 @@ try{for(const width of[360,390,430,1440]){
  assert.equal(lightIcons.length,5);assert.equal(darkIcons.length,5);assert.ok(lightIcons.every(icon=>icon.visible&&icon.stroke!=='none'));assert.ok(darkIcons.every(icon=>icon.visible&&icon.stroke!=='none'));assert.notEqual(lightIcons[0].color,darkIcons[0].color);assert.notEqual(lightIcons[0].background,darkIcons[0].background);
  await page.evaluate(()=>window.DG_APPEARANCE.set('light'));
  if(output)await page.locator('[data-showcase-name="tree"]').screenshot({path:output+'/field-'+width+'.png'});
- await page.addScriptTag({content:axe.source});
+ await page.evaluate(axe.source);
  for(const[index,mode]of['map','analysis','drawing','ndvi'].entries()){
   await page.locator('[data-showcase-index="'+(index+1)+'"]').click();const host=page.locator('[data-landing-scene="'+mode+'"]');await host.locator('[data-scene-class]').first().waitFor();
   assert.equal(await host.getAttribute('data-scene-ready'),'true');

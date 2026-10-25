@@ -40,7 +40,7 @@ try{for(const width of [360,390,430,1280]){
  const csv=page.locator('[data-grid-summary-action="downloadCsv"]');assert.match(await csv.innerText(),/Ölçüm noktaları CSV/);assert.doesNotMatch(await csv.innerText(),/WP CSV/);
  const csvHelp=help;await csvHelp.click();
  assert.match(await page.locator('#dgOperationHelpBody').innerText(),/wp_id,lat,lon,visited/);assert.match(await page.locator('#dgOperationHelpBody').innerText(),/X,Y,id/);
- await page.addScriptTag({content:axe.source});const violations=await page.evaluate(async()=>{const result=await axe.run(document.getElementById('dgOperationHelp'));return result.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)}));});assert.deepEqual(violations,[]);
+ await page.evaluate(axe.source);const violations=await page.evaluate(async()=>{const result=await axe.run(document.getElementById('dgOperationHelp'));return result.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)}));});assert.deepEqual(violations,[]);
  if(process.env.DG_QA_SCREENSHOT_DIR&&width===390)await page.locator('#dgOperationHelp').screenshot({path:join(process.env.DG_QA_SCREENSHOT_DIR,'operation-help-csv-390.png')});
  await page.locator('[data-dg-help-close]').click();
  const green=page.locator('#chkGreenOnly'),greenHelp=page.locator('label[for="gridClearance"] .dg-operation-help');const checked=await green.isChecked();

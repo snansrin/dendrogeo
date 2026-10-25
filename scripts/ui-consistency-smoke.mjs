@@ -76,7 +76,7 @@ try{for(const width of [320,360,390,430,768,1280]){
   await tab.click();await page.locator('#v-'+id+'.on').waitFor({state:'visible'});
   await auditView('#v-'+id);
   if(id==='admin'){
-   await page.addScriptTag({content:readFileSync('src/ui/photo-admin-controls.mjs','utf8')});
+   await page.addScriptTag({url:new URL('/src/ui/photo-admin-controls.mjs',page.url()).href});
    await page.evaluate(()=>window.DG_PHOTO_ARCHIVE_UI.mount());
    const actions=page.locator('#v-admin .admin-storage-actions');
    assert.equal(await actions.count(),2,'maintenance and backups have separate named groups');

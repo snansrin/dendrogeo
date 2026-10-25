@@ -22,7 +22,7 @@ try{for(const width of [360,390,430,1280]){
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
   const box=await dialog.boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width+1);
   assert.equal(await dialog.evaluate(el=>el.scrollWidth<=el.clientWidth+1),true,'dialog content must not scroll horizontally');
-  await page.addScriptTag({content:axe.source});
+  await page.evaluate(axe.source);
   assert.deepEqual(await page.evaluate(async()=> (await axe.run(document.getElementById('dgSurfaceExportDialog'))).violations.map(v=>v.id)),[]);
   if(process.env.DG_QA_SCREENSHOT_DIR)await page.screenshot({animations:'disabled',path:join(process.env.DG_QA_SCREENSHOT_DIR,'map-options-'+theme+'-'+width+'.png')});
   await dialog.locator('#dgExportDownload').click();assert.deepEqual(await page.evaluate(()=>__mapDownload),{park:true,surface:false,grid:false,waypoints:false,mapOnly:true,boundaryColor:'#ff0000'});

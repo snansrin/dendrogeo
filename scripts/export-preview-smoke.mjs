@@ -44,7 +44,7 @@ try{for(const width of [360,390,430,1280]){
  await modal.waitFor({state:'visible'});assert.match(await modal.innerText(),/Yerel test raporu/);await page.keyboard.press('Escape');await modal.waitFor({state:'hidden'});
  await page.evaluate(()=>openPreview('CSV hücreleri','name,note\n"A, B","İlk satır\nİkinci ""satır"""',true,'quoted.csv'));
  assert.deepEqual(await modal.locator('tbody td').allTextContents(),['A, B','İlk satır\nİkinci "satır"']);
- await page.addScriptTag({content:axe.source});
+ await page.evaluate(axe.source);
  for(const theme of ['light','dark']){
   await page.evaluate(value=>document.documentElement.dataset.theme=value,theme);
   const violations=await page.evaluate(async()=> (await axe.run(document.getElementById('previewModal'))).violations.map(v=>({id:v.id,impact:v.impact})));

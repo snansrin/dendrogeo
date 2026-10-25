@@ -44,6 +44,17 @@ insert into public.park_collaborators(park_id,user_id)
  select id,'00000000-0000-0000-0000-000000000001'::uuid from public.parks where osm_key='manual/reset-two';
 set local role authenticated;
 do $$ begin
+ if (select count(*) from public.projects)<>1 then raise exception 'RESET_CONTRACT: membership without accepted project provenance exposed another project'; end if;
+end $$;
+-- A legitimate owner's accepted invitation is required for private access.
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
+select public.dg_invite_send((select id from public.parks where osm_key='manual/reset-two'),'reset-one@example.invalid',null);
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
+do $$ declare invitation uuid; begin
+ select id into invitation from public.park_invites where email='reset-one@example.invalid' and status='Beklemede';
+ perform public.dg_invite_respond(invitation,true);
+end $$;
+do $$ begin
  if (select count(*) from public.projects)<>2 then raise exception 'RESET_CONTRACT: park collaboration access broken'; end if;
 end $$;
 

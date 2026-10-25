@@ -56,7 +56,7 @@ try{for(const width of [360,390,430]){
  assert.equal(analysis.record.parkId,9002);assert.deepEqual(analysis.input.outer,analysis.active);
  assert.equal(analysis.reportArea,analysis.stageArea);assert.ok(analysis.stageArea<analysis.parentArea);
  if(process.env.DG_STAGE_SCREENSHOT_DIR)await host.screenshot({path:join(process.env.DG_STAGE_SCREENSHOT_DIR,'etap-secimi-'+width+'.png')});
- await page.addScriptTag({content:axe.source});
+ await page.evaluate(axe.source);
  const violations=await page.evaluate(async()=>(await axe.run(document.getElementById('dgParkStageWorkspace'))).violations.map(v=>v.id));assert.deepEqual(violations,[]);
  await page.evaluate(()=>{DG_LC_SENS.state.brush={diameter:20};});
  await host.locator('[data-stage-action="edit"]').click();assert.match(await host.locator('#dgStageStatus').textContent(),/fırça/);

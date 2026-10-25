@@ -65,7 +65,7 @@ try{
   await box.locator('[data-park-admin-menu]>summary').first().click();
   await cancelDialog(()=>box.locator('[data-park-admin-action="rename"]').first().click());
   await cancelDialog(()=>box.locator('[data-park-admin-action="delete"]').first().click());
-  await page.addScriptTag({content:axe.source});
+  await page.evaluate(axe.source);
   const accessibility=await page.evaluate(async()=>{const result=await axe.run(document.getElementById('parkAdminBox'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});return result.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}));});
   assert.deepEqual(accessibility,[]);
   const panelFits=await box.locator('.dg-parkadmin-actionpanel').first().evaluate(element=>{const rect=element.getBoundingClientRect();return element.scrollWidth<=element.clientWidth+1&&[...element.querySelectorAll('.btn')].every(button=>{const bounds=button.getBoundingClientRect();return !bounds.width||(bounds.left>=rect.left&&bounds.right<=rect.right+1);});});

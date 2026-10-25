@@ -1130,6 +1130,15 @@
     "stage_save_repeat_controls": [
       "supabase/migrations/20261025071344_stage_ring_vertex_limit.sql",
       "test/park-stage-detailed-save.test.mjs"
+    ],
+    "security_project_scope_2026_10_25": [
+      "scripts/build-index.mjs",
+      "scripts/lib/app-runtime-package.mjs",
+      "scripts/security-csp-smoke.mjs",
+      "test/app-runtime-package.test.mjs",
+      "supabase/migrations/20261025170621_project_invite_scope_security.sql",
+      "test/project-invite-scope-security.test.mjs",
+      "test/fixtures/security/park-invite-baseline.json"
     ]
   },
   "sha256": {
@@ -2194,7 +2203,14 @@
     "test/park-stage-delete-postgres.test.mjs": "b6387ba77ebd163f6ed175db8eea43d81cca7cd8851bea3ef1766ce5d81f2fd1",
     "test/park-stage-side-layout.test.mjs": "f13dcca76ff24cf3d29983fcebb1cdec60d5a4bbc8f19b8a700d031e8d32105d",
     "supabase/migrations/20261025071344_stage_ring_vertex_limit.sql": "92a28c1fe11a5600fca07ecb272e2a1ccdb89af5d152db924dddfdb6bb7fe388",
-    "test/park-stage-detailed-save.test.mjs": "7b1cf5348fa95ff64c476cc14c6b9426545eb578961f973f7889028708ed9b52"
+    "test/park-stage-detailed-save.test.mjs": "7b1cf5348fa95ff64c476cc14c6b9426545eb578961f973f7889028708ed9b52",
+    "scripts/build-index.mjs": "db83feea31f03c422129c52e75a2cc4d350f1d6d6c0fbae9694a5bba08fb3d3d",
+    "scripts/lib/app-runtime-package.mjs": "d87f69042d45e95678b9d625124de0f259f79920e1cecf5e5cfbe178c4267c43",
+    "scripts/security-csp-smoke.mjs": "cb98a4573d28d33675ff51035d2783f462fd24ca62fbc20782dadc22e20f595e",
+    "test/app-runtime-package.test.mjs": "ca953ec66585ae23e6c6ab93f78dc15bdbc7d6c6413b6cbaa4bc034c7ce63a33",
+    "supabase/migrations/20261025170621_project_invite_scope_security.sql": "c7c56a880d34bcf68660344e0d3f2dcde45bd97fe0b53370f426c17536ff46dd",
+    "test/project-invite-scope-security.test.mjs": "c8ac9a2489621799e5b60c10651a95b2c7a5e836bb855d96b6abd05107a9fbcc",
+    "test/fixtures/security/park-invite-baseline.json": "39162ea93ccafe37f8f222be2f962167039d9ade1b0151f06cf940b9076c9b7a"
   },
   "authorized_modularizations": [
     {
@@ -11769,6 +11785,91 @@
           "path": "index.html",
           "previous_sha256": "e56adffcd49fe56fd58c854d88e81e970ee3f2018ad2400fc2ba13d32c172d4d",
           "sha256": "4013462bf58666f92596ad10fdef7fe5668517d863d61565c480060ee5909bdf"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-25",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: security fix project-invite-scope-security-20261025. Restrict private project/draft reads to current-owner or active-admin accepted invitation provenance; isolate independent teams, revocation and leave/rejoin epochs, preserve public approved records and existing legitimate invitations. Migration only changes policies and guarded function definitions, with no rollout data mutations or schema changes. Add isolated PostgreSQL coverage. Replace broad executable CSP fallback with exact build-time script hashes and scoped resource directives; only diagnostic sourceURL becomes relative, leaving native execution order, lexical scope and source bodies intact. Add real Chromium/WebKit security-policy coverage to phone checks. Existing frozen regression changes only allow this exact reviewed migration filename. No analysis, allometry, park detection, stage geometry, UI style, stored scientific data or engine source changes.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "4013462bf58666f92596ad10fdef7fe5668517d863d61565c480060ee5909bdf",
+          "sha256": "bca736d85bca5019d0bdbb54124f0239635a86964953e8230932a60d8d4041f8"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "5f4f09f579a3b69e67ec3f9654a2def8d5a9320a9d53d940ca472d5628366ab1",
+          "sha256": "5cc5c710332bb7711c65f201725f0b028d1b5b1beda1db88614bb60abfa4f943"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "cadb0e84c57a4f83a4303d7d8aac7d56dc6c6096aba67186b0274e15fcfa4e01",
+          "sha256": "6a0a90d0dc90f3e90f849c502cd28f9273b16a2cb0befd8fdf2466071346e571"
+        },
+        {
+          "path": "test/dbh-qa.test.mjs",
+          "previous_sha256": "4d07329da132f8c7f44c7a5bfb69fbe58d811e03789257858ba95fa98ce4a36d",
+          "sha256": "8654cf646121ae06ae23a4b6e5c261272b6c10b04b8285f7e20f0daa150b7210"
+        },
+        {
+          "path": "test/form-qa.test.mjs",
+          "previous_sha256": "6191c38c799e7440a1300374e9d8ea976ce0650ac2c434a8bd4f69df3fa16ad8",
+          "sha256": "4727cfe175c51eebb3994a5ed46429f5d3f84f4f7062ef655a60fa3a7fd94f4e"
+        }
+      ],
+      "added_protected_files": [
+        "scripts/build-index.mjs",
+        "scripts/lib/app-runtime-package.mjs",
+        "scripts/security-csp-smoke.mjs",
+        "test/app-runtime-package.test.mjs",
+        "supabase/migrations/20261025170621_project_invite_scope_security.sql",
+        "test/project-invite-scope-security.test.mjs",
+        "test/fixtures/security/park-invite-baseline.json"
+      ]
+    },
+    {
+      "date": "2026-10-25",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: security validation CSP fixture compatibility 20261025. Load only diagnostic axe tooling through Playwright evaluation and explicitly injected source fixtures from same-origin script URLs; do not disable CSP, add fixture hashes to production, change assertions or change application code. The dedicated CSP browser test checks actual browser enforcement with arbitrary inline and image-provider scripts blocked.",
+      "files": [
+        {
+          "path": "scripts/landing-showcase-smoke.mjs",
+          "previous_sha256": "8125e4101cea3c4b0fdd4aca0600f63627ed18faadd3d4f4d056ca207d54878d",
+          "sha256": "597c73ede9d05b1d868b2b4d01a0a0b0f0e00c3044da828e4b920751df739b0b"
+        },
+        {
+          "path": "scripts/map-only-export-smoke.mjs",
+          "previous_sha256": "8b7f5e805cfe8102bc9cfdc22f1402d9bb131861ad99439eeb9f9937c93f68cc",
+          "sha256": "68ce8a70c382bf8cb4981d14a93f68ef345c6d96fbe6d65c7475fcef86137146"
+        },
+        {
+          "path": "scripts/osm-map-recovery-smoke.mjs",
+          "previous_sha256": "676781a52562d4d82944d1c64cb40db93fe8915b0a9513f8957daaaf553abf0f",
+          "sha256": "48888de5cde6ad19eb4cd68d6e131b8a95fa5a0e812d88e872bd26cbde9db1eb"
+        },
+        {
+          "path": "scripts/park-stage-assisted-smoke.mjs",
+          "previous_sha256": "e3f1b2a9bd82773a97f6427188e62c3859a95d923ddf23c0ca1c9fdcec823429",
+          "sha256": "0fdd2f96970a43c7db6e24b501ea8d8cf75add6b5065c4b06a38e6664061809b"
+        },
+        {
+          "path": "scripts/park-stage-workspace-smoke.mjs",
+          "previous_sha256": "07d5b385fc2eed5bd4d025fd280c96b6b9a9a2e4ccf2821975e7d4cbc578109a",
+          "sha256": "01042110946c4fa8c1e7e57773cf029c3e8879b2e8c898e6f18a6a6d7672e0c3"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-25",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: add the isolated CSP security browser regression to the existing WebKit CI job. Preserve all other jobs, dependencies, permissions and existing checks.",
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "4e0fe92c6bff910faeffaa3ea1c9c0887dc811454c264bb2c68331c4d19fe745",
+          "sha256": "7dc51fde09e79bfbf75e2067cdc2c65e4905eb6cd197acd4c1ef0629f3b0a759"
         }
       ]
     }

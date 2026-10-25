@@ -30,7 +30,7 @@ try{for(const width of [360,390,430]){
  assert.equal(await control.locator('i[lang="la"]').evaluate(e=>getComputedStyle(e).fontStyle),'italic');
  await control.click();await page.locator('#mGroup').click();assert.equal(await list.isVisible(),false);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
- await page.addScriptTag({content:readFileSync('node_modules/axe-core/axe.min.js','utf8')});
+ await page.evaluate(readFileSync('node_modules/axe-core/axe.min.js','utf8'));
  const violations=await page.evaluate(async()=>(await axe.run(document.querySelector('.dg-species-select'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa']}})).violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.failureSummary)})));
  assert.deepEqual(violations,[]);assert.deepEqual(errors,[]);
  console.log(JSON.stringify({engine:engine.name(),width,selectedLatinItalic:true,optionLatinItalic:true,commonNameNormal:true,canonicalValuePreserved:true,keyboard:true,bilingual:true,themes:true}));await page.close();

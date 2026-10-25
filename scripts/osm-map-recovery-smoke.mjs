@@ -4,7 +4,7 @@ import {loadChromium} from './lib/playwright-runtime.mjs';
 const browser=await(await loadChromium()).launch({headless:true});
 try{
  const page=await browser.newPage();
- for(const path of ['src/domain/parks/build-osm-surface-query.js','src/domain/parks/decode-osm-map-geometry.js','src/adapters/parks/load-osm-map-coverage.js'])await page.addScriptTag({content:readFileSync(path,'utf8')});
+ for(const path of ['src/domain/parks/build-osm-surface-query.js','src/domain/parks/decode-osm-map-geometry.js','src/adapters/parks/load-osm-map-coverage.js'])await page.addScriptTag({url:new URL('/'+path,page.url()).href});
  const result=await page.evaluate(async()=>{
   const xml='<osm><node id="1" lat="39" lon="32"/><node id="2" lat="39.001" lon="32"/><node id="3" lat="39.001" lon="32.001"/><way id="10"><nd ref="1"/><nd ref="2"/><nd ref="3"/><nd ref="1"/><tag k="building" v="yes"/></way><relation id="20"><member type="way" ref="11" role="outer"/><tag k="natural" v="water"/><tag k="type" v="multipolygon"/></relation></osm>';
   const full='<osm><node id="4" lat="39" lon="32"/><node id="5" lat="39.002" lon="32"/><node id="6" lat="39.002" lon="32.002"/><way id="11"><nd ref="4"/><nd ref="5"/><nd ref="6"/><nd ref="4"/></way><relation id="20"><member type="way" ref="11" role="outer"/><tag k="natural" v="water"/><tag k="type" v="multipolygon"/></relation></osm>';

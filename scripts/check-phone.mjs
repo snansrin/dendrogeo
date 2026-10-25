@@ -1,5 +1,6 @@
 import {spawnSync} from 'node:child_process';
 import {serveFixture} from './lib/browser-acceptance-fixture.mjs';
+const securityCsp=spawnSync(process.execPath,['scripts/security-csp-smoke.mjs'],{stdio:'inherit'});if(securityCsp.status!==0)process.exit(securityCsp.status||1);
 const mapExport=spawnSync(process.execPath,['scripts/map-only-export-smoke.mjs'],{stdio:'inherit'});if(mapExport.status!==0)process.exit(mapExport.status||1);
 const parkStages=spawnSync(process.execPath,['scripts/park-stage-workspace-smoke.mjs'],{stdio:'inherit'});if(parkStages.status!==0)process.exit(parkStages.status||1);
 const assistedStages=spawnSync(process.execPath,['scripts/park-stage-assisted-smoke.mjs'],{stdio:'inherit'});if(assistedStages.status!==0)process.exit(assistedStages.status||1);

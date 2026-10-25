@@ -1,6 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
+import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {packageApplication} from '../scripts/lib/app-runtime-package.mjs';
 
@@ -13,10 +14,23 @@ test('runtime packaging preserves native classic-script lexical scope and source
  vm.runInContext(result.runtime,context);
  assert.equal(context.window.before,'undefined');assert.equal(context.window.total,7);
  assert.equal(executed.length,2);assert.equal(result.count,2);
- assert.match(executed[0],/sourceURL=https:\/\/example.test\/src\/first.js\?v=a/);
+ assert.match(executed[0],/sourceURL=src\/first.js\?v=a/);
  assert.match(result.manifest,/<script src="vendor\/library.js" defer>/);
  assert.equal((result.manifest.match(/application\/x-dendrogeo-module/g)||[]).length,2);
  assert.deepEqual(packageApplication(html,path=>sources[path]),result);
+});
+
+test('CSP authorizes exact packaged bodies and blocks arbitrary inline execution',()=>{
+ const result=packageApplication('<meta content="script-src \'self\' __DG_SCRIPT_HASHES__"><script src="src/example.js?v=a" defer></script>',()=> 'window.allowed=true;');
+ const bodies=[],context=vm.createContext({document:{createElement:()=>({remove(){}}),head:{appendChild:s=>bodies.push(s.textContent)}}});
+ vm.runInContext(result.runtime,context);
+ const expected="'sha256-"+createHash('sha256').update(bodies[0]).digest('base64')+"'";
+ assert.ok(result.manifest.includes(expected));assert.ok(!result.manifest.includes('__DG_SCRIPT_HASHES__'));
+ const html=readFileSync(new URL('../index.html',import.meta.url),'utf8'),policy=html.match(/Content-Security-Policy" content="([^"]+)"/)[1];
+ const scripts=policy.match(/(?:^|; )script-src ([^;]+)/)[1];
+ assert.ok(!/unsafe-inline|unsafe-eval|data:|blob:|supabase|arcgisonline/.test(scripts));
+ assert.match(policy,/worker-src 'self' blob:/);assert.match(policy,/object-src 'none'/);assert.match(policy,/base-uri 'self'/);
+ assert.match(policy,/wss:\/\/\*\.supabase\.co/);assert.ok(!policy.includes('frame-ancestors'),'hosting-only directives cannot be claimed through a meta tag');
 });
 
 test('published index downloads one app package and retains original module ordering as metadata',()=>{

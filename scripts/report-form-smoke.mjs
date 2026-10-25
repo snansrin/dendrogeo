@@ -22,7 +22,7 @@ try{
   const before=await dialog.boundingBox(),footer=await dialog.locator('.dg-report-dialog-footer').boundingBox();
   assert.ok(before.x>=0&&before.x+before.width<=width);
   await dialog.locator('.dg-report-extra summary').click();
-  await page.addScriptTag({content:axe.source});
+  await page.evaluate(axe.source);
   const violations=await page.evaluate(async()=>{const result=await axe.run(document.querySelector('.dg-academic-dialog'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});return result.violations.map(({id,nodes})=>({id,targets:nodes.map(node=>node.target)}));});
   assert.deepEqual(violations,[]);
   await dialog.locator('[name=purpose]').fill('Envanter');
