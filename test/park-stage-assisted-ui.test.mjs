@@ -34,7 +34,8 @@ test('Detailed cap drawing retains the other line, supports insertion and undo, 
  const tool=root.DG_PARK_STAGE_ASSISTED_UI.create({document:node,leaflet:{marker,polygon:layer,polyline:(points,options)=>({...layer(),points,options}),layerGroup:children=>({...layer(),children})},getMap:()=>map,getMode:()=>false,setMode(){},getGuard:()=>false,setGuard(){},parentGeometry:()=>({outer:[[[39,32],[39,33],[40,33],[39,32]]]}),status(){},onInvalid(){},onProgress(){},onPreview:r=>{preview=r;},onCancel(){},between:async cuts=>({geometry:{outer:[],inner:[]},lines:[],cuts})});
  const click=p=>events.click({p,target:{closest:()=>null},preventDefault(){},stopImmediatePropagation(){}});
  const flush=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
- tool.start(null,true);for(const p of [[39,32],[39.01,32.1],[39,32.2]])click(p);tool.selectBoundary(1);for(const p of [[39.1,32],[39.11,32.1],[39.1,32.2]])click(p);await flush();
+ // Applying a scope locks the workspace even when no drawing is active.
+ tool.setLocked(true);tool.clear();tool.start(null,true);for(const p of [[39,32],[39.01,32.1],[39,32.2]])click(p);tool.selectBoundary(1);for(const p of [[39.1,32],[39.11,32.1],[39.1,32.2]])click(p);await flush();
  assert.equal(preview.cuts[0].length,3);assert.equal(preview.cuts[1].length,3);
  const old=[...layers].find(l=>l.dragging),segment=[...layers].find(l=>l.children?.some(n=>n.options?.className==='dg-stage-cut-segment')).children[0];
  segment.callbacks.click({latlng:{lat:39.005,lng:32.05}});await flush();assert.equal(preview.cuts[0].length,4);assert.equal(preview.cuts[1].length,3);

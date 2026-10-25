@@ -5,10 +5,13 @@
   let map=null,captureTarget=null,cuts=[[],[]],active=0,selected=-1,markers=[[],[]],previewLayer=null,lineLayer=null,parentLayer=null,proposalLayer=null,editLayer=null,locked=false,detailed=false,finished=[false,false],previousMode=false,previousGuard=false,previousZoom=false,epoch=0,referenceEpoch=0;
   function removePreview(){for(const layer of [previewLayer,lineLayer])if(layer&&map)map.removeLayer(layer);previewLayer=null;lineLayer=null;}
   function clear(){
-   ++epoch;++referenceEpoch;removePreview();if(!map)return;
+   ++epoch;++referenceEpoch;removePreview();
+   if(map){
    captureTarget?.removeEventListener("click",capture,true);captureTarget=null;ports.document.removeEventListener("keydown",key);
    for(const marker of markers.flat())map.removeLayer(marker);markers=[[],[]];if(parentLayer)map.removeLayer(parentLayer);parentLayer=null;if(proposalLayer)map.removeLayer(proposalLayer);proposalLayer=null;if(editLayer)map.removeLayer(editLayer);editLayer=null;
-   if(previousZoom)map.doubleClickZoom.enable();ports.setMode(previousMode);ports.setGuard(previousGuard);map=null;cuts=[[],[]];active=0;selected=-1;locked=false;detailed=false;finished=[false,false];
+   if(previousZoom)map.doubleClickZoom.enable();ports.setMode(previousMode);ports.setGuard(previousGuard);
+   }
+   map=null;captureTarget=null;markers=[[],[]];parentLayer=null;proposalLayer=null;editLayer=null;cuts=[[],[]];active=0;selected=-1;locked=false;detailed=false;finished=[false,false];
   }
   function key(event){if(event.key==="Escape"&&!locked){clear();ports.status("Bölüm seçimi iptal edildi.");ports.onCancel();}}
   function drawPreview(result){

@@ -1126,6 +1126,10 @@
       "test/park-stage-curved-boundaries.test.mjs",
       "test/park-stage-delete-postgres.test.mjs",
       "test/park-stage-side-layout.test.mjs"
+    ],
+    "stage_save_repeat_controls": [
+      "supabase/migrations/20261025071344_stage_ring_vertex_limit.sql",
+      "test/park-stage-detailed-save.test.mjs"
     ]
   },
   "sha256": {
@@ -2188,7 +2192,9 @@
     "supabase/migrations/20261024230150_park_stage_safe_delete.sql": "7191a61974fc6ae12449087e5d24b0730983bd6d93e0546166be8e11ec2a740c",
     "test/park-stage-curved-boundaries.test.mjs": "5bd6a51bab5d014c0255ef0e1e1e28f7963f85c117f6d9eb7d5ff0624e64f7b4",
     "test/park-stage-delete-postgres.test.mjs": "b6387ba77ebd163f6ed175db8eea43d81cca7cd8851bea3ef1766ce5d81f2fd1",
-    "test/park-stage-side-layout.test.mjs": "f13dcca76ff24cf3d29983fcebb1cdec60d5a4bbc8f19b8a700d031e8d32105d"
+    "test/park-stage-side-layout.test.mjs": "f13dcca76ff24cf3d29983fcebb1cdec60d5a4bbc8f19b8a700d031e8d32105d",
+    "supabase/migrations/20261025071344_stage_ring_vertex_limit.sql": "92a28c1fe11a5600fca07ecb272e2a1ccdb89af5d152db924dddfdb6bb7fe388",
+    "test/park-stage-detailed-save.test.mjs": "7b1cf5348fa95ff64c476cc14c6b9426545eb578961f973f7889028708ed9b52"
   },
   "authorized_modularizations": [
     {
@@ -11686,6 +11692,62 @@
           "previous_sha256": "4b8e7ae4aeb7f37074e977674935360950e290e1219ccbbd1650b7de7ae8e286",
           "sha256": "fae91e2e55fa25af66df9806365b731f0d03f3142696793ee189e6afd323c95d"
         }
+      ]
+    },
+    {
+      "date": "2026-10-25",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: stage-save-repeat-analysis-controls-20261025. User reports duplicate map selector during analysis, STAGE_INVALID_RING while revising a detailed stage and no numbered controls after a scope switch. Fix only the existing active-analysis selector hiding rule to override its inline display:flex. Reset assisted editing locks/state even when no map drawing is mounted, preserving active-save locks, stale-result guards and parent isolation. Reproduce a 320-vertex real Dikmen stage rejected by the 301-vertex storage cap; increase only the stage ring cap to bounded 1001 in matching client/SQL validator without simplifying any parent boundary or changing topology/auth checks. Verify actual local stage RPC create/revision/readback preserves old geometry; retain crossing, unclosed ring and oversized rejection. Add exact reviewed migration to existing allowlists. Browser fixture now validates rings; three-width Chromium/WebKit tests cover analysis pending selector and repeat scope-change/new numbered path. No allometry, species/density, park discovery, raster/area engine, accepted results or existing table/record changes.",
+      "files": [
+        {
+          "path": "css/park-panel.css",
+          "previous_sha256": "cd0632d6ade01ca56a2aece2121bee9e891250c95773d9fb1ca9e36e86ebb9c8",
+          "sha256": "d9283d76867db1ee4259694715e0c8930bc38833e4e165e169d1d498a316d8b6"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "9e035556b48b7b358ca9f7b9c5a9c8f02771c6bdae7c8c718f57cf14d405e344",
+          "sha256": "e56adffcd49fe56fd58c854d88e81e970ee3f2018ad2400fc2ba13d32c172d4d"
+        },
+        {
+          "path": "scripts/lib/park-stage-browser-fixture.mjs",
+          "previous_sha256": "e061800fbb7544e82d0777911ae19d03a08728a2eb91eb487b3c6384f14ba85a",
+          "sha256": "f99e0bd3c4c141ebf4df698c48511039333f56b71b6633f28b6b55dc87d4ac74"
+        },
+        {
+          "path": "scripts/park-stage-assisted-smoke.mjs",
+          "previous_sha256": "fae91e2e55fa25af66df9806365b731f0d03f3142696793ee189e6afd323c95d",
+          "sha256": "e3f1b2a9bd82773a97f6427188e62c3859a95d923ddf23c0ca1c9fdcec823429"
+        },
+        {
+          "path": "src/domain/parks/stage-geometry.js",
+          "previous_sha256": "b4a95a36e658eb31414d7e9f231035dcada822051f22bbfd3428fbf80f8953b5",
+          "sha256": "c2d5586506d5a5cab3efaa9678224e660eea3754c3b0e22f0c5186cdc2559736"
+        },
+        {
+          "path": "src/ui/park-stage-assisted-selection.js",
+          "previous_sha256": "97aee8ae43050c5d733d91720946f39f3f63db23a541ae48cf9c2e5a35dcf183",
+          "sha256": "cfc98de8d2bd5680138ea2b8b842d35bf58c6e3cf34795d19abee76dd858825d"
+        },
+        {
+          "path": "test/dbh-qa.test.mjs",
+          "previous_sha256": "057dc36774d0f1488afb93dc9a1908cecbeda39ddf1302006d41826c3866e87f",
+          "sha256": "4d07329da132f8c7f44c7a5bfb69fbe58d811e03789257858ba95fa98ce4a36d"
+        },
+        {
+          "path": "test/form-qa.test.mjs",
+          "previous_sha256": "c481a53210452039e05dd8419fa2f3046ee2c6a574453b666842e224be877053",
+          "sha256": "6191c38c799e7440a1300374e9d8ea976ce0650ac2c434a8bd4f69df3fa16ad8"
+        },
+        {
+          "path": "test/park-stage-assisted-ui.test.mjs",
+          "previous_sha256": "cc8e7d1e1811175fde4508077203da607a6e255501a0e965d299d26960ad086c",
+          "sha256": "db628ddb31692ce0dc5e096acd55858e47c3cca707340a64514ec0be3a83dcda"
+        }
+      ],
+      "added_protected_files": [
+        "supabase/migrations/20261025071344_stage_ring_vertex_limit.sql",
+        "test/park-stage-detailed-save.test.mjs"
       ]
     }
   ]
