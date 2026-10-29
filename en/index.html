@@ -91,10 +91,10 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--mut);font-siz
 <header class="top"><div class="wrap nav"><a class="brand" href="../">🌲 DendroGeo</a>
 <nav class="links" aria-label="Main"><a href="methods/">Methods</a><a href="../rapor/">Reports (DGR)</a><a href="../">Türkçe</a></nav></div></header>
 <main><div class="wrap">
-<div class="tag">ENGLISH · BETA</div>
+<div class="tag">URBAN FORESTRY · TREE INVENTORY · WEB GIS</div>
 <h1>Global Tree Inventory &amp; Carbon Data System</h1>
 <p class="lead">DendroGeo turns field measurements of individual trees (circumference at 1.30 m, derived DBH = circumference/π, height, species, GNSS position, photo evidence) into allometric carbon-stock estimates (Chave et&nbsp;al. 2014) and 10&nbsp;m land-cover context for urban parks — with moderator approval, geofencing, Monte-Carlo uncertainty and fully disclosed QA/QC in reproducible scientific reports (DGR).</p>
-<a class="btn" href="../">Open the app (Turkish)</a>
+<a class="btn" href="../">Open the app · select EN for English</a>
 <a class="btn alt" href="methods/">Read the methods</a>
 <div class="grid">
 <div class="card"><h3>🌳 Individual-tree inventory</h3><p>Every record carries point ID, species (canonical dictionary with sourced wood density ρ), raw circumference at 1.30 m, derived DBH, height, photo evidence and GNSS position. Raw <code>girth_cm</code> is preserved; <code>dbh_cm = girth_cm / π</code>. Allometry uses the unrounded derived DBH, while user-facing DBH is displayed to one decimal place.</p></div>
@@ -102,7 +102,12 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--mut);font-siz
 <div class="card"><h3>🛰️ 10 m land-cover context</h3><p>ESA WorldCover tiles are intersected with the park polygon (area-weighted border cells), with an area-balance QA gate (≤0.5%) before publication.</p></div>
 <div class="card"><h3>📄 DGR scientific reports</h3><p>Each publication is an immutable, hash-verified document: metadata (DataCite 4.7-aligned), analysis fingerprint (engine, git commit, EPSG), QR to the permanent URL, citation &amp; retraction notices. Author = the data contributor.</p></div>
 </div>
-<p style="margin-top:30px;color:var(--mut)"><small>Full English translation is in progress; the application interface is currently in Turkish. Founders: Nagihan Şirin &amp; Sinan Şirin · Software code: MIT · approved DendroGeo data and original editorial content: CC BY-NC 4.0. Third-party materials remain under their own licenses; the DendroGeo name and logo are not licensed by these notices. See the repository for details.</small></p>
+<h2>Urban park land-cover analysis</h2>
+<p>The accepted park surface uses five classes: green space, hard surface, buildings, water and bare ground. Pools and ornamental pools belong to water. ESA WorldCover raster results, Sentinel-2 spectral observations, OpenStreetMap geometries and user-accepted corrections are tracked separately. Relative NDVI describes the distribution within the same park; it is not a canopy-cover measurement. Read the <a href="methods/">scientific methods and limitations</a> before interpreting results.</p>
+<h2>Software citation and research outputs</h2>
+<p>Şirin, N. &amp; Şirin, S. (2026). <cite>DendroGeo: Küresel Ağaç Envanteri ve Karbon Veri Sistemi</cite> (Version 3.0.1) [Software]. Zenodo. <a href="https://doi.org/10.5281/zenodo.22948773">doi:10.5281/zenodo.22948773</a>.</p>
+<p>This DOI identifies the software release. Cite each dataset or DGR report using its own publication metadata and DOI, when assigned. Browse the <a href="../rapor/">DGR publication directory</a> for available reports and publication status.</p>
+<p style="margin-top:30px;color:var(--mut)"><small>The application has an EN language option. Translation of some information pages is still in progress. Founders: Nagihan Şirin &amp; Sinan Şirin · Software code: MIT · approved DendroGeo data and original editorial content: CC BY-NC 4.0. Third-party materials remain under their own licenses; the DendroGeo name and logo are not licensed by these notices. See the repository for details.</small></p>
 </div></main>
 <footer><div class="wrap">© DendroGeo · <a href="../kunye/">Künye</a> · <a href="privacy/">Privacy</a> · <a href="data-protection/">Data protection</a> · <a href="terms/">Terms</a> · <a href="https://github.com/snansrin/dendrogeo">GitHub</a></div></footer>
 </body>

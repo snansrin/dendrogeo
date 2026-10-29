@@ -10,7 +10,11 @@ let xml=readFileSync(sitemapPath,'utf8');
 const original=xml;
 const policies=['privacy','data-protection','terms'];
 for(const slug of policies){const url='https://dendrogeo.org/en/'+slug+'/';if(!xml.includes('<loc>'+url+'</loc>'))xml=xml.replace('</urlset>','  <url><loc>'+url+'</loc><lastmod>2026-10-19</lastmod></url>\n</urlset>');}
-xml=xml.replace(/(<loc>https:\/\/dendrogeo\.org\/en\/<\/loc>)([\s\S]*?)(<\/url>)/,(_,loc,rest,end)=>loc+rest.replace(/<lastmod>[^<]+<\/lastmod>/g,'')+'<lastmod>2026-10-19</lastmod>'+end);
+xml=xml.replace(/(<loc>https:\/\/dendrogeo\.org\/en\/<\/loc>)([\s\S]*?)(<\/url>)/,(_,loc,rest,end)=>{
+ const current=rest.match(/<lastmod>(\d{4}-\d{2}-\d{2})<\/lastmod>/)?.[1];
+ const lastmod=current&&current>'2026-10-19'?current:'2026-10-19';
+ return loc+rest.replace(/<lastmod>[^<]+<\/lastmod>/g,'')+'<lastmod>'+lastmod+'</lastmod>'+end;
+});
 const queue=JSON.parse(readFileSync(join(root,'rapor/yayin-kuyrugu.json'),'utf8'));
 const dates=(queue.entries||[]).filter(entry=>entry.status==='Geri çekildi').map(entry=>entry.finished_at||entry.completed_at||entry.started_at).filter(value=>/^\d{4}-\d{2}-\d{2}/.test(value)).map(value=>value.slice(0,10)).sort();
 const activeReports=readReportIndex();
