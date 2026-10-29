@@ -1,6 +1,8 @@
 /* Canvas renderer for the park PNG; download and DOM concerns stay in its adapter. */
 (function(root){
  "use strict";
+ // Translate only presentation text; preserve surrounding spacing and numeric inputs.
+ const t=value=>root.document?.documentElement?.lang==="en"?String(value).replace(/\S(?:[\s\S]*\S)?/,text=>root.DG_PNG_I18N_EN?.[text]??root.dgT?.(text)??text):value;
  function draw({context,layout,options,landcover,outer,holes,gridSession,waypoints,classes,areaM2,osmAttribution,traceRing}){
   const {W,H,PAD,LEGH,scale,projector:pr}=layout;
   const ctx=context,opts=options,lc=landcover;
@@ -12,11 +14,11 @@
     /* başlık */
     ctx.fillStyle="#14532d";
     ctx.font="700 22px system-ui,sans-serif";
-    ctx.fillText("DendroGeo · Park Analizi",PAD,40);
+    ctx.fillText(t("DendroGeo · Park Analizi"),PAD,40);
     ctx.fillStyle="#556b5e";
     ctx.font="400 13px system-ui,sans-serif";
-    const haTxt="Park polygonu: "+(areaM2()/10000).toFixed(2)+" ha";
-    ctx.fillText(haTxt+"   ·   "+new Date().toLocaleString("tr-TR"),PAD+ctx.measureText("DendroGeo · Park Analizi   ").width+180,40);
+    const haTxt=t("Park polygonu: ")+(areaM2()/10000).toFixed(2)+" ha";
+    ctx.fillText(haTxt+t("   ·   ")+new Date().toLocaleString(root.document?.documentElement?.lang==="en"?"en-GB":"tr-TR"),PAD+ctx.measureText(t("DendroGeo · Park Analizi   ")).width+180,40);
 
     /* PARK KIPI: park dışındaki hiçbir şey çizilmez */
     ctx.save();
@@ -84,7 +86,7 @@
         ctx.fill();
         ctx.strokeStyle="#fff";ctx.lineWidth=2;ctx.stroke();
         ctx.fillStyle="#33413a";
-        ctx.fillText("P"+w.wp_id,x+8,y+3);
+        ctx.fillText(t("P")+w.wp_id,x+8,y+3);
       }
     }
 
@@ -112,8 +114,8 @@
       ctx.strokeStyle="rgba(0,0,0,.35)";ctx.strokeRect(lx,ly-4,16,12);
       ctx.setLineDash([]);
       ctx.fillStyle="#33413a";ctx.font="500 12px system-ui,sans-serif";
-      ctx.fillText(label,lx+22,ly+6);
-      lx+=22+ctx.measureText(label).width+26;
+      ctx.fillText(t(label),lx+22,ly+6);
+      lx+=22+ctx.measureText(t(label)).width+26;
     };
     if(opts.cover&&lc&&lc.patches){
       const present=["green","water","hard","bare","other"].filter(k=>
@@ -138,14 +140,14 @@
     ctx.moveTo(bx,by-5);ctx.lineTo(bx,by+5);
     ctx.moveTo(bx+best*scale,by-5);ctx.lineTo(bx+best*scale,by+5);
     ctx.stroke();
-    ctx.fillText(best+" m",bx+best*scale+8,by+4);
+    ctx.fillText(best+t(" m"),bx+best*scale+8,by+4);
 
     /* kuzey oku */
     const nx=W-PAD-40,ny=ly-2;
     ctx.beginPath();ctx.moveTo(nx,ny-16);ctx.lineTo(nx-7,ny+4);ctx.lineTo(nx+7,ny+4);
     ctx.closePath();ctx.fillStyle="#33413a";ctx.fill();
     ctx.font="700 12px system-ui,sans-serif";
-    ctx.fillText("N",nx-4,ny+18);
+    ctx.fillText(t("N"),nx-4,ny+18);
 
     /* TELİF/LİSANS SATIRI (ODbL türev eser şartı): park geometrisi OSM'den
      * türetilir; üretilen PNG bir türev eserdir ve atıf gerektirir. Ayrıca
@@ -154,8 +156,8 @@
     ctx.fillStyle="#8a978f";
     ctx.font="400 11px system-ui,sans-serif";
     ctx.fillText(
-      "Park s\u0131n\u0131r\u0131 ve veriler: "+osmAttribution()+
-      "  \u00b7  DendroGeo (CC BY-NC 4.0)  \u00b7  dendrogeo.org  \u00b7  "+
+      t("Park s\u0131n\u0131r\u0131 ve veriler: ")+osmAttribution()+
+      t("  \u00b7  DendroGeo (CC BY-NC 4.0)  \u00b7  dendrogeo.org  \u00b7  ")+
       new Date().toISOString().slice(0,10),
       PAD, H-14
     );

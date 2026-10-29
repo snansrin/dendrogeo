@@ -1,5 +1,6 @@
 /* Own the verified surface-map export dialog and canvas composition. */
 (function(root){
+  const t=value=>root.document?.documentElement?.lang==="en"?String(value).replace(/\S(?:[\s\S]*\S)?/,text=>root.DG_PNG_I18N_EN?.[text]??root.dgT?.(text)??text):value;
   function openDialog({document,grid,waypoints,escape,translate,renderDialog,renderPng}){
     if(document.getElementById('dgSurfaceExportDialog'))return;
     const dialog=document.createElement('dialog');dialog.id='dgSurfaceExportDialog';dialog.className='dg-export-dialog card';
@@ -53,7 +54,7 @@
         if(epoch!==state.epoch)return;
       }
       drawLayers({context,layers,displayFeatures,project,parkRings,gridCells:layers.grid?getGridCells():[],waypoints,colors:palette,ink});
-      if(!mapOnly)renderInfo({context,width,height,green,muted,ink,colors:palette,park,parkDate:new Date().toISOString().slice(0,10),decisionCount,viewLabel:accepted?'KABUL EDİLMİŞ v'+(record.serverRevision||1):'ÖNİZLEME · HENÜZ KAYDEDİLMEDİ',mapTitle:accepted?'DOĞRULANMIŞ PARK HARİTASI':'PARK ANALİZİ ÖNİZLEMESİ',areasTitle:accepted?'DOĞRULANMIŞ ALANLAR':'ANALİZ ALANLARI',footerNote:accepted?'Kesin hücre geometrisi ve doğrulanmış yüzey sınıfları.':'Kabul edilmemiş analiz önizlemesi; saha doğrulaması değildir.',parkAreaLabel:typeof parkAreaLabel==="function"?parkAreaLabel():parkAreaLabel,edits,layers,areas,ha,labelForClass,fingerprint:record.fingerprint});
+      if(!mapOnly)renderInfo({context,width,height,green,muted,ink,colors:palette,park,parkDate:new Date().toISOString().slice(0,10),decisionCount,viewLabel:accepted?t('KABUL EDİLMİŞ')+' v'+(record.serverRevision||1):t('ÖNİZLEME · HENÜZ KAYDEDİLMEDİ'),mapTitle:accepted?'DOĞRULANMIŞ PARK HARİTASI':'PARK ANALİZİ ÖNİZLEMESİ',areasTitle:accepted?'DOĞRULANMIŞ ALANLAR':'ANALİZ ALANLARI',footerNote:accepted?'Kesin hücre geometrisi ve doğrulanmış yüzey sınıfları.':'Kabul edilmemiş analiz önizlemesi; saha doğrulaması değildir.',parkAreaLabel:typeof parkAreaLabel==="function"?parkAreaLabel():parkAreaLabel,edits,layers,areas,ha,labelForClass,fingerprint:record.fingerprint});
       if(attribution){context.fillStyle='#fff';context.fillRect(x,y+drawHeight,mapWidth,44);context.fillStyle=ink;context.font='bold 14px Arial';context.fillText('© DendroGeo · dendrogeo.org',x+8,y+drawHeight+17,mapWidth-16);context.font='12px Arial';context.fillText(attribution,x+8,y+drawHeight+35,mapWidth-16);}
       canvas.toBlob(blob=>{
         if(!blob){toast(translate('PNG üretilemedi.'),'err','🖼️');return;}

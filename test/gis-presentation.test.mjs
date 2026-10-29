@@ -261,7 +261,7 @@ test('verified NDVI PNG uses 1240x1560 official layout and paints observed green
  assert.match(src,/async function renderVerified\(layers\)/);
  assert.match(src,/computeLayout\(\{rings:getParkRings\(\)\}\)/);
  assert.match(layout,/CW=1240,CH=1560,MX=40,MY=240,MW=760,MH=1180/);
- assert.match(src,/g\.fillText\("DOĞRULANMIŞ PARK HARİTASI"/);
+ assert.match(src,/g\.fillText\(t\("DOĞRULANMIŞ PARK HARİTASI"/);
  assert.match(src,/for\(const poly of ndviPolys\)[\s\S]*?drawLeaflet\(g,pr,poly/);
  assert.match(src,/const counts=\{sparse:0,moderate:0,dense:0\}/);
  assert.match(src,/tiers\.cutoffs\.map\(n=>Number\(n\)\.toFixed\(3\)\)/);

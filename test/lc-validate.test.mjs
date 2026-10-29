@@ -754,7 +754,7 @@ describe("0058 · Doğrulanmış Harita PNG (kullanıcının refactor'ü üstün
   });
   test("künye dürüst: parmak izi + dönem + ÖNİZLEME/KABUL damgası canvas'ta", () => {
     assert.match(rd('src/ui/render-surface-export-infographic.js'), /parmak izi/);
-    assert.match(rd('src/ui/render-verified-surface-map-export.js'), /accepted\?'KABUL EDİLMİŞ v'/);
+    assert.match(rd('src/ui/render-verified-surface-map-export.js'), /accepted\?t\('KABUL EDİLMİŞ'\)\+' v'/);
     assert.match(rd('src/ui/render-verified-surface-map-export.js'), /ÖNİZLEME · HENÜZ KAYDEDİLMEDİ/);
     assert.match(rd('src/ui/render-surface-export-infographic.js'), /DOĞRULANMIŞ PARK HARİTASI/);
   });
