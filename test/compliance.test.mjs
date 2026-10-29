@@ -147,10 +147,11 @@ describe('KVKK: açık rıza ve aydınlatma', () => {
     assert.match(t, /5651/);
   });
 
-  test('yasal sayfalar sitemap + robots + footer bağlantılarıyla erişilebilir', () => {
+  test('yasal sayfalar noindex ile erişilebilir; landing footer bağlantıları korunur', () => {
     const sm = rd('sitemap.xml'), rb = rd('robots.txt');
     for (const s of ['/gizlilik/', '/kullanim-kosullari/', '/aydinlatma/', '/kunye/']) {
-      assert.ok(sm.includes(s), 'sitemap: ' + s);
+      assert.ok(!sm.includes(s), 'legal document must not be a search entry: ' + s);
+      assert.match(rd(s.slice(1)+'index.html'), /name="robots" content="noindex, follow"/);
       assert.ok(rb.includes(s), 'robots: ' + s);
       assert.ok(idx.includes('href="' + s + '"'), 'landing footer: ' + s);
     }

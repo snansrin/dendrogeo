@@ -209,12 +209,11 @@ describe('P1 · SEO/çok dillilik', () => {
       assert.match(t, /hreflang="tr"/); assert.match(t, /hreflang="en"/); assert.match(t, /hreflang="x-default"/);
     }
   });
-  test('sitemap /rapor/ galerisini ve yalnızca etkin DGR yayınlarını içeriyor', () => {
+  test('sitemap yalnız TR/EN landing içerir; rapor bağlantıları korunur', () => {
     const sm = rd('sitemap.xml');
-    assert.match(sm, /<loc>https:\/\/dendrogeo\.org\/rapor\/<\/loc>/);
-    const activeIds=readReportIndex(join(ROOT,'rapor')).map(report=>report.id);
-    for(const id of activeIds)assert.ok(sm.includes(`/rapor/${id}/`),`active report missing from sitemap: ${id}`);
-    if(!activeIds.length)assert.doesNotMatch(sm,/rapor\/DGR-\d{4}-\d{4}\//,'retracted reports must not remain indexable');
+    assert.deepEqual([...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]),['https://dendrogeo.org/','https://dendrogeo.org/en/']);
+    assert.match(rd('rapor/index.html'), /name="robots" content="noindex, follow"/);
+    assert.ok(existsSync(join(ROOT,'rapor/index.html')));
   });
   test('dil düğmesi landing topnav VE uygulama üst barında (EN↔TR)', () => {
     assert.match(landing, /class="btn sm ghost dg-lang-toggle" data-dg-landing-action="toggle-language"/);

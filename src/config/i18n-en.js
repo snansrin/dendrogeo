@@ -1970,3 +1970,10 @@ Object.assign(DG_I18N_EN,{
  "Başlangıçta 1.1, 1.2…; bitişte 2.1, 2.2… noktaları ekleyin. Parkın çevresi otomatik alınır.":"Add points 1.1, 1.2… at the start and 2.1, 2.2… at the end. The existing park outline is reused.",
  "Başlangıç / bitiş düğmeleriyle hattı seçin. Nokta ekleyin veya sürükleyin. Her hatta en az iki nokta olunca geçerli alan kaydedilebilir.":"Select a path with the start / end buttons. Add or drag points. A valid area can be saved once each path has at least two points."
 });
+
+/* Public landing copy only; scientific computation is unchanged. */
+Object.assign(DG_I18N_EN,{
+  "Ağaçlarda karbon hesaplama nasıl yapılır?": "How is tree carbon stock calculated?",
+  "DendroGeo, yerden 1,30 m yüksekte ölçülen göğüs çevresinden DBH çapını türetir; ağaç boyu ve odun yoğunluğuyla biyokütle ve karbon stoğu tahmini hesaplar. Sonuç bir stok tahminidir; yıllık karbon tutumu veya kişisel karbon ayak izi değildir. Model varsayımları ve ölçüm belirsizlikleri bilimsel yöntem belgesinde açıklanır.": "DendroGeo derives DBH from trunk circumference measured at 1.30 m above ground, then estimates biomass and carbon stock using tree height and wood density. The result is a stock estimate, not annual carbon sequestration or a personal carbon footprint. Model assumptions and measurement uncertainties are explained in the scientific methods.",
+  "Ağaç envanteri kayıtlarını GPS konumu, tür, çevre ve boy bilgisiyle oluşturun. Kent parkı analiziyle bu kayıtları park sınırı ve beş yüzey sınıfı bağlamında inceleyin; CSV, GeoJSON ve QGIS çıktılarıyla araştırma iş akışınıza aktarın.": "Build a tree inventory with GPS position, species, circumference and height. Examine these records within the park boundary and five surface classes using urban park analysis, then export CSV, GeoJSON or QGIS files for your research workflow."
+});

@@ -253,7 +253,8 @@ describe('kalite denetimi 2026-09-27 kilidi (P1/P3/P7/P9)', () => {
     assert.ok(existsSync(join(ROOT, 'en/methods/index.html')), 'sayfa var');
     const en = rd('en/methods/index.html');
     assert.match(en, /hreflang="tr"/); assert.match(en, /Chave et al\. \(2014\)/);
-    assert.match(rd('sitemap.xml'), /\/en\/methods\//);
+    assert.doesNotMatch(rd('sitemap.xml'), /\/en\/methods\//);
+    assert.match(en, /name="robots" content="noindex, follow"/);
     assert.match(rd('yontem/index.html'), /hreflang="en"/);
   });
 });

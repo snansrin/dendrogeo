@@ -11884,6 +11884,43 @@
           "sha256": "18fd478ae715d9883066dcd2676d5af4d707eccf31f92e76079e5a4246dcb3f5"
         }
       ]
+    },
+    {
+      "date": "2026-10-29",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: Explicit user SEO-only request: Google should index only TR/EN landing while other documents remain accessible by link. Landing title/copy/metadata and generated index change; service-worker revision only invalidates the public presentation cache. Two existing search-discovery assertions follow the new policy while retaining document accessibility checks. Allometry, density/species, domain/application/service modules, map/surface/grid/waypoint logic, shell/boot, database and immutable report artifacts remain byte-identical. This is a scoped presentation release, not a core hash refresh.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "bca736d85bca5019d0bdbb54124f0239635a86964953e8230932a60d8d4041f8",
+          "sha256": "22736c1acd15a1b38d3d1aaaa192e4c5538a0961df1442201c0ff698f375c444"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "5cc5c710332bb7711c65f201725f0b028d1b5b1beda1db88614bb60abfa4f943",
+          "sha256": "a268a15bcb61f85eb5010a77debfc2537c2c3e1aa9dfe88e5e44b50b4d83bfba"
+        },
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "d7a164c3946d5c1a6dcca426a006987cfd393bdf1285de7567389a8a21b3b1ec",
+          "sha256": "058a3233c6b6db5b913ba793281ac59a6154c4b0a6b54ebddd75c3b79ca765b0"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "e1b1cd86029c772dfbdc53e4d8ad410214230a8a6353511777fd6c9befb2c19d",
+          "sha256": "602bce0a03e28806df0b90292e1b8c6eaba406df026bf72db657fddd0f09b1fb"
+        },
+        {
+          "path": "test/critical-fixes.test.mjs",
+          "previous_sha256": "9b5f0f5c1ce08eabad4441cba6018ebe4728b6c534541d38ab50ee469afe001f",
+          "sha256": "381f7f79a15128d9f105070662b894982057afb453244fa0bdb42b627a14bd96"
+        },
+        {
+          "path": "test/landing-claims.test.mjs",
+          "previous_sha256": "d72f5e68eb7f03a252a3ee32bb2f415f21336177a17b75ed1a80f5c30db59bb7",
+          "sha256": "457936086a56f4e9ce4376a4c64084fbfce1be256ad7f9fa9bc87dec00dc1448"
+        }
+      ]
     }
   ]
 }
