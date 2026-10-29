@@ -21,6 +21,7 @@ function renderIndex(list, retractedReports) {
   }).join('');
   return `<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Yayınlanmış Raporlar — DendroGeo</title>
+<meta name="robots" content="noindex, follow">
 <meta name="description" content="DendroGeo tarafından yayınlanmış, içerik hash'i ile dondurulmuş park ölçekli bilimsel raporların dizini.">
 <link rel="canonical" href="https://dendrogeo.org/rapor/">
 ${publicPageThemeHead('..')}

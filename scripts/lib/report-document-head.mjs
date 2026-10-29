@@ -4,6 +4,7 @@ export function createReportDocumentHead({esc, fmtT, reportStyles, siteOrigin: S
   return function renderHead({id, P, t, dataset, ciTxt, hash, L, jsonld}) {
     return `<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, follow">
 <title>${id} · ${esc(P.name)} — Ağaç Envanteri ve Karbon Stoku Raporu</title>
 <meta name="description" content="${esc(P.name)} (${esc(P.city)}) bireysel ağaç envanteri: ${t.n} onaylı ölçüm, toplam karbon ${fmtT(t.ci.mean)} t (%95 GA ${fmtT(t.ci.lo)}–${fmtT(t.ci.hi)}). Yöntem: Chave ve ark. 2014; Monte Carlo belirsizlik; konum çiti doğrulaması; ${esc(dataset)} arazi örtüsü bağlamı.">
 <link rel="canonical" href="${SITE_ORIGIN}/rapor/${id}/">

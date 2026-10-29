@@ -1,9 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DendroGeo — Global Tree Inventory & Carbon Data System (English)</title>
-<meta name="description" content="DendroGeo: field-measured individual tree inventory, allometric carbon stock (Chave et al. 2014) and 10 m land-cover analysis for urban parks, with full QA/QC disclosure and reproducible scientific reports (DGR).">
-<meta name="robots" content="index, follow">
+<title>DendroGeo — Tree Inventory &amp; Tree Carbon Stock Calculator</title>
+<meta name="description" content="DendroGeo: tree inventory, biomass and carbon stock estimation, urban park GIS and land-cover analysis. Field measurements, scientific methods and uncertainty reporting.">
 <link rel="canonical" href="https://dendrogeo.org/en/">
 <meta property="og:type" content="website"><meta property="og:site_name" content="DendroGeo">
 <meta property="og:title" content="DendroGeo — Global Tree Inventory & Carbon Data System">
@@ -45,8 +44,8 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--mut);font-siz
       "@type": "WebPage",
       "@id": "https://dendrogeo.org/en/#webpage",
       "url": "https://dendrogeo.org/en/",
-      "name": "DendroGeo — Global Tree Inventory & Carbon Data System (English)",
-      "description": "DendroGeo: field-measured individual tree inventory, allometric carbon stock (Chave et al. 2014) and 10 m land-cover analysis for urban parks, with full QA/QC disclosure and reproducible scientific reports (DGR).",
+      "name": "DendroGeo — Tree Inventory & Tree Carbon Stock Calculator",
+      "description": "DendroGeo: tree inventory, biomass and carbon stock estimation, urban park GIS and land-cover analysis. Field measurements, scientific methods and uncertainty reporting.",
       "inLanguage": "en-US",
       "isPartOf": {
         "@id": "https://dendrogeo.org/#website"
@@ -71,7 +70,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--mut);font-siz
         {
           "@type": "ListItem",
           "position": 2,
-          "name": "DendroGeo — Global Tree Inventory & Carbon Data System (English)",
+          "name": "DendroGeo — Tree Inventory & Tree Carbon Stock Calculator",
           "item": "https://dendrogeo.org/en/"
         }
       ]
@@ -80,11 +79,12 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--mut);font-siz
 }
 </script>
 <!-- /dg-site-identity -->
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <!-- dg-site-traffic -->
-<script src="../src/config/site-traffic-config.js?v=adbb1346" defer></script>
-<script src="../src/domain/visitors/traffic-categories.js?v=aa57014d" defer></script>
-<script src="../src/adapters/visitors/send-site-metric.js?v=fc389d08" defer></script>
-<script src="../src/bootstrap/site-traffic.js?v=57fff36c" defer></script>
+<script src="../src/config/site-traffic-config.js?v=a82b5e5c" defer></script>
+<script src="../src/domain/visitors/traffic-categories.js?v=aa593dcc" defer></script>
+<script src="../src/adapters/visitors/send-site-metric.js?v=604aba3b" defer></script>
+<script src="../src/bootstrap/site-traffic.js?v=96ba1b28" defer></script>
 <!-- /dg-site-traffic -->
 </head>
 <body class="dg-page">
@@ -102,6 +102,9 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--mut);font-siz
 <div class="card"><h3>🛰️ 10 m land-cover context</h3><p>ESA WorldCover tiles are intersected with the park polygon (area-weighted border cells), with an area-balance QA gate (≤0.5%) before publication.</p></div>
 <div class="card"><h3>📄 DGR scientific reports</h3><p>Each publication is an immutable, hash-verified document: metadata (DataCite 4.7-aligned), analysis fingerprint (engine, git commit, EPSG), QR to the permanent URL, citation &amp; retraction notices. Author = the data contributor.</p></div>
 </div>
+<h2>How is tree carbon stock calculated?</h2>
+<p>DendroGeo derives DBH from trunk circumference measured at 1.30 m above ground, then estimates biomass and carbon stock using tree height and wood density. The result is a stock estimate, not annual carbon sequestration or a personal carbon footprint. Model assumptions and measurement uncertainties are explained in the scientific methods.</p>
+<p>Build a tree inventory with GPS position, species, circumference and height. Examine these records within the park boundary and five surface classes using urban park analysis, then export CSV, GeoJSON or QGIS files for your research workflow.</p>
 <h2>Urban park land-cover analysis</h2>
 <p>The accepted park surface uses five classes: green space, hard surface, buildings, water and bare ground. Pools and ornamental pools belong to water. ESA WorldCover raster results, Sentinel-2 spectral observations, OpenStreetMap geometries and user-accepted corrections are tracked separately. Relative NDVI describes the distribution within the same park; it is not a canopy-cover measurement. Read the <a href="methods/">scientific methods and limitations</a> before interpreting results.</p>
 <h2>Software citation and research outputs</h2>
