@@ -11930,7 +11930,7 @@
         {
           "path": "index.html",
           "previous_sha256": "22736c1acd15a1b38d3d1aaaa192e4c5538a0961df1442201c0ff698f375c444",
-          "sha256": "eb5f87659ba48e93d6569fdc9793851fc5a92c0abe0ca4dfdee9fc9d8552f916"
+          "sha256": "efaebfed329e2b9a4d7f686ace3458952b1e76d6c6dfc3bac1e5fa13b71b79cc"
         },
         {
           "path": "src/ui/gis-export-canvas-legend.js",

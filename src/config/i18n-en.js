@@ -1979,7 +1979,7 @@ Object.assign(DG_I18N_EN,{
 });
 
 /* PNG canvas text is drawn outside the DOM translation observer. */
-window.DG_PNG_I18N_EN = Object.freeze({
+globalThis.DG_PNG_I18N_EN = Object.freeze({
   "DendroGeo · Doğrulanmış Harita": "DendroGeo · Verified Map",
   "DendroGeo · Park Analizi": "DendroGeo · Park Analysis",
   "Park analizi": "Park analysis",
