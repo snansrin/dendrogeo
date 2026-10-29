@@ -11921,6 +11921,63 @@
           "sha256": "457936086a56f4e9ce4376a4c64084fbfce1be256ad7f9fa9bc87dec00dc1448"
         }
       ]
+    },
+    {
+      "date": "2026-10-29",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: Explicit user bug report: PNG output remains Turkish with EN selected. Translate canvas presentation text and measured legend labels using the existing runtime language dictionary. Retain original park/stage names, numeric values, colours, geometry, algorithms and accepted/preview gates. Generated runtime/index only refresh presentation content hashes. No domain/application/service/data/report artifacts change. This records only the listed presentation files, not a blanket core hash refresh. Add the dedicated offline EN/TR PNG browser regression to the existing phone CI sequence without removing any checks. English PNG labels are isolated from DOM translations to preserve unique EN/TR round trips. Two existing source assertions retain the same title and accepted/version checks through translation calls.",
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "22736c1acd15a1b38d3d1aaaa192e4c5538a0961df1442201c0ff698f375c444",
+          "sha256": "efaebfed329e2b9a4d7f686ace3458952b1e76d6c6dfc3bac1e5fa13b71b79cc"
+        },
+        {
+          "path": "src/ui/gis-export-canvas-legend.js",
+          "previous_sha256": "4262db061e0dd45a17bdb3ac5081ba62ff85b7d97ceefdeef84d858822afbf76",
+          "sha256": "d538a3b66adcbec3113a390ac695332efcbe3ee4df4d5d460c2547116d0e66ec"
+        },
+        {
+          "path": "src/ui/gis-export-standard-canvas.js",
+          "previous_sha256": "46c6cf820c4692a62ecbaa03fb6d6dd7eb501603498993b16b4f97212e6bfe32",
+          "sha256": "52ca1740aa0238fee0e9d5cf21f96b037ce919bd91369498e2be42bf727dc1ed"
+        },
+        {
+          "path": "src/ui/gis-export-verified-frame.js",
+          "previous_sha256": "f563b69c42f516d759c2a617d2bb840488e0f10aea2a7ab2a321b817407eed87",
+          "sha256": "bf3f3b73e685f7a0edc0464574e79c3981bc7301a85c6389b6c5f997749fcea9"
+        },
+        {
+          "path": "src/ui/gis-export-verified-summary.js",
+          "previous_sha256": "8416154bd5411fe493d8fab0ba09bdb0897357fcb496be2ed0394fdc904fc662",
+          "sha256": "9beef4cea904b24d91897d750d5080d61f9f4267266c357dd1dcdf10ca7f0f84"
+        },
+        {
+          "path": "src/ui/park-export-canvas.js",
+          "previous_sha256": "6e17ecbad2d5fbefa2abf336e7623450a7288254b2e013a2a8b875acb31813e3",
+          "sha256": "d9005b9fd6d9505f727fa6319a0241682d2af0191043f2da17503573dd46fc45"
+        },
+        {
+          "path": "src/ui/render-surface-export-infographic.js",
+          "previous_sha256": "a64873cd701ea6002765ca73577ab4a6f8c43f68c2cfbdc6ca1457c0667e7d8f",
+          "sha256": "4f49f78672a1f0434fd58e621b4ac8fc95b56b523575ea7a243a1bd874ac9638"
+        },
+        {
+          "path": "src/ui/render-verified-surface-map-export.js",
+          "previous_sha256": "8749881fbfb8859a3b94eb2a7335c2766d1c49026bcc8d8d4933f0d3d7b011c1",
+          "sha256": "149f92c105347e7414811460ee869bd8d97f184dceaa3d0d956a70a9b8c9217d"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "6a0a90d0dc90f3e90f849c502cd28f9273b16a2cb0befd8fdf2466071346e571",
+          "sha256": "e222b42d1fc25e11c74f191424f6c718f6f3b8c257fb56abab0b43eda3e70c52"
+        },
+        {
+          "path": "test/lc-validate.test.mjs",
+          "previous_sha256": "5334cc2dca71cbc6358c24aa1a76d90bbee56ff94b084200ed6aa062099a7501",
+          "sha256": "803d1e2317368c633b08a667215b06b0759c896336a286eb40403dc29a02028d"
+        }
+      ]
     }
   ]
 }
