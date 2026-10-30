@@ -16,7 +16,7 @@ try{for(const width of [360,390,430]){
  });
  await page.locator('#saveBtn').tap();await page.waitForFunction(()=>document.getElementById('toastWrap').textContent.includes('formda korundu'));
  assert.equal(await page.locator('#mHeight').inputValue(),'12');assert.equal(await page.evaluate(()=>EDIT_ID),7);assert.equal(await page.locator('#saveBtn').isEnabled(),true);
- assert.ok(await page.evaluate(()=>__dgWriteCalls[0].filters.some(([k,v])=>k==='height_m'&&v===10)));
+ assert.ok(await page.evaluate(()=>!__dgWriteCalls[0].filters.some(([k])=>k==='height_m')),'recorded dimensions must not be SQL equality predicates');
  await page.evaluate(()=>{window.__dgWriteMode='error';document.getElementById('toastWrap').replaceChildren()});await page.locator('#saveBtn').tap();await page.waitForFunction(()=>document.getElementById('toastWrap').textContent.includes('<img'));
  assert.equal(await page.locator('#toastWrap img').count(),0,'server errors must be text, never injected markup');assert.equal(await page.locator('#mHeight').inputValue(),'12');
  await page.evaluate(()=>{__dgWriteMode='empty';dgSetLang('en');document.getElementById('toastWrap').replaceChildren()});await page.locator('#saveBtn').tap();await page.waitForFunction(()=>document.getElementById('toastWrap').textContent.includes('Your edits remain in the form'));
