@@ -22,12 +22,15 @@ test('domain guidance chooses the nearest pending point, keeps tie order and rep
   assert.equal(resolve({waypoints,target:waypoints[2],gps,distance:()=>0,bearing:()=>0}).target,waypoints[2]);
 });
 
-test('location marker keeps its initial-target-only arrow and original Leaflet styling',()=>{
+test('location marker always exposes a hidden phone-oriented arrow with original size and GPS coordinates',()=>{
   const add=setup().DG_CREATE_WAYPOINT_GPS_LOCATION_MARKER.add,{events,leaflet}=api(),map={},gps={latitude:39,longitude:32},target={lat:40,lon:33};
   add({map,gps,target,leaflet,bearing:()=>70});
   const marker=events[0];assert.equal(marker[0],'marker');assert.deepEqual(JSON.parse(JSON.stringify(marker[1])),[39,32]);
-  assert.match(marker[2].icon.html,/rotate\(70deg\)/);assert.equal(marker[2].icon.iconSize[0],48);assert.equal(marker[2].zIndexOffset,1000);
-  events.length=0;add({map,gps,target:null,leaflet,bearing:()=>70});assert.doesNotMatch(events[0][2].icon.html,/nav-arrow-svg/);
+  assert.match(marker[2].icon.html,/nav-arrow-svg/);assert.match(marker[2].icon.html,/visibility:hidden/);
+  assert.doesNotMatch(marker[2].icon.html,/rotate\\(70deg\\)/,'target bearing must never be used as phone heading');
+  assert.equal(marker[2].icon.iconSize[0],48);assert.equal(marker[2].zIndexOffset,1000);
+  events.length=0;add({map,gps,target:null,leaflet,bearing:()=>70});
+  assert.match(events[0][2].icon.html,/nav-arrow-svg/,'orientation indicator is available before target selection');
 });
 
 test('readout preserves translated target, distance and reset states',()=>{
@@ -48,7 +51,7 @@ test('application draws current location first, then selects target and renders 
   const target={id:1,wp_id:1,lat:2,lon:1},waypoints=[target,{id:2,wp_id:2,lat:0,lon:1}],gps={latitude:1,longitude:1},els={navDist:{},navTarget:{},navArrow:{style:{}}};
   const result=render({map:{},waypoints,target:null,gps,leaflet,distance:(_a,_b,lat)=>Math.abs(lat-1),bearing:(_a,_b,lat)=>lat*10,getElement:id=>els[id],translate:value=>value,setTarget:value=>{selected=value;},createLocationMarker:window.DG_CREATE_WAYPOINT_GPS_LOCATION_MARKER,renderReadout:window.DG_RENDER_WAYPOINT_GPS_GUIDANCE_READOUT,addGuidanceLine:window.DG_ADD_WAYPOINT_GUIDANCE_LINE});
   assert.equal(result,target);assert.equal(selected,target);assert.equal(events[0][0],'marker');assert.equal(events[1][0],'line');assert.equal(els.navDist.textContent,'1 m');assert.equal(els.navTarget.textContent,'Hedef: P1 · 20° · Pusula bekleniyor; konumu ve haritayı izleyin.');
-  assert.doesNotMatch(events[0][2].icon.html,/nav-arrow-svg/); // target was selected after the location marker, as before
+  assert.match(events[0][2].icon.html,/nav-arrow-svg/); // the arrow is hidden until the phone provides a heading
 });
 
 test('overlay adapter retains its local fallback and modules load before it and are precached',()=>{

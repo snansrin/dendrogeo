@@ -37,11 +37,16 @@ try{for(const width of [360,390,430]){
   evidence=[];await loadWaypoints();const removed=WP[0].visited;
   await go('nav');await loadWaypoints();navTarget=WP[0];drawNav();
   const send=heading=>{const event=new Event('deviceorientation');Object.defineProperties(event,{webkitCompassHeading:{value:heading},webkitCompassAccuracy:{value:5}});window.dispatchEvent(event);};
-  send(90);const east=document.getElementById('navArrow').style.transform;
-  send(180);const south=document.getElementById('navArrow').style.transform;
-  return{arrived,saved,removed,east,south,visible:document.getElementById('navArrow').style.visibility};
+  const redPins=()=>[...document.querySelectorAll('#navMap .wp-badge2')].map(node=>node.outerHTML);
+  const beforePins=redPins();
+  const locationArrow=()=>document.querySelector('#navMap .loc-marker .nav-arrow-svg');
+  const initialBlue=locationArrow()?.style.visibility;
+  send(90);const east=document.getElementById('navArrow').style.transform,blueEast=locationArrow()?.style.transform;
+  send(180);const south=document.getElementById('navArrow').style.transform,blueSouth=locationArrow()?.style.transform;
+  return{arrived,saved,removed,east,south,visible:document.getElementById('navArrow').style.visibility,
+    initialBlue,blueEast,blueSouth,redPinsUntouched:JSON.stringify(beforePins)===JSON.stringify(redPins())};
  });
- assert.deepEqual(navigation,{arrived:{visited:false,point:'34',project:'1',writes:0},saved:true,removed:false,east:'rotate(270deg)',south:'rotate(180deg)',visible:'visible'});
- assert.deepEqual(errors,[]);console.log(JSON.stringify({engine:engine.name(),width,photoLayout:true,arrivalWithoutWrite:true,completionFromData:true,liveHeading:true}));
+ assert.deepEqual(navigation,{arrived:{visited:false,point:'34',project:'1',writes:0},saved:true,removed:false,east:'rotate(270deg)',south:'rotate(180deg)',visible:'visible',initialBlue:'hidden',blueEast:'rotate(90deg)',blueSouth:'rotate(180deg)',redPinsUntouched:true});
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({engine:engine.name(),width,photoLayout:true,arrivalWithoutWrite:true,completionFromData:true,liveHeading:true,liveMapCompass:true}));
  await page.close();
 }}finally{await browser.close();await server.close();}

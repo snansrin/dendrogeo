@@ -12082,6 +12082,105 @@
           "sha256": "c097b13d7de6ac212dde8d2ab7c9f715d29290170377d665c42222bf31f9ba1f"
         }
       ]
+    },
+    {
+      "date": "2026-10-30",
+      "audit_chain": "sha256-v1",
+      "scope": "Explicit user-requested field defect repair only: blue GPS map arrow/cone follows fresh device heading without moving red waypoints or geospatial analysis, and measurements edit CAS ignores unrelated volatile metadata while retaining exact owner, scientific-field, approval, deletion and photo-write comparisons. No allometry, wood-density, land-cover engine, theme, schema or stored measurements changed.",
+      "validation": [
+        "test/waypoint-gps-overlay-modules.test.mjs",
+        "test/field-compass-measurement-edit.test.mjs",
+        "scripts/field-navigation-smoke.mjs (Chromium/WebKit 360/390/430)",
+        "npm run check",
+        "npm run check:phone",
+        "npm run check:accessibility"
+      ],
+      "files": [
+        {
+          "path": "src/ui/create-waypoint-gps-location-marker.js",
+          "previous_sha256": "48e3ce0e4853f7285a7dac863f4abebf28cdf45b178b10120e9a16e50b86b7a4",
+          "sha256": "f660aaa104b50669e67749e26b80a88df48a9930cfe4c54ed5c7c7b662c01a08"
+        },
+        {
+          "path": "src/ui/render-waypoint-gps-guidance-readout.js",
+          "previous_sha256": "825a0397ce5a22615ac4fa572a1ec2d3d0417e6ce440c99137a3f6795170830c",
+          "sha256": "12c77dd73a1ab8d176101e116ac66473393997205de9317e01cefc936b0830ae"
+        },
+        {
+          "path": "src/adapters/trees/update-measurement-if-current.js",
+          "previous_sha256": "2bd0dfb0444dc8a6b41a24f51b41d1763f7831ad085d31c472ee92ca5d2bb9eb",
+          "sha256": "cabb7173f1ec776002d02a65928d4fc0a6772963bcae617d05ee8fbf27611bbb"
+        },
+        {
+          "path": "test/waypoint-gps-overlay-modules.test.mjs",
+          "previous_sha256": "d4820ede4aef37a7f2492a3ca79681315d1699e49830e3f710be93d8247c2a4c",
+          "sha256": "792318a3d5c60aaf954d50a6b4f5c3de868d3322bc81202902a0ca0b9159f1ea"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-30",
+      "audit_chain": "sha256-v1",
+      "scope": "Explicit user-requested field fix: regenerate only index.html and src/bootstrap/app-runtime.js using existing npm run build after compass and measurement edit changes. No changes to scientific calculations, waypoints, map/land-cover engines, themes, DB or measurement rows. One-shot build workflow removed itself.",
+      "validation": [
+        "npm run check",
+        "npm run check:phone",
+        "npm run check:accessibility",
+        "scripts/field-navigation-smoke.mjs"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "951266d06b6b6ee4a5fe4b0f86dfdcc99be8a55b509c422a433b386b7fca9ff6",
+          "sha256": "8e3ce8ed4884c0d2eb6581ef1648f07879bae0ced4fba28c35e3ea63ae79edc2"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-30",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: restore original photo concurrency safeguards for species-only measurement edits, and regenerate only bundled assets and index. Preserved owner/RLS, scientific data and allometry/wood density, land-cover engines, red waypoints, theme, source geometries and saved records.",
+      "validation": [
+        "npm run check",
+        "npm run check:phone",
+        "npm run check:accessibility",
+        "scripts/field-navigation-smoke.mjs Chromium/WebKit"
+      ],
+      "files": [
+        {
+          "path": "src/adapters/trees/update-measurement-if-current.js",
+          "previous_sha256": "cabb7173f1ec776002d02a65928d4fc0a6772963bcae617d05ee8fbf27611bbb",
+          "sha256": "8571828f2d4d30252f7f78ff8096d5df52d849636f78d192314cc77602584f79"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "8e3ce8ed4884c0d2eb6581ef1648f07879bae0ced4fba28c35e3ea63ae79edc2",
+          "sha256": "ceaac0615827cb154ab5621a66a2071bdd518a96d7bad21803fc5acf00c525aa"
+        }
+      ]
+    },
+    {
+      "date": "2026-10-30",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: preserve client_id in atomic edit conflict checks while ignoring volatile timestamps, and rebuild generated runtime/index. No change to scientific allometry, locked wood densities, surface/park engines, red waypoint coordinates, theme, database or stored measurements.",
+      "validation": [
+        "npm run check",
+        "npm run check:phone",
+        "npm run check:accessibility",
+        "scripts/field-navigation-smoke.mjs Chromium/WebKit"
+      ],
+      "files": [
+        {
+          "path": "src/adapters/trees/update-measurement-if-current.js",
+          "previous_sha256": "8571828f2d4d30252f7f78ff8096d5df52d849636f78d192314cc77602584f79",
+          "sha256": "0489da1f7575b4a8113908ebbbaa8a63c6240efbc6c4ec6914398074878a31c4"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "ceaac0615827cb154ab5621a66a2071bdd518a96d7bad21803fc5acf00c525aa",
+          "sha256": "55fb411a4e27e848a43149a58f7106472dc9a03432bdd007d419c94838fe8a30"
+        }
+      ]
     }
   ]
 }
