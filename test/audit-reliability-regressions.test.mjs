@@ -23,11 +23,11 @@ test('offline edits compare their original server snapshot atomically and preser
   };}};
   const queued=w.DG_BUILD_OFFLINE_MEASUREMENT_RECORD.build({record:{owner:'u1',height_m:12},editId:7,clientId:'queue',baseline});
   assert.notEqual(queued._editBaseline,baseline);
-  await db.query('update measurements set height_m=11 where id=7');
-  const result=await w.DG_PERSIST_QUEUED_MEASUREMENT.save({client,payload:{height_m:12},editId:7,owner:'u1',baseline:queued._editBaseline});
+  await db.query("update measurements set height_m=11,client_id='concurrent-write' where id=7");
+  const result=await w.DG_PERSIST_QUEUED_MEASUREMENT.save({client,payload:{height_m:12,client_id:'queue-write'},editId:7,owner:'u1',baseline:queued._editBaseline});
   assert.equal(result.data.length,0);assert.equal((await db.query('select height_m from measurements')).rows[0].height_m,11);
   const fresh=(await db.query('select * from measurements')).rows[0];
-  assert.equal((await w.DG_PERSIST_QUEUED_MEASUREMENT.save({client,payload:{height_m:12},editId:7,owner:'u1',baseline:fresh})).data.length,1);
+  assert.equal((await w.DG_PERSIST_QUEUED_MEASUREMENT.save({client,payload:{height_m:12,client_id:'queue-write'},editId:7,owner:'u1',baseline:fresh})).data.length,1);
   assert.equal((await db.query('select height_m from measurements')).rows[0].height_m,12);
  }finally{await db.close();}
 });
