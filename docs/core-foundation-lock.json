@@ -12181,6 +12181,39 @@
           "sha256": "55fb411a4e27e848a43149a58f7106472dc9a03432bdd007d419c94838fe8a30"
         }
       ]
+    },
+    {
+      "date": "2026-10-30",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: repair confirmed approved-row measurement edit failures with a limited owner/version/status CAS, non-overwriting photo guard, and explicit read-only zero-row diagnosis. An untouched circumference input retains the original preserved DBH and raw evidence for historic rows; species-dependent carbon uses the existing locked formula. No modifications to density values, allometry equations, land-cover engines, map tools, red waypoint markers, Supabase schema, or saved records.",
+      "validation": [
+        "npm run check",
+        "npm run check:phone",
+        "npm run check:accessibility",
+        "scripts/measurement-save-smoke.mjs Chromium/WebKit"
+      ],
+      "files": [
+        {
+          "path": "src/adapters/trees/update-measurement-if-current.js",
+          "previous_sha256": "0489da1f7575b4a8113908ebbbaa8a63c6240efbc6c4ec6914398074878a31c4",
+          "sha256": "f26362995ac570aaa566d952fe5eff068b87f5d53c34bc8d80c95c4d11faf36f"
+        },
+        {
+          "path": "src/adapters/trees/persist-measurement-record.js",
+          "previous_sha256": "23293d7e831fa20b0783383edb69c8f0fcc83c2bb85b7506756c486b39f58aae",
+          "sha256": "df488f9b12c365df718c0c30a581acc819af85d8bf33a7ed196994e0fa7a45c6"
+        },
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "da54b4773630e48cae818256269ce62c7daf1f5a9e38dd6e513de608d5463c44",
+          "sha256": "ce12a2fb083499a2397f3901995722e89138de0e7576e4425200b1c880fa569f"
+        },
+        {
+          "path": "test/offline-sync-modules.test.mjs",
+          "previous_sha256": "f100f890960074244b3dc3148be2ed69ac76382a021f792bab1e4045d4bbd7e5",
+          "sha256": "38442b251af9e88084317076618d9f8d703cdbafac281ff3899d0e320057260d"
+        }
+      ]
     }
   ]
 }
