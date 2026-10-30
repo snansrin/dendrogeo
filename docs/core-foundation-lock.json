@@ -12158,6 +12158,29 @@
           "sha256": "ceaac0615827cb154ab5621a66a2071bdd518a96d7bad21803fc5acf00c525aa"
         }
       ]
+    },
+    {
+      "date": "2026-10-30",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: preserve client_id in atomic edit conflict checks while ignoring volatile timestamps, and rebuild generated runtime/index. No change to scientific allometry, locked wood densities, surface/park engines, red waypoint coordinates, theme, database or stored measurements.",
+      "validation": [
+        "npm run check",
+        "npm run check:phone",
+        "npm run check:accessibility",
+        "scripts/field-navigation-smoke.mjs Chromium/WebKit"
+      ],
+      "files": [
+        {
+          "path": "src/adapters/trees/update-measurement-if-current.js",
+          "previous_sha256": "8571828f2d4d30252f7f78ff8096d5df52d849636f78d192314cc77602584f79",
+          "sha256": "0489da1f7575b4a8113908ebbbaa8a63c6240efbc6c4ec6914398074878a31c4"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "ceaac0615827cb154ab5621a66a2071bdd518a96d7bad21803fc5acf00c525aa",
+          "sha256": "55fb411a4e27e848a43149a58f7106472dc9a03432bdd007d419c94838fe8a30"
+        }
+      ]
     }
   ]
 }
