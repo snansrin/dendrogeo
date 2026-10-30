@@ -12135,6 +12135,29 @@
           "sha256": "8e3ce8ed4884c0d2eb6581ef1648f07879bae0ced4fba28c35e3ea63ae79edc2"
         }
       ]
+    },
+    {
+      "date": "2026-10-30",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: restore original photo concurrency safeguards for species-only measurement edits, and regenerate only bundled assets and index. Preserved owner/RLS, scientific data and allometry/wood density, land-cover engines, red waypoints, theme, source geometries and saved records.",
+      "validation": [
+        "npm run check",
+        "npm run check:phone",
+        "npm run check:accessibility",
+        "scripts/field-navigation-smoke.mjs Chromium/WebKit"
+      ],
+      "files": [
+        {
+          "path": "src/adapters/trees/update-measurement-if-current.js",
+          "previous_sha256": "cabb7173f1ec776002d02a65928d4fc0a6772963bcae617d05ee8fbf27611bbb",
+          "sha256": "8571828f2d4d30252f7f78ff8096d5df52d849636f78d192314cc77602584f79"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "8e3ce8ed4884c0d2eb6581ef1648f07879bae0ced4fba28c35e3ea63ae79edc2",
+          "sha256": "ceaac0615827cb154ab5621a66a2071bdd518a96d7bad21803fc5acf00c525aa"
+        }
+      ]
     }
   ]
 }
