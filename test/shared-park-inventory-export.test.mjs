@@ -25,6 +25,20 @@ function fixture(count=77){
   photo_url:`${storageOrigin}/storage/v1/object/public/dendro-photos/sinan/${i+1}.jpg`
  }));
 }
+function scopeClient({projects=[],memberships=[],invites=[],profiles=[],user=null}={}){
+ const data={projects,park_collaborators:memberships,park_invites:invites,profiles},calls=[];
+ return{
+  calls,auth:{async getUser(){return{data:{user},error:null};}},
+  from(table){assert.ok(Object.hasOwn(data,table),`unexpected read: ${table}`);return{
+   select(){const clauses=[];return{
+    eq(field,value){clauses.push(row=>row[field]===value);return this;},
+    in(field,values){clauses.push(row=>values.includes(row[field]));return this;},
+    order(){return this;},
+    async range(from,to){calls.push({table,from,to});return{data:data[table].filter(row=>clauses.every(p=>p(row))).slice(from,to+1),error:null};}
+   };}
+  };}
+ };
+}
 
 test('shared park document keeps all 77 measurements from two owners in numeric Point ID order',()=>{
  const api=app(),group=api.groupProjects([{id:25,park_id:8,name:'Göksu Parkı saha',parks:{name:'Göksu Parkı',area_m2:501000}}]).get('park:8');
@@ -55,6 +69,64 @@ test('same-park project groups are merged without disclosing unrelated parks',()
  assert.equal(groups.get('park:13').projects.length,1);
 });
 
+test('administrator participant selector contains only own and verified partner projects, never the admin-wide directory',async()=>{
+ const api=app(),who='sinan',partner='nagihan',other='outsider';
+ const client=scopeClient({
+  projects:[
+   {id:1,owner:who,park_id:8,name:'Sinan saha',parks:{name:'Göksu Parkı'}},
+   {id:2,owner:partner,park_id:8,name:'Nagihan saha',parks:{name:'Göksu Parkı'}},
+   {id:3,owner:other,park_id:8,name:'İzinsiz aynı park',parks:{name:'Göksu Parkı'}},
+   {id:4,owner:other,park_id:12,name:'Alakasız park',parks:{name:'Özel park'}}
+  ],
+  memberships:[{park_id:8,user_id:who,added_at:'2026-10-30T10:00:00Z'}],
+  invites:[{park_id:8,invited_by:partner,email:'sinan@example.org',status:'Kabul',responded_at:'2026-10-30T10:00:00Z'}],
+  profiles:[{id:partner,role:'user',active:true}],
+  user:{id:who,email:'Sinan@Example.org',email_confirmed_at:'2026-10-01T00:00:00Z'}
+ });
+ const rows=await api.listParticipantProjects(client,{userId:who,role:'admin'});
+ assert.deepEqual(Array.from(rows,p=>p.id).sort(),[1,2]);
+ assert.equal(api.groupProjects(rows).size,1);
+ assert.ok(client.calls.every(call=>call.table!=='measurements'));
+});
+
+test('revoked, unconfirmed or unrelated invitations cannot widen a shared selector',async()=>{
+ const api=app(),projects=[{id:1,owner:'sinan',park_id:8},{id:2,owner:'nagihan',park_id:8}];
+ for(const account of [
+  {id:'sinan',email:'sinan@example.org',email_confirmed_at:null},
+  {id:'different',email:'sinan@example.org',email_confirmed_at:'2026-10-01T00:00:00Z'}
+ ]){
+  const client=scopeClient({projects,memberships:[{park_id:8,user_id:'sinan',added_at:'2026-10-30T10:00:00Z'}],
+   invites:[{park_id:8,invited_by:'nagihan',email:'sinan@example.org',status:'Kabul',responded_at:'2026-10-30T10:00:00Z'}],user:account});
+  assert.deepEqual(Array.from(await api.listParticipantProjects(client,{userId:'sinan',role:'admin'}),p=>p.id),[1]);
+ }
+ const revoked=scopeClient({projects,user:{id:'sinan',email:'sinan@example.org',email_confirmed_at:'2026-10-01T00:00:00Z'}});
+ assert.deepEqual(Array.from(await api.listParticipantProjects(revoked,{userId:'sinan',role:'admin'}),p=>p.id),[1]);
+});
+
+test('accepted invite older than current membership does not authorize a project',async()=>{
+ const api=app(),client=scopeClient({
+  projects:[{id:1,owner:'sinan',park_id:8},{id:2,owner:'nagihan',park_id:8}],
+  memberships:[{park_id:8,user_id:'sinan',added_at:'2026-10-31T10:00:00Z'}],
+  invites:[{park_id:8,invited_by:'nagihan',email:'sinan@example.org',status:'Kabul',responded_at:'2026-10-30T10:00:00Z'}],
+  user:{id:'sinan',email:'sinan@example.org',email_confirmed_at:'2026-10-01T00:00:00Z'}
+ });
+ assert.deepEqual(Array.from(await api.listParticipantProjects(client,{userId:'sinan',role:'admin'}),p=>p.id),[1]);
+});
+
+test('admin-issued accepted invitation requires an active privileged sender, and full admin export stays separate',async()=>{
+ const api=app(),base={
+  projects:[{id:1,owner:'sinan',park_id:8},{id:2,owner:'nagihan',park_id:8},{id:3,owner:'third',park_id:9}],
+  memberships:[{park_id:8,user_id:'sinan',added_at:'2026-10-30T10:00:00Z'}],
+  invites:[{park_id:8,invited_by:'manager',email:'sinan@example.org',status:'Kabul',responded_at:'2026-10-30T10:00:00Z'}],
+  user:{id:'sinan',email:'sinan@example.org',email_confirmed_at:'2026-10-01T00:00:00Z'}
+ };
+ const permitted=scopeClient({...base,profiles:[{id:'manager',role:'admin',active:true}]});
+ assert.deepEqual(Array.from(await api.listParticipantProjects(permitted,{userId:'sinan',role:'admin'}),p=>p.id).sort(),[1,2]);
+ const denied=scopeClient({...base,profiles:[{id:'manager',role:'admin',active:false}]});
+ assert.deepEqual(Array.from(await api.listParticipantProjects(denied,{userId:'sinan',role:'admin'}),p=>p.id),[1]);
+ assert.equal((await api.listProjects(permitted)).length,3,'administrator-only directory keeps the full accessible set');
+});
+
 test('only trusted Supabase photo links are clickable and all DB text is escaped',()=>{
  const api=app(),group=api.groupProjects([{id:1,park_id:8,name:'Project',parks:{name:'Göksu <script>'}}]).get('park:8');
  const rows=fixture(2);
@@ -68,6 +140,17 @@ test('only trusted Supabase photo links are clickable and all DB text is escaped
  assert.doesNotMatch(html,/wrong\.example/);
  assert.equal((html.match(/Fotoğrafı aç<\/a>/g)||[]).length,0);
  assert.equal(api.photoURL(fixture(1)[0].photo_url,storageOrigin),fixture(1)[0].photo_url);
+});
+
+test('downloadable report has scoped DendroGeo identity and a non-publication notice',()=>{
+ const api=app(),group=api.groupProjects([{id:25,park_id:8,name:'Göksu',parks:{name:'Göksu Parkı'}}]).get('park:8');
+ const html=api.documentHTML([{group,rows:fixture(2)}],{origin:storageOrigin});
+ assert.match(html,/DENDROGEO/);
+ assert.match(html,/SAHA ENVANTER RAPORU/);
+ assert.match(html,/Point ID sıralı ayrıntılı envanter/);
+ assert.match(html,/dg-park-export-report/);
+ assert.match(html,/bir DGR bilimsel yayın onayı, DOI kaydı veya doğrulama sertifikası değildir/);
+ assert.equal((html.match(/Fotoğrafı aç<\/a>/g)||[]).length,2);
 });
 
 test('paginated measurement read does not truncate at 1000 and applies admin filters',async()=>{

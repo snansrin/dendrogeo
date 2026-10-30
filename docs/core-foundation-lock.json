@@ -12291,6 +12291,29 @@
           "sha256": "58bb4c438a621b5bb3242f95468d263b848cf4885ec7c9a794c2f5cfe073fd94"
         }
       ]
+    },
+    {
+      "date": "2026-10-31",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: restrict the ordinary shared-park inventory selector to the current user's owned projects and confirmed, still-active invitations instead of inheriting administrator-wide project visibility. Preserve the complete administrator export exclusively in management. Refresh the standalone photo-linked HTML inventory report with DendroGeo's scientific-looking presentation without claiming DGR publication or DOI certification. The changes affect only read-only export adapter/UI, generated index/runtime and synthetic tests. Allometry, DBH, density/species catalogs, calculations, GIS/surface/park engines, themes, Supabase RLS/schema and production records remain unchanged.",
+      "validation": [
+        "npm run check",
+        "npm run check:phone",
+        "npm run check:accessibility",
+        "node --test test/shared-park-inventory-export.test.mjs"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "3dd797694801dbcb5c28660e89e9f296a84413cb6833729438799db1b59af5e4",
+          "sha256": "c198a24172261279240b6ee8539a1dcf4b8aba5ab960a44d13022459eebda859"
+        },
+        {
+          "path": "src/ui/shared-park-inventory-export.js",
+          "previous_sha256": "7b5066dec386c4924a434684318957f3f16338bcdd74a0d0fcd71636e780f239",
+          "sha256": "ddb609e190c13cf070636b510502be1a6729bafd1ae36ca02c693a7eb0745368"
+        }
+      ]
     }
   ]
 }
