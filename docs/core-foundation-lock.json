@@ -12185,7 +12185,7 @@
     {
       "date": "2026-10-30",
       "audit_chain": "sha256-v1",
-      "scope": "User-authorized follow-up: repair existing approved-row edit failures with an owner/version/status CAS that does not compare unrelated photo or moderation metadata; owner-scoped read-only diagnosis distinguishes stale edits from blocked writes. The scientific diameter/circumference and density/allometry inputs, map/land-cover engines, themes, Supabase schema and saved measurements remain unchanged.",
+      "scope": "User-authorized release follow-up: repair existing approved-row edit failures with an owner/version/status CAS that does not compare unrelated photo or moderation metadata; owner-scoped read-only diagnosis distinguishes stale edits from blocked writes. The scientific diameter/circumference and density/allometry inputs, map/land-cover engines, themes, Supabase schema and saved measurements remain unchanged.",
       "validation": [
         "npm run check",
         "npm run check:phone",
