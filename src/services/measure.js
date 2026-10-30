@@ -281,7 +281,14 @@ async function dgSaveMeasInner(){
         prepare:{
           rememberProject:dgProjectRemember,
           preparePhoto:async value=>{const file=$("mPhoto").files[0];if(!file)return{blob:null,fileName:null};const prepared=await window.DG_PREPARE_MEASUREMENT_PHOTO.prepare({file,pointId:value.pointId,measurementNo:value.measurementNo,compress,buildFileName:parts=>window.DG_BUILD_MEASUREMENT_PHOTO_FILE_NAME.build(parts)});return{blob:prepared.blob,fileName:prepared.fileName};},
-          calculate:value=>calcFromCircumference(value.circumferenceCm,value.heightM,value.species,value.group),
+          calculate:value=>{
+            const original=DG_MEASUREMENT_EDIT_BASELINE,source=DG_MEASUREMENT_EDIT_INPUT_BASELINE;
+            if(EDIT_ID&&original&&source&&Number(value.circumferenceCm)===Number(source.circumference)&&
+               Number.isFinite(Number(original.dbh_cm))&&Number(original.dbh_cm)>0){
+              return {...calc(Number(original.dbh_cm),value.heightM,value.species,value.group),circumference_cm:value.circumferenceCm};
+            }
+            return calcFromCircumference(value.circumferenceCm,value.heightM,value.species,value.group);
+          },
           buildRecord:({form:value,calculation,project})=>{const record=window.DG_BUILD_MEASUREMENT_RECORD.build({owner:USER.id,projectId:value.projectId,pointId:value.pointId,measurementNo:value.measurementNo,group:value.group,species:value.species,circumferenceCm:value.circumferenceCm,dbhCm:calculation.dbh_cm,heightM:value.heightM,volumeM3:calculation.vol,carbonKg:calculation.total_carbon,parkSchemaOk:DG_PARK_SCHEMA_OK,parkId:project&&project.park_id});
             const original=DG_MEASUREMENT_EDIT_BASELINE,source=DG_MEASUREMENT_EDIT_INPUT_BASELINE;
             if(EDIT_ID&&original&&source&&Number(value.circumferenceCm)===Number(source.circumference)&&
