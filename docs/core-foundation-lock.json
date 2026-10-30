@@ -1854,7 +1854,7 @@
     "src/ui/shell-navigation-controller.js": "80d4c679a1a4ff43d997146b80827d7f5f2f277349b25f75f66a73e30b768166",
     "src/ui/shell-view-effects.js": "f85d2ed54e29126ede3e54e02c8567d109270e43e987c6176eb2c35f09217780",
     "src/ui/shell.js": "74cb4d81db2f33d92fc64aed84c0ebfcfafce75f3383290065326cf730fae938",
-    "src/ui/shared-park-inventory-export.js": "9f0fc208f4ad37328f8d06e956e9ba2c4a3764ece19453a990284bf5376f6024",
+    "src/ui/shared-park-inventory-export.js": "7b5066dec386c4924a434684318957f3f16338bcdd74a0d0fcd71636e780f239",
     "src/ui/show-manual-park-form.js": "7241e5d3adfa7b950cb4437c45a9a051742edca661d363b9d609739dbb3768bc",
     "src/ui/show-measurement-validation-error.js": "1d12c666b52d4a5f7f2584f9927726a79029c855bec3149f795312b10cfe10d7",
     "src/ui/show-park-comparison-denied.js": "5b0665352be5a8cce2e80850b87a5a473ad07711e5b96d68561ce6861f4131e2",
@@ -12278,7 +12278,7 @@
         {
           "path": "index.html",
           "previous_sha256": "b1cb030178cccbce0d15c37a5e72508f1cb78c1ba15873fdf87823fbf8d35625",
-          "sha256": "868a47d9097e1853c28151aea7471ddde97da52941a8e94699e25b5392bd21d2"
+          "sha256": "3dd797694801dbcb5c28660e89e9f296a84413cb6833729438799db1b59af5e4"
         },
         {
           "path": "partials/boot.html",

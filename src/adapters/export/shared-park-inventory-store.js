@@ -2,7 +2,7 @@
 /* Paginated RLS-scoped reads; no service role, view, schema or auth-policy changes. */
 (function(root){
  const PAGE=1000,sortPoints=root.DG_SHARED_PARK_INVENTORY_DOMAIN.sortPoints;
-async function listProjects(client){
+async function listInventoryProjects(client){
   const rows=[];
   for(let from=0;;from+=PAGE){
    const {data,error}=await client.from("projects").select("id,name,park_id,park_name,parks(id,name,area_m2)").order("id",{ascending:true}).range(from,from+PAGE-1);
@@ -31,5 +31,5 @@ async function listProjects(client){
   }
   return rows.sort(sortPoints);
  }
-  root.DG_SHARED_PARK_INVENTORY_STORE=Object.freeze({listProjects,readAll});
+  root.DG_SHARED_PARK_INVENTORY_STORE=Object.freeze({listProjects:listInventoryProjects,readAll});
 })(window);

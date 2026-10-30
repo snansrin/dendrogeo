@@ -102,7 +102,7 @@
   }catch(error){status("dgAdminParkInventoryStatus","Tam dışa aktarım yapılamadı: "+error.message,true);}finally{setBusy(false);}
  }
  function mount(){
-  const exportBody=root.document.querySelector("#v-export .export-panel-body"),adminCard=root.document.getElementById("admExpCountry")?.closest(".card");
+  const exportBody=root.document.querySelector?.("#v-export .export-panel-body"),adminCard=root.document.getElementById?.("admExpCountry")?.closest?.(".card");
   if(exportBody&&!root.document.getElementById("dgSharedParkSelect")){
    const section=root.document.createElement("section");section.className="export-format-card";section.style.marginTop="14px";
    section.innerHTML='<h3>🌳 Ortak Park · Tam Envanter</h3><p>Ortak çalışılan parkta erişim yetkin olan bütün projelerin ve kullanıcıların ölçümleri, Point ID sırasıyla ve fotoğrafa tıklanabilen bağlantılarla tek raporda.</p><div class="grid g3"><div><label class="lbl" for="dgSharedParkSelect">Park / ortak proje</label><select id="dgSharedParkSelect"><option value="">Parklar yükleniyor…</option></select></div><div style="align-self:end"><button type="button" class="btn sm ghost" data-dg-park-inventory-action="refresh">↻ Parkları yenile</button></div><div style="align-self:end"><button type="button" class="btn sm" data-dg-park-inventory-action="preview">📄 Önizle / HTML indir</button></div></div><p id="dgSharedParkStatus" class="dg-meta" role="status">Ortak parkları görmek için bu sekmeyi aç.</p>';
@@ -120,7 +120,7 @@
    const action=event.target?.closest?.("[data-dg-park-inventory-action]")?.dataset.dgParkInventoryAction;
    if(action==="refresh")refresh();else if(action==="preview")preview();else if(action==="admin")admin();
   });
-  const view=root.document.getElementById("v-export");
+  const view=root.document.getElementById?.("v-export");
   if(view&&root.MutationObserver){new root.MutationObserver(()=>{if(view.classList.contains("on"))refresh();}).observe(view,{attributes:true,attributeFilter:["class"]});}
   if(view?.classList.contains("on"))refresh();
  }
