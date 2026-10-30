@@ -2,7 +2,7 @@
 (function(root){
  async function execute(event,projectId,ports){
   if(event){event.preventDefault();event.stopPropagation();}
-  if(!ports.confirm(ports.confirmation))return {status:"cancelled"};
+  if(!await ports.confirm(ports.confirmation))return {status:"cancelled"};
   try{
    const{error}=await ports.deleteProject(projectId);
    if(error){ports.failure(error);return {status:"failed",error};}

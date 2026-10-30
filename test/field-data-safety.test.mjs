@@ -7,7 +7,7 @@ function deleteFixture(result){
  const events=[];const ctx={window:null,document:{getElementById:()=>({classList:{contains:()=>false}})},confirm:()=>true,dgCf:s=>s,console,
  sb:{from(){return {delete(){events.push('delete');return this;},eq(){return this;},select(){return Promise.resolve(result);}};}},
  removePhoto:async u=>events.push('photo:'+u),toast:()=>events.push('error'),$:()=>null,dgMarkLiveDirty:()=>events.push('dirty')};
- ctx.window=ctx;vm.createContext(ctx);
+ ctx.window=ctx;ctx.DG_TYPED_DELETE_CONFIRM={ask:async()=>true};vm.createContext(ctx);
  for(const path of ['src/ui/dashboard-view-state.js','src/adapters/users/delete-own-record-store.js','src/application/dashboard/delete-own-record.js'])
   vm.runInContext(readFileSync(new URL(path,root),'utf8'),ctx);
  vm.runInContext(readFileSync(new URL('src/services/dash.js',root),'utf8'),ctx);
@@ -21,6 +21,10 @@ test('failed or zero-row deletion retains photo and UI records',async()=>{
 test('confirmed deletion removes its returned photo and refreshes live data',async()=>{
  const f=deleteFixture({data:[{photo_url:'saved.jpg'}],error:null});await f.ctx.delRec(42);
  assert.deepEqual(f.events,['delete','photo:saved.jpg','records','dash','dirty']);
+});
+test('cancelled typed measurement deletion does not touch server, photo or view',async()=>{
+ const f=deleteFixture({data:[{photo_url:'saved.jpg'}],error:null});f.ctx.DG_TYPED_DELETE_CONFIRM.ask=async()=>false;
+ await f.ctx.delRec(42);assert.deepEqual(f.events,[]);
 });
 test('restore SQL quotes untrusted column identifiers and contains metadata line breaks',()=>{
  let output;const ctx={window:null,confirm:()=>true,dgCf:s=>s,dgTfs:()=> 'restore',toast(){},

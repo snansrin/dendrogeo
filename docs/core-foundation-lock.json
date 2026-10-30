@@ -12314,6 +12314,83 @@
           "sha256": "ddb609e190c13cf070636b510502be1a6729bafd1ae36ca02c693a7eb0745368"
         }
       ]
+    },
+    {
+      "date": "2026-10-31",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: accidental-deletion safety improvement. The existing user and administrator trash actions for a measurement, project or park identity now require an explicit typed, target-id-bound confirmation before any existing Supabase delete path can run. The modal reuses the established DendroGeo dialog theme, supports cancellation and keyboard use, and fails closed on wrong/missing text; asynchronous application gates await the decision. No delete adapter, role/RLS policy, schema, scientific formula, species/wood-density reference, GIS/park-detection/surface engine or existing records changed. Existing historical SHA-256 catalog and audit records remain intact.",
+      "validation": [
+        "npm run check",
+        "node --test test/typed-delete-confirmation.test.mjs test/measurement-cleanup-modules.test.mjs test/osm-drawing-reliability.test.mjs test/park-admin-mutation-modules.test.mjs test/field-data-safety.test.mjs test/delete-park-identity-application.test.mjs test/admin-tree-controller-modules.test.mjs test/dashboard-workflow-modules.test.mjs",
+        "GitHub Actions: CI (source, mobile Chromium, WebKit accessibility)"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "c198a24172261279240b6ee8539a1dcf4b8aba5ab960a44d13022459eebda859",
+          "sha256": "953332d9357f5540e6c4802bec8596f0a83bbf101438fc558f4eb00a2539ae5f"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "a268a15bcb61f85eb5010a77debfc2537c2c3e1aa9dfe88e5e44b50b4d83bfba",
+          "sha256": "388071a5cc7994693425345d765939dca452e3a6d11cfad1bdb62a29b8b4ac9d"
+        },
+        {
+          "path": "src/application/parks/delete-park-identity.js",
+          "previous_sha256": "e1dccf929a2cfabd4c93a428a9722032eaede68f073c1b2a15711745e11787d0",
+          "sha256": "46c50b33ffd9a3109769909986b57d41f588b68f12c3a7b4ea30252d0f62ed68"
+        },
+        {
+          "path": "src/application/trees/delete-measurement-project.js",
+          "previous_sha256": "8227b81f75e9e55137b753d2bf818d60e64356b5a3ca3b59fe68bbd268385ac5",
+          "sha256": "1180d55d63df359964e2fb60db357f03c77b8b51b5648451c6ada9edbb7b9851"
+        },
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "da54b4773630e48cae818256269ce62c7daf1f5a9e38dd6e513de608d5463c44",
+          "sha256": "3f0bc833b5a00eb49573a643c9c48c33d185e951875f2f9f3bd65802aef64a64"
+        },
+        {
+          "path": "src/ui/confirm-measurement-project-delete.js",
+          "previous_sha256": "b0c594f70bd0500f810993f508ef43eefe1aa17c7bcd0e6627586911b1a9683a",
+          "sha256": "9396b72534c523e4c56a00cd1ad687387d6764e24d8230874640b7347ffa76d6"
+        },
+        {
+          "path": "src/ui/delete-admin-tree-project.js",
+          "previous_sha256": "73d457db30b9d16b91e8855544f0ad5cd65b8c26af423005a2ce591b9939190d",
+          "sha256": "7bd2f8a933b9b7db5a0aa95b1039224110526797cfbeaad94f3e6ad90aa0aeda"
+        },
+        {
+          "path": "src/ui/park-admin-mutation.js",
+          "previous_sha256": "5d84e711a5619928dd056d6790857966d5d2b3bb26fd3c5b291fb56f63e9b1d5",
+          "sha256": "21d70834337ef6f3155dcd1888936ec56d1d427c0ae1527ab230bb5714d07564"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "58bb4c438a621b5bb3242f95468d263b848cf4885ec7c9a794c2f5cfe073fd94",
+          "sha256": "6bc4cc62de849c4a9b4a646a4a6933717b14260e48f663b6c886a51402592689"
+        },
+        {
+          "path": "test/admin-tree-controller-modules.test.mjs",
+          "previous_sha256": "f21a208baed65e4786e4786ee7e87534500d3baa98256d1a99a522f4dbad702d",
+          "sha256": "14cef44d6e880774fdc9a7b40e8bbe313e75a3cbb930fa0444eabd3498b12f48"
+        },
+        {
+          "path": "test/field-data-safety.test.mjs",
+          "previous_sha256": "bb10fa6a31ad988d711badb8e58bab4e755ed76d6a22f0cdaf78bc942d9f4bb1",
+          "sha256": "30da1fc5659c9724e8461259ef06771d9499fcb2a9145b74a3d2ad635e576603"
+        },
+        {
+          "path": "test/osm-drawing-reliability.test.mjs",
+          "previous_sha256": "753aeb457bf9ff8e0445d061957cefe4239e4514591716e939b25bdb1cbfaf03",
+          "sha256": "396a5956d13a3a2bb5658fade99da628879b8b600dd042bbe406803c7f7a8776"
+        },
+        {
+          "path": "test/park-admin-mutation-modules.test.mjs",
+          "previous_sha256": "84be1f5bcdacef2e308189d9559f00740c94aaf1d395ab47d298efef1ffdfa55",
+          "sha256": "b70738fb84380cd962038ae01a8a2484cdb033dbc88ca2a3d5b9e119ea02eb28"
+        }
+      ]
     }
   ]
 }

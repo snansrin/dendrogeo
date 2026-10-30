@@ -276,6 +276,7 @@ const CORE_ASSETS = [
     '/src/ui/admin-overview-metrics.js',
     '/src/ui/admin-overview-measurements.js',
     '/src/application/admin/load-admin-overview.js',
+    '/src/ui/typed-delete-confirmation.js',
     '/src/services/admin.js',
     '/src/application/admin/admin-tree-state.js',
     '/src/adapters/admin/admin-tree-store.js',

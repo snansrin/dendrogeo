@@ -40,15 +40,17 @@ test('park rename UI reports partial success and reloads the persisted identity'
   assert.match(feedback[0][0],/Park adı kaydedildi/);assert.match(feedback[0][0],/project RLS denied/);assert.deepEqual(events,['refresh']);
 });
 
-test('park-admin UI keeps confirmation wording and result feedback',()=>{
+test('park-admin UI keeps confirmation wording and result feedback',async()=>{
   const ui=setup().DG_PARK_ADMIN_MUTATION_UI,events=[];
   const translated=value=>'T:'+value,translateFormat=(value,params)=>value.replace('{src}',params.src).replace('{dst}',params.dst).replace('{sid}',params.sid).replace('{did}',params.did);
   assert.equal(ui.promptRename({name:'Park'},{prompt:(...args)=>{events.push(args);return 'Yeni';},translate:translated}),'Yeni');
   assert.deepEqual(events.shift(),['T:Park adı (örn. Göksu Parkı):','Park']);
   assert.equal(ui.confirmMerge({name:'A',id:1},{name:'B',id:2},{confirm:value=>{events.push(value);return true;},translateFormat}),true);
   assert.match(events.shift(),/Projeler ve ölçümler hedef parka taşınır/);
-  assert.equal(ui.confirmDelete({name:'B',id:2},{confirm:value=>{events.push(value);return true;}}),true);
-  assert.match(events.shift(),/ÖLÇÜM SİLİNMEZ/);
+  const sandbox=setup();sandbox.DG_TYPED_DELETE_CONFIRM={ask:input=>{events.push(input);return Promise.resolve(true);}};
+  assert.equal(await sandbox.DG_PARK_ADMIN_MUTATION_UI.confirmDelete({name:'B',id:2},{}),true);
+  const requested=events.shift();assert.equal(requested.kind,'park');assert.equal(requested.id,2);
+  assert.equal(requested.name,'B');assert.match(requested.warning,/ÖLÇÜM SİLİNMEZ/);
   const feedback=[];const ports={translate:value=>'T:'+value,translateCommon:value=>'C:'+value,translateFormat:value=>'T:'+value,escape:value=>'E:'+value,toast:(...args)=>feedback.push(args)};
   assert.equal(ui.renameResult({status:'write-failed',error:{message:'denied'}},ports),false);
   assert.deepEqual(feedback.pop(),['C:Ad güncellenemedi: E:denied','err']);

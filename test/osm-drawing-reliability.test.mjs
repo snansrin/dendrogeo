@@ -4,10 +4,12 @@ import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 function environment(paths,extra={}){const c=vm.createContext({window:null,Map,Date,Promise,AbortController,setTimeout,clearTimeout,console:{log(){},warn(){}},...extra});c.window=c;for(const p of paths)vm.runInContext(read(p),c);return c;}
-test('all native park dialogs use the browser window as receiver',()=>{
+test('native park rename and merge dialogs keep window receiver, deletion uses typed verification',async()=>{
  const c=environment(['src/ui/park-admin-mutation.js']);let calls=0;
  const ports={translate:s=>s,translateFormat:s=>s,prompt:function(){assert.equal(this,vm.runInContext("window",c));calls++;return 'name';},confirm:function(){assert.equal(this,vm.runInContext("window",c));calls++;return true;}};
- const park={id:1,name:'Park'};assert.equal(c.DG_PARK_ADMIN_MUTATION_UI.promptRename(park,ports),'name');assert.equal(c.DG_PARK_ADMIN_MUTATION_UI.confirmDelete(park,ports),true);assert.equal(c.DG_PARK_ADMIN_MUTATION_UI.confirmMerge(park,park,ports),true);assert.equal(calls,3);
+ const requests=[];c.DG_TYPED_DELETE_CONFIRM={ask:input=>{requests.push(input);return Promise.resolve(true);}};
+ const park={id:1,name:'Park'};assert.equal(c.DG_PARK_ADMIN_MUTATION_UI.promptRename(park,ports),'name');assert.equal(await c.DG_PARK_ADMIN_MUTATION_UI.confirmDelete(park,ports),true);assert.equal(c.DG_PARK_ADMIN_MUTATION_UI.confirmMerge(park,park,ports),true);assert.equal(calls,2);
+ assert.equal(requests[0].kind,'park');assert.equal(requests[0].id,1);
 });
 test('provider recovery reaches an independent backend after a primary 504 and a short park abort does not poison surface requests',async()=>{
  const urls=[];let aborted=false;

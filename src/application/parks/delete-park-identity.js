@@ -6,7 +6,7 @@
       if(!isAdmin())return{status:"forbidden"};
       const park=getPark(id);
       if(!park)return{status:"park-missing"};
-      if(!confirmDelete(park))return{status:"cancelled"};
+      if(!await confirmDelete(park))return{status:"cancelled"};
 
       const result=await deletePark(id);
       if(result&&result.error)return{status:"write-failed",error:result.error};

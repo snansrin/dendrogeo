@@ -206,7 +206,7 @@ function dgRenderProjectParkBox(){
 async function deleteProject(id){
  return window.DG_DELETE_MEASUREMENT_PROJECT.remove(id,{
   count:projectId=>window.DG_MEASUREMENT_PROJECT_DELETION_STORE.countMeasurements({client:sb,projectId}),
-  confirm:count=>window.DG_CONFIRM_MEASUREMENT_PROJECT_DELETE.confirm({count,format:dgTfs,confirm}),
+  confirm:count=>window.DG_CONFIRM_MEASUREMENT_PROJECT_DELETE.confirm({count,format:dgTfs,projectId:id,projectName:PROJ_LIST.find(project=>Number(project.id)===Number(id))?.name}),
   delete:projectId=>window.DG_MEASUREMENT_PROJECT_DELETION_STORE.delete({client:sb,projectId}),
   refresh:loadProjects
  });

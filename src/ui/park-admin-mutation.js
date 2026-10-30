@@ -9,11 +9,11 @@ window.DG_PARK_ADMIN_MUTATION_UI={
       {src:source.name,sid:source.id,dst:destination.name,did:destination.id}));
   },
   confirmDelete(park,ports){
-    return ports.confirm.call(window,
+    return window.DG_TYPED_DELETE_CONFIRM.ask({kind:"park",id:park.id,name:park.name,warning:
       `"${park.name}" (#${park.id}) silinsin mi?\n\n`+
       `· Bağlı projeler park bağını KAYBEDER ("park yok" durumuna düşer, adları değişmez)\n`+
       `· Ölçümlerin park_id'si null olur — ÖLÇÜM SİLİNMEZ\n`+
-      `· Yanlış/çift kimlikse silmek yerine 🔀 birleştirmeyi kullan`);
+      `· Yanlış/çift kimlikse silmek yerine 🔀 birleştirmeyi kullan`});
   },
   renameResult(result,ports){
     const {translate:t,translateCommon:tc,escape:esc,toast}=ports;
