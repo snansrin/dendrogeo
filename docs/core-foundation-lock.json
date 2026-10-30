@@ -12207,6 +12207,11 @@
           "path": "test/offline-sync-modules.test.mjs",
           "previous_sha256": "f100f890960074244b3dc3148be2ed69ac76382a021f792bab1e4045d4bbd7e5",
           "sha256": "38442b251af9e88084317076618d9f8d703cdbafac281ff3899d0e320057260d"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "55fb411a4e27e848a43149a58f7106472dc9a03432bdd007d419c94838fe8a30",
+          "sha256": "a64477ea06a51fb1b2de742b1449f826cb4dcdc8010e56814887e8fd819bff73"
         }
       ]
     }
