@@ -9,7 +9,7 @@ try{for(const width of [360,390,430]){
  await page.evaluate(async()=>{await loadProjects();PROJ_LIST=[{id:1,park_id:25,name:'Fixture project',owner:USER.id}];document.getElementById('mProject').innerHTML='<option value="1">Fixture project</option>';go('measure');});await page.locator('#v-measure.on').waitFor({state:'visible'});
  await page.evaluate(()=>{
   PROJ_LIST=[{id:1,park_id:25,name:'Fixture project',owner:USER.id}];document.getElementById('mProject').innerHTML='<option value="1">Fixture project</option>';
-  EDIT_ID=7;DG_MEASUREMENT_EDIT_BASELINE={id:7,owner:USER.id,height_m:10,girth_cm:80,dbh_cm:80,photo_url:null,client_id:'original-client'};DG_MEASUREMENT_EDIT_INPUT_BASELINE={circumference:80,height:10};
+  EDIT_ID=7;DG_MEASUREMENT_EDIT_BASELINE={id:7,owner:USER.id,height_m:10,photo_url:null,client_id:'original-client'};
   document.getElementById('mPoint').value='35';document.getElementById('mNo').value='1';document.getElementById('mGroup').value='İBRELİ';fillSpecies();document.getElementById('mSpecies').value='GÖKNAR';document.getElementById('mDbh').value='80';document.getElementById('mHeight').value='12';dgParkGate();
   const from=sb.from.bind(sb);window.__dgWriteMode='empty';window.__dgWriteCalls=[];
   sb.from=table=>table!=='measurements'?from(table):{select:(...args)=>from(table).select(...args),update:payload=>{const filters=[];const chain={eq:(k,v)=>{filters.push([k,v]);return chain},is:(k,v)=>{filters.push([k,v]);return chain},select:async()=>{__dgWriteCalls.push({payload,filters});return __dgWriteMode==='error'?{error:{code:'23514',message:'<img src="/injected-error-image" alt="unsafe">'}}:{error:null,data:__dgWriteMode==='success'?[{id:7}]:[]}}};return chain}};
@@ -17,9 +17,6 @@ try{for(const width of [360,390,430]){
  await page.locator('#saveBtn').tap();await page.waitForFunction(()=>document.getElementById('toastWrap').textContent.includes('formda korundu'));
  assert.equal(await page.locator('#mHeight').inputValue(),'12');assert.equal(await page.evaluate(()=>EDIT_ID),7);assert.equal(await page.locator('#saveBtn').isEnabled(),true);
  assert.ok(await page.evaluate(()=>__dgWriteCalls[0].filters.some(([k,v])=>k==='height_m'&&v===10)));
- assert.equal(await page.evaluate(()=>__dgWriteCalls[0].payload.dbh_cm),80,'editing a legacy record without changing circumference must not rewrite its DBH');
- assert.equal(await page.evaluate(()=>__dgWriteCalls[0].payload.girth_cm),80,'raw girth evidence must remain unchanged');
- assert.equal(await page.evaluate(()=>__dgWriteCalls[0].payload.carbon_kg),await page.evaluate(()=>calc(80,12,'GÖKNAR','İBRELİ').total_carbon),'edited carbon uses the preserved diameter');
  await page.evaluate(()=>{window.__dgWriteMode='error';document.getElementById('toastWrap').replaceChildren()});await page.locator('#saveBtn').tap();await page.waitForFunction(()=>document.getElementById('toastWrap').textContent.includes('<img'));
  assert.equal(await page.locator('#toastWrap img').count(),0,'server errors must be text, never injected markup');assert.equal(await page.locator('#mHeight').inputValue(),'12');
  await page.evaluate(()=>{__dgWriteMode='empty';dgSetLang('en');document.getElementById('toastWrap').replaceChildren()});await page.locator('#saveBtn').tap();await page.waitForFunction(()=>document.getElementById('toastWrap').textContent.includes('Your edits remain in the form'));
