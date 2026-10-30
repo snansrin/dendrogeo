@@ -68,7 +68,7 @@ test('account change during lookup prevents upload and write',async()=>{
  assert.equal(f.records.length,1);assert.equal(f.counts().inserts,0);assert.equal(f.counts().uploads,0);
 });
 test('zero-row update retains local edit',async()=>{
- const f=fixture([draft({_editId:42,_editBaseline:{id:42,owner:'a'}})],{writeResult:{data:[],error:null}});await f.ctx.syncOfflineData();assert.equal(f.counts().updates,1);assert.equal(f.records.length,1);
+ const f=fixture([draft({_editId:42,_editBaseline:{id:42,owner:'a',client_id:'previous-version'}})],{writeResult:{data:[],error:null}});await f.ctx.syncOfflineData();assert.equal(f.counts().updates,1);assert.equal(f.records.length,1);
 });
 test('write and photo failures retain queue and release the sync lock',async()=>{
  const f=fixture(undefined,{writeResult:{error:{code:'42501',message:'denied'}}});await f.ctx.syncOfflineData();await f.ctx.syncOfflineData();assert.equal(f.counts().inserts,2);assert.equal(f.records.length,1);

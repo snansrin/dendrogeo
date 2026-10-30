@@ -77,7 +77,7 @@ test('species-only edit ignores volatile metadata but compares scientific and ap
     editId:74,baseline
   });
   assert.equal(result.error,null);
-  for(const field of ['id','owner','species','status','girth_cm','dbh_cm','height_m','carbon_kg','deleted_at','client_id'])
+  for(const field of ['id','owner','species','status','girth_cm','dbh_cm','height_m','deleted_at','client_id'])
     assert.ok(calls.some(row=>row[1]===field),field);
   for(const field of ['updated_at','background_metadata','last_seen_at'])
     assert.equal(calls.some(row=>row[1]===field),false,'volatile metadata must not block edit: '+field);
@@ -98,10 +98,63 @@ test('true edit collision and RLS errors remain blocked, never overwrite or inse
     insert(){throw Error('edit must never become INSERT');}
   }}};
   const input={client,record:{owner:'u',species:'İĞDE'},editId:74,
-    baseline:{id:74,owner:'u',species:'ZEYTİN',status:'Onaylandı'}};
+    baseline:{id:74,owner:'u',client_id:'original-token',species:'ZEYTİN',status:'Onaylandı'}};
   const conflict=await window.DG_PERSIST_MEASUREMENT_RECORD.persist(input);
   assert.equal(conflict.error.code,'DG_EDIT_CONFLICT');
   const denied=await window.DG_PERSIST_MEASUREMENT_RECORD.persist(input);
   assert.equal(denied.error.code,'42501');
   assert.equal(write.species,'İĞDE');
+});
+
+test('approved owner can change species without an unrelated photo-metadata CAS rejection',async()=>{
+  const window=load(['src/adapters/trees/update-measurement-if-current.js','src/adapters/trees/persist-measurement-record.js']);
+  const server={id:74,owner:'u',client_id:'old-token',status:'Onaylı',deleted_at:null,
+    project_id:25,point_id:74,measurement_no:1,grp:'YAPRAKLI',species:'SÜS KİRAZI',
+    girth_cm:80,dbh_cm:80,height_m:9,photo_url:'new-photo.png',photo_file:'new.png'};
+  const baseline={...server,photo_url:'old-photo.png',photo_file:'old.png'};
+  let applied=false,attempts=0;
+  const client={from(table){
+    assert.equal(table,'measurements');
+    return{update(payload){
+      attempts++;const predicates=[];
+      const query={
+        eq(k,v){predicates.push([k,v]);return query;},
+        is(k,v){predicates.push([k,v]);return query;},
+        async select(){
+          if(!predicates.every(([k,v])=>server[k]===v))return{data:[],error:null};
+          Object.assign(server,payload);applied=true;return{data:[{id:74}],error:null};
+        }
+      };
+      return query;
+    }};
+  }};
+  const result=await window.DG_PERSIST_MEASUREMENT_RECORD.persist({client,record:{
+    owner:'u',species:'ZEYTİN',grp:'YAPRAKLI',carbon_kg:999,client_id:'new-token',status:'Beklemede'
+  },editId:74,baseline});
+  assert.equal(result.error,null);
+  assert.equal(applied,true);
+  assert.equal(attempts,1);
+  assert.equal(server.photo_url,'new-photo.png','existing photo must not be overwritten');
+  assert.equal(server.dbh_cm,80,'existing dimensions must not be overwritten');
+});
+
+test('stale edit token still prevents a write when the same row changed',async()=>{
+  const window=load(['src/adapters/trees/update-measurement-if-current.js','src/adapters/trees/persist-measurement-record.js']);
+  let writes=0;
+  const server={id:74,owner:'u',client_id:'newer-token',status:'Onaylı',deleted_at:null,species:'SÜS KİRAZI'};
+  const baseline={...server,client_id:'old-token'};
+  const client={from(){
+    return{update(payload){
+      const filters=[];
+      const query={eq(k,v){filters.push([k,v]);return query},is(k,v){filters.push([k,v]);return query},async select(){
+        if(filters.every(([k,v])=>server[k]===v)){writes++;Object.assign(server,payload);return{data:[{id:74}],error:null}}
+        return{data:[],error:null};
+      }};
+      return query;
+    },select(){return{eq(){return this},maybeSingle:async()=>({data:server,error:null})}}};
+  }};
+  const result=await window.DG_PERSIST_MEASUREMENT_RECORD.persist({client,record:{owner:'u',species:'ZEYTİN',client_id:'another-token'},editId:74,baseline});
+  assert.equal(result.error?.code,'DG_EDIT_CONFLICT');
+  assert.match(result.error.message,/client_id/);
+  assert.equal(writes,0);
 });

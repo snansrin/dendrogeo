@@ -12181,6 +12181,44 @@
           "sha256": "55fb411a4e27e848a43149a58f7106472dc9a03432bdd007d419c94838fe8a30"
         }
       ]
+    },
+    {
+      "date": "2026-10-30",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: repair existing approved-row edit failures with an owner/version/status CAS that does not compare unrelated photo or moderation metadata; owner-scoped read-only diagnosis distinguishes stale edits from blocked writes. The scientific diameter/circumference and density/allometry inputs, map/land-cover engines, themes, Supabase schema and saved measurements remain unchanged.",
+      "validation": [
+        "npm run check",
+        "npm run check:phone",
+        "npm run check:accessibility",
+        "scripts/measurement-save-smoke.mjs Chromium/WebKit"
+      ],
+      "files": [
+        {
+          "path": "src/adapters/trees/update-measurement-if-current.js",
+          "previous_sha256": "0489da1f7575b4a8113908ebbbaa8a63c6240efbc6c4ec6914398074878a31c4",
+          "sha256": "f26362995ac570aaa566d952fe5eff068b87f5d53c34bc8d80c95c4d11faf36f"
+        },
+        {
+          "path": "src/adapters/trees/persist-measurement-record.js",
+          "previous_sha256": "23293d7e831fa20b0783383edb69c8f0fcc83c2bb85b7506756c486b39f58aae",
+          "sha256": "df488f9b12c365df718c0c30a581acc819af85d8bf33a7ed196994e0fa7a45c6"
+        },
+        {
+          "path": "test/offline-sync-modules.test.mjs",
+          "previous_sha256": "f100f890960074244b3dc3148be2ed69ac76382a021f792bab1e4045d4bbd7e5",
+          "sha256": "38442b251af9e88084317076618d9f8d703cdbafac281ff3899d0e320057260d"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "55fb411a4e27e848a43149a58f7106472dc9a03432bdd007d419c94838fe8a30",
+          "sha256": "a64477ea06a51fb1b2de742b1449f826cb4dcdc8010e56814887e8fd819bff73"
+        },
+        {
+          "path": "test/offline-safety.test.mjs",
+          "previous_sha256": "c3503bc119698671e0f0c90d00b0fc8b3aa371ea6f90c713171a99168df063e3",
+          "sha256": "146986519e5cc5fa24100d54cb7c2139420cc49bc01725bb58e17642e5eba2dd"
+        }
+      ]
     }
   ]
 }
