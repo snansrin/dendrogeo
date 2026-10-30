@@ -15,7 +15,7 @@ window.DG_UPDATE_MEASUREMENT_IF_CURRENT={
       "project_id","point_id","measurement_no","grp","species",
       "girth_cm","dbh_cm","height_m","volume_m3","carbon_kg",
       "slope_deg","shared","status","park_id","deleted_at",
-      "photo_url","photo_file"
+      "photo_url","photo_file","client_id"
     ]);
     // Protect existing photos even for a species-only edit: never silently
     // accept a concurrent photo change during this submission.
