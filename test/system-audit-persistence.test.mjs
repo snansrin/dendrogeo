@@ -5,7 +5,7 @@ import {readFileSync,existsSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 function runtime(){const window={};for(const file of ['src/adapters/trees/update-measurement-if-current.js','src/adapters/trees/persist-measurement-record.js'])if(existsSync(new URL('../'+file,import.meta.url)))vm.runInNewContext(read(file),{window});return window;}
 function clientFor(responses){const calls=[];return{calls,from(){let payload,kind;const filters=[];const chain={update(v){kind='update';payload=v;return chain},insert(v){kind='insert';payload=v;return chain},eq(k,v){filters.push([k,v]);return chain},is(k,v){filters.push([k,v]);return chain},select(){return chain},then(resolve){calls.push({kind,payload:{...payload},filters});return Promise.resolve(responses.shift()).then(resolve)}};return chain}};}
-const baseline={id:7,owner:'u1',height_m:10,photo_url:null,status:'Beklemede'};
+const baseline={id:7,owner:'u1',height_m:10,photo_url:null,status:'Beklemede',client_id:'original-client'};
 
 test('online edit requires an actual server row before reporting success',async()=>{
  const w=runtime(),client=clientFor([{data:[],error:null}]);
