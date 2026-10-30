@@ -77,7 +77,7 @@ test('species-only edit ignores volatile metadata but compares scientific and ap
     editId:74,baseline
   });
   assert.equal(result.error,null);
-  for(const field of ['id','owner','species','status','girth_cm','dbh_cm','height_m','carbon_kg','deleted_at'])
+  for(const field of ['id','owner','species','status','girth_cm','dbh_cm','height_m','carbon_kg','deleted_at','client_id'])
     assert.ok(calls.some(row=>row[1]===field),field);
   for(const field of ['updated_at','client_id','background_metadata','last_seen_at'])
     assert.equal(calls.some(row=>row[1]===field),false,'volatile metadata must not block edit: '+field);
