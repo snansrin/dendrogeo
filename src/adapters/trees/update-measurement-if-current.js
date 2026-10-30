@@ -11,14 +11,22 @@ window.DG_UPDATE_MEASUREMENT_IF_CURRENT={
     if(payload.owner!=null&&String(payload.owner)!==String(owner))
       throw new Error("Kayıt sahibi düzenleme sırasında değiştirilemez.");
     const updates={...payload};delete updates.id;
+    // client_id is a NOT NULL, UNIQUE edit token in the production schema.
+    // Every app edit sends a fresh client_id. Guard the old token and status
+    // atomically; keep the dimensional inputs and record identity protected.
+    // Do NOT compare unrelated photo/approval metadata on a species-only edit:
+    // those fields are not in the PATCH and can change independently.
+    if(typeof baseline.client_id!=="string"||!baseline.client_id.trim())
+      throw new Error("Kaydın güvenli güncelleme kimliği bulunamadı; kaydı yeniden açın.");
     const guard=new Set([
+      "client_id","status","deleted_at",
       "project_id","point_id","measurement_no","grp","species",
-      "girth_cm","dbh_cm","height_m","volume_m3","carbon_kg",
-      "slope_deg","shared","status","park_id","deleted_at",
-      "photo_url","photo_file","client_id"
+      "girth_cm","dbh_cm","height_m"
     ]);
-    // Protect existing photos even for a species-only edit: never silently
-    // accept a concurrent photo change during this submission.
+    // If a new photo is explicitly supplied, protect the old photo from a
+    // concurrent replacement. A species edit never removes existing photos.
+    for(const key of ["photo_url","photo_file"])
+      if(Object.hasOwn(updates,key))guard.add(key);
     const fields=Object.entries(baseline).filter(([key])=>guard.has(key));
     if(fields.some(([key,value])=>! /^[a-z][a-z0-9_]*$/.test(key)||
       (value!==null&&!["string","number","boolean"].includes(typeof value))))
