@@ -70,6 +70,13 @@ test('project deletion confirms, handles server errors, and refreshes only after
  assert.equal((await api.execute(null,6,{...ports,confirm:()=>false})).status,'cancelled');assert.equal(events.length,before);
 });
 
+test('admin project deletion cannot race ahead of typed confirmation',async()=>{
+  const api=load().DG_DELETE_ADMIN_TREE_PROJECT,events=[];let decide;
+  const result=api.execute(null,23,{confirmation:'project 23',confirm:()=>new Promise(resolve=>{decide=resolve;}),deleteProject:async()=>{events.push('delete');return{error:null};},markLiveDirty(){},success(){},failure(){}});
+  assert.deepEqual(events,[]);decide(false);
+  assert.equal((await result).status,'cancelled');assert.deepEqual(events,[]);
+});
+
 test('admin tree service delegates the extracted controller workflows',()=>{
  const source=readFileSync(new URL('../src/services/admin-tree.js',import.meta.url),'utf8');
  for(const api of ['DG_LOAD_ADMIN_TREE','DG_UPDATE_ADMIN_TREE_FILTER','DG_SET_ADMIN_TREE_NODE_OPEN','DG_NAVIGATE_ADMIN_TREE_PENDING_SCAN','DG_DELETE_ADMIN_TREE_PROJECT'])assert.ok(source.includes('window.'+api));

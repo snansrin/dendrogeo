@@ -157,7 +157,7 @@ async function reGeocodeAll(){
 }
 
 async function delMeas(id){
- if(!confirm(dgCf("Kayıt silinsin mi?")))return;
+ if(!await window.DG_TYPED_DELETE_CONFIRM.ask({kind:"measurement",id,warning:dgCf("Kayıt silinsin mi?")}))return;
  const{error}=await window.DG_ADMIN_DELETE_MEASUREMENT.execute(sb,id,removePhoto,window.DG_ADMIN_MODERATION_STORE);
  if(error)return toast("Hata: "+error.message,"err");
  dgMarkLiveDirty();

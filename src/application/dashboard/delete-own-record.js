@@ -1,7 +1,7 @@
 "use strict";
 (function(root){
  async function execute(id,ports){
-  if(!ports.confirm())return;
+  if(!await ports.confirm())return;
   const{data,error}=await ports.remove(id);
   if(error||!data?.length)return ports.onFailure(error);
   for(const row of data)if(row.photo_url)await ports.removePhoto(row.photo_url);

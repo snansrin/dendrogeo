@@ -50,3 +50,11 @@ test('database failure keeps the identity session intact', async () => {
   assert.equal(result.error, error);
   assert.deepEqual(events, ['confirm:7', 'delete:7']);
 });
+
+test('park identity deletion waits for typed confirmation to finish',async()=>{
+  let decide;const events=[];
+  const remove=create({isAdmin:()=>true,getPark:()=>park,confirmDelete:()=>new Promise(resolve=>{decide=resolve;}),deletePark:async()=>{events.push('delete');return{error:null};},clearSession:()=>events.push('clear')});
+  const result=remove(park.id);
+  assert.deepEqual(events,[]);decide(false);
+  assert.equal((await result).status,'cancelled');assert.deepEqual(events,[]);
+});

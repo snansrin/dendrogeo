@@ -13,5 +13,8 @@
 .dg-operation-help-body li+li{margin-top:10px}
 .dg-operation-help-body .dg-meta{margin:4px 0;color:var(--mut)}
 .dg-operation-help-dialog :focus-visible{outline:2px solid var(--green);outline-offset:3px}
+.dg-operation-help-dialog .dg-typed-delete-field{display:block;box-sizing:border-box;width:100%;min-height:44px;margin:8px 0 16px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:16px var(--f-ui)}
+.dg-operation-help-dialog .dg-typed-delete-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+.dg-operation-help-dialog .dg-typed-delete-actions .btn{min-height:44px}
 
 @media(max-width:430px){.dg-operation-help-header{padding:12px}.dg-operation-help-body{padding:6px 14px 16px}.dg-operation-help-header h2{font-size:1.05rem}}

@@ -19,7 +19,7 @@ async function loadRecords__scroll(){
 // 2. Kayıt sil
 async function delRec(id){
  const viewState=window.DG_DASHBOARD_VIEW_STATE.create(document);
- return window.DG_DELETE_OWN_RECORD.execute(id,{confirm:()=>confirm(dgCf("Kayıt tamamen silinsin mi?")),remove:recordId=>window.DG_DELETE_OWN_RECORD_STORE.remove(sb,recordId),onFailure:error=>toast(dgCf("Kayıt silinemedi: ")+(error?.message||dgCf("Sunucu silmeyi doğrulamadı.")),"err"),removePhoto,refreshRecords:()=>loadRecords(),refreshDashboard:()=>loadDash(),markLiveDirty:()=>dgMarkLiveDirty(),shouldRefreshMap:()=>typeof loadLiveMap==="function"&&viewState.isActive("v-map"),refreshMap:()=>loadLiveMap()});
+ return window.DG_DELETE_OWN_RECORD.execute(id,{confirm:()=>window.DG_TYPED_DELETE_CONFIRM.ask({kind:"measurement",id,warning:dgCf("Kayıt tamamen silinsin mi?")}),remove:recordId=>window.DG_DELETE_OWN_RECORD_STORE.remove(sb,recordId),onFailure:error=>toast(dgCf("Kayıt silinemedi: ")+(error?.message||dgCf("Sunucu silmeyi doğrulamadı.")),"err"),removePhoto,refreshRecords:()=>loadRecords(),refreshDashboard:()=>loadDash(),markLiveDirty:()=>dgMarkLiveDirty(),shouldRefreshMap:()=>typeof loadLiveMap==="function"&&viewState.isActive("v-map"),refreshMap:()=>loadLiveMap()});
 }
 // 3. Panel istatistikleri + grafik
 async function loadDash(){

@@ -374,7 +374,7 @@ async function dgTreeDeleteProject(ev,pid){
  const store=window.DG_ADMIN_PERSISTENCE_STORE.create(()=>sb);
  if(window.DG_DELETE_ADMIN_TREE_PROJECT)return window.DG_DELETE_ADMIN_TREE_PROJECT.execute(ev,pid,{
   confirmation:_ta("Proje TÜM ölçüm ve ölçüm noktalarıyla kalıcı olarak silinsin mi? Bu işlem geri alınamaz (park kimliği kalır)."),
-  confirm:message=>confirm(message),
+  confirm:message=>window.DG_TYPED_DELETE_CONFIRM.ask({kind:"project",id:pid,warning:message}),
   deleteProject:id=>store.deleteProject(id),
   markLiveDirty:()=>{DG_LIVE_DIRTY=true;},
   success:()=>toast(_ta("✓ Proje silindi (ölçümler + ölçüm noktaları cascade ile kaldırıldı)"),"ok","🗑"),
@@ -384,7 +384,7 @@ async function dgTreeDeleteProject(ev,pid){
  });
  if(ev){ev.preventDefault();ev.stopPropagation();}
  const msg=_ta("Proje TÜM ölçüm ve ölçüm noktalarıyla kalıcı olarak silinsin mi? Bu işlem geri alınamaz (park kimliği kalır).");
- if(!confirm(msg))return;
+ if(!await window.DG_TYPED_DELETE_CONFIRM.ask({kind:"project",id:pid,warning:msg}))return;
  try{
   const{error}=await store.deleteProject(pid);
   if(error){toast(_ta("Proje silinemedi: ")+error.message,"err","🗑");return;}

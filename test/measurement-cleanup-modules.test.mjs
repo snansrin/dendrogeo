@@ -7,11 +7,12 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const modules=[
   'src/ui/show-measurement-validation-error.js',
   'src/ui/reset-measurement-entry-fields.js',
+  'src/ui/typed-delete-confirmation.js',
   'src/ui/confirm-measurement-project-delete.js',
   'src/adapters/trees/measurement-project-deletion-store.js',
   'src/application/trees/delete-measurement-project.js'
 ];
-function setup(){const window={};const context=vm.createContext({window});for(const path of modules)vm.runInContext(read(path),context,{filename:path});return{window,context};}
+function setup(typedAsk){const window={};const context=vm.createContext({window});for(const path of modules){if(typedAsk&&path==='src/ui/typed-delete-confirmation.js'){window.DG_TYPED_DELETE_CONFIRM={ask:typedAsk};continue;}vm.runInContext(read(path),context,{filename:path});}return{window,context};}
 
 test('validation error focuses the field, marks it invalid, then notifies',()=>{
   const{window}=setup(),events=[],field={setAttribute:(...args)=>events.push(['attribute',...args]),focus:()=>events.push('focus')};
@@ -25,10 +26,12 @@ test('measurement reset clears only per-tree fields and preserves helper order',
   assert.equal(elements.mPoint.value,'');assert.equal(elements.mDbh.value,'');assert.equal(elements.mHeight.value,'');assert.equal(elements.pointQueryResult.style.display,'none');assert.deepEqual(events,['photo',['manual',false],'calc']);
 });
 
-test('delete confirmation retains count-aware Turkish warning',()=>{
-  const{window}=setup(),messages=[];
-  const result=window.DG_CONFIRM_MEASUREMENT_PROJECT_DELETE.confirm({count:12,format:(text,data)=>text.replace('{n}',data.n),confirm:text=>{messages.push(text);return false;}});
-  assert.equal(result,false);assert.match(messages[0],/12 ölçüm/);assert.match(messages[0],/Park kimliği silinmez/);assert.match(messages[0],/ölçüm noktaları/);
+test('delete confirmation retains count and identifies the target before a typed decision',async()=>{
+  const requests=[],{window}=setup(input=>{requests.push(input);return Promise.resolve(false);});
+  const result=await window.DG_CONFIRM_MEASUREMENT_PROJECT_DELETE.confirm({count:12,projectId:7,projectName:'Göksu Projesi',format:(text,data)=>text.replace('{n}',data.n)});
+  assert.equal(result,false);assert.equal(requests[0].kind,'project');assert.equal(requests[0].id,7);
+  assert.equal(requests[0].name,'Göksu Projesi');assert.match(requests[0].warning,/12 ölçüm/);
+  assert.match(requests[0].warning,/Park kimliği silinmez/);assert.match(requests[0].warning,/ölçüm noktaları/);
 });
 
 test('project deletion adapter preserves measurement count and waypoint-before-project RLS writes',async()=>{
@@ -42,6 +45,14 @@ test('delete use case skips writes on cancel and refreshes only after success',a
   const{window}=setup(),events=[],ports={count:async id=>{events.push(['count',id]);return 3;},confirm:count=>{events.push(['confirm',count]);return false;},delete:async id=>events.push(['delete',id]),refresh:()=>events.push('refresh')};
   assert.deepEqual(JSON.parse(JSON.stringify(await window.DG_DELETE_MEASUREMENT_PROJECT.remove(5,ports))),{deleted:false});assert.equal(events.some(event=>Array.isArray(event)&&event[0]==='delete'),false);
   events.length=0;assert.deepEqual(JSON.parse(JSON.stringify(await window.DG_DELETE_MEASUREMENT_PROJECT.remove(5,{...ports,confirm:()=>true}))),{deleted:true});assert.deepEqual(events.map(event=>Array.isArray(event)?event[0]:event),['count','delete','refresh']);
+});
+
+test('project deletion waits for asynchronous typed confirmation before any write',async()=>{
+  const{window}=setup(),events=[];let answer;
+  const result=window.DG_DELETE_MEASUREMENT_PROJECT.remove(8,{count:async()=>5,confirm:()=>new Promise(resolve=>{answer=resolve;}),delete:async()=>events.push('delete'),refresh:()=>events.push('refresh')});
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.deepEqual(events,[]);
+  answer(false);assert.equal((await result).deleted,false);assert.deepEqual(events,[]);
 });
 
 test('five cleanup modules load before measure.js, are precached and delegated',()=>{

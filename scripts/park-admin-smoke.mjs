@@ -10,6 +10,17 @@ try{
   const page=await browser.newPage({viewport:{width,height:900},bypassCSP:true}),errors=[];
   page.on('pageerror',error=>errors.push(error.message));
   const cancelDialog=async action=>{let seen=false;page.once('dialog',async dialog=>{seen=true;await dialog.dismiss();});await action();assert.equal(seen,true);};
+  const cancelTypedDelete=async action=>{
+   await action();
+   const dialog=page.locator('dialog[aria-labelledby="dgTypedDeleteTitle"]');
+   await dialog.waitFor({state:'visible'});
+   const input=dialog.locator('#dgTypedDeleteInput'),submit=dialog.locator('button[type="submit"]');
+   assert.equal(await submit.isDisabled(),true,'delete starts disabled');
+   await input.fill('YANLIŞ ONAY');
+   assert.equal(await submit.isDisabled(),true,'wrong phrase cannot delete');
+   await dialog.getByRole('button',{name:'Vazgeç'}).click();
+   await dialog.waitFor({state:'hidden'});
+  };
   await isolateAccount(page);await page.goto(server.url,{waitUntil:'domcontentloaded'});
   await page.locator('#shell').waitFor({state:'visible'});await page.waitForFunction(()=>document.getElementById('dgStartupScreen').hidden);
   await page.evaluate(()=>{
@@ -51,7 +62,7 @@ try{
   assert.equal(await rows.first().locator('[data-park-admin-action="rename"]').isVisible(),true,'rename is directly visible');
   assert.equal(await rows.first().locator('[data-park-admin-action="delete"]').isVisible(),true,'delete is directly visible');
   await search.fill('Boş Park');assert.equal(await rows.count(),1);assert.match(await rows.first().innerText(),/Boş Park/);
-  await cancelDialog(()=>rows.first().locator('[data-park-admin-action="delete"]').click());
+  await cancelTypedDelete(()=>rows.first().locator('[data-park-admin-action="delete"]').click());
   await search.fill('');await search.pressSequentially('Nagihan');assert.equal(await rows.count(),1);assert.match(await rows.first().innerText(),/Göksu/);
   assert.equal(await search.evaluate(element=>element===document.activeElement),true);
   await box.locator('[data-park-admin-menu]>summary').click();
@@ -64,7 +75,7 @@ try{
   await box.locator('[data-park-admin-sort]').selectOption('measurements-desc');assert.match(await rows.first().innerText(),/Göksu/);
   await box.locator('[data-park-admin-menu]>summary').first().click();
   await cancelDialog(()=>box.locator('[data-park-admin-action="rename"]').first().click());
-  await cancelDialog(()=>box.locator('[data-park-admin-action="delete"]').first().click());
+  await cancelTypedDelete(()=>box.locator('[data-park-admin-action="delete"]').first().click());
   await page.evaluate(axe.source);
   const accessibility=await page.evaluate(async()=>{const result=await axe.run(document.getElementById('parkAdminBox'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});return result.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}));});
   assert.deepEqual(accessibility,[]);
