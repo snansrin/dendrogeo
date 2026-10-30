@@ -14,10 +14,11 @@ window.DG_UPDATE_MEASUREMENT_IF_CURRENT={
     const guard=new Set([
       "project_id","point_id","measurement_no","grp","species",
       "girth_cm","dbh_cm","height_m","volume_m3","carbon_kg",
-      "slope_deg","shared","status","park_id","deleted_at"
+      "slope_deg","shared","status","park_id","deleted_at",
+      "photo_url","photo_file"
     ]);
-    // Guard extra photo fields only when the edit actually overwrites them.
-    for(const key of ["photo_url","photo_file"])if(Object.hasOwn(updates,key))guard.add(key);
+    // Protect existing photos even for a species-only edit: never silently
+    // accept a concurrent photo change during this submission.
     const fields=Object.entries(baseline).filter(([key])=>guard.has(key));
     if(fields.some(([key,value])=>! /^[a-z][a-z0-9_]*$/.test(key)||
       (value!==null&&!["string","number","boolean"].includes(typeof value))))
