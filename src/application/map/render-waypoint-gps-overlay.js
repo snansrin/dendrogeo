@@ -7,7 +7,7 @@ window.DG_RENDER_WAYPOINT_GPS_OVERLAY={
     createLocationMarker.add({map,gps,target,leaflet,bearing});
     const guidance=resolve.resolve({waypoints,target,gps,distance,bearing});
     if(guidance.target!==target&&guidance.target)setTarget(guidance.target);
-    renderReadout.render({...guidance,getElement,translate});
+    renderReadout.render({...guidance,gps,getElement,translate});
     if(guidance.target&&!guidance.target.visited)addGuidanceLine.add({map,gps,target:guidance.target,leaflet});
     return guidance.target;
   }

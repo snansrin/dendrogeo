@@ -57,6 +57,10 @@ const SPECIES_DATA={
   {tr:"JAPON SOFORASI",lat:"Styphnolobium japonicum",rho:null},
   {tr:"DEFNE",lat:"Laurus nobilis",rho:null},
   {tr:"AMBERAĞACI",lat:"Liquidambar styraciflua",rho:null},
+  {tr:"ZEYTİN",lat:"Olea europaea",rho:null},
+  {tr:"İĞDE",lat:"Elaeagnus angustifolia",rho:null},
+  {tr:"SÜS KİRAZI",lat:"Prunus serrulata",rho:null},
+  {tr:"GÜVEY KANDİLİ",lat:"Koelreuteria paniculata",rho:null},
   {tr:"DİĞER YAPRAKLI",lat:"Angiosperm spp.",rho:null}
  ]
 };

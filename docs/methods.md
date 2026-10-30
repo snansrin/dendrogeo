@@ -88,8 +88,8 @@ Güncel hesapta tek ve değiştirilemez otorite `src/config/wood-density-lock.js
 taşımaz**. Sığla bir yapraklı tür olarak **YAPRAKLI genel 0,541 ton/m³
 (541 kg/m³)** değerini kullanır. Türetilmiş DBH 57 cm ve H 7,5 m olan matematiksel bir model girdisi yaklaşık **418,42 kg C** üretir. Bu değer doğrudan saha çevresi örneği değildir; saha protokolünde önce **D=C/π** uygulanır.
 
-Aktif ölçüm kataloğunda **49** tür vardır; **16** tür kilitli özel ρ taşır,
-**33/49** tür özel ρ taşımadığı için yalnız kendi grup genelini kullanır.
+Aktif ölçüm kataloğunda **53** tür vardır; **16** tür kilitli özel ρ taşır,
+**37/53** tür özel ρ taşımadığı için yalnız kendi grup genelini kullanır.
 Ölçüm grubu yalnız **İBRELİ** veya **YAPRAKLI** olabilir. `DİĞER`,
 bilinmeyen tür veya katalogla uyuşmayan grup için karbon hesabı üretilmez.
 
@@ -312,7 +312,7 @@ Bunlar hata değil, **belgelenmiş varsayımlardır**. Değiştirmek isteyen
    bağımsızlık varsayımının yapay daralttığı aralıklardan kaçınılır).
    Panel/harita/dışa aktarım sayıları belirsizlik eki olmadan tek nokta
    tahmini olarak kalır.
-3. **ρ tablosu nihai ve kilitlidir:** 49 ölçüm türünün 33/49'u özel tür ρ'su taşımaz ve yalnız kendi grup genelini kullanır. Yeni tür yalnız İBRELİ/YAPRAKLI olarak eklenebilir; DİĞER yoğunluk/fallback yoktur. Sığla YAPRAKLI genel 541 kg/m³ kullanır.
+3. **ρ tablosu nihai ve kilitlidir:** 53 ölçüm türünün 37/53'u özel tür ρ'su taşımaz ve yalnız kendi grup genelini kullanır. Yeni tür yalnız İBRELİ/YAPRAKLI olarak eklenebilir; DİĞER yoğunluk/fallback yoktur. Sığla YAPRAKLI genel 541 kg/m³ kullanır.
 4. **Kök oranı (0,26) ve karbon oranı (0,47) sabittir.**
 5. **Gövde form faktörü (0,5) sabittir.**
 6. **Boy ölçülemeyen ağaç veri setine giremez** (`H` zorunlu). Chave'ın boy

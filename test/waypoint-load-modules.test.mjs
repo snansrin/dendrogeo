@@ -19,7 +19,7 @@ test('restored target selection requires the same ID and an unvisited row',()=>{
 });
 
 test('project waypoint adapter preserves query, project filter, order, and response identity',async()=>{
-  const fetch=setup().DG_FETCH_PROJECT_WAYPOINTS.fetch,events=[],response={data:[{wp_id:2}],error:null};
+  const fetch=setup().DG_FETCH_PROJECT_WAYPOINTS.fetch,events=[],response={data:[],error:null};
   const client={from:table=>({select:columns=>{events.push(['select',table,columns]);return{eq:(...args)=>{events.push(['eq',...args]);return{order:async(...orderArgs)=>{events.push(['order',...orderArgs]);return response;}};}};}})};
   assert.equal(await fetch({client,projectId:7}),response);
   assert.deepEqual(JSON.parse(JSON.stringify(events)),[['select','waypoints','*'],['eq','project_id',7],['order','wp_id',{ascending:true}]]);

@@ -33,7 +33,7 @@ test('location marker keeps its initial-target-only arrow and original Leaflet s
 test('readout preserves translated target, distance and reset states',()=>{
   const render=setup().DG_RENDER_WAYPOINT_GPS_GUIDANCE_READOUT.render,els={navDist:{},navTarget:{},navArrow:{style:{}}},getElement=id=>els[id];
   render({target:{wp_id:7},meters:49.6,targetBearing:123.4,getElement,translate:value=>`EN:${value}`});
-  assert.equal(els.navDist.textContent,'50 m');assert.equal(els.navTarget.textContent,'EN:Hedef: P7 · 123°');assert.equal(els.navArrow.style.transform,'rotate(123.4deg)');
+  assert.equal(els.navDist.textContent,'50 m');assert.equal(els.navTarget.textContent,'EN:Hedef: P7 · 123° · EN:Pusula bekleniyor; konumu ve haritayı izleyin.');assert.equal(els.navArrow.style.visibility,'hidden');
   render({target:null,meters:null,targetBearing:null,getElement,translate:value=>`EN:${value}`});
   assert.equal(els.navDist.textContent,'—');assert.equal(els.navTarget.textContent,'EN:Hedef seç / tamamlandı');assert.equal(els.navArrow.style.transform,'rotate(0)');
 });
@@ -47,7 +47,7 @@ test('application draws current location first, then selects target and renders 
   const window=setup(),render=window.DG_RENDER_WAYPOINT_GPS_OVERLAY.render,{events,leaflet}=api();let selected=null;
   const target={id:1,wp_id:1,lat:2,lon:1},waypoints=[target,{id:2,wp_id:2,lat:0,lon:1}],gps={latitude:1,longitude:1},els={navDist:{},navTarget:{},navArrow:{style:{}}};
   const result=render({map:{},waypoints,target:null,gps,leaflet,distance:(_a,_b,lat)=>Math.abs(lat-1),bearing:(_a,_b,lat)=>lat*10,getElement:id=>els[id],translate:value=>value,setTarget:value=>{selected=value;},createLocationMarker:window.DG_CREATE_WAYPOINT_GPS_LOCATION_MARKER,renderReadout:window.DG_RENDER_WAYPOINT_GPS_GUIDANCE_READOUT,addGuidanceLine:window.DG_ADD_WAYPOINT_GUIDANCE_LINE});
-  assert.equal(result,target);assert.equal(selected,target);assert.equal(events[0][0],'marker');assert.equal(events[1][0],'line');assert.equal(els.navDist.textContent,'1 m');assert.equal(els.navTarget.textContent,'Hedef: P1 · 20°');
+  assert.equal(result,target);assert.equal(selected,target);assert.equal(events[0][0],'marker');assert.equal(events[1][0],'line');assert.equal(els.navDist.textContent,'1 m');assert.equal(els.navTarget.textContent,'Hedef: P1 · 20° · Pusula bekleniyor; konumu ve haritayı izleyin.');
   assert.doesNotMatch(events[0][2].icon.html,/nav-arrow-svg/); // target was selected after the location marker, as before
 });
 

@@ -5,8 +5,6 @@ window.DG_ARRIVE_AT_WAYPOINT={
     const waypoint=selectTarget({target,waypoints,gps,distance});
     if(!waypoint){notify("Aktif ölçüm noktası yok","warn","🎯");return;}
     if(!confirmDistance({target:waypoint,gps,distance}))return;
-    const{error}=await persist(waypoint.id);
-    if(error){notify("Hata: "+error.message,"err","🎯");return;}
     complete(waypoint);
   }
 };

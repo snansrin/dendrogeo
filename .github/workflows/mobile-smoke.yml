@@ -56,6 +56,7 @@ jobs:
         env:
           DG_UI_BROWSER: webkit
         run: |
+          node scripts/field-navigation-smoke.mjs
           node scripts/security-csp-smoke.mjs
           node scripts/landing-showcase-smoke.mjs
           node scripts/visitor-analytics-smoke.mjs

@@ -73,11 +73,11 @@ describe('ρ tek-kaynak zinciri',()=>{
    assert.equal(r.valid,false);assert.equal(r.density_kg_m3,null);assert.equal(r.total_carbon,0);
   }
  });
- test('CANARY: seçim kataloğu 49 tür; 16 özel, 33 grup-geneli',()=>{
+ test('CANARY: seçim kataloğu 53 tür; 16 özel, 37 grup-geneli',()=>{
   const hepsi=Object.values(app.SPECIES_DATA).flat();
-  assert.equal(hepsi.length,49);
+  assert.equal(hepsi.length,53);
   assert.equal(hepsi.filter(x=>x.rho!=null).length,16);
-  assert.equal(hepsi.filter(x=>x.rho==null).length,33);
+  assert.equal(hepsi.filter(x=>x.rho==null).length,37);
   assert.equal(Object.keys(app.SPECIES_DATA).sort().join('|'),['İBRELİ','YAPRAKLI'].sort().join('|'));
  });
  test('eşanlamlılar mevcut kanonik türe iner',()=>{

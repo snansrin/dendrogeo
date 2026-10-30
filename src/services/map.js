@@ -221,42 +221,10 @@ function dgWaypointGuidance(){
   resolve:input=>window.DG_WAYPOINT_GUIDANCE.resolve(input),getElement:$
  });
 }
-// 7. Navigasyon çizimi
-/* "🎯 Vardım → Ölçüme Geç" butonu (index.html:563) daha önce TANIMSIZ bir
- * fonksiyon çağırıyordu (arriveWp hiç yazılmamıştı → ölü buton).
- * Akış: aktif hedefi (yoksa GPS'e en yakın ziyaret edilmemiş WP) bul,
- * uzaklık 50 m'den fazlaysa onay sor, DB'de visited işaretle, ölçüm
- * formuna point id'yi yaz ve ölçüm sekmesine geç. */
+// Arrival opens the form; only saved measurement data completes a point.
 async function arriveWp(){
-  const app=window.DG_ARRIVE_AT_WAYPOINT,selection=window.DG_SELECT_WAYPOINT_ARRIVAL_TARGET,confirmation=window.DG_CONFIRM_WAYPOINT_ARRIVAL_DISTANCE,store=window.DG_MARK_WAYPOINT_VISITED,completion=window.DG_COMPLETE_WAYPOINT_ARRIVAL;
-  if(app&&selection&&confirmation&&store&&completion){await app.arrive({target:navTarget,waypoints:WP,gps:GPS,distance:hav,selectTarget:selection.select,confirmDistance:input=>confirmation.confirm({...input,confirm,format:dgTfs}),persist:id=>store.mark({client:sb,id}),complete:waypoint=>completion.complete({waypoint,isManual:()=>manualPoint,setPoint:value=>{$("mPoint").value=value;},setTarget:value=>{navTarget=value;},draw:drawNav,refresh:loadWaypoints,hasProjectField:()=>$("mProject"),setProject:value=>{$("mProject").value=value;},notify:toast,format:dgTfs,go}),notify:toast});return;}
-  let w=navTarget;
-  if(!w||w.visited){
-    const ts=WP.filter(x=>!x.visited);
-    if(ts.length&&GPS){
-      w=ts.sort((a,b)=>
-        hav(GPS.latitude,GPS.longitude,a.lat,a.lon)-
-        hav(GPS.latitude,GPS.longitude,b.lat,b.lon))[0];
-    }
-  }
-  if(!w)return toast("Aktif ölçüm noktası yok","warn","🎯");
-  if(GPS){
-    const d=hav(GPS.latitude,GPS.longitude,w.lat,w.lon);
-    if(d>50&&!confirm(dgTfs("Hedeften {d} m uzaktasın.\nYine de 'vardım' işaretlensin mi?",{d:d.toFixed(0)})))return;
-  }
-  const{error}=await window.DG_MARK_WAYPOINT_VISITED.mark({client:sb,id:w.id});
-  if(error)return toast("Hata: "+error.message,"err","🎯");
-  w.visited=true;
-  navTarget=null;
-  if(!manualPoint)$("mPoint").value=w.wp_id;
-  drawNav();
-  loadWaypoints();
-  /* Waypoint hangi projeye bağlıysa ölçüm formu da o projeye geçsin: park
-   * kapısı (dgParkGate) doğru projeyi değerlendirsin. go("measure") kapıyı
-   * zaten tazeliyor. (2026-09-24) */
-  if(w.project_id&&$("mProject"))$("mProject").value=String(w.project_id);
-  toast(dgTfs("✓ Vardın: P{id} → ölçüme geç",{id:w.wp_id}),"ok","🎯");
-  go("measure");
+ const app=window.DG_ARRIVE_AT_WAYPOINT,selection=window.DG_SELECT_WAYPOINT_ARRIVAL_TARGET,confirmation=window.DG_CONFIRM_WAYPOINT_ARRIVAL_DISTANCE,completion=window.DG_COMPLETE_WAYPOINT_ARRIVAL;
+ await app.arrive({target:navTarget,waypoints:WP,gps:GPS,distance:hav,selectTarget:selection.select,confirmDistance:input=>confirmation.confirm({...input,confirm,format:dgTfs}),complete:waypoint=>completion.complete({waypoint,setPoint:value=>{$("mPoint").value=value;},setTarget:value=>{navTarget=value;},draw:drawNav,refresh:loadWaypoints,hasProjectField:()=>$("mProject"),setProject:value=>{$("mProject").value=value;},notify:toast,format:dgTfs,go}),notify:toast});
 }
 window.arriveWp=arriveWp;
 

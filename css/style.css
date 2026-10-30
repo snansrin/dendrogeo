@@ -541,11 +541,12 @@ label.lbl{display:block}
  #v-measure .measure-query input{width:0;min-width:0}
  #v-measure .measure-query .btn{padding:6px;font-size:.68rem}
  #v-measure .measure-photo{margin-top:10px;padding-top:10px;gap:6px;flex-wrap:wrap}
- #v-measure .measure-photo>div{flex:1 1 0;min-width:0}
+ #v-measure .measure-photo>div{flex:1 0 100%;min-width:0}
  #v-measure .measure-photo h4{font-size:.75rem}
- #v-measure .measure-optional{display:block;margin-left:0;font-size:.65rem}
+ #v-measure .measure-optional{display:inline-block;margin-left:8px;font-size:.65rem}
  #v-measure .measure-photo .dg-file{min-height:44px;padding:8px;font-size:.75rem;flex:0 0 auto}
  #v-measure .measure-photo .measure-help{display:none}
+ #v-measure .measure-photo .dg-file-name{flex:1 1 100%;min-width:0;margin-left:0;overflow-wrap:anywhere}
  #v-measure .measure-save{position:static;gap:6px;padding:10px;margin-top:8px;box-shadow:none}
  #v-measure .measure-save-copy:has(#liveCalc[style*="display:none"]){display:none}
  #v-measure .measure-save-copy:has(#liveCalc[style*="display: none"]){display:none}

@@ -11978,6 +11978,110 @@
           "sha256": "803d1e2317368c633b08a667215b06b0759c896336a286eb40403dc29a02028d"
         }
       ]
+    },
+    {
+      "date": "2026-10-30",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up — field fixes: mobile photo layout; arrival opens measurement without visited writes; waypoint completion derives from saved non-rejected project-point measurements; phone-relative live compass with honest unavailable state; four rho:null broadleaf catalogue additions. Existing density table, allometry, park/surface engines, analysis and frozen Python reference vectors remain unchanged.",
+      "validation": [
+        "test/field-navigation-regression.test.mjs",
+        "scripts/field-navigation-smoke.mjs (Chromium/WebKit; 360/390/430; light/dark)",
+        "npm run check",
+        "npm run check:phone",
+        "npm run check:accessibility"
+      ],
+      "files": [
+        {
+          "path": "css/style.css",
+          "previous_sha256": "13f4f3f92f62798521b0528c5a4ddde7dc02afd97e4573a0938a9149cc55cc47",
+          "sha256": "5366240a409100f77cdbc270e5228907428c18e695c30683e655676b3f2b43d6"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "efaebfed329e2b9a4d7f686ace3458952b1e76d6c6dfc3bac1e5fa13b71b79cc",
+          "sha256": "951266d06b6b6ee4a5fe4b0f86dfdcc99be8a55b509c422a433b386b7fca9ff6"
+        },
+        {
+          "path": "partials/landing.html",
+          "previous_sha256": "058a3233c6b6db5b913ba793281ac59a6154c4b0a6b54ebddd75c3b79ca765b0",
+          "sha256": "fcfcfe9f2bce039ab8b3292c0dfd489dc8adaac73abac7c5613e0893b140bfbf"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "e222b42d1fc25e11c74f191424f6c718f6f3b8c257fb56abab0b43eda3e70c52",
+          "sha256": "13fb1fdfca282bfc675c28610ba38b9d0e92a19c826a6b14680703d35f2ea4a2"
+        },
+        {
+          "path": "src/adapters/map/fetch-project-waypoints.js",
+          "previous_sha256": "eca437cf0b443db6c45348b075185f155b11c1af7a6a9f317b3b8808bbccb6aa",
+          "sha256": "fafc9ec6d54c67d4ce38f843e9985d97c37701292427df6d856b1d9c7e10712f"
+        },
+        {
+          "path": "src/adapters/trees/fetch-unvisited-measurement-waypoints.js",
+          "previous_sha256": "5ccf9cdd41a4d6ad5bffe5f911cfa0aa5e0d189cf9b2c5db06aa0f42361aeeaa",
+          "sha256": "9503ed6da9e7b6acb682736c50c289c29430261a92cf9a298829778361b94371"
+        },
+        {
+          "path": "src/application/map/arrive-at-waypoint.js",
+          "previous_sha256": "23afedd8272bdd2639e1f7fd72f9e8b37f454b440e87f63a0e52867db7704da0",
+          "sha256": "d0dac5a3066d03a66b4a8768e7affa727def902c76d00e32b7bdd207711e22d8"
+        },
+        {
+          "path": "src/application/map/complete-waypoint-arrival.js",
+          "previous_sha256": "2d3e83e26fd2bf74e8d8179273ab1c751ac62c0fae3211583a01902d6ee6146a",
+          "sha256": "b3b9271b4b7fbf82875b684d922331c0a92031f415b85e6c8a91dce9e15dca97"
+        },
+        {
+          "path": "src/application/map/render-waypoint-gps-overlay.js",
+          "previous_sha256": "510eb8cd7968244b215658fc15f7397cbdd715bbd326a07e9fcdd40f23967891",
+          "sha256": "03ad074fa41d33ea152111f42f3e50daad980707dc654bff0648f3c928feffb3"
+        },
+        {
+          "path": "src/config/species.js",
+          "previous_sha256": "8d72ff0de79ed4c1db866170915a7b3cf98396b98684159cd5637ea50ccb8403",
+          "sha256": "d3ec8762a4a23d9346ba603683fcbf7b38090174ca945110ce2155884d7ea8b9"
+        },
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "3d6dd746f50af262e31140cfa8a689bc0bb78d0ed85a16ff94b9ee786a482277",
+          "sha256": "fb103641ab12be650099f5ba2b69774e96e822881949c097ca8388b71308f677"
+        },
+        {
+          "path": "src/ui/render-waypoint-gps-guidance-readout.js",
+          "previous_sha256": "fa9cc0201cffab7ab8ca965a65c5f27a7cdf8deca70e19914fc30e405bd4b174",
+          "sha256": "825a0397ce5a22615ac4fa572a1ec2d3d0417e6ce440c99137a3f6795170830c"
+        },
+        {
+          "path": "src/ui/waypoint-actions.js",
+          "previous_sha256": "046e0b993086d2e79e4c77f8ce5b0d0ac34512c90de2b0af3cae18ecdbcdada1",
+          "sha256": "25206631db6534e0308e2a9a5760763e8109e3aa91122184bfc2e5e9bb1e4686"
+        },
+        {
+          "path": "test/waypoint-arrival-modules.test.mjs",
+          "previous_sha256": "080abb17e99d8450a61c4577070cc7ca306b5617199f5131b4947c0c0b8b43bb",
+          "sha256": "08c6936b0ee1cec1798fe87c5c06d083d59223cdc1b751ba14dcfb7b51774368"
+        },
+        {
+          "path": "test/waypoint-field.test.mjs",
+          "previous_sha256": "d6331654911a7c4a94b40d9ac27b5ecf758b66e9609ddf1ba212ecd93a2eb231",
+          "sha256": "af337bd24ab262ad1cc2c9b6974a4629fc571ca7148b460b89369263031f3d08"
+        },
+        {
+          "path": "test/waypoint-gps-overlay-modules.test.mjs",
+          "previous_sha256": "e8a26332bd4fdc49dbc524e60dd09fe7f7e8a8a3b31903af9c73cf689fc42236",
+          "sha256": "d4820ede4aef37a7f2492a3ca79681315d1699e49830e3f710be93d8247c2a4c"
+        },
+        {
+          "path": "test/waypoint-load-modules.test.mjs",
+          "previous_sha256": "f248350d87f5c5641f1abc9c0343fd6f77b3b8230302a5f4ff8eec39c10ffa2a",
+          "sha256": "6da291d65223d92347b1c4f20fbe38f940325a51e6a636b107349470addaafdb"
+        },
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "7dc51fde09e79bfbf75e2067cdc2c65e4905eb6cd197acd4c1ef0629f3b0a759",
+          "sha256": "c097b13d7de6ac212dde8d2ab7c9f715d29290170377d665c42222bf31f9ba1f"
+        }
+      ]
     }
   ]
 }

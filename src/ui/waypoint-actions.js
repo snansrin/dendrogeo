@@ -8,7 +8,7 @@
     next:()=>root.dgNextWaypoint(),
     focus:()=>root.dgFocusWaypoint(true),
     fit:()=>root.dgFitWaypoints(true),
-    gps:()=>root.startGps(),
+    gps:()=>{root.DG_RENDER_WAYPOINT_GPS_GUIDANCE_READOUT.start();return root.startGps();},
     arrive:()=>root.arriveWp(),
     render:()=>root.renderWaypointList(),
     "file-name":(element,event)=>root.dgFileName(event,"nCsvName"),

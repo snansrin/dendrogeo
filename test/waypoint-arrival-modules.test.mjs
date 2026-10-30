@@ -38,7 +38,7 @@ test('visited adapter preserves the exact Supabase update filter and response',a
 test('successful completion preserves local state and navigation side-effect order',()=>{
   const complete=setup().DG_COMPLETE_WAYPOINT_ARRIVAL.complete,events=[],waypoint={id:3,wp_id:8,project_id:12,visited:false};
   complete({waypoint,isManual:()=>false,setPoint:value=>events.push(['point',value]),setTarget:value=>events.push(['target',value]),draw:()=>events.push('draw'),refresh:()=>events.push('refresh'),hasProjectField:()=>true,setProject:value=>events.push(['project',value]),notify:(...args)=>events.push(['notify',...args]),format:(text,values)=>text.replace('{id}',values.id),go:(...args)=>events.push(['go',...args])});
-  assert.equal(waypoint.visited,true);assert.deepEqual(JSON.parse(JSON.stringify(events)),[['target',null],['point',8],'draw','refresh',['project','12'],['notify','✓ Vardın: P8 → ölçüme geç','ok','🎯'],['go','measure']]);
+  assert.equal(waypoint.visited,false);assert.deepEqual(JSON.parse(JSON.stringify(events)),[['target',waypoint],['point',8],'draw','refresh',['project','12'],['notify','✓ Vardın: P8 → ölçüme geç','ok','🎯'],['go','measure']]);
 });
 
 test('arrival use case exits safely for no target, cancellation and write failure, then completes once',async()=>{
@@ -46,12 +46,12 @@ test('arrival use case exits safely for no target, cancellation and write failur
   const base={target:null,waypoints:[],gps:null,distance(){},selectTarget:()=>waypoint,confirmDistance:()=>true,persist:async id=>{events.push(['persist',id]);return{error:null};},complete:value=>events.push(['complete',value]),notify:(...args)=>events.push(['notify',...args])};
   await arrive({...base,selectTarget:()=>null});assert.deepEqual(JSON.parse(JSON.stringify(events)),[['notify','Aktif ölçüm noktası yok','warn','🎯']]);events.length=0;
   await arrive({...base,confirmDistance:()=>false});assert.deepEqual(events,[]);
-  await arrive({...base,persist:async id=>{events.push(['persist',id]);return{error:{message:'RLS'}};}});assert.deepEqual(JSON.parse(JSON.stringify(events)),[['persist',1],['notify','Hata: RLS','err','🎯']]);events.length=0;
-  await arrive(base);assert.deepEqual(JSON.parse(JSON.stringify(events)),[['persist',1],['complete',{id:1}]]);
+  await arrive(base);assert.deepEqual(JSON.parse(JSON.stringify(events)),[['complete',{id:1}]]);
+
 });
 
 test('arrival modules load before the locked map service and are cached offline',()=>{
   const head=read('partials/head.html'),sw=read('sw.js'),service=read('src/services/map.js');
   for(const path of modules){assert.ok(head.includes(`src="${path}?v=`));assert.ok(sw.includes(`'/${path}'`));assert.ok(head.indexOf(`src="${path}?v=`)<head.indexOf('src="src/services/map.js?'));}
-  assert.match(service,/DG_ARRIVE_AT_WAYPOINT/);assert.match(service,/DG_MARK_WAYPOINT_VISITED\.mark\(\{client:sb,id:w\.id\}\)/);
+  assert.match(service,/DG_ARRIVE_AT_WAYPOINT/);assert.doesNotMatch(service,/DG_MARK_WAYPOINT_VISITED/);
 });

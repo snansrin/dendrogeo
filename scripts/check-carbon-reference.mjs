@@ -21,9 +21,11 @@ export function compareCarbonReference(referenceRows,fixture) {
   const policy=JSON.parse(read('research/carbon/density-policy-v1.json')),live=loadRho(),catalogue=loadSpeciesDict();
   assert.deepEqual(policy.defaults_kg_m3,live.grho,'Group densities changed');
   assert.deepEqual(policy.species_kg_m3,live.rho,'Specific densities changed');
-  assert.deepEqual(policy.species_groups,live.groupBySpecies,'Species/groups changed');
+  // User-authorized catalogue additions; the frozen Python policy/vectors stay intact.
+  const additions={'ZEYTİN':'YAPRAKLI','İĞDE':'YAPRAKLI','SÜS KİRAZI':'YAPRAKLI','GÜVEY KANDİLİ':'YAPRAKLI'};
+  assert.deepEqual({...policy.species_groups,...additions},live.groupBySpecies,'Species/groups changed');
   assert.equal(policy.lock_fingerprint,live.lockFingerprint);
-  assert.equal(Object.keys(catalogue.byName).length,49);
+  assert.equal(Object.keys(catalogue.byName).length,49+Object.keys(additions).length);
   assert.equal(referenceRows.length,fixture.rows.length);
   let comparisons=0,maxRelativeError=0;
   const fields=['dbh_cm','density_kg_m3','agb','bhb','bio','c_agb','c_bhb','total_carbon','vol'];
@@ -45,6 +47,18 @@ export function compareCarbonReference(referenceRows,fixture) {
       if(field!=='dbh_cm')close(report[field],reference[field],`${row.id} report/Python ${field}`);
     }
     assert.equal(reference.density_source,frozen.density_source);
+  }
+  for(const [species,group] of Object.entries(additions)){
+    for(let i=0;i<fixture.rows.length;i++){
+      const row=fixture.rows[i];if(row.species!=='DİĞER YAPRAKLI')continue;
+      const actual=api.calculate({circumferenceCm:row.girth_cm,heightM:row.height_m,species,group});
+      const report=calcRow(row.girth_cm/Math.PI,row.height_m,species,group);
+      assert.equal(actual.valid,true);assert.equal(report.valid,true);
+      for(const field of fields){
+        close(actual[field],fixture.expected[i][field],`${species} frozen group fallback ${field}`);
+        if(field!=='dbh_cm')close(report[field],fixture.expected[i][field],`${species} report fallback ${field}`);
+      }
+    }
   }
   return {schema:'dendrogeo-carbon-reference-check/1',cases:fixture.rows.length,species:49,
     comparisons,maxRelativeError,tolerance:1e-12,productionFilesModified:false,

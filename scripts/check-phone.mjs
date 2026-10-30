@@ -1,5 +1,6 @@
 import {spawnSync} from 'node:child_process';
 import {serveFixture} from './lib/browser-acceptance-fixture.mjs';
+const fieldNavigation=spawnSync(process.execPath,['scripts/field-navigation-smoke.mjs'],{stdio:'inherit'});if(fieldNavigation.status!==0)process.exit(fieldNavigation.status||1);
 const securityCsp=spawnSync(process.execPath,['scripts/security-csp-smoke.mjs'],{stdio:'inherit'});if(securityCsp.status!==0)process.exit(securityCsp.status||1);
 const mapExport=spawnSync(process.execPath,['scripts/map-only-export-smoke.mjs'],{stdio:'inherit'});if(mapExport.status!==0)process.exit(mapExport.status||1);
 const parkStages=spawnSync(process.execPath,['scripts/park-stage-workspace-smoke.mjs'],{stdio:'inherit'});if(parkStages.status!==0)process.exit(parkStages.status||1);

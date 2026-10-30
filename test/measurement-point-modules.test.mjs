@@ -13,14 +13,14 @@ const modules=[
 ];
 function setup(){const window={};const context=vm.createContext({window});for(const path of modules)vm.runInContext(read(path),context,{filename:path});return{window,context};}
 
-test('waypoint and latest-point adapters preserve project filters and next-id query',async()=>{
-  const{window}=setup(),calls=[];
-  const client={from(table){calls.push(['from',table]);return{select(columns){calls.push(['select',columns]);const query={eq(field,value){calls.push(['eq',field,value]);if(table==='waypoints'&&field==='visited')return Promise.resolve({data:[{wp_id:2}]});return query;},order(field,options){calls.push(['order',field,options]);return query;},limit(value){calls.push(['limit',value]);return Promise.resolve({data:[{point_id:7}]});}};return query;}};}};
-  const waypoints=await window.DG_FETCH_UNVISITED_MEASUREMENT_WAYPOINTS.fetch({client,projectId:4});
-  const latest=await window.DG_FETCH_LATEST_MEASUREMENT_POINT.fetch({client,projectId:4});
-  assert.deepEqual(JSON.parse(JSON.stringify(waypoints)),[{wp_id:2}]);assert.deepEqual(JSON.parse(JSON.stringify(latest)),{point_id:7});
-  assert.deepEqual(calls.slice(0,5),[['from','waypoints'],['select','*'],['eq','project_id',4],['eq','visited',false],['from','measurements']]);
-  assert.equal(JSON.stringify(calls.slice(5)),JSON.stringify([['select','point_id'],['eq','project_id',4],['order','point_id',{ascending:false}],['limit',1]]));
+test('pending point adapter uses measured completion and propagates errors',async()=>{
+ const{window}=setup();let requested;
+ window.DG_FETCH_PROJECT_WAYPOINTS={fetch:async input=>{requested=input;return{data:[{wp_id:2,visited:false},{wp_id:3,visited:true}]};}};
+ const client={};
+ assert.deepEqual(JSON.parse(JSON.stringify(await window.DG_FETCH_UNVISITED_MEASUREMENT_WAYPOINTS.fetch({client,projectId:4}))),[{wp_id:2,visited:false}]);
+ assert.equal(requested.client,client);assert.equal(requested.projectId,4);
+ window.DG_FETCH_PROJECT_WAYPOINTS.fetch=async()=>({error:new Error('denied')});
+ await assert.rejects(window.DG_FETCH_UNVISITED_MEASUREMENT_WAYPOINTS.fetch({client,projectId:4}),/denied/);
 });
 
 test('next-point suggestion chooses nearest waypoint and protects current form state',async()=>{
