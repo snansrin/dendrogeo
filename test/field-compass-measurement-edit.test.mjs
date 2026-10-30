@@ -98,7 +98,7 @@ test('true edit collision and RLS errors remain blocked, never overwrite or inse
     insert(){throw Error('edit must never become INSERT');}
   }}};
   const input={client,record:{owner:'u',species:'İĞDE'},editId:74,
-    baseline:{id:74,owner:'u',species:'ZEYTİN',status:'Onaylandı'}};
+    baseline:{id:74,owner:'u',client_id:'original-token',species:'ZEYTİN',status:'Onaylandı'}};
   const conflict=await window.DG_PERSIST_MEASUREMENT_RECORD.persist(input);
   assert.equal(conflict.error.code,'DG_EDIT_CONFLICT');
   const denied=await window.DG_PERSIST_MEASUREMENT_RECORD.persist(input);
