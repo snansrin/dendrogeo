@@ -26,7 +26,7 @@ function fixture(records=[draft()],options={}){
    if(op==='insert')inserts++;if(op==='update')updates++;
    if(options.beforeWrite)await options.beforeWrite();
    const r=options.writeResult||{data:[{id:42}],error:null};
-   if(!r.error&&r.data?.length&&(op==='insert'||op==='update'))remote.set(payload.client_id,{...payload,id:filters.id||42});
+   if(!r.error&&r.data?.length&&(op==='insert'||op==='update')){const original=op==='update'?records.find(row=>row.data._editId===filters.id)?.data||{}:{};remote.set(payload.client_id,{...original,...payload,id:filters.id||42});}
    events.push('server');return resolve(r);
   }catch(e){return reject(e);}}
  };},storage:{from(){return {async upload(){uploads++;return {error:options.photoError||null};},getPublicUrl(){return {data:{publicUrl:'https://example.org/photo.jpg'}};}};}}};
