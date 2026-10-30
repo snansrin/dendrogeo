@@ -130,18 +130,7 @@ function liveCalc(){
  const preview=window.DG_CALCULATE_LIVE_MEASUREMENT_PREVIEW.calculate({
   input:()=>window.DG_BUILD_LIVE_MEASUREMENT_PREVIEW_INPUT.build({circumference:$("mDbh").value,height:$("mHeight").value,species:$("mSpecies").value,group:$("mGroup").value}),
   validate:request=>DG_TREE_MEASUREMENT_VALIDATOR.validateBiometrics({group:request.group,species:request.species,circumferenceCm:request.circumferenceCm,heightM:request.heightM}),
-  calculate:request=>{
-    // Existing historical measurements may have a preserved DBH that is not
-    // derivable from legacy girth evidence. An untouched circumference input
-    // must not silently rewrite that scientific measurement.
-    const original=DG_MEASUREMENT_EDIT_BASELINE,source=DG_MEASUREMENT_EDIT_INPUT_BASELINE;
-    if(EDIT_ID&&original&&source&&Number(request.circumferenceCm)===Number(source.circumference)&&
-       Number.isFinite(Number(original.dbh_cm))&&Number(original.dbh_cm)>0){
-      const result=calc(Number(original.dbh_cm),request.heightM,request.species,request.group);
-      return {...result,circumference_cm:request.circumferenceCm};
-    }
-    return calcFromCircumference(request.circumferenceCm,request.heightM,request.species,request.group);
-  }
+  calculate:request=>calcFromCircumference(request.circumferenceCm,request.heightM,request.species,request.group)
  });
  return window.DG_RENDER_LIVE_MEASUREMENT_PREVIEW.render({preview,element:$("liveCalc"),getHint:()=>$("measureSaveHint"),translate:_tms});
 }
@@ -281,24 +270,8 @@ async function dgSaveMeasInner(){
         prepare:{
           rememberProject:dgProjectRemember,
           preparePhoto:async value=>{const file=$("mPhoto").files[0];if(!file)return{blob:null,fileName:null};const prepared=await window.DG_PREPARE_MEASUREMENT_PHOTO.prepare({file,pointId:value.pointId,measurementNo:value.measurementNo,compress,buildFileName:parts=>window.DG_BUILD_MEASUREMENT_PHOTO_FILE_NAME.build(parts)});return{blob:prepared.blob,fileName:prepared.fileName};},
-          calculate:value=>{
-            const original=DG_MEASUREMENT_EDIT_BASELINE,source=DG_MEASUREMENT_EDIT_INPUT_BASELINE;
-            if(EDIT_ID&&original&&source&&Number(value.circumferenceCm)===Number(source.circumference)&&
-               Number.isFinite(Number(original.dbh_cm))&&Number(original.dbh_cm)>0){
-              return {...calc(Number(original.dbh_cm),value.heightM,value.species,value.group),circumference_cm:value.circumferenceCm};
-            }
-            return calcFromCircumference(value.circumferenceCm,value.heightM,value.species,value.group);
-          },
-          buildRecord:({form:value,calculation,project})=>{const record=window.DG_BUILD_MEASUREMENT_RECORD.build({owner:USER.id,projectId:value.projectId,pointId:value.pointId,measurementNo:value.measurementNo,group:value.group,species:value.species,circumferenceCm:value.circumferenceCm,dbhCm:calculation.dbh_cm,heightM:value.heightM,volumeM3:calculation.vol,carbonKg:calculation.total_carbon,parkSchemaOk:DG_PARK_SCHEMA_OK,parkId:project&&project.park_id});
-            const original=DG_MEASUREMENT_EDIT_BASELINE,source=DG_MEASUREMENT_EDIT_INPUT_BASELINE;
-            if(EDIT_ID&&original&&source&&Number(value.circumferenceCm)===Number(source.circumference)&&
-               Number.isFinite(Number(original.dbh_cm))&&Number(original.dbh_cm)>0){
-              // Only the requested species, height and dependent calculated
-              // quantities change. Preserve original raw measurement evidence.
-              record.girth_cm=original.girth_cm??null;
-              record.dbh_cm=original.dbh_cm;
-            }
-            if(DG_PARK_SCHEMA_OK)record.park_id=(project&&project.park_id)||null;return record;},
+          calculate:value=>calcFromCircumference(value.circumferenceCm,value.heightM,value.species,value.group),
+          buildRecord:({form:value,calculation,project})=>{const record=window.DG_BUILD_MEASUREMENT_RECORD.build({owner:USER.id,projectId:value.projectId,pointId:value.pointId,measurementNo:value.measurementNo,group:value.group,species:value.species,circumferenceCm:value.circumferenceCm,dbhCm:calculation.dbh_cm,heightM:value.heightM,volumeM3:calculation.vol,carbonKg:calculation.total_carbon,parkSchemaOk:DG_PARK_SCHEMA_OK,parkId:project&&project.park_id});if(DG_PARK_SCHEMA_OK)record.park_id=(project&&project.park_id)||null;return record;},
           createClientId:uuidv4,gps:()=>GPS,reverseGeocode:fix=>reverseGeocode(fix.latitude,fix.longitude),
           buildLocationFields:({fix,geocode})=>{if(geocode)toast(dgCf("📍 Konum algılandı: ")+esc(geocode.city)+" / "+esc(geocode.country),"info","🗺️");return window.DG_BUILD_MEASUREMENT_LOCATION_FIELDS.build({fix,geocode});}
         },
@@ -338,10 +311,8 @@ async function dgSaveMeasInner(){
 
 /* --- 8. DÜZENLEME --- */
 let DG_MEASUREMENT_EDIT_BASELINE=null;
-let DG_MEASUREMENT_EDIT_INPUT_BASELINE=null;
 function cancelEdit(){
  DG_MEASUREMENT_EDIT_BASELINE=null;
- DG_MEASUREMENT_EDIT_INPUT_BASELINE=null;
  return window.DG_CANCEL_MEASUREMENT_EDIT.cancel({setEditing:id=>{EDIT_ID=id;},setManualPoint:value=>{manualPoint=value;},element:$,parkGate:dgParkGate});
 }
 async function editRec(id){
@@ -350,11 +321,7 @@ async function editRec(id){
   setBaseline:record=>{DG_MEASUREMENT_EDIT_BASELINE=record;},
   clearPhoto:dgClearMeasurePhoto,
   setEditing:value=>{EDIT_ID=value;},
-  build:record=>{
-    const form=window.DG_BUILD_MEASUREMENT_EDIT_FORM.build(record,value=>typeof circumferenceCmFromDiameter==="function"?circumferenceCmFromDiameter(value):value);
-    DG_MEASUREMENT_EDIT_INPUT_BASELINE={circumference:form.circumference,height:form.height};
-    return form;
-  },
+  build:record=>window.DG_BUILD_MEASUREMENT_EDIT_FORM.build(record,value=>typeof circumferenceCmFromDiameter==="function"?circumferenceCmFromDiameter(value):value),
   render:form=>window.DG_RENDER_MEASUREMENT_EDIT_FORM.render(form,{element:$,fillSpecies,showLatin}),
   liveCalc,
   navigate:go,
