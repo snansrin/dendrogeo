@@ -12117,6 +12117,24 @@
           "sha256": "792318a3d5c60aaf954d50a6b4f5c3de868d3322bc81202902a0ca0b9159f1ea"
         }
       ]
+    },
+    {
+      "date": "2026-10-30",
+      "audit_chain": "sha256-v1",
+      "scope": "Explicit user-requested field fix: regenerate only index.html and src/bootstrap/app-runtime.js using existing npm run build after compass and measurement edit changes. No changes to scientific calculations, waypoints, map/land-cover engines, themes, DB or measurement rows. One-shot build workflow removed itself.",
+      "validation": [
+        "npm run check",
+        "npm run check:phone",
+        "npm run check:accessibility",
+        "scripts/field-navigation-smoke.mjs"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "951266d06b6b6ee4a5fe4b0f86dfdcc99be8a55b509c422a433b386b7fca9ff6",
+          "sha256": "8e3ce8ed4884c0d2eb6581ef1648f07879bae0ced4fba28c35e3ea63ae79edc2"
+        }
+      ]
     }
   ]
 }
