@@ -12391,6 +12391,23 @@
           "sha256": "b70738fb84380cd962038ae01a8a2484cdb033dbc88ca2a3d5b9e119ea02eb28"
         }
       ]
+    },
+    {
+      "date": "2026-10-31",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: align the isolated Chromium surface-drawing smoke fixture with the new typed-delete confirmation. That fixture previously called the unrelated park-admin deletion UI without loading the new confirmation module, which caused an artificial page error. It still verifies native park rename/merge prompts; actual typed deletion is independently exercised by the park-admin mobile smoke. Only this browser smoke and the integrity audit changed. Allometry, GIS, park geometry, deletion implementation, species/wood-density tables, RLS and production data are unchanged.",
+      "validation": [
+        "node --check scripts/drawing-smoke.mjs",
+        "npm run check",
+        "GitHub Actions: Chromium mobile / WebKit"
+      ],
+      "files": [
+        {
+          "path": "scripts/drawing-smoke.mjs",
+          "previous_sha256": "c93aec619d579dc56bd57dc650591e6a040d9de33924a1aa4a31760232a9396b",
+          "sha256": "aa3830ee3d239a7b035b5bd53fca7fb951fbcb1c54edb50566abf5ad658e843f"
+        }
+      ]
     }
   ]
 }
