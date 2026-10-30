@@ -14,7 +14,7 @@ function runtime(){
 test('offline edits compare their original server snapshot atomically and preserve conflicting rows',async()=>{
  const w=runtime(),db=new PGlite();
  try{
-  await db.exec("create table measurements(id bigint primary key,owner text,height_m double precision,photo_url text,status text);insert into measurements values(7,'u1',10,null,'Beklemede');");
+  await db.exec("create table measurements(id bigint primary key,owner text,height_m double precision,photo_url text,status text,client_id text);insert into measurements values(7,'u1',10,null,'Beklemede','first-version');");
   const baseline=(await db.query('select * from measurements')).rows[0];
   // Real PostgreSQL executes the adapter predicates together, not a separate read-then-write.
   const client={from(table){assert.equal(table,'measurements');let payload;const predicates=[];return{
