@@ -37,9 +37,9 @@ test('queued photo keeps owner path, timestamp and jpeg upload settings',async()
 test('queued measurement persistence retains owner filtered update and insert query shapes',async()=>{
   const window=setup(),calls=[];
   const client={from(table){calls.push(['from',table]);return{update(payload){calls.push(['update',payload]);return this;},insert(payload){calls.push(['insert',payload]);return this;},eq(key,value){calls.push(['eq',key,value]);return this;},is(key,value){calls.push(['is',key,value]);return this;},select(columns){calls.push(['select',columns]);return this;}};}};
-  await window.DG_PERSIST_QUEUED_MEASUREMENT.save({client,payload:{lat:1},editId:7,owner:'u1',baseline:{id:7,owner:'u1',height_m:10,photo_url:null,client_id:'original-client'}});
+  await window.DG_PERSIST_QUEUED_MEASUREMENT.save({client,payload:{lat:1,client_id:'new-token'},editId:7,owner:'u1',baseline:{id:7,owner:'u1',height_m:10,photo_url:null,client_id:'original-client'}});
   await window.DG_PERSIST_QUEUED_MEASUREMENT.save({client,payload:{lat:2},editId:null,owner:'u1'});
-  assert.deepEqual(JSON.parse(JSON.stringify(calls)),[['from','measurements'],['update',{lat:1}],['eq','id',7],['eq','owner','u1'],['eq','height_m',10],['eq','client_id','original-client'],['select','id'],['from','measurements'],['insert',{lat:2}],['select','id']]);
+  assert.deepEqual(JSON.parse(JSON.stringify(calls)),[['from','measurements'],['update',{client_id:'new-token'}],['eq','id',7],['eq','owner','u1'],['eq','client_id','original-client'],['select','id'],['from','measurements'],['insert',{lat:2}],['select','id']]);
 });
 
 test('sync use case stops on account changes and reports saved result',async()=>{

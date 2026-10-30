@@ -12219,6 +12219,45 @@
           "sha256": "146986519e5cc5fa24100d54cb7c2139420cc49bc01725bb58e17642e5eba2dd"
         }
       ]
+    },
+    {
+      "date": "2026-10-30",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: restore reliable measurement record edit updates. Remove over-constrained SQL predicates on scientific dimensions, patch only changed record fields, and retain owner/RLS, row version token, approval/deletion and photo replacement guards. Locked equations, wood-density and species catalogs, map/land-cover engines, styling, databases and persisted measurements remain unchanged.",
+      "validation": [
+        "npm run check",
+        "npm run check:phone",
+        "npm run check:accessibility",
+        "Chromium and WebKit measurement-save-smoke",
+        "PGlite measurement-update-regression"
+      ],
+      "files": [
+        {
+          "path": "src/adapters/trees/update-measurement-if-current.js",
+          "previous_sha256": "f26362995ac570aaa566d952fe5eff068b87f5d53c34bc8d80c95c4d11faf36f",
+          "sha256": "b40ff687dcb96a35827fd4166038650ad16c6bab50f663c9b717b93411f0337a"
+        },
+        {
+          "path": "test/measurement-persistence-modules.test.mjs",
+          "previous_sha256": "baa598ba165c143a45278ef283129f73244df53c4c300d9a2b59d6dbde918c98",
+          "sha256": "e6af873626218c9b4cadb837eff9768dc393c70ea1aecbb3c1f7f5b55d03cec7"
+        },
+        {
+          "path": "test/offline-sync-modules.test.mjs",
+          "previous_sha256": "38442b251af9e88084317076618d9f8d703cdbafac281ff3899d0e320057260d",
+          "sha256": "902e02fe48050e5104cb0e0e9f0994457fed7ad070f8ec8e43c7be915065c171"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "a64477ea06a51fb1b2de742b1449f826cb4dcdc8010e56814887e8fd819bff73",
+          "sha256": "b1cb030178cccbce0d15c37a5e72508f1cb78c1ba15873fdf87823fbf8d35625"
+        },
+        {
+          "path": "test/offline-safety.test.mjs",
+          "previous_sha256": "146986519e5cc5fa24100d54cb7c2139420cc49bc01725bb58e17642e5eba2dd",
+          "sha256": "0c8795e69f741049b54a168a90fec0b1a29ffab3570584f7c8620b4551ac9ddc"
+        }
+      ]
     }
   ]
 }

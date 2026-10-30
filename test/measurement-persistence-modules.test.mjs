@@ -27,7 +27,7 @@ test('measurement park adapter preserves the primary-key lookup and missing-row 
 test('measurement adapter requires the written row, keeps owner scope, and retries only named optional columns',async()=>{
   const{window}=setup(),calls=[],record={owner:'u1',client_id:'c',altitude_m:4,photo_file:'P001_M1.JPG'};let fail=true;
   const client={from:table=>{let kind,row;const chain={update:value=>{kind='update';row=value;return chain;},insert:value=>{kind='insert';row={...value};return chain;},eq:(field,id)=>{calls.push(['eq',field,id]);return chain;},is:()=>chain,select:async()=>{calls.push([kind,table,row]);if(kind==='insert'&&fail){fail=false;return{error:{code:'PGRST204',message:"Could not find the 'photo_file' column of 'measurements' in the schema cache"}};}return{error:null,data:[{id:7}]};}};return chain;}};
-  const updated=await window.DG_PERSIST_MEASUREMENT_RECORD.persist({client,record,editId:7,baseline:{id:7,owner:'u1',client_id:'c'}});assert.equal(updated.error,null);assert.ok(calls.some(c=>c[0]==='eq'&&c[1]==='owner'&&c[2]==='u1'));
+  const updated=await window.DG_PERSIST_MEASUREMENT_RECORD.persist({client,record,editId:7,baseline:{id:7,owner:'u1',client_id:'previous-c'}});assert.equal(updated.error,null);assert.ok(calls.some(c=>c[0]==='eq'&&c[1]==='owner'&&c[2]==='u1'));
   const result=await window.DG_PERSIST_MEASUREMENT_RECORD.persist({client,record,editId:null});assert.equal(result.error,null);const inserts=calls.filter(c=>c[0]==='insert');assert.equal(inserts.length,2);assert.equal(inserts[1][2].altitude_m,4);assert.equal(Object.hasOwn(inserts[1][2],'photo_file'),false);assert.equal(record.photo_file,'P001_M1.JPG');
 });
 

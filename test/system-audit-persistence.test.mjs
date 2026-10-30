@@ -9,7 +9,7 @@ const baseline={id:7,owner:'u1',height_m:10,photo_url:null,status:'Beklemede',cl
 
 test('online edit requires an actual server row before reporting success',async()=>{
  const w=runtime(),client=clientFor([{data:[],error:null}]);
- const result=await w.DG_PERSIST_MEASUREMENT_RECORD.persist({client,record:{owner:'u1',height_m:12},editId:7,baseline});
+ const result=await w.DG_PERSIST_MEASUREMENT_RECORD.persist({client,record:{owner:'u1',height_m:12,client_id:'new-token'},editId:7,baseline});
  assert.ok(result.error,'zero-row updates must not complete/reset the form');
 });
 test('online write errors never strip evidence or retry unrelated failures',async()=>{
@@ -23,7 +23,7 @@ test('old-schema fallback removes only the optional column identified by the ser
 test('online edits compare the original snapshot and keep primary-key scope with a fresh write identity',async()=>{
  const w=runtime(),client=clientFor([{error:null,data:[{id:7}]}]);
  const result=await w.DG_PERSIST_MEASUREMENT_RECORD.persist({client,record:{owner:'u1',client_id:'new-client',height_m:12},editId:7,baseline:{...baseline,client_id:'original-client'}});
- assert.equal(result.error,null);assert.ok(client.calls[0].filters.some(([k,v])=>k==='height_m'&&v===10));assert.ok(client.calls[0].filters.some(([k,v])=>k==='client_id'&&v==='original-client'));assert.ok(client.calls[0].filters.some(([k,v])=>k==='id'&&v===7));assert.equal(client.calls[0].payload.client_id,'new-client');
+ assert.equal(result.error,null);assert.ok(!client.calls[0].filters.some(([k])=>k==='height_m'));assert.ok(client.calls[0].filters.some(([k,v])=>k==='client_id'&&v==='original-client'));assert.ok(client.calls[0].filters.some(([k,v])=>k==='id'&&v===7));assert.equal(client.calls[0].payload.client_id,'new-client');
 });
 test('edits with missing or mismatched snapshots stop before any request',async()=>{
  const w=runtime();for(const original of [null,{id:8,owner:'u1'},{id:7,owner:'other'}]){const client=clientFor([]);const result=await w.DG_PERSIST_MEASUREMENT_RECORD.persist({client,record:{owner:'u1'},editId:7,baseline:original});assert.ok(result.error);assert.equal(client.calls.length,0);}
