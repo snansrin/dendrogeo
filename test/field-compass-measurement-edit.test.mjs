@@ -73,13 +73,13 @@ test('species-only edit ignores volatile metadata but compares scientific and ap
     background_metadata:{index:1},last_seen_at:'2026-10-30T12:02:00Z'
   };
   const result=await window.DG_PERSIST_MEASUREMENT_RECORD.persist({
-    client,record:{owner:'u',species:'ZEYTİN',status:'Beklemede'},
+    client,record:{owner:'u',species:'ZEYTİN',status:'Beklemede',client_id:'new-client-id'},
     editId:74,baseline
   });
   assert.equal(result.error,null);
-  for(const field of ['id','owner','species','status','girth_cm','dbh_cm','height_m','deleted_at','client_id'])
+  for(const field of ['id','owner','status','deleted_at','client_id'])
     assert.ok(calls.some(row=>row[1]===field),field);
-  for(const field of ['updated_at','background_metadata','last_seen_at'])
+  for(const field of ['updated_at','background_metadata','last_seen_at','species','girth_cm','dbh_cm','height_m'])
     assert.equal(calls.some(row=>row[1]===field),false,'volatile metadata must not block edit: '+field);
 });
 
@@ -97,7 +97,7 @@ test('true edit collision and RLS errors remain blocked, never overwrite or inse
     update(value){write=value;return chain;},
     insert(){throw Error('edit must never become INSERT');}
   }}};
-  const input={client,record:{owner:'u',species:'İĞDE'},editId:74,
+  const input={client,record:{owner:'u',species:'İĞDE',client_id:'fresh-token'},editId:74,
     baseline:{id:74,owner:'u',client_id:'original-token',species:'ZEYTİN',status:'Onaylandı'}};
   const conflict=await window.DG_PERSIST_MEASUREMENT_RECORD.persist(input);
   assert.equal(conflict.error.code,'DG_EDIT_CONFLICT');
