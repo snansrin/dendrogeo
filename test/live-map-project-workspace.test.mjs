@@ -66,6 +66,25 @@ test('Göksu project opens existing boundary and points without creating data',a
  assert.deepEqual(x.calls,['draw','points 77','select 30','remember 30']);
  assert.equal(x.actions.hidden,false);assert.match(x.status.textContent,/77 kayıtlı ölçüm noktası/);
 });
+test('project selector stays blank until the user selects a project, then opens it',async()=>{
+ const x=uiScenario({remembered:()=> '33'});
+ assert.equal(x.select.value,'');assert.deepEqual(x.calls,[]);
+ x.select.value='30';x.select.listeners.change();
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.deepEqual(x.calls,['draw','points 77','select 30','remember 30'],'selection by the user must reopen their chosen project');
+ assert.equal(x.actions.hidden,false);
+});
+test('explicit open restores only the chosen project snapshot and focuses the verified park',async()=>{
+ const x=uiScenario({restoreWorkspace:async(project,park)=>{x.calls.push('restore '+project.id+'/'+park.id);return {mode:'cached',scan:true,grid:123};},
+  watchWorkspace:(id,park)=>x.calls.push('watch '+id+'/'+park.id),focusPark:()=>x.calls.push('focus park'),
+  saveWorkspace:async(id,parkId)=>{x.calls.push('save before switch '+id+'/'+parkId);return true;}});
+ x.select.value='30';await x.ui.open();
+ assert.deepEqual(x.calls,['draw','points 77','select 30','remember 30','restore 30/25','watch 30/25','focus park']);
+ assert.match(x.status.textContent,/123 grid hücresi/);
+ x.select.value='33';x.select.listeners.change();
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.deepEqual(x.calls.slice(7),['save before switch 30/25','parent 50','draw','points 42','select 33','remember 33','restore 33/53','watch 33/53','focus park']);
+});
 test('Dikmen stage primes its parent then opens the original stage and points',async()=>{
  const x=uiScenario();x.select.value='33';await x.ui.open();
  assert.deepEqual(x.calls,['parent 50','draw','points 42','select 33','remember 33']);
@@ -130,6 +149,49 @@ test('saved surface opens from account/device review after a clean scan, without
  assert.deepEqual(plain(await root.DG_LIVE_MAP_PROJECT_SURFACE_UI.restore({...ports,currentParkId:()=>25})),{ready:false,restored:false});
  assert.deepEqual(plain(await root.DG_LIVE_MAP_PROJECT_SURFACE_UI.restore({...ports,currentRecordParkId:()=>25})),{ready:false,restored:false});
  assert.deepEqual(calls,['saved previous draft','scan','restore existing review','saved previous draft','scan','restore existing review','saved previous draft','scan','saved previous draft','scan','saved previous draft','scan']);
+});
+test('device snapshot persists exact existing raster/grid state without mixing owners, parks or revisions',async()=>{
+ const root=moduleAt('src/ui/live-map-project-snapshot.js'),snapshots=new Map(),events=[],original={analysis:{report:{year:2021},result:{cells:[{row:1,col:2}]}},grid:{cells:[{id:'c1'}],selected:['c1'],reviewBasis:null}};
+ const store={async save(id,value){const key=id.ownerId+':'+id.projectId+':'+id.parkId;snapshots.set(key,JSON.parse(JSON.stringify(value)));},async read(id){return snapshots.get(id.ownerId+':'+id.projectId+':'+id.parkId)||null;}};
+ const controller=root.DG_LIVE_MAP_PROJECT_SNAPSHOT.create({store,capture:()=>original,apply:async state=>{events.push(state);return {scan:true,grid:state.grid.cells.length};}});
+ const scope={ownerId:'sinan',projectId:33,parkId:53,geometry,engine:'2026-v1'};
+ assert.equal((await controller.save(scope)).saved,true);
+ assert.equal((await controller.restore(scope)).grid,1);
+ assert.equal(events.length,1);assert.deepEqual(JSON.parse(JSON.stringify(events[0])),original);
+ assert.equal((await controller.restore({...scope,ownerId:'someone-else'})).restored,false);
+ assert.equal((await controller.restore({...scope,parkId:25})).restored,false);
+ assert.equal((await controller.restore({...scope,geometry:{...geometry,outer:[[[39,32],[40,33],[40,32],[39,32]]]}})).reason,'changed');
+ assert.equal((await controller.restore({...scope,engine:'2027-v2'})).reason,'changed');
+ const empty=root.DG_LIVE_MAP_PROJECT_SNAPSHOT.create({store,capture:()=>({analysis:null,grid:{cells:[]}}),apply:()=>{}});
+ assert.equal((await empty.save(scope)).empty,true);
+ assert.equal(snapshots.size,1,'empty save never overwrites the last complete snapshot');
+ assert.equal(root.DG_LIVE_MAP_PROJECT_SNAPSHOT.reviewBasis({record:null}),null);
+});
+test('device snapshot adapter requires IndexedDB rather than performing any remote fallback write',async()=>{
+ const root=moduleAt('src/adapters/parks/live-map-project-snapshot-store.js');
+ const store=root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE.create(()=>null);
+ const scope={ownerId:'sinan',projectId:33,parkId:53};
+ await assert.rejects(store.read(scope),/Cihazda kalıcı çalışma alanı kullanılamıyor/);
+ await assert.rejects(store.save(scope,{state:{grid:{cells:[]}}}),/Cihazda kalıcı çalışma alanı kullanılamıyor/);
+});
+test('bootstrap restores selected cached project only after resolving the lazy scientific engine version',async()=>{
+ const order=[],root={};let ports;
+ root.DG_LIVE_MAP_PROJECT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT={reviewBasis:()=>null,create:()=>({
+  save:async()=>{order.push('save device');return true;},
+  restore:async scope=>{order.push('read '+scope.projectId+'/'+scope.parkId+'/'+scope.engine);return{scan:true,grid:12};}
+ })};
+ root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI={create:result=>(ports=result,{})};
+ const env={window:root,sb:{},USER:{id:'account-one'},DG_PARK:{id:53,geom_json:stage.geom_json},
+  document:{addEventListener:()=>{}},dgEnsureLulc:async()=>{order.push('load lazy engine');env.DG_LC_ENGINE_VERSION='core-v1';}};
+ runInNewContext(readFileSync(new URL('../src/bootstrap/live-map-project-workspace.js',import.meta.url),'utf8'),env);
+ const restored=await ports.restoreWorkspace({id:33,is_locked:false},stage);
+ assert.equal(restored.mode,'cached');
+ assert.deepEqual(order,['load lazy engine','read 33/53/core-v1']);
+ const locked=await ports.restoreWorkspace({id:33,is_locked:true},stage);
+ assert.equal(locked.restored,false);assert.equal(locked.mode,'readonly');
+ assert.deepEqual(order,['load lazy engine','read 33/53/core-v1'],'locked projects never load editable snapshots');
 });
 test('live-map bootstrap reuses existing map/waypoint tools without a second writer',()=>{
  const source=readFileSync(new URL('../src/bootstrap/live-map-project-workspace.js',import.meta.url),'utf8');
