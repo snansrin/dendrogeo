@@ -12555,7 +12555,8 @@
         {"path":"index.html","previous_sha256":"a42b2192347443d970962c00bdc4cb9bcc499f5ed51bfedc8d199a6a28ab22b1","sha256":"37e03c3e020f14d60c9d8f0fd5091ca37712b40ec4ee992656f127bbf5f14d8d"},
         {"path":"partials/boot.html","previous_sha256":"9b13ef5e302038e14cb8eeaabd4ddf03424d77d3534d576ae24f27b3cc9190f8","sha256":"598e6267be1fad2c32b589b25c8281a67a34feade91ab1dbfccb8d3ee8d15bf1"},
         {"path":"sw.js","previous_sha256":"bf7f17b704f13754dd65130f5a24305bbc2501f98a888341d398d456f7c54fdb","sha256":"1e4430249661cdbe288208279a504643c7b7f1dee72b416d32d52773a4b90f4e"},
-        {"path":"src/adapters/parks/live-map-project-store.js","previous_sha256":"8e13ca52749711ba0a1e5308b7b8260370b16c551d7fa3e455c8883882c038a8","sha256":"b55d186cb0551f61083793c2934762e4d009a7dbd8c08002108d80098ce0d106"}
+        {"path":"src/adapters/parks/live-map-project-store.js","previous_sha256":"8e13ca52749711ba0a1e5308b7b8260370b16c551d7fa3e455c8883882c038a8","sha256":"b55d186cb0551f61083793c2934762e4d009a7dbd8c08002108d80098ce0d106"},
+        {"path":".github/workflows/mobile-smoke.yml","previous_sha256":"c097b13d7de6ac212dde8d2ab7c9f715d29290170377d665c42222bf31f9ba1f","sha256":"791909a00ebb0ec8445106dae45d20fcda2ddd505f8749668a5cac93c757d21d"}
       ]
     }
   ]
