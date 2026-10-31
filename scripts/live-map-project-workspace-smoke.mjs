@@ -49,7 +49,9 @@ try{
   assert.deepEqual(storeSaved,{schema:'test',parkId:53,grid:{cells:[{id:'saved-grid'}]}},'IndexedDB preserves an exact project-scoped snapshot');
   await page.locator('#dgLiveProjectSelect').selectOption('33');
   await page.waitForFunction(()=>document.querySelector('#dgLiveProjectStatus').textContent.includes('Ana park kaydı eksik'));
-  assert.equal(await page.locator('[data-live-project-action="stages"]').isHidden(),true);
+  assert.equal(await page.locator('[data-live-project-action="stages"]').isVisible(),true,'orphan stage tools remain discoverable');
+  await page.locator('[data-live-project-action="stages"]').click();
+  assert.match(await page.locator('#dgLiveProjectStatus').innerText(),/sınır düzenleme güvenle başlatılamıyor/,'orphan stage cannot begin an unsafe boundary edit');
   assert.equal(await page.locator('[data-live-project-action="surface"]').isVisible(),true);
   await page.locator('[data-live-project-action="surface"]').click();
   await page.waitForFunction(()=>document.querySelector('#dgLiveProjectStatus').textContent.includes('Kaydedilmiş yüzey düzeltmeleri'));
