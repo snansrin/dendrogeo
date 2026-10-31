@@ -12463,6 +12463,21 @@
         {"path":"test/form-qa.test.mjs","previous_sha256":"4727cfe175c51eebb3994a5ed46429f5d3f84f4f7062ef655a60fa3a7fd94f4e","sha256":"9f81677979d4d4282387114043150ba02ed6ff57d3edb36fca9e3a938e6b9c09"},
         {"path":"test/dbh-qa.test.mjs","previous_sha256":"8654cf646121ae06ae23a4b6e5c261272b6c10b04b8285f7e20f0daa150b7210","sha256":"3ee5863d9936c1b7d510c0c020d04db1a3669ab75646e0bf02a59a3d61031eeb"}
       ]
+    },
+    {
+      "date": "2026-10-31",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up for the targeted waypoint navigation map viewport. On selecting a project or opening its measurement-points map, frame only that project's linked park geometry, falling back to its center or same-project waypoints when needed. Defer fitting while the map panel is collapsed, reject stale park responses, never retain park data across project/account changes, and preserve explicit waypoint/GPS focus. Reuse the existing read-only measurement-park adapter; no DB write, permission change, other-map viewport change, map style, carbon/allometry, species/wood-density or raster/surface analysis modification. The generated index hash follows these two isolated UI changes.",
+      "validation": [
+        "node --test test/waypoint-project-auto-focus.test.mjs test/waypoint-field.test.mjs test/waypoint-navigation-modules.test.mjs",
+        "npm run check",
+        "npm run check:phone"
+      ],
+      "files": [
+        {"path":"index.html","previous_sha256":"831765572e9b347d5e5a330bf61bcc960eda72869ccc668be2319d41cdebea58","sha256":"1e534dfe5996b2ff3871b72d57a09b2b475972abfee0198903ade792eae42800"},
+        {"path":"src/ui/shell.js","previous_sha256":"aaad18a7a92f0062b49fd2b19491b0b686fe7a44ca6ff8ec5280619db1460c4f","sha256":"eb57acd661f483f8ac500122336afc40bfa23dc5812063c324b2565a6e822c7f"},
+        {"path":"src/ui/waypoint-map-viewport.js","previous_sha256":"d302214df223907c1dcb52c8fc54679629740997e12678d6f5750e675bd7154b","sha256":"24420b54d2cc2c87ab67ac9e37e37ed61c18881eb332d81d3eb3d03803008da5"}
+      ]
     }
   ]
 }
