@@ -12583,7 +12583,7 @@
     {
       "date": "2026-10-31",
       "audit_chain": "sha256-v1",
-      "scope": "Explicitly user-approved narrow UI repair: keep the saved-project stage action accessible; open the existing parent-scoped stage editor when available and explain read-only access for an orphan stage; avoid GIS menu overlap with the fixed header; correct the landing Chromium test's invalid assumption that themed icon foreground colors must differ. No park or stage boundary data, surface raster classification, allometry, carbon formulas, species or wood-density inputs are changed.",
+      "scope": "User-authorized modularization: narrow UI repair approved explicitly by the user. Keep the saved-project stage action accessible; open the existing parent-scoped stage editor when available and explain read-only access for an orphan stage; avoid GIS menu overlap with the fixed header; correct the landing Chromium test's invalid assumption that themed icon foreground colors must differ. No park or stage boundary data, surface raster classification, allometry, carbon formulas, species or wood-density inputs are changed.",
       "validation": ["node --test test/live-map-project-workspace.test.mjs test/park-stage-workspace.test.mjs test/gis-workspace-menu-position.test.mjs", "npm run check", "GitHub Actions mobile and WebKit push CI"],
       "files": [
         {"path":"scripts/landing-showcase-smoke.mjs","previous_sha256":"597c73ede9d05b1d868b2b4d01a0a0b0f0e00c3044da828e4b920751df739b0b","sha256":"60bc529aa84e3f076313714ccb6e545e21ded0c7c006b439aab9c4f7900bcb30"},
@@ -12595,7 +12595,7 @@
     {
       "date": "2026-10-31",
       "audit_chain": "sha256-v1",
-      "scope": "Follow-up of the same user-authorized live-map UI fix: replace an English waypoint noun in the orphan-stage warning with the existing Turkish measurement-points terminology. Rebuild only the matching static runtime and its CSP/version hashes. No scientific engine, geometry, measurement or account data changed.",
+      "scope": "User-authorized release follow-up of the same live-map UI fix: replace an English waypoint noun in the orphan-stage warning with the existing Turkish measurement-points terminology. Rebuild only the matching static runtime and its CSP/version hashes. No scientific engine, geometry, measurement or account data changed.",
       "validation": ["node --test test/measurement-points-labels.test.mjs", "npm run check", "GitHub Actions CI"],
       "files": [
         {"path":"index.html","previous_sha256":"fa376f93f4e7750cd67b996cfa52655911af35a2f3a06c8e2d38dfc7a2baf6a0","sha256":"a0fbef8868d2897957c7abb8954f2e2aab8ae55eab14bf0822ee915d3ccd349b"}
