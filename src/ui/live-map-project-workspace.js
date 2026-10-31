@@ -34,11 +34,18 @@
     const project=await ports.readProject(local.id);
     if(!project||Number(project.park_id)!==Number(local.park_id)||!projects().some(row=>Number(row.id)===Number(project.id)))throw Error(t("Proje erişimi veya park bağlantısı değişti; listeyi yenile."));
     const park=await ports.readPark(project.park_id),candidate=ports.candidate(park);
-    let parent=null,missingParent=false;
+    let parent=null,missingParent=false,reconnectedParent=false;
     if(park.geom_json?.stage_scope){
-     const parentId=Number(park.geom_json.stage_scope.parentId);
+     const scope=park.geom_json.stage_scope,parentId=Number(scope.parentId);
      if(!Number.isSafeInteger(parentId)||parentId<=0||parentId===park.id)throw Error(t("Etap ana park kimliği geçersiz."));
      parent=await ports.readParent(parentId);
+     if(!parent&&typeof ports.readParentByKey==="function"&&typeof scope.parentKey==="string"&&park.created_by){
+      const replacement=await ports.readParentByKey(scope.parentKey);
+      if(replacement&&Number(replacement.id)!==Number(park.id)&&!replacement.geom_json?.stage_scope&&
+       replacement.osm_key===scope.parentKey&&replacement.created_by===park.created_by){
+       parent=replacement;reconnectedParent=true;
+      }
+     }
      if(parent)ports.candidate(parent);
      else missingParent=true;
     }
@@ -68,9 +75,9 @@
     ports.watchWorkspace?.(project.id,park);
     ports.focusPark?.();
     if(restoreError)note(t("Etap ve {n} ölçüm noktası açıldı; çalışma görüntüsü yüklenemedi: {error}",{n:points.length,error:String(restoreError.message||restoreError)}),"warn");
-    else if(restored?.mode==="cached")note(t("{n} ölçüm noktası, kaydedilmiş {g} grid hücresi ve {s} yüzey taraması bu cihazdan geri açıldı.",{n:points.length,g:restored.grid||0,s:restored.scan?1:0})+(missingParent?" "+t("Ana park kaydı eksik; etap sınırı düzenlenemez."):""),missingParent?"warn":"ok");
-    else if(restored?.mode==="review")note(t("{n} ölçüm noktası ve kayıtlı yüzey düzeltmeleri otomatik hazırlandı. Yeni analiz kabul edilmedi.",{n:points.length})+(missingParent?" "+t("Ana park kaydı eksik; etap sınırı düzenlenemez."):""),missingParent?"warn":"ok");
-    else note(project.is_locked?t("{n} ölçüm noktası salt okunur görüntülendi. Kilitli proje yeni saha çalışmasının hedefi yapılamaz.",{n:points.length}):missingParent?t("{n} kayıtlı ölçüm noktası ve etap sınırı yüklendi. Ana park kaydı eksik; etap sınırı düzenlenemez, yüzey ve ölçüm kayıtları açılabilir.",{n:points.length}):t("{n} kayıtlı ölçüm noktası yüklendi. Etap sınırı ve varsa kabul edilmiş yüzey sonucu mevcut araçlarla düzenlenebilir.",{n:points.length}),missingParent?"warn":"ok");
+    else if(restored?.mode==="cached")note(t("{n} ölçüm noktası, kaydedilmiş {g} grid hücresi ve {s} yüzey taraması bu cihazdan geri açıldı.",{n:points.length,g:restored.grid||0,s:restored.scan?1:0})+(missingParent?" "+t("Ana park kaydı eksik; etap sınırı düzenlenemez."):reconnectedParent?" "+t("Etaplar menüsü doğrulanan ana parka yeniden bağlandı."):""),missingParent?"warn":"ok");
+    else if(restored?.mode==="review")note(t("{n} ölçüm noktası ve kayıtlı yüzey düzeltmeleri otomatik hazırlandı. Yeni analiz kabul edilmedi.",{n:points.length})+(missingParent?" "+t("Ana park kaydı eksik; etap sınırı düzenlenemez."):reconnectedParent?" "+t("Etaplar menüsü doğrulanan ana parka yeniden bağlandı."):""),missingParent?"warn":"ok");
+    else note(project.is_locked?t("{n} ölçüm noktası salt okunur görüntülendi. Kilitli proje yeni saha çalışmasının hedefi yapılamaz.",{n:points.length}):missingParent?t("{n} kayıtlı ölçüm noktası ve etap sınırı yüklendi. Ana park kaydı eksik; etap sınırı düzenlenemez, yüzey ve ölçüm kayıtları açılabilir.",{n:points.length}):reconnectedParent?t("{n} kayıtlı ölçüm noktası ve seçilen etap değişmeden açıldı. Etaplar menüsü doğrulanan ana parka yeniden bağlandı.",{n:points.length}):t("{n} kayıtlı ölçüm noktası yüklendi. Etap sınırı ve varsa kabul edilmiş yüzey sonucu mevcut araçlarla düzenlenebilir.",{n:points.length}),missingParent?"warn":"ok");
    }catch(error){ports.resumeWatching?.();note(t("Proje açılamadı: {error}",{error:String(error.message||error)}),"err");}
    finally{busy(false);}
   }

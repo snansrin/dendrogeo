@@ -151,6 +151,29 @@ test('Missing parent retains the existing stage menu as read-only without loadin
  assert.doesNotMatch(host.innerHTML,/data-stage-action=/,'editing cannot be offered with missing parent geometry');
  assert.equal(storeCalls,0);assert.equal(drawCalls,0);
 });
+test('re-created canonical parent re-enables the standard Etaplar menu for the original immutable stage',async()=>{
+ const models=[];let lists=0;
+ const host={innerHTML:'',setAttribute(){},addEventListener(){},querySelector:()=>null};
+ const document={getElementById:()=>({}),createElement:()=>host};
+ const original={id:53,name:'Dikmen Vadisi · 2.etap',created_by:'same-owner',osm_key:'stage/50/'+ 'a'.repeat(32),
+  geom_json:{...row.geom_json,stage_scope:{label:'2.etap',parentId:50,parentKey:'relation/14290362'}}};
+ const parent={id:54,name:'Dikmen Vadisi',osm_key:'relation/14290362',created_by:'same-owner'};
+ const root={DG_PARK_STAGE_DRAWING_UI:{create:()=>({cancel(){}})},DG_PARK_STAGE_ASSISTED_UI:{create:()=>({clear(){}})},
+  DG_PARK_STAGE_MENU_UI:{create:()=>({mount(){},clear(){},refresh(){},status(){}})},DG_PARK_STAGE_VIEW:{render:model=>{models.push(model);return '';}}};
+ vm.runInNewContext(readFileSync(new URL('../src/ui/park-stage-workspace.js',import.meta.url),'utf8'),{window:root});
+ const workspace=root.DG_PARK_STAGE_WORKSPACE_UI.create({document,escape:String,drawing:{},actor:()=>({id:'same-owner'}),
+  store:{ready:async()=>true,deleteReady:async()=>true,list:async id=>{assert.equal(id,54);lists++;return[];}}});
+ await workspace.present({park:{name:parent.name},row:parent});
+ await workspace.present({park:{name:original.name},row:original});
+ assert.equal(lists,2);
+ assert.equal(models.at(-1).ready,true);
+ assert.equal(models.at(-1).selectedId,53);
+ assert.deepEqual(models.at(-1).rows.map(row=>row.id),[53]);
+ assert.equal(models.at(-1).canDelete,false,'old stage with 42 measurements cannot be deleted through a replacement parent');
+ await workspace.present({park:{name:original.name},row:{...original,created_by:'different-owner'}});
+ assert.match(host.innerHTML,/Ana park kaydı eksik/);
+ assert.equal(lists,2,'wrong creator must never enable the editor');
+});
 test('A stale workspace action cannot draw, overwrite status or unlock controls in a different park',async()=>{
  for(const phase of ['validation','validation-error','clear']){
   let reached,release,reject,approved=0,drawn=0;

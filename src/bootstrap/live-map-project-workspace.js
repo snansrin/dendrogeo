@@ -147,7 +147,7 @@
   translate:(template,values)=>typeof dgTf==="function"?dgTf(template,values):template,
   remembered:()=>"",remember:()=>{},
   observe:(element,notify)=>{if(typeof root.MutationObserver!=="function")return;const observer=new root.MutationObserver(notify);observer.observe(element,{attributes:true,attributeFilter:["class"]});},
-  reloadProjects:()=>loadProjects(),readProject:id=>store.project(id),readPark:id=>store.park(id),readParent:id=>store.parent(id),readWaypoints:id=>store.waypoints(id),
+  reloadProjects:()=>loadProjects(),readProject:id=>store.project(id),readPark:id=>store.park(id),readParent:id=>store.parent(id),readParentByKey:key=>store.parentByKey(key),readWaypoints:id=>store.waypoints(id),
   candidate:row=>root.DG_LIVE_MAP_PROJECT_CANDIDATE.candidate(row),
   activeParkId:()=>typeof DG_PARK!=="undefined"?Number(DG_PARK?.id||0):0,
   isEditing:()=>!!(root._dgLandCoverBusy||root.DG_LC_SENS?.state?.busy||root.DG_LC_SENS?.state?.saving||root.DG_LC_SENS?.state?.brush||root.DG_LC_SENS?.state?.draw||root.DG_LC_SENS?.state?.objectPick||root.DG_PARK_STAGES?.isDrawing()||document.querySelector('#dgUxMapTools [data-tool][aria-pressed="true"]')),

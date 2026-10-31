@@ -12613,6 +12613,28 @@
         {"path":"scripts/park-stage-workspace-smoke.mjs","previous_sha256":"01042110946c4fa8c1e7e57773cf029c3e8879b2e8c898e6f18a6a6d7672e0c3","sha256":"66951a3406ef334ad7c8afb3600be71016ffbdbaa33024f52bb546218121c75b"},
         {"path":"test/park-stage-workspace.test.mjs","previous_sha256":"587701e53db3601d1717b193344ab6cea4d8ea1bb1b51f52864ed07873a2248b","sha256":"19694bd13facc412884bf8cf18e25b150d4cd64de54b2e6824b15a76ca92ca83"}
       ]
+    },
+    {
+      "date": "2026-11-01",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: recover editing of the existing immutable Dikmen 2.etap stage #53 when its historical parent #50 was deleted and its exact OSM parent identity was re-registered as #54. Enforce matching canonical parent OSM key and same creator through read-only RLS queries, keep stage #53 and its project, geometry, accepted surface, grid and 42 measurement points unchanged; show the original stage in the standard Etaplar editor while disabling deletion through the replacement parent. Explicit boundary revisions still create new stage versions under the existing SQL guards. No parent or stage row creation, mutation, reassignment, altered styles, scientific algorithms, database migrations or permission changes.",
+      "validation": ["node --test test/live-map-project-workspace.test.mjs test/park-stage-workspace.test.mjs", "npm run check", "GitHub Actions Chromium and WebKit mobile stage-menu smoke"],
+      "files": [
+        {"path":"index.html","previous_sha256":"b1fea2a202462c8b55b11f3d94a1c204c9548a73efdd88c0c2c5c03203ac9635","sha256":"b2d8031e9532f0bba513008f1e79b5cf26a4b04a46ddb90c4e16d1e8f714549a"},
+        {"path":"src/adapters/parks/live-map-project-store.js","previous_sha256":"b55d186cb0551f61083793c2934762e4d009a7dbd8c08002108d80098ce0d106","sha256":"17ebf9611f9423f1d1a242d494c1b4951fda7d6cd45b766259151ebea28d5427"},
+        {"path":"src/ui/park-stage-workspace.js","previous_sha256":"ccbe2de9c5e8d1d98559c4f40381bc4a4f873e066f128800396d03db582eabdb","sha256":"067e7231e5a92eb0a96b71b016f21cd06ce642bf01a73df5e8c8c91d70017831"},
+        {"path":"scripts/park-stage-workspace-smoke.mjs","previous_sha256":"66951a3406ef334ad7c8afb3600be71016ffbdbaa33024f52bb546218121c75b","sha256":"328935a28a76f1dd382ce5502f8c631e2d76c7463bb9daba4da650056b8415d0"},
+        {"path":"test/park-stage-workspace.test.mjs","previous_sha256":"19694bd13facc412884bf8cf18e25b150d4cd64de54b2e6824b15a76ca92ca83","sha256":"ea593c292d8c9fe5f64b27cdb9a8b076253b144dc92c079175c81b7e13be9cde"}
+      ]
+    },
+    {
+      "date": "2026-11-01",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization CI follow-up: repair only the new synthetic mobile stage-menu smoke fixture by supplying its required immutable stage_scope.schema marker. The live stage geometry, editor, project data, 42 measurements, styling, scientific engines, RLS and runtime outputs are unchanged.",
+      "validation": ["node --test test/live-map-project-workspace.test.mjs test/park-stage-workspace.test.mjs", "npm run check:core-foundation", "GitHub Actions Chromium and WebKit mobile stage-menu smoke"],
+      "files": [
+        {"path":"scripts/park-stage-workspace-smoke.mjs","previous_sha256":"328935a28a76f1dd382ce5502f8c631e2d76c7463bb9daba4da650056b8415d0","sha256":"1eeaf65948a97cae6b411d68fee0ecb115e81e111008687afd728566a62b429f"}
+      ]
     }
   ]
 }

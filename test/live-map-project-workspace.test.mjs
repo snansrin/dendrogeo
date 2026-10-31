@@ -9,12 +9,14 @@ function moduleAt(path,window={}){
 }
 const geometry={outer:[[[39,32],[39,33],[40,33],[39,32]]],inner:[]};
 const goksu={id:25,name:'Göksu Parkı',osm_key:'way/423602737',source:'osm',area_m2:508000,geom_json:geometry};
-const stage={id:53,name:'Dikmen Vadisi · 2.etap',osm_key:'stage/50/'+'a'.repeat(32),source:'manual',geom_json:{...geometry,stage_scope:{parentId:50,schema:'dendrogeo/park-stage/1'}}};
+const stage={id:53,name:'Dikmen Vadisi · 2.etap',osm_key:'stage/50/'+'a'.repeat(32),source:'manual',created_by:'same-owner',geom_json:{...geometry,stage_scope:{parentId:50,parentKey:'relation/14290362',schema:'dendrogeo/park-stage/1'}}};
 
 test('saved project controls retain English labels for mobile language switching',()=>{
  const source=readFileSync(new URL('../src/config/i18n-en.js',import.meta.url),'utf8');
  const translations=runInNewContext(source+'\nDG_I18N_EN');
  assert.equal(translations['💾 Çalışmayı bu cihazda sakla'],'💾 Save workspace on this device');
+ assert.match(translations['Etaplar menüsü doğrulanan ana parka yeniden bağlandı.'],/Stages menu was reconnected/);
+ assert.match(translations['{n} kayıtlı ölçüm noktası ve seçilen etap değişmeden açıldı. Etaplar menüsü doğrulanan ana parka yeniden bağlandı.'],/original stage/);
  assert.equal(translations['Haritada açmak için bir proje seç.'],'Select a project to open it on the map.');
 });
 
@@ -99,6 +101,28 @@ test('Dikmen stage survives deleted parent without fabricating geometry or mutat
  assert.deepEqual(x.calls,['forget deleted parent','draw','points 42','select 33','remember 33']);
  assert.match(x.status.textContent,/Ana park kaydı eksik/);
 });
+test('deleted parent ID is recovered only by matching canonical OSM key and same creator; stage 53 stays active',async()=>{
+ const canonical={...goksu,id:54,name:'Dikmen Vadisi',osm_key:'relation/14290362',created_by:'same-owner'};
+ const keys=[];
+ const x=uiScenario({readParent:async()=>null,readParentByKey:async key=>{keys.push(key);return canonical;},
+  restoreWorkspace:async(project,park)=>{x.calls.push('restore '+project.id+'/'+park.id);return{mode:'cached',grid:123,scan:true};},
+  focusPark:()=>x.calls.push('focus 53')});
+ x.select.value='33';await x.ui.open();
+ assert.deepEqual(keys,['relation/14290362']);
+ assert.deepEqual(x.calls,['parent 54','draw','points 42','select 33','remember 33','restore 33/53','focus 53']);
+ assert.match(x.status.textContent,/doğrulanan ana parka yeniden bağlandı/);
+ assert.match(x.status.textContent,/123 grid hücresi/);
+});
+test('recovery refuses mismatched owners, wrong keys, stage-as-parent and missing parent identity',async()=>{
+ const canonical={...goksu,id:54,osm_key:'relation/14290362',created_by:'same-owner'};
+ for(const replacement of [{...canonical,created_by:'other-owner'},{...canonical,osm_key:'relation/1'},
+  {...canonical,geom_json:stage.geom_json},{...canonical,id:53}]){
+  const x=uiScenario({readParent:async()=>null,readParentByKey:async()=>replacement});
+  x.select.value='33';await x.ui.open();
+  assert.deepEqual(x.calls,['forget deleted parent','draw','points 42','select 33','remember 33']);
+  assert.match(x.status.textContent,/Ana park kaydı eksik/);
+ }
+});
 test('project selection refuses stale authorization, unsaved drafts and active editors',async()=>{
  const stale=uiScenario({readProject:async()=>({id:30,park_id:99})});stale.select.value='30';await stale.ui.open();
  assert.equal(stale.calls.length,0);assert.match(stale.status.textContent,/erişimi/);
@@ -128,8 +152,10 @@ test('Supabase store uses only exact RLS reads; no creates, updates or deletes',
  assert.equal((await store.project(30)).id,30);
  assert.equal((await store.park(25)).id,30);
  assert.equal((await store.parent(50)).id,30);
+ assert.equal((await store.parentByKey('relation/14290362')).id,30);
+ assert.equal(await store.parentByKey('stage/50/abc'),null);
  assert.equal((await store.waypoints(30)).length,1);
- assert.deepEqual(operations,['projects','parks','parks']);
+ assert.deepEqual(operations,['projects','parks','parks','parks']);
 });
 test('missing stage parent is a non-error read while missing selected park remains a hard stop',async()=>{
  const client={from(){return{select(){return this;},eq(){return this;},maybeSingle:async()=>({data:null,error:null})};}};
