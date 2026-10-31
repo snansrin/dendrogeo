@@ -12500,7 +12500,7 @@
     {
       "date": "2026-10-31",
       "audit_chain": "sha256-v1",
-      "scope": "User-authorized security hardening: approve the waypoint project-permission SQL migration in exactly two scientific-test filename allowlists. No scientific or numeric assertions changed. Allometry, species/density, DBH, GIS, park geometry, calculations, themes and saved data stay immutable. Before/after SHA-256 values protect the limited test edits.",
+      "scope": "User-authorized release follow-up: security hardening; approve the waypoint project-permission SQL migration in exactly two scientific-test filename allowlists. No scientific or numeric assertions changed. Allometry, species/density, DBH, GIS, park geometry, calculations, themes and saved data stay immutable. Before/after SHA-256 values protect the limited test edits.",
       "validation": [
         "npm run check",
         "Supabase fresh reset",
