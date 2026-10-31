@@ -34,6 +34,7 @@ const DG_INV={...DG_PARK_INVITE_STATE_STORE.getState()};
 DG_PARK_INVITE_STATE_STORE.subscribe(state=>Object.assign(DG_INV,state));
 function dgInviteStateUpdate(patch){return DG_PARK_INVITE_STATE_STORE.setState(patch);}
 const DG_PARK_INVITE_MODULE_STORE=window.DG_PARK_INVITE_STORE.create(()=>sb);
+let DG_INVITE_BADGE_EPOCH=0;
 
 function dgInvSetCount(id,n){return window.DG_PARK_INVITE_INBOX_UI.setCount($,id,n);}
 function dgOwnedParks(rows){return window.DG_PARK_INVITE_ACCESS.owned(rows);}
@@ -50,13 +51,32 @@ async function dgMyParks(force){
 }
 
 /* ---------------- 📬 DAVETLERİN (Projeler sekmesi · herkes) ---------------- */
+/* Hafif, salt-okunur rozet sorgusu: Projeler ekranına girmeden de yeni davet görülür.
+ * RLS bütün sonuçları sınırlar; sahip/yönetici satırları e-postaya göre ayrıca ayıklanır. */
+async function dgInvitesRefreshBadge(){
+ const epoch=++DG_INVITE_BADGE_EPOCH;
+ if(typeof USER==="undefined"||!USER||typeof sb==="undefined"||!sb){window.DG_PARK_INVITE_INBOX_UI.resetRecipient($);return;}
+ const userId=USER.id,email=String((PROFILE&&PROFILE.email)||USER.email||"").trim().toLowerCase();
+ if(!email){window.DG_PARK_INVITE_INBOX_UI.setInviteBadge($,0);return;}
+ try{
+  const{data,error}=await DG_PARK_INVITE_MODULE_STORE.pendingBadge();
+  if(error)throw error;
+  if(epoch!==DG_INVITE_BADGE_EPOCH||!USER||USER.id!==userId||String((PROFILE&&PROFILE.email)||USER.email||"").trim().toLowerCase()!==email)return;
+  const count=(data||[]).filter(row=>String(row.email||"").trim().toLowerCase()===email).length;
+  window.DG_PARK_INVITE_INBOX_UI.setCount($,"projInviteCount",count);
+  window.DG_PARK_INVITE_INBOX_UI.setInviteBadge($,count);
+ }catch(error){/* Ağ/RLS hatasında mevcut sayı kalsın; yanlışlıkla sıfırlama. */}
+}
 /* 0040: kaydırma koruma sarmalı — yeniden çizimde #main scrollTop korunur. */
 async function dgInvitesLoadMine(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await dgInvitesLoadMine__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function dgInvitesLoadMine__scroll(){
+ const epoch=++DG_INVITE_BADGE_EPOCH;
  if(typeof USER==="undefined"||!USER){window.DG_PARK_INVITE_INBOX_UI.resetRecipient($);return;}
+ const userId=USER.id;
  const email=String((PROFILE&&PROFILE.email)||USER.email||"").toLowerCase();
  const rows=await window.DG_LOAD_RECIPIENT_PARK_INVITES.execute(email,()=>DG_PARK_INVITE_MODULE_STORE.inbox(),DG_PARK_INVITE_STATE_STORE);
  const parks=await dgMyParks(),shared=dgSharedParks(parks);
+ if(epoch!==DG_INVITE_BADGE_EPOCH||!USER||USER.id!==userId||String((PROFILE&&PROFILE.email)||USER.email||"").toLowerCase()!==email)return;
  window.DG_PARK_INVITE_INBOX_UI.presentRecipient({getElement:$,rows,shared,escape:esc});
 }
 async function dgInviteRespond(id,accept){
