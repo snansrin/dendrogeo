@@ -7,10 +7,18 @@
   if(!data)throw Error(missing);
   return data;
  }
+ async function optionalPark(client,id){
+  const {data,error}=await client.from("parks")
+   .select("id,name,osm_key,osm_type,osm_id,source,area_m2,centroid_lat,centroid_lon,geom_json")
+   .eq("id",id).maybeSingle();
+  if(error)throw error;
+  return data||null;
+ }
  function create(client){
   return Object.freeze({
    project:id=>one(client.from("projects").select("id,name,park_id,is_locked").eq("id",id),"Proje bulunamadı veya erişim izni kaldırıldı."),
-   park:id=>one(client.from("parks").select("id,name,osm_key,osm_type,osm_id,source,area_m2,centroid_lat,centroid_lon,geom_json").eq("id",id),"Kayıtlı park veya etap bulunamadı."),
+   async park(id){const row=await optionalPark(client,id);if(!row)throw Error("Kayıtlı park veya etap bulunamadı.");return row;},
+   parent:id=>optionalPark(client,id),
    async waypoints(id){
     const {data,error}=await root.DG_FETCH_PROJECT_WAYPOINTS.fetch({client,projectId:id});
     if(error)throw error;

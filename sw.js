@@ -823,6 +823,7 @@ const CORE_ASSETS = [
     '/src/domain/parks/live-map-project-candidate.js',
     '/src/adapters/parks/live-map-project-store.js',
     '/src/ui/live-map-project-workspace.js',
+    '/src/ui/live-map-project-surface.js',
     '/src/bootstrap/live-map-project-workspace.js',
     '/src/ui/operation-help.js',
     '/src/services/lc-config.js',

@@ -36,17 +36,20 @@
     const project=await ports.readProject(local.id);
     if(!project||Number(project.park_id)!==Number(local.park_id)||!projects().some(row=>Number(row.id)===Number(project.id)))throw Error(t("Proje erişimi veya park bağlantısı değişti; listeyi yenile."));
     const park=await ports.readPark(project.park_id),candidate=ports.candidate(park);
-    let parent=null;
+    let parent=null,missingParent=false;
     if(park.geom_json?.stage_scope){
      const parentId=Number(park.geom_json.stage_scope.parentId);
      if(!Number.isSafeInteger(parentId)||parentId<=0||parentId===park.id)throw Error(t("Etap ana park kimliği geçersiz."));
-     parent=await ports.readPark(parentId);ports.candidate(parent);
+     parent=await ports.readParent(parentId);
+     if(parent)ports.candidate(parent);
+     else missingParent=true;
     }
     if(active!==Number(project.id)||ports.activeParkId()!==Number(park.id)){
      const saved=await ports.saveDraft();if(!saved)throw Error(t("Açık yüzey taslağı kaydedilemedi. Harita değiştirilmedi."));
      // Stage view needs the parent scope even when opened directly from a
      // fresh session. This initializes only the existing editor, not its data.
      if(parent)await ports.prepareParent(parent);
+     else if(missingParent)await ports.forgetParent(); // never reuse an old parent editor session
      note(t("Kaydedilmiş sınır haritaya yükleniyor…"));
      await ports.draw(candidate,park);
      if(ports.activeParkId()!==Number(park.id))throw Error(t("Harita seçilen park kimliğine bağlanamadı. Kayıtlar değiştirilmedi."));
@@ -58,7 +61,8 @@
     if(!project.is_locked)ports.selectProject(project.id);
     active=Number(project.id);ports.remember(active);
     heading.textContent=project.name+(project.is_locked?" "+t("· kilitli"):"");actions.hidden=!!project.is_locked;
-    note(project.is_locked?t("{n} ölçüm noktası salt okunur görüntülendi. Kilitli proje yeni saha çalışmasının hedefi yapılamaz.",{n:points.length}):t("{n} kayıtlı ölçüm noktası yüklendi. Etap sınırı ve varsa kabul edilmiş yüzey sonucu mevcut araçlarla düzenlenebilir.",{n:points.length}),"ok");
+    const stages=host.querySelector?.('[data-live-project-action="stages"]');if(stages)stages.hidden=missingParent;
+    note(project.is_locked?t("{n} ölçüm noktası salt okunur görüntülendi. Kilitli proje yeni saha çalışmasının hedefi yapılamaz.",{n:points.length}):missingParent?t("{n} kayıtlı ölçüm noktası ve etap sınırı yüklendi. Ana park kaydı eksik; etap sınırı düzenlenemez, yüzey ve ölçüm kayıtları açılabilir.",{n:points.length}):t("{n} kayıtlı ölçüm noktası yüklendi. Etap sınırı ve varsa kabul edilmiş yüzey sonucu mevcut araçlarla düzenlenebilir.",{n:points.length}),missingParent?"warn":"ok");
    }catch(error){note(t("Proje açılamadı: {error}",{error:String(error.message||error)}),"err");}
    finally{busy(false);}
   }
@@ -68,7 +72,11 @@
    if(action==="open")void open();
    else if(action==="refresh")void (async()=>{if(working)return;busy(true);try{await ports.reloadProjects();}catch(error){note(t("Proje listesi yenilenemedi: {error}",{error:error.message}),"err");}finally{busy(false);refresh();}})();
    else if(action==="waypoints"&&active)ports.openWaypoints(active);
-   else if(action==="surface"&&active)ports.openSurface();
+   else if(action==="surface"&&active){
+    if(!projects().some(row=>Number(row.id)===active&&Number(row.park_id)===ports.activeParkId()))return note(t("Önce seçili projeyi yeniden haritada aç."),"warn");
+    if(ports.isEditing())return note(t("Açık etap çizimini, fırçayı veya harita ölçümünü tamamlayıp yeniden dene. Mevcut işlem korunuyor."),"warn");
+    void Promise.resolve().then(()=>ports.openSurface()).then(result=>{if(result?.restored)note(t("Kaydedilmiş yüzey düzeltmeleri hesap/cihaz taslağından yüklendi. Sınıfları ve sınırları kontrol edebilirsin."),"ok");else if(result?.ready)note(t("Yüzey taraması açıldı; bu hesaba veya cihaza ait eski bir taslak bulunamadı."),"warn");else note(t("Yüzey taraması tamamlanmadı. Önce veri kaynaklarını kontrol et."),"warn");}).catch(error=>note(t("Yüzey çalışması açılamadı: {error}",{error:String(error.message||error)}),"err"));
+   }
    else if(action==="stages"&&active)ports.openStages();
   });
   select.addEventListener("change",()=>{if(!working){actions.hidden=true;note(t("Seçilen projeyi haritada açarak kayıtlarını görüntüleyebilirsin."));}});
