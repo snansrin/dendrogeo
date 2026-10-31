@@ -41,6 +41,7 @@
       "src/adapters/parks/fetch-nominatim-osm-way.js",
       "src/adapters/parks/fetch-osm-park-ring.js",
       "src/adapters/parks/insert-grid-waypoints.js",
+      "src/adapters/parks/live-map-project-store.js",
       "src/adapters/parks/nominatim-client.js",
       "src/adapters/parks/park-admin-read-store.js",
       "src/adapters/parks/park-geometry-store.js",
@@ -105,6 +106,7 @@
       "src/domain/parks/impervious-geometry.js",
       "src/domain/parks/is-schema-error.js",
       "src/domain/parks/line-distance.js",
+      "src/domain/parks/live-map-project-candidate.js",
       "src/domain/parks/osm-rings.js",
       "src/domain/parks/park-containment.js",
       "src/domain/parks/park-export-formats.js",
@@ -1213,6 +1215,7 @@
     "src/adapters/parks/fetch-nominatim-osm-way.js": "420db8cc16ac51d0bd2dcd26b380bf2b2367c8cefa9f04b9049ee42c065a382d",
     "src/adapters/parks/fetch-osm-park-ring.js": "e1c1baec5daf1092c522d0dbe114283eaa2880b864a378bf2ba67a73993ec0b7",
     "src/adapters/parks/insert-grid-waypoints.js": "ae136309c895acb79b76b134ad913cec15213ffa5fbeb60fde23e5dc587d526d",
+    "src/adapters/parks/live-map-project-store.js": "8e13ca52749711ba0a1e5308b7b8260370b16c551d7fa3e455c8883882c038a8",
     "src/adapters/parks/leave-park-presence-channel.js": "7721cacb7a41d61e25d646ab88100eab9b7b7b7aa32acd1de51a24dfa4a80e8c",
     "src/adapters/parks/load-osm-map-coverage.js": "11f68d1bcfac7c69b490c166045c9a2a10fa84d2c7f87d2f0fd0e7378e919e72",
     "src/adapters/parks/nominatim-client.js": "4f8256f017a0694dc12178efb41184517b1750129e3b0c291eeb2bb208eced71",
@@ -1516,6 +1519,7 @@
     "src/domain/parks/impervious-geometry.js": "46e22334f604f9ac3e2a93a94c0ed6967a90d5a41ef866e6a4e80b62988716e7",
     "src/domain/parks/is-schema-error.js": "c3c3738f9ea9fc1a8721e5951e49d45508b1532aebdf21237388777e97e2ae69",
     "src/domain/parks/line-distance.js": "16a296b78a6a9c37b806d678175b9d555809569335fc530c2136bb035000c9b4",
+    "src/domain/parks/live-map-project-candidate.js": "e209bca09499b4eed8d0db6d83819ba962919881ffafe229f4a3ab1f84185d46",
     "src/domain/parks/normalize-drawn-park-geometry.js": "b8e9bd215dadd99e6405fb6c684dcdd8acac9ca5005a33ac60110f04fd96fe19",
     "src/domain/parks/normalize-overpass-cache-key.js": "9fd57413383f8de55999ef2b3b42232396d6867c20ae6ed5c7d52f312a26021b",
     "src/domain/parks/osm-rings.js": "85707c2b13db1beb246f9079ba339fcd6b56b35481a134a928d52818ea3ac53c",
@@ -12495,6 +12499,29 @@
         {"path":"src/services/park-invites.js","previous_sha256":"7e9ea0aed696581924d2bbbc3b9330ec901328e18fcb32d0444897b238d6b92b","sha256":"22f10d68bfadb825c6d0e1ce352c7a062380efa134cd7e9a8b9f6f5c2dbab3e0"},
         {"path":"src/ui/park-invite-inbox.js","previous_sha256":"43ba818b8e268129ed5f0425f30d342b36ff2f7b39161a20f2f3042409e0e4e1","sha256":"73c22ebca5079982c6994235fbf914771697818a789f68eb637338b2e019b0e3"},
         {"path":"src/ui/shell.js","previous_sha256":"eb57acd661f483f8ac500122336afc40bfa23dc5812063c324b2565a6e822c7f","sha256":"325536d7be1185662f80d8afc5c064341d8998474083b7421cd656620a32c487"}
+      ]
+    },
+    {
+      "date": "2026-10-31",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: additive live-map project workspace to show existing owner/shared projects, reopen Göksu Parkı and Dikmen Vadisi 2. Etap by their original park and project IDs, render already stored waypoints, and link to existing surface/stage/waypoint tools. Verify RLS-scoped project access before read-only restoration, prime only the verified row in the existing park session cache so reopening cannot insert an additional park identity, and save any device draft before switching; do not backfill, overwrite or delete production rows. The park detector, stage revision policy, raster/classification, immutable accepted surface, maps, tree measurements, species/wood density, allometry and carbon formulas are unchanged. Only generated shell/boot/head/index/offline manifests and new isolated modules are added; old core hashes retain their audit chain.",
+      "validation": [
+        "node --test test/live-map-project-workspace.test.mjs",
+        "npm run check",
+        "npm run check:phone",
+        "npm run check:accessibility",
+        "GitHub Actions CI"
+      ],
+      "added_protected_files": [
+        "src/adapters/parks/live-map-project-store.js",
+        "src/domain/parks/live-map-project-candidate.js"
+      ],
+      "files": [
+        {"path":"index.html","previous_sha256":"137e96645c34885258c241e5498b002892e1a4a200ab2ef5ed882b5b72d4e3c6","sha256":"c766c39e49772acdf1f2da829f5a36f5b30f18bdc8f7ab6aa2c3bba339c9eb2d"},
+        {"path":"partials/boot.html","previous_sha256":"28bdf11fc3c3e2ceacffa382b8d677e6bd3087de99803b664a79bcce9f81332b","sha256":"9b13ef5e302038e14cb8eeaabd4ddf03424d77d3534d576ae24f27b3cc9190f8"},
+        {"path":"partials/head.html","previous_sha256":"388071a5cc7994693425345d765939dca452e3a6d11cfad1bdb62a29b8b4ac9d","sha256":"260e8e6061399e14122bfcdf5ab645c42b6e2bddb61039d1747217506a1f8e75"},
+        {"path":"partials/shell.html","previous_sha256":"24e8bc25f8d07a1e2ebaea9867b481f525ab84bfa94a202fd92eb7fcf56ea726","sha256":"b02c466bada5492e8dbd638e05e067df2b4ff8aad42c43b13f2e457b290c01fb"},
+        {"path":"sw.js","previous_sha256":"6bc4cc62de849c4a9b4a646a4a6933717b14260e48f663b6c886a51402592689","sha256":"bf7f17b704f13754dd65130f5a24305bbc2501f98a888341d398d456f7c54fdb"}
       ]
     }
   ]
