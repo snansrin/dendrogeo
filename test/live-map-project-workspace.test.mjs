@@ -11,6 +11,13 @@ const geometry={outer:[[[39,32],[39,33],[40,33],[39,32]]],inner:[]};
 const goksu={id:25,name:'Göksu Parkı',osm_key:'way/423602737',source:'osm',area_m2:508000,geom_json:geometry};
 const stage={id:53,name:'Dikmen Vadisi · 2.etap',osm_key:'stage/50/'+'a'.repeat(32),source:'manual',geom_json:{...geometry,stage_scope:{parentId:50,schema:'dendrogeo/park-stage/1'}}};
 
+test('saved project controls retain English labels for mobile language switching',()=>{
+ const source=readFileSync(new URL('../src/config/i18n-en.js',import.meta.url),'utf8');
+ const translations=runInNewContext(source+'\nDG_I18N_EN');
+ assert.equal(translations['💾 Çalışmayı bu cihazda sakla'],'💾 Save workspace on this device');
+ assert.equal(translations['Haritada açmak için bir proje seç.'],'Select a project to open it on the map.');
+});
+
 test('saved normal parks reuse the exact recorded geometry and OSM identity',()=>{
  const root=moduleAt('src/domain/parks/live-map-project-candidate.js');
  const result=root.DG_LIVE_MAP_PROJECT_CANDIDATE.candidate(goksu);
