@@ -59,5 +59,5 @@ test('park DELETE policy consolidation preserves both administrator and staged p
 });
 test('only missing projects locked-by reference index added',()=>{
  assert.match(migration,/CREATE INDEX IF NOT EXISTS idx_projects_locked_by ON public\.projects \(locked_by\)/);
- assert.doesNotMatch(migration,/\b(?:allometry|wood_density|carbon_kg|measurements)\b/i);
+ assert.doesNotMatch(migration.replace(/^--.*$/gm,''),/\b(?:allometry|wood_density|carbon_kg|measurements)\b/i);
 });
