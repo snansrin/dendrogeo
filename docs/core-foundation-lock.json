@@ -12408,6 +12408,34 @@
           "sha256": "aa3830ee3d239a7b035b5bd53fca7fb951fbcb1c54edb50566abf5ad658e843f"
         }
       ]
+    },
+    {
+      "date": "2026-10-31",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: display-only correction on the approved-tree markers shared by Live Map, World Data and landing map, using the already established tree-analysis group palette (conifers green #1e6f4b, broadleaf amber #c77d2e) instead of painting all points green. Keep the two marker render paths identical, preserve coordinates, approved-record selection, popup and photo contents, cluster counts, data rights and scientific calculations. The generated HTML/runtime content hashes are refreshed so browsers retrieve the new marker code without touching the established PWA cache policy. No allometry, wood-density/species source, GIS/park/surface/NDVI engine, Supabase query/RLS/schema or production data has changed.",
+      "validation": [
+        "node --test test/measurement-map-group-colors.test.mjs test/map-measurement-marker-chunk-modules.test.mjs test/map-presentation-modules.test.mjs",
+        "npm run check",
+        "npm run check:phone",
+        "GitHub Actions: CI Chromium/WebKit"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "953332d9357f5540e6c4802bec8596f0a83bbf101438fc558f4eb00a2539ae5f",
+          "sha256": "962d68f02c4e9e1899c37502fc295647efe9b7356924e12a1359e6f486bb2af5"
+        },
+        {
+          "path": "src/ui/create-measurement-map-marker.js",
+          "previous_sha256": "d16cbffbe5ae95897b973ea76181469bb6335421bbfef733e86c836097c94ab1",
+          "sha256": "86d27192c4d5659cf0ff6d9160cda75e7c9d2b024c5490614e6d24f98c755c7a"
+        },
+        {
+          "path": "src/ui/map-measurement-markers.js",
+          "previous_sha256": "cedd193f2786604f84044f2ecf020144b5cba20c86160b729891b7d4f3668a67",
+          "sha256": "b6a912292322ccaa10fcca3d2f2636df07406022a55ddf146a7f95142bf3bd70"
+        }
+      ]
     }
   ]
 }
