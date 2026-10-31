@@ -41,6 +41,7 @@
       "src/adapters/parks/fetch-nominatim-osm-way.js",
       "src/adapters/parks/fetch-osm-park-ring.js",
       "src/adapters/parks/insert-grid-waypoints.js",
+      "src/adapters/parks/live-map-project-snapshot-store.js",
       "src/adapters/parks/live-map-project-store.js",
       "src/adapters/parks/nominatim-client.js",
       "src/adapters/parks/park-admin-read-store.js",
@@ -339,6 +340,7 @@
       "src/ui/editor-ui.js",
       "src/ui/fail-park-live-share.js",
       "src/ui/map-measurement-markers.js",
+      "src/ui/live-map-project-snapshot.js",
       "src/ui/park-live-share-connection-status.js",
       "src/ui/prepare-park-live-collaborator-layer.js",
       "src/ui/render-live-map-load-status.js",
@@ -1157,7 +1159,7 @@
     "css/ui-standard.css": "cf5fc000e24f988fddb04da907b2bdc168a4575c36bc8554c1b2e22ccf527b9b",
     "docs/legacy-service-boundaries.json": "a42273d82bef00247d48bca5f6edf3e05dc41e70bb950f13382b362342067e17",
     "docs/surface-scientific-contract.json": "ad98bde39dc2e8dfd80d36d8f287349cf0ab8a91cd7a9f728e6dd533a844ffa3",
-    "index.html": "314187f5a33c8d10d4dd2d9a18eda5608bd613cb9401025e67e40eb766856982",
+    "index.html": "4ab08ced11b1b86a8786e53bd4e3f3acb0670b29c76aa66657a44a7a6c69abce",
     "package-lock.json": "7c911eebd0849bccd565d0e56935035c7d187b57d310feebbe837843cdefd913",
     "package.json": "7acc377c195644a0a14ac05ce09ffb20a5fc11a15f7cb0c192f951e9f2e62fc3",
     "partials/boot.html": "d9959a7c00c92185f9b085564370ecdc5b2e539c6becad0d80687410096c8fef",
@@ -1217,6 +1219,7 @@
     "src/adapters/parks/fetch-osm-park-ring.js": "e1c1baec5daf1092c522d0dbe114283eaa2880b864a378bf2ba67a73993ec0b7",
     "src/adapters/parks/insert-grid-waypoints.js": "ae136309c895acb79b76b134ad913cec15213ffa5fbeb60fde23e5dc587d526d",
     "src/adapters/parks/live-map-project-store.js": "8e13ca52749711ba0a1e5308b7b8260370b16c551d7fa3e455c8883882c038a8",
+    "src/adapters/parks/live-map-project-snapshot-store.js": "27ba827145656892f2bfc5bb4f5408beb9363eff9fb986d1238afb989f9ede61",
     "src/adapters/parks/leave-park-presence-channel.js": "7721cacb7a41d61e25d646ab88100eab9b7b7b7aa32acd1de51a24dfa4a80e8c",
     "src/adapters/parks/load-osm-map-coverage.js": "11f68d1bcfac7c69b490c166045c9a2a10fa84d2c7f87d2f0fd0e7378e919e72",
     "src/adapters/parks/nominatim-client.js": "4f8256f017a0694dc12178efb41184517b1750129e3b0c291eeb2bb208eced71",
@@ -2110,6 +2113,7 @@
     "src/adapters/surface/read-accepted-park-surface.js": "682a286f82721c3c5357f693e4aeb9a56e8a4614300fd855b1488ad67a06dd73",
     "src/ui/accepted-park-surface.js": "852fc9b603aa93c7a763447e81838b5b3c9368c51df48df02f7bf3f27fe2f487",
     "src/ui/live-map-project-surface.js": "ab2339c073b3a9f0e0f311c0180051af5d370bab56c4bebe3d86c48acdb9cd9f",
+    "src/ui/live-map-project-snapshot.js": "be7a3a04d436522b6878004f2186af4f5cb7d87e70023793d4a1fbc0ddcf6144",
     "scripts/landing-showcase-smoke.mjs": "67695a1f1dc6b05ff7e3340125fde37f0f7f50d7c8d4a9631d6d13d42f29a33a",
     "src/bootstrap/gis-export.js": "1efc829fd8bd3625733f0bd45e65b6aeb221b7ccd539fe22ea81b158d027807a",
     "src/bootstrap/park-admin-controller.js": "0edee558c7b102e9c66414c74d500bf60e40ac24214bbea72b00444fbd34409a",
@@ -12557,6 +12561,23 @@
         {"path":"sw.js","previous_sha256":"bf7f17b704f13754dd65130f5a24305bbc2501f98a888341d398d456f7c54fdb","sha256":"1e4430249661cdbe288208279a504643c7b7f1dee72b416d32d52773a4b90f4e"},
         {"path":"src/adapters/parks/live-map-project-store.js","previous_sha256":"8e13ca52749711ba0a1e5308b7b8260370b16c551d7fa3e455c8883882c038a8","sha256":"b55d186cb0551f61083793c2934762e4d009a7dbd8c08002108d80098ce0d106"},
         {"path":".github/workflows/mobile-smoke.yml","previous_sha256":"c097b13d7de6ac212dde8d2ab7c9f715d29290170377d665c42222bf31f9ba1f","sha256":"791909a00ebb0ec8445106dae45d20fcda2ddd505f8749668a5cac93c757d21d"}
+      ]
+    },
+    {
+      "date": "2026-10-31",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization of the saved-project workspace: live-map project selector starts unselected and performs no implicit draw/scan on reopening the map. Only deliberate user selection or the explicit Haritada ac action verifies the chosen project and restores its immutable park/stage identity, RLS-filtered waypoints and account/device surface review. Add an isolated owner/project/park/geometry/engine-scoped IndexedDB snapshot for previously computed raster and grid state, with exact source-state validation and no auto-acceptance, server-side data writes or inferred grid cells. Fresh raster work is invoked only when no compatible device snapshot exists but an existing authenticated surface review must be opened. Explicit focus uses the original park boundary fit; the missing Dikmen parent stays read-only. Protected numeric engines, park detection, grid generation, allometry, species, accepted surface snapshots and the project's original records remain unchanged.",
+      "validation": [
+        "node --test test/live-map-project-workspace.test.mjs",
+        "npm run check",
+        "GitHub Actions: Chromium + WebKit mobile workspace smoke and three-park GIS"
+      ],
+      "added_protected_files": ["src/adapters/parks/live-map-project-snapshot-store.js", "src/ui/live-map-project-snapshot.js"],
+      "files": [
+        {"path":"index.html","previous_sha256":"37e03c3e020f14d60c9d8f0fd5091ca37712b40ec4ee992656f127bbf5f14d8d","sha256":"4ab08ced11b1b86a8786e53bd4e3f3acb0670b29c76aa66657a44a7a6c69abce"},
+        {"path":"partials/boot.html","previous_sha256":"598e6267be1fad2c32b589b25c8281a67a34feade91ab1dbfccb8d3ee8d15bf1","sha256":"aed5c91a3e8e216dd8f8fc0e4e2d5b6698576263d11b768337e7f1bbb5c7e5da"},
+        {"path":"partials/shell.html","previous_sha256":"b02c466bada5492e8dbd638e05e067df2b4ff8aad42c43b13f2e457b290c01fb","sha256":"87ba33a203316d759ebd4cddaba746286cbd8af0201ad715060b84c1acc1d0fc"},
+        {"path":"sw.js","previous_sha256":"1e4430249661cdbe288208279a504643c7b7f1dee72b416d32d52773a4b90f4e","sha256":"9e6c210d2482677151c14c1cb5e27a1061d9637f776e9176de2aad8e89e4243b"}
       ]
     }
   ]
