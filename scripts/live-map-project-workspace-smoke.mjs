@@ -10,11 +10,7 @@ const html=`<!doctype html><html lang="tr"><meta charset="utf-8"><meta name="vie
 <section id="dgLiveProjects" class="card dg-live-projects"><select id="dgLiveProjectSelect"></select>
 <button type="button" data-live-project-action="open">Haritada aç</button>
 <button type="button" data-live-project-action="refresh">Yenile</button>
-<p id="dgLiveProjectStatus"></p><div id="dgLiveProjectActions" hidden><strong id="dgLiveProjectActive"></strong>
-<button type="button" data-live-project-action="waypoints">Noktalar</button>
-<button type="button" data-live-project-action="surface">Yüzey</button>
-<button type="button" data-live-project-action="save">Bu cihazda sakla</button>
-<button type="button" data-live-project-action="stages">Etap</button></div></section>
+<p id="dgLiveProjectStatus"></p></section>
 <div id="v-map" class="on"></div><script src="/src/adapters/parks/live-map-project-snapshot-store.js"></script>
 <script src="/src/ui/live-map-project-snapshot.js"></script><script src="/src/ui/live-map-project-workspace.js"></script>`;
 try{
@@ -49,19 +45,14 @@ try{
   assert.deepEqual(storeSaved,{schema:'test',parkId:53,grid:{cells:[{id:'saved-grid'}]}},'IndexedDB preserves an exact project-scoped snapshot');
   await page.locator('#dgLiveProjectSelect').selectOption('33');
   await page.waitForFunction(()=>document.querySelector('#dgLiveProjectStatus').textContent.includes('Ana park kaydı eksik'));
-  assert.equal(await page.locator('[data-live-project-action="stages"]').isVisible(),true,'orphan stage tools remain discoverable');
-  await page.locator('[data-live-project-action="stages"]').click();
-  assert.match(await page.locator('#dgLiveProjectStatus').innerText(),/sınır düzenleme güvenle başlatılamıyor/,'orphan stage cannot begin an unsafe boundary edit');
-  assert.equal(await page.locator('[data-live-project-action="surface"]').isVisible(),true);
-  await page.locator('[data-live-project-action="surface"]').click();
-  await page.waitForFunction(()=>document.querySelector('#dgLiveProjectStatus').textContent.includes('Kaydedilmiş yüzey düzeltmeleri'));
+  assert.equal(await page.locator('[data-live-project-action="stages"], [data-live-project-action="surface"], [data-live-project-action="waypoints"]').count(),0,'project selection must not invent a second tool menu');
   await page.locator('#dgLiveProjectSelect').selectOption('30');
   await page.waitForFunction(()=>document.querySelector('#dgLiveProjectStatus').textContent.includes('5 grid hücresi'));
-  assert.equal(await page.locator('[data-live-project-action="stages"]').isVisible(),true);
+  assert.equal(await page.locator('[data-live-project-action="stages"]').count(),0);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no horizontal overflow');
   assert.deepEqual(await page.evaluate(()=>window.__savedProjectCalls),['missing parent','draw 53','waypoints 42','select 33','remember 33','restore 33','watch 33','focus park','save 33','draw 25','waypoints 77','select 30','remember 30','restore 30','watch 30','focus park']);
   assert.deepEqual(errors,[]);
-  console.log(JSON.stringify({engine:process.env.DG_UI_BROWSER||'chromium',width,orphanStageReadOnly:true,waypointsPreserved:true,explicitSelection:true,projectSnapshot:true,parkFocused:true}));
+  console.log(JSON.stringify({engine:process.env.DG_UI_BROWSER||'chromium',width,standardToolsPreserved:true,waypointsPreserved:true,explicitSelection:true,projectSnapshot:true,parkFocused:true}));
   await context.close();
  }
 }finally{await browser.close();await server.close();}

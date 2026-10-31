@@ -130,6 +130,27 @@ test('Stage workspace binds UI workflow with parent-scoped reads and current-epo
  assert.match(source,/ports\.store\.list\(base\.row\.id\)/);assert.match(source,/token!==epoch/);
  assert.match(source,/parentId===base\.row\.id/);assert.match(source,/DG_ACTIVATE_STAGE_SCOPE\.create/);
 });
+test('Missing parent retains the existing stage menu as read-only without loading or writing geometry',async()=>{
+ let mounted=null,storeCalls=0,drawCalls=0;
+ const host={innerHTML:'',setAttribute(){},addEventListener(){},querySelector:()=>null};
+ const document={getElementById:()=>({}),createElement:()=>host};
+ const root={
+  DG_PARK_STAGE_DRAWING_UI:{create:()=>({cancel(){}})},
+  DG_PARK_STAGE_ASSISTED_UI:{create:()=>({clear(){}})},
+  DG_PARK_STAGE_MENU_UI:{create:()=>({mount:element=>{mounted=element;},clear(){},refresh(){},status(){}})}
+ };
+ vm.runInNewContext(readFileSync(new URL('../src/ui/park-stage-workspace.js',import.meta.url),'utf8'),{window:root});
+ const workspace=root.DG_PARK_STAGE_WORKSPACE_UI.create({document,escape:value=>String(value).replaceAll('<','&lt;'),drawing:{},
+  store:{ready:async()=>{storeCalls++;return true;},list:async()=>{storeCalls++;return[];}},draw:()=>{drawCalls++;}});
+ const orphan={id:53,name:'Dikmen',geom_json:{stage_scope:{parentId:50,label:'2. etap <test>'}}};
+ await workspace.present({park:null,row:null});
+ await workspace.present({park:{name:'Dikmen'},row:orphan});
+ assert.equal(mounted,host,'Etaplar toolbar owner must mount even without the parent');
+ assert.match(host.innerHTML,/2\. etap &lt;test>/);
+ assert.match(host.innerHTML,/Ana park kaydı eksik/);
+ assert.doesNotMatch(host.innerHTML,/data-stage-action=/,'editing cannot be offered with missing parent geometry');
+ assert.equal(storeCalls,0);assert.equal(drawCalls,0);
+});
 test('A stale workspace action cannot draw, overwrite status or unlock controls in a different park',async()=>{
  for(const phase of ['validation','validation-error','clear']){
   let reached,release,reject,approved=0,drawn=0;

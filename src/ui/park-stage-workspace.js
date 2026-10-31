@@ -20,7 +20,15 @@
   function showHint(){if(cutEditing){menu.cutReady(true);return;}menu.showHint("Seçili bölüm: "+area(preview.geometry)+" ha",()=>{menu.open();host?.querySelector("#dgStageName")?.focus();},()=>void action("cancel"));}
   function selectProposal(index){if(working||!proposals[index])return;previewIndex=index;preview=proposals[index];assisted.show(preview);showHint();render();}
   function render(){
-   if(!host||!base)return;
+   if(!host)return;
+   if(!base){
+    // An archived stage can outlive its parent park. Keep the original
+    // Etaplar tab in place, but never offer geometry edits without that park.
+    const label=current?.row?.geom_json?.stage_scope?.label||current?.row?.name||"";
+    host.innerHTML=`<div class="dg-png-title">Etap yönetimi</div><p class="dg-meta">${ports.escape(label)}</p>`+
+     `<p id="dgStageStatus" class="dg-meta" role="status" aria-live="polite">Ana park kaydı eksik. Kayıtlı etap haritada görüntülenebilir; ana park sınırı olmadan etap düzenlenemez. Grid, ölçüm noktaları ve yüzey araçları mevcut menülerdedir.</p>`;
+    menu.refresh();return;
+   }
    draftName=host.querySelector("#dgStageName")?.value??draftName;
    host.innerHTML=root.DG_PARK_STAGE_VIEW.render({escape:ports.escape,baseName:base.row.name,rows,selectedId:current?.row?.id===base.row.id?null:current?.row?.id,ready,editing,status:"",proposals,previewIndex,previewArea:preview?area(preview.geometry):null,draftName,partCount,canSave:!!preview||freeDrawing,revision:!!editSource,canDelete:canDelete(rows.find(row=>row.id===current?.row?.id))});menu.refresh();
   }
@@ -29,13 +37,14 @@
    if(!row){base=null;return;}
    const scope=row.geom_json?.stage_scope;
    if(!scope){base={park,row};rows=[];}
-   else if(base?.row.id!==scope.parentId){base=null;return;}
+   else if(base?.row.id!==scope.parentId){base=null;rows=[];}
    const panel=ports.document.getElementById("parkInfo");if(!panel)return;
    host=ports.document.createElement("section");host.id="dgParkStageWorkspace";host.className="dg-png-card dg-stage-workspace";
    host.setAttribute("aria-label","Etap seçimi");host.addEventListener("click",event=>{
     const button=event.target.closest?.("[data-stage-action]");if(!button||button.disabled)return;
     const token=epoch;void action(button.dataset.stageAction).catch(error=>{if(token===epoch)status(error.message||"Etap işlemi tamamlanamadı.");});
    });host.addEventListener("change",event=>{if(event.target.id==="dgStageProposal"&&event.target.value!=="")selectProposal(Number(event.target.value));if(event.target.id==="dgStageSelect"){const button=host.querySelector('[data-stage-action="revise"]');if(button)button.disabled=!ready||event.target.value==="whole";const remove=host.querySelector('[data-stage-action="delete"]');if(remove)remove.disabled=!canDelete(rows.find(row=>String(row.id)===event.target.value));}});menu.mount(host);ready=false;deleteReady=false;render();
+   if(!base)return;
    try{
     const [available,list,removeAvailable]=await Promise.all([ports.store.ready(),ports.store.list(base.row.id),ports.store.deleteReady?.()||false]);
     if(token!==epoch)return;ready=available;deleteReady=removeAvailable;rows=list.filter(r=>r.geom_json?.stage_scope?.parentId===base.row.id);render();

@@ -44,14 +44,12 @@ function fakeDom(){
   querySelectorAll(){return this.controls||[];}
  };}
  const host=node('dgLiveProjects'),select=node('dgLiveProjectSelect'),status=node('dgLiveProjectStatus');
- const actions=node('dgLiveProjectActions'),heading=node('dgLiveProjectActive');
  const mapView=node('v-map');mapView.classList={contains:()=>true};host.controls=[select];
- const stageButton={hidden:false};host.querySelector=selector=>selector==='[data-live-project-action="stages"]'?stageButton:null;
- return {host,select,status,actions,heading,stageButton,document:{getElementById:id=>items[id],createElement:()=>({value:'',textContent:''})}};
+ return {host,select,status,document:{getElementById:id=>items[id],createElement:()=>({value:'',textContent:''})}};
 }
 
 function uiScenario(overrides={}){
- const {host,select,status,actions,heading,stageButton,document}=fakeDom(),calls=[],projects=[{id:30,park_id:25,name:'Göksu'},{id:33,park_id:53,name:'Dikmen'}];
+ const {host,select,status,document}=fakeDom(),calls=[],projects=[{id:30,park_id:25,name:'Göksu'},{id:33,park_id:53,name:'Dikmen'}];
  let activePark=0;
  const root=moduleAt('src/ui/live-map-project-workspace.js');
  const ports={document,projects:()=>projects,remembered:()=>'',remember:id=>calls.push('remember '+id),
@@ -65,13 +63,13 @@ function uiScenario(overrides={}){
   showWaypoints:rows=>calls.push('points '+rows.length),clearWaypoints:()=>calls.push('clear points'),selectProject:id=>calls.push('select '+id),
   openWaypoints:()=>{},openSurface:()=>{},openStages:()=>{},reloadProjects:async()=>{},...overrides};
  const ui=root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI.create(ports);
- return {ui,select,status,actions,heading,stageButton,calls,projects};
+ return {ui,select,status,calls,projects};
 }
 
 test('Göksu project opens existing boundary and points without creating data',async()=>{
  const x=uiScenario();x.select.value='30';await x.ui.open();
  assert.deepEqual(x.calls,['draw','points 77','select 30','remember 30']);
- assert.equal(x.actions.hidden,false);assert.match(x.status.textContent,/77 kayıtlı ölçüm noktası/);
+ assert.match(x.status.textContent,/77 kayıtlı ölçüm noktası/);
 });
 test('project selector stays blank until the user selects a project, then opens it',async()=>{
  const x=uiScenario({remembered:()=> '33'});
@@ -79,7 +77,7 @@ test('project selector stays blank until the user selects a project, then opens 
  x.select.value='30';x.select.listeners.change();
  await new Promise(resolve=>setImmediate(resolve));
  assert.deepEqual(x.calls,['draw','points 77','select 30','remember 30'],'selection by the user must reopen their chosen project');
- assert.equal(x.actions.hidden,false);
+ assert.match(x.status.textContent,/77 kayıtlı ölçüm noktası/);
 });
 test('explicit open restores only the chosen project snapshot and focuses the verified park',async()=>{
  const x=uiScenario({restoreWorkspace:async(project,park)=>{x.calls.push('restore '+project.id+'/'+park.id);return {mode:'cached',scan:true,grid:123};},
@@ -99,9 +97,7 @@ test('Dikmen stage primes its parent then opens the original stage and points',a
 test('Dikmen stage survives deleted parent without fabricating geometry or mutating saved waypoints',async()=>{
  const x=uiScenario({readParent:async()=>null});x.select.value='33';await x.ui.open();
  assert.deepEqual(x.calls,['forget deleted parent','draw','points 42','select 33','remember 33']);
- assert.equal(x.stageButton.hidden,false,'etap yönetimi kayıp ana park nedeniyle gizlenmemeli');
  assert.match(x.status.textContent,/Ana park kaydı eksik/);
- assert.equal(x.actions.hidden,false,'surface and waypoints must remain available');
 });
 test('project selection refuses stale authorization, unsaved drafts and active editors',async()=>{
  const stale=uiScenario({readProject:async()=>({id:30,park_id:99})});stale.select.value='30';await stale.ui.open();
@@ -115,13 +111,12 @@ test('completed project is visible but never selected as an editable field targe
  const locked=uiScenario({readProject:async()=>({id:30,park_id:25,name:'Göksu',is_locked:true})});
  locked.select.value='30';await locked.ui.open();
  assert.deepEqual(locked.calls,['draw','points 77','remember 30']);
- assert.equal(locked.actions.hidden,true);
  assert.match(locked.status.textContent,/salt okunur/);
 });
 test('revoked project access clears only its transient waypoint overlay',async()=>{
  const x=uiScenario();x.select.value='30';await x.ui.open();
  x.projects.splice(0,1);x.ui.refresh();
- assert.equal(x.calls.at(-1),'clear points');assert.equal(x.actions.hidden,true);
+ assert.equal(x.calls.at(-1),'clear points');
 });
 test('Supabase store uses only exact RLS reads; no creates, updates or deletes',async()=>{
  const operations=[];
@@ -230,4 +225,10 @@ test('live-map bootstrap reuses existing map/waypoint tools without a second wri
  assert.match(source,/saveDraft:/);
  assert.match(source,/DG_PARK_SESSION\.set\(key,row\)/);
  assert.doesNotMatch(source,/\.insert\(|\.upsert\(|\.update\(|\.delete\(/);
+});
+test('saved-project selector does not add a second GIS action toolbar',()=>{
+ const shell=readFileSync(new URL('../partials/shell.html',import.meta.url),'utf8');
+ assert.match(shell,/id="dgLiveProjectSelect"/);
+ assert.match(shell,/id="surfaceMenuBar"/);
+ assert.doesNotMatch(shell,/dgLiveProjectActions|data-live-project-action="(?:stages|surface|waypoints|save)"/);
 });
