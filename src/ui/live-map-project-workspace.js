@@ -4,10 +4,9 @@
 (function(root){
  function create(ports){
   const doc=ports.document,host=doc.getElementById("dgLiveProjects"),select=doc.getElementById("dgLiveProjectSelect"),
-   status=doc.getElementById("dgLiveProjectStatus"),actions=doc.getElementById("dgLiveProjectActions"),
-   heading=doc.getElementById("dgLiveProjectActive");
-  if(!host||!select||!status||!actions||!heading)return Object.freeze({refresh:()=>{}});
-  let active=0,working=false,stageParentMissing=false;
+   status=doc.getElementById("dgLiveProjectStatus");
+  if(!host||!select||!status)return Object.freeze({refresh:()=>{}});
+  let active=0,working=false;
   const t=(template,values={})=>typeof ports.translate==="function"?ports.translate(template,values):Object.entries(values).reduce((out,[key,value])=>out.replaceAll("{"+key+"}",String(value)),template);
   function note(message,type="info"){status.textContent=message;status.dataset.status=type;}
   function projects(){return (ports.projects()||[]).filter(row=>Number.isSafeInteger(Number(row.id))&&Number(row.id)>0);}
@@ -20,10 +19,9 @@
    for(const project of rows){const item=doc.createElement("option");item.value=String(project.id);item.disabled=!Number(project.park_id);item.textContent=project.name+(project.shared?" "+t("· paylaşılan"):"")+(item.disabled?" "+t("· park bağlantısı yok"):"");select.append(item);}
    const available=rows.filter(row=>Number(row.park_id)>0);
    if(active&&!available.some(row=>Number(row.id)===active&&Number(row.park_id)===ports.activeParkId())){
-    ports.clearWaypoints();ports.stopWatching?.();active=0;stageParentMissing=false;heading.textContent="";actions.hidden=true;
+    ports.clearWaypoints();ports.stopWatching?.();active=0;
    }
    select.value=available.some(row=>String(row.id)===current)?current:"";
-   actions.hidden=!active||!rows.some(row=>Number(row.id)===active);
    if(!available.length)note(t("Haritada açılabilecek park bağlantılı proje bulunamadı. Parkı olmayan projeler listede korunur."));
    else if(!active)note(t("{n} haritada açılabilir proje hazır. Haritada açmak için seç.",{n:available.length}));
   }
@@ -61,9 +59,7 @@
     if(!projects().some(row=>Number(row.id)===Number(project.id)))throw Error(t("Proje erişimi güncellendi; yeniden deneyin."));
     ports.showWaypoints(points);
     if(!project.is_locked)ports.selectProject(project.id);
-    active=Number(project.id);stageParentMissing=missingParent;ports.remember(active);
-    heading.textContent=project.name+(project.is_locked?" "+t("· kilitli"):"");actions.hidden=!!project.is_locked;
-    const stages=host.querySelector?.('[data-live-project-action="stages"]');if(stages){stages.hidden=false;stages.title=missingParent?t("Ana park kaydı eksik; kayıtlı etap görüntülenebilir ancak sınır düzenlenemez."):"";}
+    active=Number(project.id);ports.remember(active);
     let restored=null,restoreError=null;
     if(changing&&ports.restoreWorkspace){
      note(t("Kayıtlı tarama, grid ve yüzey düzeltmeleri proje kapsamında aranıyor…"));
@@ -83,21 +79,10 @@
    const action=control.dataset.liveProjectAction;
    if(action==="open")void open();
    else if(action==="refresh")void (async()=>{if(working)return;busy(true);try{await ports.reloadProjects();}catch(error){note(t("Proje listesi yenilenemedi: {error}",{error:error.message}),"err");}finally{busy(false);refresh();}})();
-   else if(action==="waypoints"&&active)ports.openWaypoints(active);
-   else if(action==="save"&&active){
-    if(ports.isEditing())return note(t("Açık çizim veya fırça işlemini tamamlayıp çalışma alanını kaydet."),"warn");
-    void Promise.resolve().then(()=>ports.saveWorkspace(active,ports.activeParkId())).then(result=>note(result?.empty?t("Henüz kaydedilecek tarama veya grid bulunmuyor. Etap ve noktalar hesap kayıtlarında korunuyor."):t("Projenin mevcut tarama ve grid çalışma görüntüsü bu cihazda saklandı."),result?.empty?"warn":"ok")).catch(error=>note(t("Çalışma alanı kaydedilemedi: {error}",{error:String(error.message||error)}),"err"));
-   }
-   else if(action==="surface"&&active){
-    if(!projects().some(row=>Number(row.id)===active&&Number(row.park_id)===ports.activeParkId()))return note(t("Önce seçili projeyi yeniden haritada aç."),"warn");
-    if(ports.isEditing())return note(t("Açık etap çizimini, fırçayı veya harita ölçümünü tamamlayıp yeniden dene. Mevcut işlem korunuyor."),"warn");
-    void Promise.resolve().then(()=>ports.openSurface()).then(result=>{if(result?.restored)note(t("Kaydedilmiş yüzey düzeltmeleri hesap/cihaz taslağından yüklendi. Sınıfları ve sınırları kontrol edebilirsin."),"ok");else if(result?.ready)note(t("Yüzey taraması açıldı; bu hesaba veya cihaza ait eski bir taslak bulunamadı."),"warn");else note(t("Yüzey taraması tamamlanmadı. Önce veri kaynaklarını kontrol et."),"warn");}).catch(error=>note(t("Yüzey çalışması açılamadı: {error}",{error:String(error.message||error)}),"err"));
-   }
-   else if(action==="stages"&&active){if(stageParentMissing)note(t("Etap sınırı haritada açık; ana park kaydı eksik olduğu için sınır düzenleme güvenle başlatılamıyor. Grid, ölçüm noktaları ve yüzey ayarlarını mevcut menülerden değiştirebilirsin."),"warn");else ports.openStages();}
   });
   // Only a real user choice starts project loading. Programmatic refresh and
   // the initial placeholder never draw, scan or select a previously used park.
-  select.addEventListener("change",()=>{if(!working){actions.hidden=true;if(select.value)void open();else note(t("Haritada açmak için bir proje seç."));}});
+  select.addEventListener("change",()=>{if(!working){if(select.value)void open();else note(t("Haritada açmak için bir proje seç."));}});
   const mapView=doc.getElementById("v-map");
   function entering(){if(mapView?.classList.contains("on"))refresh();}
   if(mapView&&typeof ports.observe==="function")ports.observe(mapView,entering);

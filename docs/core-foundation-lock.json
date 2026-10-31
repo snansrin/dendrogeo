@@ -12600,6 +12600,19 @@
       "files": [
         {"path":"index.html","previous_sha256":"fa376f93f4e7750cd67b996cfa52655911af35a2f3a06c8e2d38dfc7a2baf6a0","sha256":"a0fbef8868d2897957c7abb8954f2e2aab8ae55eab14bf0822ee915d3ccd349b"}
       ]
+    },
+    {
+      "date": "2026-11-01",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: standard-toolbar restoration for existing saved projects. Remove only the duplicate measurement, surface, local-save and stage action row from the project selector, leaving the established eight GIS menus intact. Keep the original Etaplar tab mounted for an orphan stage such as Dikmen #53 whose historical parent #50 is inaccessible, but display its existing label as read-only and offer no geometry editing without that verified parent. Existing parent-scoped edit controls, project-scoped saved raster/grid/waypoint restoration and map focus are unchanged. No park reconstruction, database write, permission change, raster/classification logic, allometry, wood density or carbon formula modification.",
+      "validation": ["node --test test/live-map-project-workspace.test.mjs test/park-stage-workspace.test.mjs", "npm run check", "GitHub Actions Chromium and WebKit mobile stage-menu smoke"],
+      "files": [
+        {"path":"index.html","previous_sha256":"a0fbef8868d2897957c7abb8954f2e2aab8ae55eab14bf0822ee915d3ccd349b","sha256":"b1fea2a202462c8b55b11f3d94a1c204c9548a73efdd88c0c2c5c03203ac9635"},
+        {"path":"partials/shell.html","previous_sha256":"87ba33a203316d759ebd4cddaba746286cbd8af0201ad715060b84c1acc1d0fc","sha256":"2de6cba68130b28ad4a0b521b50fb08ebfb53fbe9a76654f82127ab9ba29d01b"},
+        {"path":"src/ui/park-stage-workspace.js","previous_sha256":"c7245d792ff9b8dbbc8aa511f67c8c0141c4af7519de6297cf7cff4abf56018d","sha256":"ccbe2de9c5e8d1d98559c4f40381bc4a4f873e066f128800396d03db582eabdb"},
+        {"path":"scripts/park-stage-workspace-smoke.mjs","previous_sha256":"01042110946c4fa8c1e7e57773cf029c3e8879b2e8c898e6f18a6a6d7672e0c3","sha256":"66951a3406ef334ad7c8afb3600be71016ffbdbaa33024f52bb546218121c75b"},
+        {"path":"test/park-stage-workspace.test.mjs","previous_sha256":"587701e53db3601d1717b193344ab6cea4d8ea1bb1b51f52864ed07873a2248b","sha256":"19694bd13facc412884bf8cf18e25b150d4cd64de54b2e6824b15a76ca92ca83"}
+      ]
     }
   ]
 }
