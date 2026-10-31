@@ -12523,6 +12523,19 @@
         {"path":"partials/shell.html","previous_sha256":"24e8bc25f8d07a1e2ebaea9867b481f525ab84bfa94a202fd92eb7fcf56ea726","sha256":"b02c466bada5492e8dbd638e05e067df2b4ff8aad42c43b13f2e457b290c01fb"},
         {"path":"sw.js","previous_sha256":"6bc4cc62de849c4a9b4a646a4a6933717b14260e48f663b6c886a51402592689","sha256":"bf7f17b704f13754dd65130f5a24305bbc2501f98a888341d398d456f7c54fdb"}
       ]
+    },
+    {
+      "date": "2026-10-31",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization follow-up: WebKit bilingual smoke exposed seven untranslated static Turkish labels in the new saved-project map panel. Add only their TR/EN dictionary entries and format existing workspace progress messages through the established dgTf translator, without modifying the translator engine, park state, any project row, stage record, raster calculation, allometry or protected scientific domain. The generated index module hashes are recorded for the WebKit-detected UI translation fix.",
+      "validation": [
+        "node --test test/live-map-project-workspace.test.mjs",
+        "npm run check",
+        "GitHub Actions: Chromium + WebKit mobile-language smoke"
+      ],
+      "files": [
+        {"path":"index.html","previous_sha256":"c766c39e49772acdf1f2da829f5a36f5b30f18bdc8f7ab6aa2c3bba339c9eb2d","sha256":"a42b2192347443d970962c00bdc4cb9bcc499f5ed51bfedc8d199a6a28ab22b1"}
+      ]
     }
   ]
 }

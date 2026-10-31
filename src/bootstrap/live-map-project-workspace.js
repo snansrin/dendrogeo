@@ -18,6 +18,7 @@
  }
  root.DG_LIVE_MAP_PROJECTS=root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI.create({
   document,projects:()=>typeof USER!=="undefined"&&USER&&typeof PROJ_LIST!=="undefined"?PROJ_LIST:[],
+  translate:(template,values)=>typeof dgTf==="function"?dgTf(template,values):template,
   remembered:()=>{try{return localStorage.getItem(key())||"";}catch(error){return"";}},
   remember:id=>{try{localStorage.setItem(key(),String(id));}catch(error){}},
   observe:(element,notify)=>{if(typeof root.MutationObserver!=="function")return;const observer=new root.MutationObserver(notify);observer.observe(element,{attributes:true,attributeFilter:["class"]});},
