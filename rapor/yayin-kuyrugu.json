@@ -1,6 +1,6 @@
 {
   "schema": "dendrogeo-publish-queue/1",
-  "updated_at": "2026-10-18T15:32:09.035Z",
+  "updated_at": "2026-10-31T23:00:42.797Z",
   "production_started_at": "2026-10-04T08:26:48.034Z",
   "test_archive_ref": "archive/test-publications-2026-10-04",
   "retired_report_ids": [
@@ -51,7 +51,8 @@
     "production-DGR-2026-0021",
     "7b620060-187f-4a27-bf87-dc14af183f19",
     "7954028e-22dd-4299-905b-4a54a0481abf",
-    "911a867d-b2df-4c25-98cd-77bdd83e5b4a"
+    "911a867d-b2df-4c25-98cd-77bdd83e5b4a",
+    "bafc7c6a-ab9b-4ff5-8f56-06cfa2177b58"
   ],
   "processed_retraction_ids": [
     "faaa70f9-0c7c-4bef-b463-6e7719685bcf",
@@ -295,6 +296,35 @@
       "started_at": "2026-10-18T15:32:09.020Z",
       "status": "Geri çekildi",
       "finished_at": "2026-10-18T15:32:09.035Z"
+    },
+    {
+      "request_id": "bafc7c6a-ab9b-4ff5-8f56-06cfa2177b58",
+      "park_id": 25,
+      "with_lulc": true,
+      "surface_snapshot": true,
+      "requested_at": "2026-10-31T22:44:37.013075+00:00",
+      "started_at": "2026-10-31T22:55:30.731Z",
+      "status": "Yayınlandı",
+      "archive_bytes": 1004100,
+      "report_id": "DGR-2026-0027",
+      "version": 1,
+      "url_path": "/rapor/DGR-2026-0027/",
+      "report_hash": "sha256:c963daf3203bd3779dc8dae82b192ac3898b98be236b9550d9636f8b7f9fc3d8",
+      "park_name": "Göksu Parkı",
+      "city": "Ankara",
+      "n": 77,
+      "carbon_txt": "7,81 t [%95 GA 4,29–11,05]",
+      "lulc": "dahil (Kullanıcının kabul ettiği son analiz · uydu / OSM / çizim)",
+      "citation": "Şirin, N. (2026). Göksu Parkı ağaç envanteri ve karbon stoku raporu (DGR-2026-0027, sürüm 1.0). DendroGeo Bilimsel Analiz Raporu. https://dendrogeo.org/rapor/DGR-2026-0027/",
+      "surface_revision": null,
+      "surface_accepted_at": null,
+      "finished_at": "2026-10-31T23:00:27.588Z",
+      "doi_status": "Kayıtlı",
+      "doi_last_attempt_at": "2026-10-31T23:00:37.168Z",
+      "doi": "10.5281/zenodo.23848432",
+      "doi_url": "https://doi.org/10.5281/zenodo.23848432",
+      "doi_record_url": "https://zenodo.org/records/23848432",
+      "doi_registered_at": "2026-10-31T23:00:41.655Z"
     }
   ],
   "archived_request_ids": [

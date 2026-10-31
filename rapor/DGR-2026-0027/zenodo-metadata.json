@@ -1,0 +1,35 @@
+{
+  "metadata": {
+    "upload_type": "publication",
+    "publication_type": "report",
+    "publication_date": "2026-10-31",
+    "title": "Göksu Parkı ağaç envanteri ve karbon stoku analizi",
+    "creators": [
+      {
+        "name": "Nagihan Şirin",
+        "affiliation": "Ankara Üniversitesi",
+        "orcid": "0009-0003-7372-0973"
+      }
+    ],
+    "description": "<p>Bu rapor, Göksu Parkı (Ankara) için 77 moderatör onaylı ağaç ölçüm kaydı esas alınarak hazırlanmıştır. Çalışmada ağaç envanteri verileri ile bu verilere dayalı model tabanlı karbon stoku tahminleri sunulmaktadır. Göğüs çapı (DBH, cm), ağaç boyu (m) ve tür bilgileri, raporda belirtilen allometrik modeller ve parametreler kullanılarak değerlendirilmiştir.</p><p>Rapor; veri toplama ve hesaplama yöntemlerini, ölçü birimlerini, model belirsizliklerini, yüzey örtüsü sonuçlarını, veri kalite kontrol bulgularını ve çalışmanın sınırlılıklarını kapsamaktadır. Karbon stoku tahminleri, ölçüm kaydı bulunan ağaçlarla sınırlıdır. Bu sonuçlar, parkta bulunan tüm ağaçların toplam karbon stokunu temsil eden bir tahmin olarak yorumlanmamalıdır.</p><p>Belge kimliği: DGR-2026-0027. Sürüm: 1.0. Rapor verisinin SHA-256 özet değeri: c963daf3203bd3779dc8dae82b192ac3898b98be236b9550d9636f8b7f9fc3d8.</p>",
+    "access_right": "open",
+    "license": "cc-by-nc-4.0",
+    "language": "tur",
+    "version": "1.0",
+    "keywords": [
+      "urban forestry",
+      "tree inventory",
+      "carbon stock",
+      "land cover",
+      "Göksu Parkı"
+    ],
+    "related_identifiers": [
+      {
+        "identifier": "https://dendrogeo.org/rapor/DGR-2026-0027/",
+        "relation": "isIdenticalTo",
+        "scheme": "url"
+      }
+    ],
+    "doi": "10.5281/zenodo.23848432"
+  }
+}

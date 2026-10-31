@@ -1,0 +1,1545 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.652171,
+          39.990257
+        ]
+      },
+      "properties": {
+        "nokta": 1,
+        "tur": "SÜS ERİĞİ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 110,
+        "dbh_cm": 35,
+        "boy_m": 7,
+        "karbon_kg": 151.099022577992,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.651361,
+          39.989899
+        ]
+      },
+      "properties": {
+        "nokta": 2,
+        "tur": "SÜS ERİĞİ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 92,
+        "dbh_cm": 29.3,
+        "boy_m": 7.8,
+        "karbon_kg": 118.480156105856,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.650762,
+          39.989757
+        ]
+      },
+      "properties": {
+        "nokta": 3,
+        "tur": "SALKIM SÖĞÜT",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 166,
+        "dbh_cm": 52.8,
+        "boy_m": 10.7,
+        "karbon_kg": 510.477966266016,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.650509,
+          39.98973
+        ]
+      },
+      "properties": {
+        "nokta": 4,
+        "tur": "HALEP ÇAMI",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 57,
+        "dbh_cm": 18.1,
+        "boy_m": 8,
+        "karbon_kg": 42.4445476066324,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.650203,
+          39.989694
+        ]
+      },
+      "properties": {
+        "nokta": 5,
+        "tur": "AKASYA",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 90,
+        "dbh_cm": 28.6,
+        "boy_m": 7,
+        "karbon_kg": 102.12792590539,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.649799,
+          39.989571
+        ]
+      },
+      "properties": {
+        "nokta": 6,
+        "tur": "KARAÇAM",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 82,
+        "dbh_cm": 26.1,
+        "boy_m": 9,
+        "karbon_kg": 94.868002026175,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.649391,
+          39.989116
+        ]
+      },
+      "properties": {
+        "nokta": 7,
+        "tur": "KARAÇAM",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 107,
+        "dbh_cm": 34.1,
+        "boy_m": 10.8,
+        "karbon_kg": 190.543063988351,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.648536,
+          39.98922
+        ]
+      },
+      "properties": {
+        "nokta": 8,
+        "tur": "SALKIM SÖĞÜT",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 112,
+        "dbh_cm": 35.7,
+        "boy_m": 10.3,
+        "karbon_kg": 228.16559508467,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.64848,
+          39.988587
+        ]
+      },
+      "properties": {
+        "nokta": 9,
+        "tur": "DOĞU ÇINARI",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 84,
+        "dbh_cm": 26.7,
+        "boy_m": 6.9,
+        "karbon_kg": 88.0151281158203,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.648074,
+          39.988751
+        ]
+      },
+      "properties": {
+        "nokta": 10,
+        "tur": "MAVİ LADİN",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 88,
+        "dbh_cm": 28,
+        "boy_m": 6.7,
+        "karbon_kg": 77.5669868660649,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.647281,
+          39.988569
+        ]
+      },
+      "properties": {
+        "nokta": 11,
+        "tur": "AT KESTANESİ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 102,
+        "dbh_cm": 32.5,
+        "boy_m": 8,
+        "karbon_kg": 148.542527431494,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.646497,
+          39.988656
+        ]
+      },
+      "properties": {
+        "nokta": 12,
+        "tur": "KARAAĞAÇ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 70,
+        "dbh_cm": 22.3,
+        "boy_m": 5.3,
+        "karbon_kg": 47.6619788231742,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.645965,
+          39.989153
+        ]
+      },
+      "properties": {
+        "nokta": 13,
+        "tur": "AT KESTANESİ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 88,
+        "dbh_cm": 28,
+        "boy_m": 10.7,
+        "karbon_kg": 147.895918735225,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.64554,
+          39.989575
+        ]
+      },
+      "properties": {
+        "nokta": 14,
+        "tur": "MAVİ LADİN",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 142,
+        "dbh_cm": 45.2,
+        "boy_m": 11.2,
+        "karbon_kg": 325.912769102374,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.645354,
+          39.989999
+        ]
+      },
+      "properties": {
+        "nokta": 15,
+        "tur": "SALKIM SÖĞÜT",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 140,
+        "dbh_cm": 44.6,
+        "boy_m": 11.9,
+        "karbon_kg": 406.090852212906,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.645158,
+          39.99063
+        ]
+      },
+      "properties": {
+        "nokta": 16,
+        "tur": "AT KESTANESİ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 58,
+        "dbh_cm": 18.5,
+        "boy_m": 5.2,
+        "karbon_kg": 32.4099345010737,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.644972,
+          39.990994
+        ]
+      },
+      "properties": {
+        "nokta": 17,
+        "tur": "GÖKNAR",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 57,
+        "dbh_cm": 18.1,
+        "boy_m": 5.6,
+        "karbon_kg": 22.0169197623268,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.645614,
+          39.991792
+        ]
+      },
+      "properties": {
+        "nokta": 18,
+        "tur": "AT KESTANESİ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 80,
+        "dbh_cm": 25.5,
+        "boy_m": 9.5,
+        "karbon_kg": 109.32949445055,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.646158,
+          39.992143
+        ]
+      },
+      "properties": {
+        "nokta": 19,
+        "tur": "SÜS ERİĞİ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 92,
+        "dbh_cm": 29.3,
+        "boy_m": 8.2,
+        "karbon_kg": 124.406652804493,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.646334,
+          39.992404
+        ]
+      },
+      "properties": {
+        "nokta": 20,
+        "tur": "ATLAS SEDİRİ",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 122,
+        "dbh_cm": 38.8,
+        "boy_m": 10.3,
+        "karbon_kg": 223.306445487645,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.646658,
+          39.992562
+        ]
+      },
+      "properties": {
+        "nokta": 21,
+        "tur": "MAVİ LADİN",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 92,
+        "dbh_cm": 29.3,
+        "boy_m": 10.8,
+        "karbon_kg": 134.813431183121,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.647088,
+          39.992668
+        ]
+      },
+      "properties": {
+        "nokta": 22,
+        "tur": "SÖĞÜT",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 87,
+        "dbh_cm": 27.7,
+        "boy_m": 4,
+        "karbon_kg": 55.3604458602086,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.647694,
+          39.992926
+        ]
+      },
+      "properties": {
+        "nokta": 23,
+        "tur": "SÜS ERİĞİ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 30,
+        "dbh_cm": 9.5,
+        "boy_m": 3.5,
+        "karbon_kg": 6.08132966700884,
+        "tarih": "2026-10-01"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.648081,
+          39.992509
+        ]
+      },
+      "properties": {
+        "nokta": 24,
+        "tur": "SÖĞÜT",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 123,
+        "dbh_cm": 39.2,
+        "boy_m": 9.8,
+        "karbon_kg": 260.962962507286,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.64736,
+          39.992268
+        ]
+      },
+      "properties": {
+        "nokta": 25,
+        "tur": "SÜS ERİĞİ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 62,
+        "dbh_cm": 19.7,
+        "boy_m": 7.2,
+        "karbon_kg": 50.7168814204611,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.64763,
+          39.991307
+        ]
+      },
+      "properties": {
+        "nokta": 26,
+        "tur": "DUT",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 73,
+        "dbh_cm": 23.2,
+        "boy_m": 6.3,
+        "karbon_kg": 61.2364556276167,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.648616,
+          39.992156
+        ]
+      },
+      "properties": {
+        "nokta": 27,
+        "tur": "SÜS ELMASI",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 62,
+        "dbh_cm": 19.7,
+        "boy_m": 5.2,
+        "karbon_kg": 36.9160552936178,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.649174,
+          39.99173
+        ]
+      },
+      "properties": {
+        "nokta": 28,
+        "tur": "KARAÇAM",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 63,
+        "dbh_cm": 20.1,
+        "boy_m": 5.2,
+        "karbon_kg": 33.2006388899363,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.649704,
+          39.991637
+        ]
+      },
+      "properties": {
+        "nokta": 29,
+        "tur": "IHLAMUR",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 35,
+        "dbh_cm": 11.1,
+        "boy_m": 3.8,
+        "karbon_kg": 8.90301406327925,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.650112,
+          39.99148
+        ]
+      },
+      "properties": {
+        "nokta": 30,
+        "tur": "DOĞU ÇINARI",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 67,
+        "dbh_cm": 21.3,
+        "boy_m": 6.8,
+        "karbon_kg": 55.8051346284218,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.651162,
+          39.991545
+        ]
+      },
+      "properties": {
+        "nokta": 31,
+        "tur": "HİMALAYA SEDİRİ",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 79,
+        "dbh_cm": 25.1,
+        "boy_m": 9.6,
+        "karbon_kg": 86.1344597454133,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.651476,
+          39.991425
+        ]
+      },
+      "properties": {
+        "nokta": 32,
+        "tur": "SÖĞÜT",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 180,
+        "dbh_cm": 57.3,
+        "boy_m": 9.5,
+        "karbon_kg": 532.350437411139,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.651911,
+          39.990919
+        ]
+      },
+      "properties": {
+        "nokta": 33,
+        "tur": "ÇINAR",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 84,
+        "dbh_cm": 26.7,
+        "boy_m": 7.3,
+        "karbon_kg": 92.9916009011796,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.652428,
+          39.990648
+        ]
+      },
+      "properties": {
+        "nokta": 34,
+        "tur": "ÇINAR",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 109,
+        "dbh_cm": 34.7,
+        "boy_m": 10.5,
+        "karbon_kg": 220.487882371676,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.652873,
+          39.990795
+        ]
+      },
+      "properties": {
+        "nokta": 35,
+        "tur": "SÖĞÜT",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 93,
+        "dbh_cm": 29.6,
+        "boy_m": 9.5,
+        "karbon_kg": 146.684559459579,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.652318,
+          39.991018
+        ]
+      },
+      "properties": {
+        "nokta": 36,
+        "tur": "HİMALAYA SEDİRİ",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 70,
+        "dbh_cm": 22.3,
+        "boy_m": 10.7,
+        "karbon_kg": 75.6174572641865,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.651963,
+          39.991133
+        ]
+      },
+      "properties": {
+        "nokta": 37,
+        "tur": "DİŞBUDAK",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 68,
+        "dbh_cm": 21.6,
+        "boy_m": 6.4,
+        "karbon_kg": 56.1925333474104,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.652097,
+          39.991628
+        ]
+      },
+      "properties": {
+        "nokta": 38,
+        "tur": "SÖĞÜT",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 110,
+        "dbh_cm": 35,
+        "boy_m": 7,
+        "karbon_kg": 151.099022577992,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.652312,
+          39.99195
+        ]
+      },
+      "properties": {
+        "nokta": 39,
+        "tur": "AKÇAAĞAÇ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 49,
+        "dbh_cm": 15.6,
+        "boy_m": 7.5,
+        "karbon_kg": 33.3403371918635,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.650234,
+          39.992014
+        ]
+      },
+      "properties": {
+        "nokta": 40,
+        "tur": "IHLAMUR",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 39,
+        "dbh_cm": 12.4,
+        "boy_m": 6.7,
+        "karbon_kg": 19.1273395195723,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.64908,
+          39.992559
+        ]
+      },
+      "properties": {
+        "nokta": 41,
+        "tur": "SÜS KİRAZI",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 25,
+        "dbh_cm": 8,
+        "boy_m": 2.8,
+        "karbon_kg": 3.42651456372251,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.648414,
+          39.992958
+        ]
+      },
+      "properties": {
+        "nokta": 42,
+        "tur": "AKÇAAĞAÇ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 35,
+        "dbh_cm": 11.1,
+        "boy_m": 5.2,
+        "karbon_kg": 12.0917047015712,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.647759,
+          39.993229
+        ]
+      },
+      "properties": {
+        "nokta": 43,
+        "tur": "İĞDE",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 80,
+        "dbh_cm": 25.5,
+        "boy_m": 6.5,
+        "karbon_kg": 75.4888026951643,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.647269,
+          39.993691
+        ]
+      },
+      "properties": {
+        "nokta": 44,
+        "tur": "DUT",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 60,
+        "dbh_cm": 19.1,
+        "boy_m": 6,
+        "karbon_kg": 39.8175292389484,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.64731,
+          39.993798
+        ]
+      },
+      "properties": {
+        "nokta": 45,
+        "tur": "KATALPA",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 52,
+        "dbh_cm": 16.6,
+        "boy_m": 5.7,
+        "karbon_kg": 28.6430876806165,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.647636,
+          39.994592
+        ]
+      },
+      "properties": {
+        "nokta": 46,
+        "tur": "IHLAMUR",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 69,
+        "dbh_cm": 22,
+        "boy_m": 7.6,
+        "karbon_kg": 65.8802043643691,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.648699,
+          39.993818
+        ]
+      },
+      "properties": {
+        "nokta": 47,
+        "tur": "AKASYA",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 55,
+        "dbh_cm": 17.5,
+        "boy_m": 5.7,
+        "karbon_kg": 31.9572408321668,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.648192,
+          39.994839
+        ]
+      },
+      "properties": {
+        "nokta": 48,
+        "tur": "KARAÇAM",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 94,
+        "dbh_cm": 29.9,
+        "boy_m": 6.5,
+        "karbon_kg": 90.1495226496381,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.648898,
+          39.994702
+        ]
+      },
+      "properties": {
+        "nokta": 49,
+        "tur": "SERVİ",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 92,
+        "dbh_cm": 29.3,
+        "boy_m": 8.7,
+        "karbon_kg": 109.164735645288,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.649597,
+          39.994434
+        ]
+      },
+      "properties": {
+        "nokta": 50,
+        "tur": "DİŞBUDAK",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 96,
+        "dbh_cm": 30.6,
+        "boy_m": 6,
+        "karbon_kg": 103.43288229373,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.648567,
+          39.993583
+        ]
+      },
+      "properties": {
+        "nokta": 51,
+        "tur": "KARAÇAM",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 111,
+        "dbh_cm": 35.3,
+        "boy_m": 7.5,
+        "karbon_kg": 143.398521233257,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.648926,
+          39.99294
+        ]
+      },
+      "properties": {
+        "nokta": 52,
+        "tur": "KATALPA",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 88,
+        "dbh_cm": 28,
+        "boy_m": 7,
+        "karbon_kg": 97.744720617902,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.649379,
+          39.993243
+        ]
+      },
+      "properties": {
+        "nokta": 53,
+        "tur": "DİŞBUDAK",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 42,
+        "dbh_cm": 13.4,
+        "boy_m": 5,
+        "karbon_kg": 17.2411765421345,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.649767,
+          39.993411
+        ]
+      },
+      "properties": {
+        "nokta": 54,
+        "tur": "HUŞ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 34,
+        "dbh_cm": 10.8,
+        "boy_m": 3.8,
+        "karbon_kg": 8.41323622063873,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.649689,
+          39.993034
+        ]
+      },
+      "properties": {
+        "nokta": 55,
+        "tur": "GÜRGEN",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 61,
+        "dbh_cm": 19.4,
+        "boy_m": 4.5,
+        "karbon_kg": 36.0331760392592,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.6502,
+          39.993379
+        ]
+      },
+      "properties": {
+        "nokta": 56,
+        "tur": "KAYIN",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 60,
+        "dbh_cm": 19.1,
+        "boy_m": 2.5,
+        "karbon_kg": 16.6066049211879,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.650411,
+          39.994178
+        ]
+      },
+      "properties": {
+        "nokta": 57,
+        "tur": "MAZI (YALANCI SERVİ)",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 72,
+        "dbh_cm": 22.9,
+        "boy_m": 7,
+        "karbon_kg": 54.7175266322235,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.65156,
+          39.994185
+        ]
+      },
+      "properties": {
+        "nokta": 58,
+        "tur": "AKÇAAĞAÇ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 44,
+        "dbh_cm": 14,
+        "boy_m": 6.5,
+        "karbon_kg": 23.500143114443,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.650996,
+          39.994003
+        ]
+      },
+      "properties": {
+        "nokta": 59,
+        "tur": "DİŞBUDAK",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 110,
+        "dbh_cm": 35,
+        "boy_m": 7.2,
+        "karbon_kg": 161.192413419382,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.651184,
+          39.992932
+        ]
+      },
+      "properties": {
+        "nokta": 60,
+        "tur": "AKÇAAĞAÇ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 41,
+        "dbh_cm": 13.1,
+        "boy_m": 52,
+        "karbon_kg": 155.819138268394,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.651695,
+          39.992614
+        ]
+      },
+      "properties": {
+        "nokta": 61,
+        "tur": "SERVİ",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 79,
+        "dbh_cm": 25.1,
+        "boy_m": 10,
+        "karbon_kg": 92.8893277983062,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.652233,
+          39.993215
+        ]
+      },
+      "properties": {
+        "nokta": 62,
+        "tur": "KARAÇAM",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 104,
+        "dbh_cm": 33.1,
+        "boy_m": 8.7,
+        "karbon_kg": 145.960147641666,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.65255,
+          39.994035
+        ]
+      },
+      "properties": {
+        "nokta": 63,
+        "tur": "SEDİR",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 64,
+        "dbh_cm": 20.4,
+        "boy_m": 7.9,
+        "karbon_kg": 47.2127697018715,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.653147,
+          39.993022
+        ]
+      },
+      "properties": {
+        "nokta": 64,
+        "tur": "SERVİ",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 38,
+        "dbh_cm": 12.1,
+        "boy_m": 3.2,
+        "karbon_kg": 7.32085318286298,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.652941,
+          39.992033
+        ]
+      },
+      "properties": {
+        "nokta": 65,
+        "tur": "LADİN",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 45,
+        "dbh_cm": 14.3,
+        "boy_m": 7,
+        "karbon_kg": 17.6410025899066,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.653145,
+          39.991619
+        ]
+      },
+      "properties": {
+        "nokta": 66,
+        "tur": "SÜS ERİĞİ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 81,
+        "dbh_cm": 25.8,
+        "boy_m": 6.5,
+        "karbon_kg": 77.3416867605507,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.653207,
+          39.990812
+        ]
+      },
+      "properties": {
+        "nokta": 67,
+        "tur": "DİŞBUDAK",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 60,
+        "dbh_cm": 19.1,
+        "boy_m": 5.7,
+        "karbon_kg": 39.3074309023941,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.653724,
+          39.991309
+        ]
+      },
+      "properties": {
+        "nokta": 68,
+        "tur": "AKÇAAĞAÇ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 49,
+        "dbh_cm": 15.6,
+        "boy_m": 6.3,
+        "karbon_kg": 28.1233188678737,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.653692,
+          39.992097
+        ]
+      },
+      "properties": {
+        "nokta": 69,
+        "tur": "SERVİ",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 35,
+        "dbh_cm": 11.1,
+        "boy_m": 3.5,
+        "karbon_kg": 6.80501319651562,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.653272,
+          39.993701
+        ]
+      },
+      "properties": {
+        "nokta": 70,
+        "tur": "AKÇAAĞAÇ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 66,
+        "dbh_cm": 21,
+        "boy_m": 5.8,
+        "karbon_kg": 46.3983920719582,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.653704,
+          39.994264
+        ]
+      },
+      "properties": {
+        "nokta": 71,
+        "tur": "ÇINAR",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 102,
+        "dbh_cm": 32.5,
+        "boy_m": 8,
+        "karbon_kg": 148.542527431494,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.65385,
+          39.995055
+        ]
+      },
+      "properties": {
+        "nokta": 72,
+        "tur": "ÇINAR",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 132,
+        "dbh_cm": 42,
+        "boy_m": 8.3,
+        "karbon_kg": 254.699433138769,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.654142,
+          39.996115
+        ]
+      },
+      "properties": {
+        "nokta": 73,
+        "tur": "AKÇAAĞAÇ",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 50,
+        "dbh_cm": 15.9,
+        "boy_m": 6,
+        "karbon_kg": 27.8941103954456,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.65433,
+          39.995559
+        ]
+      },
+      "properties": {
+        "nokta": 74,
+        "tur": "AKASYA",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 113,
+        "dbh_cm": 36,
+        "boy_m": 9,
+        "karbon_kg": 203.515390425627,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.654291,
+          39.993381
+        ]
+      },
+      "properties": {
+        "nokta": 75,
+        "tur": "SEDİR",
+        "grup": "İBRELİ",
+        "gogus_cevresi_cm": 67,
+        "dbh_cm": 21.3,
+        "boy_m": 8,
+        "karbon_kg": 52.2668071100489,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.654452,
+          39.993057
+        ]
+      },
+      "properties": {
+        "nokta": 76,
+        "tur": "KESTANE",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 38,
+        "dbh_cm": 12.1,
+        "boy_m": 3.8,
+        "karbon_kg": 10.4533096999,
+        "tarih": "2026-10-30"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.654342,
+          39.99184
+        ]
+      },
+      "properties": {
+        "nokta": 77,
+        "tur": "DİŞBUDAK",
+        "grup": "YAPRAKLI",
+        "gogus_cevresi_cm": 55,
+        "dbh_cm": 17.5,
+        "boy_m": 4.1,
+        "karbon_kg": 24.0466495332607,
+        "tarih": "2026-10-30"
+      }
+    }
+  ]
+}

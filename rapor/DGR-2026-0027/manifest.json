@@ -1,0 +1,40 @@
+{
+  "report_id": "DGR-2026-0027",
+  "result_hash": "sha256:c963daf3203bd3779dc8dae82b192ac3898b98be236b9550d9636f8b7f9fc3d8",
+  "doi": "10.5281/zenodo.23848432",
+  "registration_status": "registered",
+  "files": [
+    {
+      "name": "rapor.pdf",
+      "sha256": "560810f03560bbeb06b9e7172cb46cc65458b5b29d8f5665b3325a8753108316"
+    },
+    {
+      "name": "index.html",
+      "sha256": "575d23a7d4932c3ad7268040a8a4157b62d6148e3bedde7ca90328e12f810670"
+    },
+    {
+      "name": "data.json",
+      "sha256": "7f7c8a19b332f3b465fd36f1c784ab07f8fea588d4db6abde757eace0ab17e66"
+    },
+    {
+      "name": "metadata.json",
+      "sha256": "68aa87aa435b6beacb30d541ace47528f736a787d6859c1bbf194c9516fe976d"
+    },
+    {
+      "name": "olcum.csv",
+      "sha256": "b8c7327cd25b3a3b66feab75b1660655553dd6e16208ccb7d477e843e3b05aa3"
+    },
+    {
+      "name": "park.geojson",
+      "sha256": "25fa413f37801dcdac0c3401172e579224477fb6b6adae79c1d8f21c2bfcc0d0"
+    },
+    {
+      "name": "harita.png",
+      "sha256": "fc0f00059a0459dbdbff6ccde9cbd73de451dba94a98a27523b38ac296d23e4c"
+    },
+    {
+      "name": "surface.geojson",
+      "sha256": "3d7a1eea76e328cd422899f2d64840b153aa45c8a266c37e93a73aca8718f8d1"
+    }
+  ]
+}
