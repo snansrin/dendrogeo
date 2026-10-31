@@ -10,6 +10,7 @@
   const t=(template,values={})=>typeof ports.translate==="function"?ports.translate(template,values):Object.entries(values).reduce((out,[key,value])=>out.replaceAll("{"+key+"}",String(value)),template);
   function note(message,type="info"){status.textContent=message;status.dataset.status=type;}
   function projects(){return (ports.projects()||[]).filter(row=>Number.isSafeInteger(Number(row.id))&&Number(row.id)>0);}
+  function hasSavedBoundary(row){return Array.isArray(row?.geom_json?.outer)&&row.geom_json.outer.some(ring=>Array.isArray(ring)&&ring.length>=4);}
   function selected(){return projects().find(row=>Number(row.id)===Number(select.value)&&Number(row.park_id)>0);}
   function busy(value){working=value;host.setAttribute("aria-busy",String(value));host.querySelectorAll("button,select").forEach(el=>{el.disabled=value;});}
   function refresh(){
@@ -38,11 +39,16 @@
     if(park.geom_json?.stage_scope){
      const scope=park.geom_json.stage_scope,parentId=Number(scope.parentId);
      if(!Number.isSafeInteger(parentId)||parentId<=0||parentId===park.id)throw Error(t("Etap ana park kimliği geçersiz."));
-     parent=await ports.readParent(parentId);
+     // A parent is optional for opening an immutable stage. Historical parent
+     // records (and their OSM replacements) can exist without saved geometry;
+     // that must never prevent loading the stage's own verified boundary.
+     try{parent=await ports.readParent(parentId);}catch{parent=null;}
+     if(parent&&!hasSavedBoundary(parent))parent=null;
      if(!parent&&typeof ports.readParentByKey==="function"&&typeof scope.parentKey==="string"&&park.created_by){
-      const replacement=await ports.readParentByKey(scope.parentKey);
+      let replacement=null;
+      try{replacement=await ports.readParentByKey(scope.parentKey);}catch{replacement=null;}
       if(replacement&&Number(replacement.id)!==Number(park.id)&&!replacement.geom_json?.stage_scope&&
-       replacement.osm_key===scope.parentKey&&replacement.created_by===park.created_by){
+       replacement.osm_key===scope.parentKey&&replacement.created_by===park.created_by&&hasSavedBoundary(replacement)){
        parent=replacement;reconnectedParent=true;
       }
      }

@@ -123,6 +123,26 @@ test('recovery refuses mismatched owners, wrong keys, stage-as-parent and missin
   assert.match(x.status.textContent,/Ana park kaydı eksik/);
  }
 });
+test('a replacement parent with no saved boundary never prevents reopening the original stage and its 42 points',async()=>{
+ const incomplete={...goksu,id:54,osm_key:'relation/14290362',created_by:'same-owner',geom_json:null};
+ const x=uiScenario({readParent:async()=>null,readParentByKey:async()=>incomplete,
+  candidate:row=>{if(!row.geom_json?.outer)throw Error('Projenin kayıtlı park sınırı bulunamadı. Kayıt değiştirilmedi.');return{name:row.name};},
+  restoreWorkspace:async(project,park)=>{x.calls.push('restore '+project.id+'/'+park.id);return{mode:'cached',scan:true,grid:123};}});
+ x.select.value='33';await x.ui.open();
+ assert.deepEqual(x.calls,['forget deleted parent','draw','points 42','select 33','remember 33','restore 33/53']);
+ assert.match(x.status.textContent,/123 grid hücresi/);
+ assert.match(x.status.textContent,/Ana park kaydı eksik/);
+ assert.doesNotMatch(x.status.textContent,/Proje açılamadı/);
+});
+test('an inaccessible or geometry-less historical parent is optional; the chosen stage remains active',async()=>{
+ for(const readParent of [async()=>{throw Error('parent RLS read failed');},async()=>({...goksu,id:50,geom_json:null})]){
+  const x=uiScenario({readParent,readParentByKey:async()=>null,
+   candidate:row=>{if(!row.geom_json?.outer)throw Error('parent boundary missing');return{name:row.name};}});
+  x.select.value='33';await x.ui.open();
+  assert.deepEqual(x.calls,['forget deleted parent','draw','points 42','select 33','remember 33']);
+  assert.match(x.status.textContent,/Ana park kaydı eksik/);
+ }
+});
 test('project selection refuses stale authorization, unsaved drafts and active editors',async()=>{
  const stale=uiScenario({readProject:async()=>({id:30,park_id:99})});stale.select.value='30';await stale.ui.open();
  assert.equal(stale.calls.length,0);assert.match(stale.status.textContent,/erişimi/);
