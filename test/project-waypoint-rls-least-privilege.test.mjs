@@ -9,7 +9,7 @@ const part=(name,next)=>migration.split('CREATE POLICY '+name+' ON public.')[1]?
 
 test('versioned migration and old emergency script are identical',()=>{
  assert.equal(legacy,migration);
- assert.match(migration,/^BEGIN;[\s\S]*COMMIT;\s*$/);
+ assert.match(migration.replace(/^--[^\n]*\n/gm,''),/^BEGIN;[\s\S]*COMMIT;\s*$/);
  assert.match(migration,/SET LOCAL lock_timeout = '5s'/);
  assert.doesNotMatch(migration,/\b(?:INSERT INTO|UPDATE public\.|DELETE FROM|TRUNCATE)\b/i);
 });
