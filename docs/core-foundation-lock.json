@@ -12496,6 +12496,29 @@
         {"path":"src/ui/park-invite-inbox.js","previous_sha256":"43ba818b8e268129ed5f0425f30d342b36ff2f7b39161a20f2f3042409e0e4e1","sha256":"73c22ebca5079982c6994235fbf914771697818a789f68eb637338b2e019b0e3"},
         {"path":"src/ui/shell.js","previous_sha256":"eb57acd661f483f8ac500122336afc40bfa23dc5812063c324b2565a6e822c7f","sha256":"325536d7be1185662f80d8afc5c064341d8998474083b7421cd656620a32c487"}
       ]
+    },
+    {
+      "date": "2026-10-31",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: security hardening; approve the waypoint project-permission SQL migration in exactly two scientific-test filename allowlists. No scientific or numeric assertions changed. Allometry, species/density, DBH, GIS, park geometry, calculations, themes and saved data stay immutable. Before/after SHA-256 values protect the limited test edits.",
+      "validation": [
+        "npm run check",
+        "Supabase fresh reset",
+        "Chromium and WebKit CI",
+        "read-only live RLS checks"
+      ],
+      "files": [
+        {
+          "path": "test/dbh-qa.test.mjs",
+          "previous_sha256": "3ee5863d9936c1b7d510c0c020d04db1a3669ab75646e0bf02a59a3d61031eeb",
+          "sha256": "443a4533ac1db298eabf5fa514cb6bd7f7d50f046df6b42835b240d4a5682b5f"
+        },
+        {
+          "path": "test/form-qa.test.mjs",
+          "previous_sha256": "9f81677979d4d4282387114043150ba02ed6ff57d3edb36fca9e3a938e6b9c09",
+          "sha256": "6ff2b04c1a5de0524d540acbe086e9dbc1280b4c453bc20ea54dd7bf9ebdb5a4"
+        }
+      ]
     }
   ]
 }
