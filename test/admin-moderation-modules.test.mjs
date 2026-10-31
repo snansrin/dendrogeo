@@ -43,18 +43,18 @@ test('geofence override writes the acting administrator as the audit identity', 
   assert.deepEqual(JSON.parse(JSON.stringify(write)), [{ geo_override_by: 'admin-2' }, 'id', 8]);
 });
 
-test('delete use case removes a linked photo before issuing the row delete', async () => {
+test('delete use case removes a linked photo only after confirmed row deletion', async () => {
   const api = runtime();
   const order = [];
   const sb = { from: (table) => ({
     select: (columns) => ({ eq: (field, id) => ({ single: async () => { order.push(['read', table, columns, field, id]); return { data: { photo_url: 'public/tree.jpg' } }; } }) }),
-    delete: () => ({ eq: async (field, id) => { order.push(['delete', table, field, id]); return { error: null }; } }),
+    delete: () => ({ eq: (field, id) => ({select:async columns=>{order.push(['delete', table, field, id,columns]);return{data:[{id}],error:null};}}) }),
   }) };
   const result = await api.DG_ADMIN_DELETE_MEASUREMENT.execute(sb, 3, async (url) => order.push(['photo', url]), api.DG_ADMIN_MODERATION_STORE);
   assert.deepEqual(JSON.parse(JSON.stringify(order)), [
-    ['read', 'measurements', 'photo_url', 'id', 3], ['photo', 'public/tree.jpg'], ['delete', 'measurements', 'id', 3],
+    ['read', 'measurements', 'photo_url', 'id', 3], ['delete', 'measurements', 'id', 3,'id'], ['photo', 'public/tree.jpg'],
   ]);
-  assert.deepEqual({ ...result }, { error: null });
+  assert.equal(result.error,null);
 });
 
 test('moderation store preserves direct Supabase method sequence and missing-photo behavior', async () => {
@@ -62,10 +62,10 @@ test('moderation store preserves direct Supabase method sequence and missing-pho
   const order = [];
   const sb = { from: (table) => ({
     select: (columns) => ({ eq: (field, id) => ({ single: async () => { order.push([table, columns, field, id]); return { data: null }; } }) }),
-    delete: () => ({ eq: async (field, id) => { order.push(['delete', table, field, id]); return { error: null }; } }),
+    delete: () => ({ eq: (field, id) => ({select:async columns=>{order.push(['delete', table, field,id,columns]);return{data:[],error:null};}}) }),
   }) };
   let removed = false;
   await api.DG_ADMIN_DELETE_MEASUREMENT.execute(sb, 9, async () => { removed = true; }, api.DG_ADMIN_MODERATION_STORE);
   assert.equal(removed, false);
-  assert.deepEqual(JSON.parse(JSON.stringify(order)), [['measurements', 'photo_url', 'id', 9], ['delete', 'measurements', 'id', 9]]);
+  assert.deepEqual(JSON.parse(JSON.stringify(order)), [['measurements', 'photo_url', 'id', 9], ['delete', 'measurements', 'id', 9,'id']]);
 });

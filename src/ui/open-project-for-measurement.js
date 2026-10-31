@@ -4,6 +4,7 @@
 window.DG_OPEN_PROJECT_FOR_MEASUREMENT={
   open(id,ports){
     const project=(ports.projects()||[]).find(row=>Number(row.id)===Number(id));if(!project)return null;
+    if(project.is_locked===true){if(typeof toast==="function")toast("🔒 Proje kilitli · Yeni ölçüm için aktif bir proje seçin.","info","🔒");return null;}
     ports.remember(id);ports.go("measure");
     ports.schedule(()=>{
       const select=ports.measureSelect();if(select)select.value=String(id);

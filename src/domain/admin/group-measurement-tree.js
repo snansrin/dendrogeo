@@ -20,6 +20,7 @@ window.DG_GROUP_MEASUREMENT_TREE = (() => {
       if (!P.projects.has(jKey)) P.projects.set(jKey, {
         key: jKey, project_id: (proj && proj.id) || r.project_id || 0,
         name: (proj && proj.name) || "Proje #" + (r.project_id || 0),
+        is_locked: proj?.is_locked===true,
         park_name: (proj && proj.park_name) || null, users: new Map(),
         n: 0, c: 0, beklemede: 0, onayli: 0, red: 0,
       });

@@ -5,7 +5,8 @@
   const result=await ports.load();
   const data={users:result.users.data||[],measurements:result.measurements.data||[],projects:result.projects.data||[],global:result.global.data||{},measurementCount:result.measurementCount.count};
   ports.updateMetrics(ports.summarize(data));
-  ports.renderMeasurements(result.measurements,data.measurements);
+  const projectById=new Map(data.projects.map(project=>[Number(project.id),project]));
+  ports.renderMeasurements(result.measurements,data.measurements.map(row=>({...row,projects:projectById.get(Number(row.project_id))||null})));
   ports.refreshBasePanels();
   ports.refreshTree();
   ports.refreshParkAdmin();
