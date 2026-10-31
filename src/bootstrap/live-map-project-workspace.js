@@ -22,12 +22,13 @@
   remembered:()=>{try{return localStorage.getItem(key())||"";}catch(error){return"";}},
   remember:id=>{try{localStorage.setItem(key(),String(id));}catch(error){}},
   observe:(element,notify)=>{if(typeof root.MutationObserver!=="function")return;const observer=new root.MutationObserver(notify);observer.observe(element,{attributes:true,attributeFilter:["class"]});},
-  reloadProjects:()=>loadProjects(),readProject:id=>store.project(id),readPark:id=>store.park(id),readWaypoints:id=>store.waypoints(id),
+  reloadProjects:()=>loadProjects(),readProject:id=>store.project(id),readPark:id=>store.park(id),readParent:id=>store.parent(id),readWaypoints:id=>store.waypoints(id),
   candidate:row=>root.DG_LIVE_MAP_PROJECT_CANDIDATE.candidate(row),
   activeParkId:()=>typeof DG_PARK!=="undefined"?Number(DG_PARK?.id||0):0,
   isEditing:()=>!!(root._dgLandCoverBusy||root.DG_LC_SENS?.state?.busy||root.DG_LC_SENS?.state?.saving||root.DG_LC_SENS?.state?.brush||root.DG_LC_SENS?.state?.draw||root.DG_LC_SENS?.state?.objectPick||root.DG_PARK_STAGES?.isDrawing()||document.querySelector('#dgUxMapTools [data-tool][aria-pressed="true"]')),
   saveDraft:async()=>!root.DG_LC_SENS?.state?.record||typeof dgSensSave!=="function"||!!(await dgSensSave()),
   prepareParent:row=>root.DG_PARK_STAGES.present({park:root.DG_LIVE_MAP_PROJECT_CANDIDATE.candidate(row),row}),
+  forgetParent:()=>root.DG_PARK_STAGES.present({park:null,row:null}),
   draw:(candidate,row)=>{
    // The shared drawPark registration hook would otherwise be allowed to
    // insert a park on a key miss (notably for historical manual parks).
@@ -50,7 +51,14 @@
   },
   clearWaypoints:()=>{const layer=DG_GRID_SESSION.getWaypointLayer();if(layer&&map)map.removeLayer(layer);DG_GRID_SESSION.setWaypointLayer(null);LAST_WP_ROWS=[];},
   selectProject:setSelect,openWaypoints,
-  openSurface:()=>{if(typeof runLandCoverAnalysis==="function")void runLandCoverAnalysis();else document.getElementById("landCoverBtn")?.click();},
+  openSurface:()=>root.DG_LIVE_MAP_PROJECT_SURFACE_UI.restore({
+   parkId:Number(DG_PARK?.id||0),currentParkId:()=>Number(DG_PARK?.id||0),
+   saveExisting:async()=>{const s=root.DG_LC_SENS?.state;if(!s?.record||!s.editing&&!s.record.draftDirty)return true;return typeof dgSensSave==="function"&&!!(await dgSensSave());},
+   scan:()=>runLandCoverAnalysis(),
+   hasCells:()=>typeof DG_LC_LAST!=="undefined"&&Array.isArray(DG_LC_LAST?.result?.cells)&&DG_LC_LAST.result.cells.length>0,
+   currentRecordParkId:()=>Number(root.DG_LC_SENS?.state?.record?.parkId||0),savedRecord:()=>root.DG_LC_SENS?.state?.record,
+   openSavedReview:()=>root.DG_LC_SENS.mount("lcSens",{freshAnalysis:false})
+  }),
   openStages
  });
 })(window);

@@ -970,6 +970,7 @@
       "test/world-render-modules.test.mjs",
       "src/adapters/surface/read-accepted-park-surface.js",
       "src/ui/accepted-park-surface.js",
+      "src/ui/live-map-project-surface.js",
       "scripts/landing-showcase-smoke.mjs"
     ],
     "modular_shell_action_safeguards": [
@@ -2108,6 +2109,7 @@
     "src/ui/toast-message-content.js": "3cd604b74561d5aaddb97f96e06e4db9472b1852dc2ae4391f0cccd60d8d1b5d",
     "src/adapters/surface/read-accepted-park-surface.js": "682a286f82721c3c5357f693e4aeb9a56e8a4614300fd855b1488ad67a06dd73",
     "src/ui/accepted-park-surface.js": "852fc9b603aa93c7a763447e81838b5b3c9368c51df48df02f7bf3f27fe2f487",
+    "src/ui/live-map-project-surface.js": "ab2339c073b3a9f0e0f311c0180051af5d370bab56c4bebe3d86c48acdb9cd9f",
     "scripts/landing-showcase-smoke.mjs": "67695a1f1dc6b05ff7e3340125fde37f0f7f50d7c8d4a9631d6d13d42f29a33a",
     "src/bootstrap/gis-export.js": "1efc829fd8bd3625733f0bd45e65b6aeb221b7ccd539fe22ea81b158d027807a",
     "src/bootstrap/park-admin-controller.js": "0edee558c7b102e9c66414c74d500bf60e40ac24214bbea72b00444fbd34409a",
@@ -12535,6 +12537,25 @@
       ],
       "files": [
         {"path":"index.html","previous_sha256":"c766c39e49772acdf1f2da829f5a36f5b30f18bdc8f7ab6aa2c3bba339c9eb2d","sha256":"a42b2192347443d970962c00bdc4cb9bcc499f5ed51bfedc8d199a6a28ab22b1"}
+      ]
+    },
+    {
+      "date": "2026-10-31",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: repair the live-map saved-project workspace after an actual orphaned Dikmen stage (#53 points to deleted parent #50). Preserve the verified stage record/geometry and 42 saved waypoints in a read-only display while disabling stage revision without its historical parent; never synthesize or insert a replacement parent. Add an isolated saved-surface reopening workflow that first preserves an existing device draft, regenerates the original raster evidence and then reloads the selected park's owner-scoped account/device review instead of retaining a fresh scan. Core geometry, accepted surfaces, scientific classification, species, wood densities, allometry and carbon formulas remain unchanged; no live database writes or permission expansions.",
+      "validation": [
+        "node --test test/live-map-project-workspace.test.mjs",
+        "npm run check",
+        "npm run check:phone",
+        "npm run check:accessibility",
+        "GitHub Actions: Chromium, WebKit and three-park GIS QA"
+      ],
+      "added_protected_files": ["src/ui/live-map-project-surface.js"],
+      "files": [
+        {"path":"index.html","previous_sha256":"a42b2192347443d970962c00bdc4cb9bcc499f5ed51bfedc8d199a6a28ab22b1","sha256":"37e03c3e020f14d60c9d8f0fd5091ca37712b40ec4ee992656f127bbf5f14d8d"},
+        {"path":"partials/boot.html","previous_sha256":"9b13ef5e302038e14cb8eeaabd4ddf03424d77d3534d576ae24f27b3cc9190f8","sha256":"598e6267be1fad2c32b589b25c8281a67a34feade91ab1dbfccb8d3ee8d15bf1"},
+        {"path":"sw.js","previous_sha256":"bf7f17b704f13754dd65130f5a24305bbc2501f98a888341d398d456f7c54fdb","sha256":"1e4430249661cdbe288208279a504643c7b7f1dee72b416d32d52773a4b90f4e"},
+        {"path":"src/adapters/parks/live-map-project-store.js","previous_sha256":"8e13ca52749711ba0a1e5308b7b8260370b16c551d7fa3e455c8883882c038a8","sha256":"b55d186cb0551f61083793c2934762e4d009a7dbd8c08002108d80098ce0d106"}
       ]
     }
   ]
