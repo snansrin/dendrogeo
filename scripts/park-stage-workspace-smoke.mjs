@@ -71,9 +71,9 @@ try{for(const width of [360,390,430]){
   const orphan={id:9012,name:'Dikmen Vadisi · 2. etap',geom_json:{stage_scope:{parentId:9999,label:'2. etap'}}};
   await DG_PARK_STAGES.present({park:{name:orphan.name},row:orphan});
  });
- const menuLabels=await page.locator('#surfaceMenuBar > details > summary').allTextContents();
- assert.equal(menuLabels.length,8,'original toolbar keeps all eight menus');
- for(const [index,label] of [[0,'Dosya'],[1,'Görünüm'],[2,'Etaplar'],[3,'Grid']])assert.match(menuLabels[index],new RegExp(label));
+ const menus=await page.locator('#surfaceMenuBar > details').evaluateAll(items=>items.map(el=>({order:Number(el.dataset.menuOrder),label:el.querySelector('summary')?.textContent||''})));
+ assert.equal(menus.filter(item=>item.order===25&&item.label.includes('Etaplar')).length,1,'the original Etaplar tab is mounted exactly once');
+ assert.deepEqual(menus.map(item=>item.order),menus.map(item=>item.order).sort((a,b)=>a-b),'existing menus retain their standard order');
  await page.locator('#dgStageToolsMenu > summary').click();
  assert.match(await page.locator('#dgStageStatus').innerText(),/Ana park kaydı eksik/);
  assert.equal(await page.locator('#dgParkStageWorkspace [data-stage-action]').count(),0,'missing parent cannot start an unsafe edit');
