@@ -99,7 +99,7 @@
     if(!selected&&token===epoch)status("Etap kaydedildi. Çalışma kapsamını değiştirmek için listeden seçin.");
    }finally{setWorking(false,token);}
   }
-  return Object.freeze({present,clear(){++epoch;drawing.cancel();assisted.clear();menu.clear();host=null;working=false;editing=false;cutEditing=false;editSource=null;},isDrawing:()=>editing});
+  return Object.freeze({present,open:()=>menu.open(),clear(){++epoch;drawing.cancel();assisted.clear();menu.clear();host=null;working=false;editing=false;cutEditing=false;editSource=null;},isDrawing:()=>editing});
  }
  root.DG_PARK_STAGE_WORKSPACE_UI=Object.freeze({create});
 })(window);

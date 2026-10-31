@@ -99,7 +99,7 @@ test('Dikmen stage primes its parent then opens the original stage and points',a
 test('Dikmen stage survives deleted parent without fabricating geometry or mutating saved waypoints',async()=>{
  const x=uiScenario({readParent:async()=>null});x.select.value='33';await x.ui.open();
  assert.deepEqual(x.calls,['forget deleted parent','draw','points 42','select 33','remember 33']);
- assert.equal(x.stageButton.hidden,true);
+ assert.equal(x.stageButton.hidden,false,'etap yönetimi kayıp ana park nedeniyle gizlenmemeli');
  assert.match(x.status.textContent,/Ana park kaydı eksik/);
  assert.equal(x.actions.hidden,false,'surface and waypoints must remain available');
 });

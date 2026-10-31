@@ -12,6 +12,7 @@
  }
  function openWaypoints(id){setSelect(id);go("nav");}
  function openStages(){
+  if(root.DG_PARK_STAGES?.open)root.DG_PARK_STAGES.open();
   const box=document.getElementById("dgParkStageWorkspace");
   if(box){box.scrollIntoView({behavior:"smooth",block:"nearest"});box.querySelector("#dgStageSelect")?.focus({preventScroll:true});}
   else document.getElementById("parkInfo")?.scrollIntoView({behavior:"smooth",block:"nearest"});

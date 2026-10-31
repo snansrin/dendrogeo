@@ -7,7 +7,7 @@
    status=doc.getElementById("dgLiveProjectStatus"),actions=doc.getElementById("dgLiveProjectActions"),
    heading=doc.getElementById("dgLiveProjectActive");
   if(!host||!select||!status||!actions||!heading)return Object.freeze({refresh:()=>{}});
-  let active=0,working=false;
+  let active=0,working=false,stageParentMissing=false;
   const t=(template,values={})=>typeof ports.translate==="function"?ports.translate(template,values):Object.entries(values).reduce((out,[key,value])=>out.replaceAll("{"+key+"}",String(value)),template);
   function note(message,type="info"){status.textContent=message;status.dataset.status=type;}
   function projects(){return (ports.projects()||[]).filter(row=>Number.isSafeInteger(Number(row.id))&&Number(row.id)>0);}
@@ -20,7 +20,7 @@
    for(const project of rows){const item=doc.createElement("option");item.value=String(project.id);item.disabled=!Number(project.park_id);item.textContent=project.name+(project.shared?" "+t("· paylaşılan"):"")+(item.disabled?" "+t("· park bağlantısı yok"):"");select.append(item);}
    const available=rows.filter(row=>Number(row.park_id)>0);
    if(active&&!available.some(row=>Number(row.id)===active&&Number(row.park_id)===ports.activeParkId())){
-    ports.clearWaypoints();ports.stopWatching?.();active=0;heading.textContent="";actions.hidden=true;
+    ports.clearWaypoints();ports.stopWatching?.();active=0;stageParentMissing=false;heading.textContent="";actions.hidden=true;
    }
    select.value=available.some(row=>String(row.id)===current)?current:"";
    actions.hidden=!active||!rows.some(row=>Number(row.id)===active);
@@ -61,9 +61,9 @@
     if(!projects().some(row=>Number(row.id)===Number(project.id)))throw Error(t("Proje erişimi güncellendi; yeniden deneyin."));
     ports.showWaypoints(points);
     if(!project.is_locked)ports.selectProject(project.id);
-    active=Number(project.id);ports.remember(active);
+    active=Number(project.id);stageParentMissing=missingParent;ports.remember(active);
     heading.textContent=project.name+(project.is_locked?" "+t("· kilitli"):"");actions.hidden=!!project.is_locked;
-    const stages=host.querySelector?.('[data-live-project-action="stages"]');if(stages)stages.hidden=missingParent;
+    const stages=host.querySelector?.('[data-live-project-action="stages"]');if(stages){stages.hidden=false;stages.title=missingParent?t("Ana park kaydı eksik; kayıtlı etap görüntülenebilir ancak sınır düzenlenemez."):"";}
     let restored=null,restoreError=null;
     if(changing&&ports.restoreWorkspace){
      note(t("Kayıtlı tarama, grid ve yüzey düzeltmeleri proje kapsamında aranıyor…"));
@@ -93,7 +93,7 @@
     if(ports.isEditing())return note(t("Açık etap çizimini, fırçayı veya harita ölçümünü tamamlayıp yeniden dene. Mevcut işlem korunuyor."),"warn");
     void Promise.resolve().then(()=>ports.openSurface()).then(result=>{if(result?.restored)note(t("Kaydedilmiş yüzey düzeltmeleri hesap/cihaz taslağından yüklendi. Sınıfları ve sınırları kontrol edebilirsin."),"ok");else if(result?.ready)note(t("Yüzey taraması açıldı; bu hesaba veya cihaza ait eski bir taslak bulunamadı."),"warn");else note(t("Yüzey taraması tamamlanmadı. Önce veri kaynaklarını kontrol et."),"warn");}).catch(error=>note(t("Yüzey çalışması açılamadı: {error}",{error:String(error.message||error)}),"err"));
    }
-   else if(action==="stages"&&active)ports.openStages();
+   else if(action==="stages"&&active){if(stageParentMissing)note(t("Etap sınırı haritada açık; ana park kaydı eksik olduğu için sınır düzenleme güvenle başlatılamıyor. Grid, ölçüm noktaları ve yüzey ayarlarını mevcut menülerden değiştirebilirsin."),"warn");else ports.openStages();}
   });
   // Only a real user choice starts project loading. Programmatic refresh and
   // the initial placeholder never draw, scan or select a previously used park.
