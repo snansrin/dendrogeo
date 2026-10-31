@@ -1,0 +1,16 @@
+/* Use the existing DendroGeo theme and typographic tokens. */
+.dg-live-projects{margin-bottom:12px}
+.dg-live-projects-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.dg-live-projects-head strong{font-weight:800}
+.dg-live-projects-fields{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+.dg-live-projects-fields>div{flex:1 1 240px;min-width:0}
+.dg-live-projects-fields select{width:100%;min-width:0}
+.dg-live-projects-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.dg-live-projects .dg-meta{margin:7px 0 0}
+.dg-live-projects [data-status="err"]{color:var(--red,#b91c1c)}
+.dg-live-projects [data-status="ok"]{color:var(--green,#16803d)}
+@media(max-width:430px){
+ .dg-live-projects-fields>div{flex-basis:100%}
+ .dg-live-projects-fields .btn{flex:1 1 auto}
+ .dg-live-projects-actions .btn{flex:1 1 100%}
+}
