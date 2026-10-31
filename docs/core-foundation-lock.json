@@ -1159,7 +1159,7 @@
     "css/ui-standard.css": "cf5fc000e24f988fddb04da907b2bdc168a4575c36bc8554c1b2e22ccf527b9b",
     "docs/legacy-service-boundaries.json": "a42273d82bef00247d48bca5f6edf3e05dc41e70bb950f13382b362342067e17",
     "docs/surface-scientific-contract.json": "ad98bde39dc2e8dfd80d36d8f287349cf0ab8a91cd7a9f728e6dd533a844ffa3",
-    "index.html": "cb21ed71a684d8fffccc0a54f66788916affc8ef2d63739f4575f4096cb348f1",
+    "index.html": "f729df9429929dcffdb5211ab44c373e807014b0d683c4fb58722a2c7bf292bf",
     "package-lock.json": "7c911eebd0849bccd565d0e56935035c7d187b57d310feebbe837843cdefd913",
     "package.json": "7acc377c195644a0a14ac05ce09ffb20a5fc11a15f7cb0c192f951e9f2e62fc3",
     "partials/boot.html": "d9959a7c00c92185f9b085564370ecdc5b2e539c6becad0d80687410096c8fef",
@@ -12574,7 +12574,7 @@
       ],
       "added_protected_files": ["src/adapters/parks/live-map-project-snapshot-store.js", "src/ui/live-map-project-snapshot.js"],
       "files": [
-        {"path":"index.html","previous_sha256":"37e03c3e020f14d60c9d8f0fd5091ca37712b40ec4ee992656f127bbf5f14d8d","sha256":"cb21ed71a684d8fffccc0a54f66788916affc8ef2d63739f4575f4096cb348f1"},
+        {"path":"index.html","previous_sha256":"37e03c3e020f14d60c9d8f0fd5091ca37712b40ec4ee992656f127bbf5f14d8d","sha256":"f729df9429929dcffdb5211ab44c373e807014b0d683c4fb58722a2c7bf292bf"},
         {"path":"partials/boot.html","previous_sha256":"598e6267be1fad2c32b589b25c8281a67a34feade91ab1dbfccb8d3ee8d15bf1","sha256":"aed5c91a3e8e216dd8f8fc0e4e2d5b6698576263d11b768337e7f1bbb5c7e5da"},
         {"path":"partials/shell.html","previous_sha256":"b02c466bada5492e8dbd638e05e067df2b4ff8aad42c43b13f2e457b290c01fb","sha256":"87ba33a203316d759ebd4cddaba746286cbd8af0201ad715060b84c1acc1d0fc"},
         {"path":"sw.js","previous_sha256":"1e4430249661cdbe288208279a504643c7b7f1dee72b416d32d52773a4b90f4e","sha256":"9e6c210d2482677151c14c1cb5e27a1061d9637f776e9176de2aad8e89e4243b"}

@@ -59,8 +59,13 @@
     const reference=document.getElementById("refHa");if(reference&&options.reference!==undefined){reference.value=String(options.reference);if(reference.value)setRefHa(reference.value);}
     drawGridLayer();grid=cells.length;
     const gridToggle=document.getElementById("togGrid"),waypointToggle=document.getElementById("togWp");
-    if(gridToggle&&options.gridVisible===false){gridToggle.checked=false;map.removeLayer(DG_GRID_SESSION.getGridLayer());}
-    if(waypointToggle&&options.waypointVisible===false){waypointToggle.checked=false;const layer=DG_GRID_SESSION.getWaypointLayer();if(layer)map.removeLayer(layer);}
+    for(const [toggle,visible,layer] of [[gridToggle,options.gridVisible,DG_GRID_SESSION.getGridLayer()],
+     [waypointToggle,options.waypointVisible,DG_GRID_SESSION.getWaypointLayer()]]){
+     if(!toggle||visible===undefined)continue;
+     toggle.checked=visible!==false;
+     if(layer&&toggle.checked&&!map.hasLayer(layer))map.addLayer(layer);
+     else if(layer&&!toggle.checked&&map.hasLayer(layer))map.removeLayer(layer);
+    }
    }
    return {scan,grid};
   }

@@ -193,6 +193,28 @@ test('bootstrap restores selected cached project only after resolving the lazy s
  assert.equal(locked.restored,false);assert.equal(locked.mode,'readonly');
  assert.deepEqual(order,['load lazy engine','read 33/53/core-v1'],'locked projects never load editable snapshots');
 });
+test('saved grid and waypoint visibility are both restored when switching between projects',async()=>{
+ const root={};let apply;
+ root.DG_LIVE_MAP_PROJECT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT={reviewBasis:()=>null,create:ports=>{apply=ports.apply;return{save:async()=>true,restore:async()=>({})};}};
+ root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI={create:()=>({})};
+ root.DG_LC_SENS={state:{record:null}};
+ const controls={togGrid:{checked:false},togWp:{checked:true},gridSize:{value:'20'},gridClearance:{value:'3'},chkGreenOnly:{checked:false},refHa:{value:''}};
+ const layers=new Set(['wp']),map={hasLayer:id=>layers.has(id),addLayer:id=>layers.add(id),removeLayer:id=>layers.delete(id)};
+ const cells=[],selection=new Set(),gridSession={getCells:()=>cells,getSelection:()=>selection,setMeta:()=>{},setSource:()=>{},getGridLayer:()=> 'grid',getWaypointLayer:()=> 'wp'};
+ const env={window:root,sb:{},USER:{id:'account-one'},DG_PARK:{id:25,geom_json:goksu.geom_json},
+  DG_GRID_SESSION:gridSession,DG_GREEN_ONLY:false,document:{addEventListener:()=>{},getElementById:id=>controls[id]},
+  map,drawGridLayer:()=>layers.add('grid'),dgGridReviewSignature:()=>null};
+ runInNewContext(readFileSync(new URL('../src/bootstrap/live-map-project-workspace.js',import.meta.url),'utf8'),env);
+ const grid={cells:[{id:'one'}],selected:['one'],reviewBasis:null,options:{gridVisible:true,waypointVisible:false,greenOnly:false}};
+ assert.equal((await apply({grid},{parkId:25})).grid,1);
+ assert.equal(controls.togGrid.checked,true);assert.equal(controls.togWp.checked,false);
+ assert.equal(layers.has('grid'),true);assert.equal(layers.has('wp'),false);
+ await apply({grid:{...grid,options:{gridVisible:false,waypointVisible:true,greenOnly:false}}},{parkId:25});
+ assert.equal(controls.togGrid.checked,false);assert.equal(controls.togWp.checked,true);
+ assert.equal(layers.has('grid'),false);assert.equal(layers.has('wp'),true);
+});
 test('live-map bootstrap reuses existing map/waypoint tools without a second writer',()=>{
  const source=readFileSync(new URL('../src/bootstrap/live-map-project-workspace.js',import.meta.url),'utf8');
  assert.match(source,/DG_LIVE_MAP_PROJECT_WORKSPACE_UI\.create/);
