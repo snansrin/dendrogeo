@@ -12626,6 +12626,15 @@
         {"path":"scripts/park-stage-workspace-smoke.mjs","previous_sha256":"66951a3406ef334ad7c8afb3600be71016ffbdbaa33024f52bb546218121c75b","sha256":"328935a28a76f1dd382ce5502f8c631e2d76c7463bb9daba4da650056b8415d0"},
         {"path":"test/park-stage-workspace.test.mjs","previous_sha256":"19694bd13facc412884bf8cf18e25b150d4cd64de54b2e6824b15a76ca92ca83","sha256":"ea593c292d8c9fe5f64b27cdb9a8b076253b144dc92c079175c81b7e13be9cde"}
       ]
+    },
+    {
+      "date": "2026-11-01",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization CI follow-up: repair only the new synthetic mobile stage-menu smoke fixture by supplying its required immutable stage_scope.schema marker. The live stage geometry, editor, project data, 42 measurements, styling, scientific engines, RLS and runtime outputs are unchanged.",
+      "validation": ["node --test test/live-map-project-workspace.test.mjs test/park-stage-workspace.test.mjs", "npm run check:core-foundation", "GitHub Actions Chromium and WebKit mobile stage-menu smoke"],
+      "files": [
+        {"path":"scripts/park-stage-workspace-smoke.mjs","previous_sha256":"328935a28a76f1dd382ce5502f8c631e2d76c7463bb9daba4da650056b8415d0","sha256":"1eeaf65948a97cae6b411d68fee0ecb115e81e111008687afd728566a62b429f"}
+      ]
     }
   ]
 }
