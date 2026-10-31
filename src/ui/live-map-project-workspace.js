@@ -93,7 +93,7 @@
     if(ports.isEditing())return note(t("Açık etap çizimini, fırçayı veya harita ölçümünü tamamlayıp yeniden dene. Mevcut işlem korunuyor."),"warn");
     void Promise.resolve().then(()=>ports.openSurface()).then(result=>{if(result?.restored)note(t("Kaydedilmiş yüzey düzeltmeleri hesap/cihaz taslağından yüklendi. Sınıfları ve sınırları kontrol edebilirsin."),"ok");else if(result?.ready)note(t("Yüzey taraması açıldı; bu hesaba veya cihaza ait eski bir taslak bulunamadı."),"warn");else note(t("Yüzey taraması tamamlanmadı. Önce veri kaynaklarını kontrol et."),"warn");}).catch(error=>note(t("Yüzey çalışması açılamadı: {error}",{error:String(error.message||error)}),"err"));
    }
-   else if(action==="stages"&&active){if(stageParentMissing)note(t("Etap sınırı haritada açık; ana park kaydı eksik olduğu için sınır düzenleme güvenle başlatılamıyor. Grid, waypoint ve yüzey ayarlarını mevcut menülerden değiştirebilirsin."),"warn");else ports.openStages();}
+   else if(action==="stages"&&active){if(stageParentMissing)note(t("Etap sınırı haritada açık; ana park kaydı eksik olduğu için sınır düzenleme güvenle başlatılamıyor. Grid, ölçüm noktaları ve yüzey ayarlarını mevcut menülerden değiştirebilirsin."),"warn");else ports.openStages();}
   });
   // Only a real user choice starts project loading. Programmatic refresh and
   // the initial placeholder never draw, scan or select a previously used park.

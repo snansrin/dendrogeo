@@ -12591,6 +12591,15 @@
         {"path":"src/ui/park-stage-workspace.js","previous_sha256":"8df920cf962f127f74bc49c82afe4a53a65352de0d3fdf8f99c8ba1b0aa576b1","sha256":"c7245d792ff9b8dbbc8aa511f67c8c0141c4af7519de6297cf7cff4abf56018d"},
         {"path":"index.html","previous_sha256":"4ab08ced11b1b86a8786e53bd4e3f3acb0670b29c76aa66657a44a7a6c69abce","sha256":"fa376f93f4e7750cd67b996cfa52655911af35a2f3a06c8e2d38dfc7a2baf6a0"}
       ]
+    },
+    {
+      "date": "2026-10-31",
+      "audit_chain": "sha256-v1",
+      "scope": "Follow-up of the same user-authorized live-map UI fix: replace an English waypoint noun in the orphan-stage warning with the existing Turkish measurement-points terminology. Rebuild only the matching static runtime and its CSP/version hashes. No scientific engine, geometry, measurement or account data changed.",
+      "validation": ["node --test test/measurement-points-labels.test.mjs", "npm run check", "GitHub Actions CI"],
+      "files": [
+        {"path":"index.html","previous_sha256":"fa376f93f4e7750cd67b996cfa52655911af35a2f3a06c8e2d38dfc7a2baf6a0","sha256":"a0fbef8868d2897957c7abb8954f2e2aab8ae55eab14bf0822ee915d3ccd349b"}
+      ]
     }
   ]
 }
