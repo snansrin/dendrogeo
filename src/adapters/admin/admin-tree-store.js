@@ -4,7 +4,7 @@ window.DG_ADMIN_TREE_STORE = (() => {
   const SELECT_FULL = "id,point_id,measurement_no,species,grp,dbh_cm,girth_cm,height_m,carbon_kg," +
     "status,photo_url,created_at,lat,lon,owner,project_id,park_id," +
     "reviewed_by,reviewed_at,profiles!measurements_owner_fkey(full_name)," +
-    "projects(id,name,park_id,park_name,parks(id,name,area_m2,city,country))";
+    "projects(id,name,park_id,park_name,is_locked,parks(id,name,area_m2,city,country))";
 
   async function fetchRows(sb, warnIfTruncated) {
     let result = await sb.from("measurements")

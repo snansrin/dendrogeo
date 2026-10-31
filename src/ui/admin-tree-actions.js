@@ -14,6 +14,18 @@
   else{badge.style.display="none";badge.textContent="";}
  }
  function setStatusValue(value){const select=getElement("treeStatus");if(select)select.value=value;}
+ async function toggleProjectLock(id){
+  if(!Number.isSafeInteger(id)||id<1)return;
+  const{data:project,error:readError}=await window.DG_PERSIST_MEASUREMENT_PROJECT.lockStatus({client:sb,id});
+  if(readError||!project)return toast("Proje okunamadı: "+(readError?.message||id),"err");
+  const locking=!project.is_locked,phrase=(locking?"KİLİTLE PROJE ":"KİLİDİ AÇ PROJE ")+id;
+  if(window.prompt(`${project.name} (#${id})\n${locking?'Kilitli projede ölçüm, ölçüm noktası, silme ve moderasyon engellenecek.':'Kilidi açmak projeyi yeniden düzenlemeye açar.'}\nYazılı onay: ${phrase}`)!==phrase)return;
+  const{data,error}=await window.DG_PERSIST_MEASUREMENT_PROJECT.setLock({client:sb,id,locked:locking});
+  if(error||!data)return toast("Kilit işlemi reddedildi: "+(error?.message||"Durum başka oturumda değişti."),"err");
+  toast(locking?"🔒 Proje kilitlendi · Salt okunur":"🔓 Proje kilidi kaldırıldı","ok");
+  if(typeof loadProjects==="function")await loadProjects();
+  if(typeof loadAdminTree==="function")await loadAdminTree();
+ }
  function bind(){
   if(root._dgAdminTreeActionsBound)return;
   root._dgAdminTreeActionsBound=true;
@@ -27,6 +39,7 @@
     case "expand-all":root.dgTreeExpand(true);break;
     case "collapse-all":root.dgTreeExpand(false);break;
     case "delete-project":root.dgTreeDeleteProject(event,Number(element.dataset.projectId));break;
+    case "project-lock":event.preventDefault();void toggleProjectLock(Number(element.dataset.projectId));break;
     case "scan-park":root.dgTreePendingScan(event);break;
    }
   });

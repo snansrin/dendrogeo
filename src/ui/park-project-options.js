@@ -8,12 +8,12 @@ function label(project){
 
 function forPark({parkId,fallbackAll,projects,escape:esc}){
   const list=projects||[];
-  const mine=parkId?list.filter(project=>project.park_id===parkId):[];
+  const mine=parkId?list.filter(project=>project.park_id===parkId&&!project.is_locked):[];
   if(mine.length){
     return mine.map(project=>`<option value="${project.id}">${esc(project.name)}</option>`).join("");
   }
   if(fallbackAll&&list.length){
-    return list.map(project=>`<option value="${project.id}">${esc(project.name)}</option>`).join("");
+    return list.filter(project=>!project.is_locked).map(project=>`<option value="${project.id}">${esc(project.name)}</option>`).join("")||`<option value="0">Aktif proje yok — yeni proje oluştur</option>`;
   }
   return `<option value="0">Bu park için proje yok — algılama kartından oluştur</option>`;
 }

@@ -3,7 +3,8 @@
 window.DG_ADMIN_TREE_MEASUREMENT_ROW = (() => {
   function render(row, ports) {
     const status = row.status || "Beklemede";
-    const actions = status === "Onaylı"
+    const locked=row.projects?.is_locked===true;
+    const actions = locked?'<span class="badge admin">🔒 Salt okunur</span>':status === "Onaylı"
       ? `<button type="button" class="btn sm red" data-admin-measurement-action="reject" data-measurement-id="${ports.escape(row.id)}">🚫 Reddet</button>`
       : `<button type="button" class="btn sm" data-admin-measurement-action="approve" data-measurement-id="${ports.escape(row.id)}">✓ Onayla</button>`;
     const created = row.created_at ? new Date(row.created_at) : null;
@@ -17,7 +18,7 @@ window.DG_ADMIN_TREE_MEASUREMENT_ROW = (() => {
       `<td data-label="Foto">${ports.thumbnail(row.photo_url)}</td>` +
       `<td data-label="Durum">${ports.badge(status)}</td>` +
       `<td data-label="Tarih" class="mono dg-sub">${created ? created.toLocaleDateString("tr-TR") : "—"}</td>` +
-      `<td data-label="İşlem"><div class="dg-act">${actions}<button type="button" class="btn sm red" data-admin-measurement-action="delete" data-measurement-id="${ports.escape(row.id)}">🗑️</button></div></td></tr>`;
+      `<td data-label="İşlem"><div class="dg-act">${actions}${locked?'':`<button type="button" class="btn sm red" data-admin-measurement-action="delete" data-measurement-id="${ports.escape(row.id)}">🗑️</button>`}</div></td></tr>`;
   }
   return Object.freeze({ render });
 })();

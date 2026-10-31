@@ -12,12 +12,16 @@ window.DG_MEASUREMENT_PROJECT_CARD={
       ? `<span>🌳 <span translate="no">${ui.escape(park)}</span>${area?" · "+area:""}</span>`
       : `<span class="project-warning">⛔ park yok</span><small>${ui.isAdmin()?"Yönetici olarak bu eski projeyi parka bağlayabilirsin.":"🔐 yönetici bağlayacak"}</small>`;
     const projectId=Number(project.id);
+    const locked=project.is_locked===true;
     const reportButton=project.park_id?`<button type="button" class="btn sm ghost" data-project-action="publish" data-project-id="${projectId}">📄 Rapor</button>`:"";
     const linkButton=!isShared&&!project.park_id&&ui.isAdmin()?`<button type="button" class="btn sm ghost" data-project-action="startParkScan" data-project-id="${projectId}">🌳 Parka bağla</button>`:"";
-    const primary=`<button type="button" class="btn sm" data-project-action="openMeasure" data-project-id="${projectId}">📏 Ölçüme geç</button>`;
+    const primary=locked
+      ? `<button type="button" class="btn sm ghost" data-project-action="locked" data-project-id="${projectId}" aria-label="Kilitli proje, ölçüm için kullanılamaz">🔒 Salt okunur · Proje kilitli</button>`
+      : `<button type="button" class="btn sm" data-project-action="openMeasure" data-project-id="${projectId}">📏 Ölçüme geç</button>`;
+    const lockButton=!isShared?`<button type="button" class="btn sm ghost" data-project-action="${locked?'unlock':'lock'}" data-project-id="${projectId}">${locked?'🔓 Kilidi kaldır':'🔒 Projeyi kilitle'}</button>`:"";
     const management=isShared
       ? `<p class="project-access-note">Düzenleme ve ekip yönetimi proje sahibinde</p><button type="button" class="btn sm ghost project-danger" data-project-action="leave" data-project-id="${projectId}">Ortak çalışmadan ayrıl</button>`
-      : `<div class="project-card-actions">${reportButton}${linkButton}<button type="button" class="btn sm ghost" data-project-action="edit" data-project-id="${projectId}">✏️ Düzenle</button><button type="button" class="btn sm ghost project-danger" data-project-action="delete" data-project-id="${projectId}">🗑 Sil</button></div>`;
-    return `<article class="project-card ${isShared?"is-shared":"is-owned"}"><div class="project-card-top"><div><div class="project-card-park">${parkState}</div><h4 translate="no">${ui.escape(project.name||("Project #"+project.id))}</h4></div>${role}</div><div class="project-card-actions project-card-primary">${primary}<span class="project-card-location">📍 ${location}</span></div><details class="project-card-details"><summary>Proje bilgileri ve işlemler</summary><div class="project-card-detail-body"><dl class="project-card-meta"><div><dt>Oluşturulma tarihi</dt><dd>${date}</dd></div><div><dt>Proje kimliği</dt><dd class="mono">#${projectId}</dd></div></dl>${management}</div></details></article>`;
+      : `<div class="project-card-actions">${reportButton}${lockButton}${locked?'':linkButton+`<button type="button" class="btn sm ghost" data-project-action="edit" data-project-id="${projectId}">✏️ Düzenle</button><button type="button" class="btn sm ghost project-danger" data-project-action="delete" data-project-id="${projectId}">🗑 Sil</button>`}</div>`;
+    return `<article class="project-card ${isShared?"is-shared":"is-owned"}"><div class="project-card-top"><div><div class="project-card-park">${parkState}</div><h4 translate="no">${ui.escape(project.name||("Project #"+project.id))}</h4></div>${role}${locked?'<span class="badge admin">🔒 KİLİTLİ</span>':''}</div><div class="project-card-actions project-card-primary">${primary}<span class="project-card-location">📍 ${location}</span></div><details class="project-card-details"><summary>Proje bilgileri ve işlemler</summary><div class="project-card-detail-body"><dl class="project-card-meta"><div><dt>Oluşturulma tarihi</dt><dd>${date}</dd></div><div><dt>Proje kimliği</dt><dd class="mono">#${projectId}</dd></div></dl>${management}</div></details></article>`;
   }
 };
