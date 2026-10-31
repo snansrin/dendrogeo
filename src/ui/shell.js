@@ -193,11 +193,26 @@ function dgResumePendingView(){
  * storage atabilir). */
 function dgSaveView(v){try{localStorage.setItem("dg_last_view",v);}catch(e){}}
 function dgLastView(){try{return localStorage.getItem("dg_last_view")||"";}catch(e){return "";}}
+// The waypoint map must frame the selected project's actual park, including
+// projects with no imported points. Read only that park's public geometry.
+function dgFocusSelectedWaypointPark(){
+ const viewport=window.DG_WAYPOINT_MAP_VIEWPORT,select=$("nProject");
+ if(!viewport?.autoProject||!navMap||!select)return;
+ const projectId=Number(select.value);
+ const project=(typeof PROJ_LIST!=="undefined"?PROJ_LIST:[]).find(row=>Number(row.id)===projectId);
+ if(!project)return;
+ void viewport.autoProject({
+  map:navMap,panel:$("wpMapPanel"),projectId,parkId:Number(project.park_id||project.parks?.id),
+  waypoints:typeof WP!=="undefined"?WP:[],
+  isSelected:id=>Number($("nProject")?.value)===id,
+  readPark:parkId=>window.DG_FETCH_MEASUREMENT_PARK.fetch({client:sb,id:parkId})
+ });
+}
 function go(v){
  if(window.DG_SHELL_NAVIGATION_CONTROLLER&&window.DG_SHELL_VIEW_EFFECTS)return window.DG_SHELL_NAVIGATION_CONTROLLER.activate(v,{
   document,window,element:$,schedule:(fn,delay)=>setTimeout(fn,delay),initMaps:()=>{if(typeof initMaps==="function")initMaps();},setView:value=>{DG_CUR_VIEW=value;},saveView:dgSaveView,presenceView:typeof dgPresenceView==="function"?dgPresenceView:null,setScrollSwitching:value=>{DG_SCROLL_SWITCHING=value;},stopVisitorTick:typeof dgVisTickStop==="function"?dgVisTickStop:null,presencePing:typeof dgPresencePing==="function"?dgPresencePing:null,
   readScroll:key=>{try{return localStorage.getItem(key)||"0";}catch(error){return"0";}},
-  runEffects:view=>window.DG_SHELL_VIEW_EFFECTS.run(view,{schedule:(fn,delay)=>setTimeout(fn,delay),getDataLoader:()=>window._dgShellViewData,loadWaypoints:()=>loadWaypoints(),loadDash:()=>loadDash(),refreshParkGate:()=>{if(typeof dgParkGate==="function")dgParkGate(true);},scheduleLiveShare:()=>{if(typeof dgLiveShareJoinCurrent==="function")setTimeout(()=>{try{dgLiveShareJoinCurrent();}catch(error){}},400);},refreshMap:()=>{map&&map.invalidateSize();if(!liveLoaded||DG_LIVE_DIRTY)loadLiveMap();},refreshNavigation:()=>navMap&&navMap.invalidateSize(),refreshWorld:()=>worldMap&&worldMap.invalidateSize(),loadAdmin:()=>loadAdmin(),loadInvites:()=>{if(typeof dgInvitesLoadMine==="function")dgInvitesLoadMine();},loadCollaborators:()=>{if(typeof dgCollabLoad==="function")dgCollabLoad();},loadUsers:()=>loadUsers(),loadVisitors:()=>{try{if(typeof loadVisitors==="function")loadVisitors();}catch(error){}},loadMyRequests:()=>loadMyRequests(),loadRequestOptions:()=>loadRequestOptions()})
+  runEffects:view=>window.DG_SHELL_VIEW_EFFECTS.run(view,{schedule:(fn,delay)=>setTimeout(fn,delay),getDataLoader:()=>window._dgShellViewData,loadWaypoints:()=>loadWaypoints(),loadDash:()=>loadDash(),refreshParkGate:()=>{if(typeof dgParkGate==="function")dgParkGate(true);},scheduleLiveShare:()=>{if(typeof dgLiveShareJoinCurrent==="function")setTimeout(()=>{try{dgLiveShareJoinCurrent();}catch(error){}},400);},refreshMap:()=>{map&&map.invalidateSize();if(!liveLoaded||DG_LIVE_DIRTY)loadLiveMap();},refreshNavigation:()=>{navMap&&navMap.invalidateSize();dgFocusSelectedWaypointPark();},refreshWorld:()=>worldMap&&worldMap.invalidateSize(),loadAdmin:()=>loadAdmin(),loadInvites:()=>{if(typeof dgInvitesLoadMine==="function")dgInvitesLoadMine();},loadCollaborators:()=>{if(typeof dgCollabLoad==="function")dgCollabLoad();},loadUsers:()=>loadUsers(),loadVisitors:()=>{try{if(typeof loadVisitors==="function")loadVisitors();}catch(error){}},loadMyRequests:()=>loadMyRequests(),loadRequestOptions:()=>loadRequestOptions()})
  });
  if(["map","nav","world"].includes(v)&&typeof initMaps==="function")initMaps();
  DG_CUR_VIEW=v;dgSaveView(v);
@@ -229,7 +244,7 @@ if(v==="dash"){if(window._dgShellViewData)window._dgShellViewData.load(v);else l
   * YENİ: ilk açılış VEYA veri bayatladıysa (onay/red/silme/senkronizasyon)
   *      yeniden çeker; bayat değilse gereksiz sorgu atılmaz. */
  if(v==="map")setTimeout(()=>{map&&map.invalidateSize();if(!liveLoaded||DG_LIVE_DIRTY)loadLiveMap();},150);
- if(v==="nav")setTimeout(()=>navMap&&navMap.invalidateSize(),150),window._dgShellViewData?window._dgShellViewData.load(v):loadWaypoints();
+ if(v==="nav")setTimeout(()=>{navMap&&navMap.invalidateSize();dgFocusSelectedWaypointPark();},150),window._dgShellViewData?window._dgShellViewData.load(v):loadWaypoints();
  if(v==="records"&&window._dgShellViewData)window._dgShellViewData.load(v);
  if(v==="world"&&window._dgShellViewData)window._dgShellViewData.load(v);
  if(v==="world")setTimeout(()=>worldMap&&worldMap.invalidateSize(),150);
@@ -253,6 +268,15 @@ if(v==="export"){if(window._dgShellViewData)window._dgShellViewData.load(v);else
   const scw=parseInt((()=>{try{return localStorage.getItem("dg_scrollw_"+v)||"0";}catch(e){return "0";}})(),10);
   if(scw>0)window.scrollTo(0,scw);},180);
 }
+
+document.addEventListener("change",event=>{
+ if(event.target?.id==="nProject")dgFocusSelectedWaypointPark();
+});
+document.addEventListener("toggle",event=>{
+ if(event.target?.id!=="wpMapPanel"||!event.target.open)return;
+ const apply=()=>window.DG_WAYPOINT_MAP_VIEWPORT?.applyProject?.({map:navMap,panel:event.target,projectId:Number($("nProject")?.value)});
+ if(typeof window.requestAnimationFrame==="function")window.requestAnimationFrame(apply);else setTimeout(apply,0);
+},true);
 
 boot().catch(error=>{window.DG_STARTUP_SCREEN?.finish();initLanding();console.error("DENDROGEO · Giriş başlatılamadı:",error);toast(dgCf("Giriş başlatılamadı. Lütfen tekrar deneyin."),"err");});
 
