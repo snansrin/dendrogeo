@@ -12579,6 +12579,18 @@
         {"path":"partials/shell.html","previous_sha256":"b02c466bada5492e8dbd638e05e067df2b4ff8aad42c43b13f2e457b290c01fb","sha256":"87ba33a203316d759ebd4cddaba746286cbd8af0201ad715060b84c1acc1d0fc"},
         {"path":"sw.js","previous_sha256":"1e4430249661cdbe288208279a504643c7b7f1dee72b416d32d52773a4b90f4e","sha256":"9e6c210d2482677151c14c1cb5e27a1061d9637f776e9176de2aad8e89e4243b"}
       ]
+    },
+    {
+      "date": "2026-10-31",
+      "audit_chain": "sha256-v1",
+      "scope": "Explicitly user-approved narrow UI repair: keep the saved-project stage action accessible; open the existing parent-scoped stage editor when available and explain read-only access for an orphan stage; avoid GIS menu overlap with the fixed header; correct the landing Chromium test's invalid assumption that themed icon foreground colors must differ. No park or stage boundary data, surface raster classification, allometry, carbon formulas, species or wood-density inputs are changed.",
+      "validation": ["node --test test/live-map-project-workspace.test.mjs test/park-stage-workspace.test.mjs test/gis-workspace-menu-position.test.mjs", "npm run check", "GitHub Actions mobile and WebKit push CI"],
+      "files": [
+        {"path":"scripts/landing-showcase-smoke.mjs","previous_sha256":"597c73ede9d05b1d868b2b4d01a0a0b0f0e00c3044da828e4b920751df739b0b","sha256":"60bc529aa84e3f076313714ccb6e545e21ded0c7c006b439aab9c4f7900bcb30"},
+        {"path":"src/ui/gis-workspace-menu-position.js","previous_sha256":"22af41bd0dc0237a1b7136010176ce408c0e56f7f145e74ed214ad12a01dc159","sha256":"815a1ed5dae2420d64f99223d7be7b5ff04fb23fa722a642b122686d7dcf0406"},
+        {"path":"src/ui/park-stage-workspace.js","previous_sha256":"8df920cf962f127f74bc49c82afe4a53a65352de0d3fdf8f99c8ba1b0aa576b1","sha256":"c7245d792ff9b8dbbc8aa511f67c8c0141c4af7519de6297cf7cff4abf56018d"},
+        {"path":"index.html","previous_sha256":"4ab08ced11b1b86a8786e53bd4e3f3acb0670b29c76aa66657a44a7a6c69abce","sha256":"fa376f93f4e7750cd67b996cfa52655911af35a2f3a06c8e2d38dfc7a2baf6a0"}
+      ]
     }
   ]
 }

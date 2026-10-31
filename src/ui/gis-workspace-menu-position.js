@@ -15,7 +15,10 @@
    const left=Math.max(offsetLeft+12,Math.min(rect.left,width+offsetLeft-panelWidth-12));
    const panelHeight=Math.min(Math.max(140,panel.scrollHeight||0),Math.max(140,height-20));
    const below=Math.max(0,height+offsetTop-rect.bottom-12);
-   const above=Math.max(0,rect.top-offsetTop-12);
+   // Reserve the fixed application header when a long menu opens upward.
+   // Without this inset the first controls disappear behind the header.
+   const headerInset=width>700?72:56;
+   const above=Math.max(0,rect.top-offsetTop-headerInset-12);
    const openAbove=below<panelHeight&&above>below;
 
    /* Keep the panel in the trigger's coordinate system. It now scrolls with

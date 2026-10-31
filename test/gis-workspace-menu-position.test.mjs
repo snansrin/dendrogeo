@@ -37,6 +37,14 @@ test('desktop menu near the lower edge opens above the edge',()=>{
  assert.deepEqual({...panelNode.style},{position:'absolute',left:'-72px',right:'auto',width:'440px',top:'auto',bottom:'calc(100% + 6px)',maxHeight:'500px'});
 });
 
+test('upward desktop menu stays below the fixed header',()=>{
+ const place=position({innerWidth:1655,innerHeight:730,visualViewport:null});
+ const panelNode=panel(700);
+ place(menu(panelNode,{left:134,top:540,bottom:585}));
+ assert.equal(panelNode.style.bottom,'calc(100% + 6px)');
+ assert.ok(parseFloat(panelNode.style.maxHeight)<=540-72-12);
+});
+
 test('desktop menu with room remains anchored below its summary',()=>{
  const windowRef={innerWidth:1280,innerHeight:720,visualViewport:null};
  const panelNode=panel(200),place=position(windowRef);
