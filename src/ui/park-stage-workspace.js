@@ -3,7 +3,9 @@
 (function(root){
  function create(ports){
   let base=null,rows=[],current=null,host=null,epoch=0,ready=false,deleteReady=false,editing=false,working=false,proposals=[],preview=null,previewIndex=-1,draftName="",partCount=2,freeDrawing=false,cutEditing=false,editSource=null;
-  const canDelete=row=>{const actor=ports.actor?.();return !!(deleteReady&&row&&(actor?.admin||actor?.id&&actor.id===row.created_by));};
+  const canDelete=row=>{const actor=ports.actor?.();return !!(deleteReady&&row&&base&&Number(row.geom_json?.stage_scope?.parentId)===Number(base.row.id)&&(actor?.admin||actor?.id&&actor.id===row.created_by));};
+  const sameParentKey=(stage,parent)=>!!(stage?.geom_json?.stage_scope?.parentKey&&
+   stage.geom_json.stage_scope.parentKey===parent?.osm_key&&stage.created_by&&stage.created_by===parent?.created_by&&!parent?.geom_json?.stage_scope);
   const menu=root.DG_PARK_STAGE_MENU_UI.create({document:ports.document,windowRef:ports.windowRef,getMap:ports.drawing.getMap});
   const status=message=>{const node=host?.querySelector("#dgStageStatus");if(node)node.textContent=message;menu.status(message);};
   function setWorking(value,token=epoch){
@@ -37,7 +39,7 @@
    if(!row){base=null;return;}
    const scope=row.geom_json?.stage_scope;
    if(!scope){base={park,row};rows=[];}
-   else if(base?.row.id!==scope.parentId){base=null;rows=[];}
+   else if(base?.row.id!==scope.parentId&&!sameParentKey(row,base?.row)){base=null;rows=[];}
    const panel=ports.document.getElementById("parkInfo");if(!panel)return;
    host=ports.document.createElement("section");host.id="dgParkStageWorkspace";host.className="dg-png-card dg-stage-workspace";
    host.setAttribute("aria-label","Etap seçimi");host.addEventListener("click",event=>{
@@ -47,7 +49,11 @@
    if(!base)return;
    try{
     const [available,list,removeAvailable]=await Promise.all([ports.store.ready(),ports.store.list(base.row.id),ports.store.deleteReady?.()||false]);
-    if(token!==epoch)return;ready=available;deleteReady=removeAvailable;rows=list.filter(r=>r.geom_json?.stage_scope?.parentId===base.row.id);render();
+    if(token!==epoch)return;ready=available;deleteReady=removeAvailable;rows=list.filter(r=>r.geom_json?.stage_scope?.parentId===base.row.id);
+    // Legacy stage keeps its immutable ID and original project measurements.
+    // Only show it alongside stages of the re-created parent with the same key/owner.
+    if(scope&&sameParentKey(row,base.row)&&!rows.some(item=>Number(item.id)===Number(row.id)))rows.push(row);
+    render();
    }catch(error){if(token===epoch)status("Etap listesi alınamadı: "+error.message);}
   }
   async function switchTo(candidate){

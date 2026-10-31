@@ -77,6 +77,19 @@ try{for(const width of [360,390,430]){
  await page.locator('#dgStageToolsMenu > summary').click();
  assert.match(await page.locator('#dgStageStatus').innerText(),/Ana park kaydı eksik/);
  assert.equal(await page.locator('#dgParkStageWorkspace [data-stage-action]').count(),0,'missing parent cannot start an unsafe edit');
+ // A persisted stage can reference an old parent ID while the same OSM park
+ // was re-created under a new ID. Its existing tools must remain available.
+ await page.evaluate(async()=>{
+  const parent={...__stageFixture.parent,id:54,osm_key:'relation/14290362',created_by:USER.id};
+  const recovered={id:53,osm_key:'stage/50/'+'a'.repeat(32),name:'Dikmen Vadisi · 2.etap',created_by:USER.id,
+   geom_json:{outer:__parentCandidate.rings.outer,inner:[],stage_scope:{parentId:50,parentKey:parent.osm_key,label:'2.etap'}}};
+  await DG_PARK_STAGES.present({park:__parentCandidate,row:parent});
+  await DG_PARK_STAGES.present({park:DG_PARK_STAGE_GEOMETRY.candidate(recovered),row:recovered});
+ });
+ await page.waitForFunction(()=>!document.querySelector('#dgParkStageWorkspace [data-stage-action="revise"]')?.disabled);
+ assert.equal(await page.locator('#dgStageSelect').inputValue(),'53','the original stage is still selected');
+ assert.equal(await page.locator('#dgParkStageWorkspace [data-stage-action="delete"]').isDisabled(),true,'old stage deletion stays blocked');
+ assert.equal(await page.locator('#surfaceMenuBar > details[data-menu-order="25"]').count(),1,'no duplicate stage toolbar');
  await page.evaluate(()=>DG_PARK_STAGES.present({park:__parentCandidate,row:__stageFixture.parent}));
  await page.waitForFunction(()=>!!document.querySelector('#dgParkStageWorkspace [data-stage-action="edit"]'));
  assert.deepEqual(errors,[]);console.log(JSON.stringify({width,stageId:result.id,scopedGrid:true,restoredParent:true,errors}));await page.close();
