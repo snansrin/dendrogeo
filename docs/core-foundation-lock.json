@@ -12635,6 +12635,15 @@
       "files": [
         {"path":"scripts/park-stage-workspace-smoke.mjs","previous_sha256":"328935a28a76f1dd382ce5502f8c631e2d76c7463bb9daba4da650056b8415d0","sha256":"1eeaf65948a97cae6b411d68fee0ecb115e81e111008687afd728566a62b429f"}
       ]
+    },
+    {
+      "date": "2026-11-01",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization bug fix for a reported saved-project opening error: a missing, inaccessible or geometry-less historical parent and same-OSM replacement must not block loading the persisted Dikmen 2.etap #53 boundary, project #33, its 42 waypoints, and project-scoped raster/grid snapshots. The optional parent editor is disabled until a valid recorded parent boundary can be verified. Preserve the standard GIS menu, no automatic project selection, saved stage geometry, scientific calculations, measurements, accepted reviews, database writes and RLS. Add explicit regression tests for missing-parent geometry and optional read failures; regenerate the static runtime only.",
+      "validation": ["node --test test/live-map-project-workspace.test.mjs test/park-stage-workspace.test.mjs", "npm run check", "GitHub Actions Chromium and WebKit mobile stage-menu smoke"],
+      "files": [
+        {"path":"index.html","previous_sha256":"b2d8031e9532f0bba513008f1e79b5cf26a4b04a46ddb90c4e16d1e8f714549a","sha256":"0e599906d173780d01dbed0a15a807314f893526ffd92cde28072312f45dc259"}
+      ]
     }
   ]
 }
