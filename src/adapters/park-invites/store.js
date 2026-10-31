@@ -4,6 +4,7 @@
   return Object.freeze({
    myParks:()=>getClient().from("v_my_parks").select("*"),
    inbox:()=>getClient().from("park_invites").select("id,park_id,email,note,status,created_at,invited_by,parks(id,name,city)").eq("status","Beklemede"),
+   pendingBadge:()=>getClient().from("park_invites").select("email").eq("status","Beklemede"),
    collaborations:parkId=>Promise.all([
     getClient().from("park_invites").select("id,email,note,status,created_at,invited_by").eq("park_id",parkId).order("created_at",{ascending:false}).limit(50),
     getClient().from("park_collaborators").select("user_id,added_at,profiles(id,full_name,email)").eq("park_id",parkId).limit(50)

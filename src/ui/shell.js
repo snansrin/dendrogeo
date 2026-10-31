@@ -166,7 +166,29 @@ if(window.DG_SHELL_VIEW_DATA){
  /* Yöneticiyse yan menüdeki 🔐 Ölçüm Yönetimi rozeti baştan güncel olsun
   * (onay bekleyen sayısı). Sekmeyi açmadan da "iş var" görünsün. */
  if(PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner")&&typeof dgRefreshPendingBadge==="function")dgRefreshPendingBadge();
+ /* Davet rozeti Projeler'e girmeyi beklemez; görünür/aktif sekmede hafifçe tazelenir. */
+ if(initialView!=="projects")dgRefreshInviteNotice(true);
+ else DG_INVITE_NOTICE_LAST=Date.now();
+ if(!window._dgInviteNoticeHooked&&typeof window.addEventListener==="function"&&typeof document.addEventListener==="function"&&typeof window.setInterval==="function"){
+  window._dgInviteNoticeHooked=true;
+  window.addEventListener("focus",()=>dgRefreshInviteNotice());
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)dgRefreshInviteNotice();});
+  window.addEventListener("online",()=>dgRefreshInviteNotice());
+  window.setInterval(()=>dgRefreshInviteNotice(),120000);
+ }
 autoFillPointId();
+}
+
+let DG_INVITE_NOTICE_LAST=0;
+function dgRefreshInviteNotice(force=false){
+ if(typeof USER==="undefined"||!USER){window.DG_PARK_INVITE_INBOX_UI?.resetRecipient?.($);return;}
+ if(document.hidden||navigator.onLine===false)return;
+ const now=Date.now();
+ if(!force&&now-DG_INVITE_NOTICE_LAST<30000)return;
+ DG_INVITE_NOTICE_LAST=now;
+ if(DG_CUR_VIEW==="projects"){
+  if(typeof dgInvitesLoadMine==="function")dgInvitesLoadMine();
+ }else if(typeof dgInvitesRefreshBadge==="function")dgInvitesRefreshBadge();
 }
 
 let DG_CUR_VIEW="dash";

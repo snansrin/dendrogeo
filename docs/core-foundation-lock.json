@@ -12478,6 +12478,24 @@
         {"path":"src/ui/shell.js","previous_sha256":"aaad18a7a92f0062b49fd2b19491b0b686fe7a44ca6ff8ec5280619db1460c4f","sha256":"eb57acd661f483f8ac500122336afc40bfa23dc5812063c324b2565a6e822c7f"},
         {"path":"src/ui/waypoint-map-viewport.js","previous_sha256":"d302214df223907c1dcb52c8fc54679629740997e12678d6f5750e675bd7154b","sha256":"24420b54d2cc2c87ab67ac9e37e37ed61c18881eb332d81d3eb3d03803008da5"}
       ]
+    },
+    {
+      "date": "2026-10-31",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization for project-invitation notifications: reuse the existing red navigation badge style to display the recipient's pending invite count even outside the Projects view; show a clear waiting-response label beside existing accept/reject actions; refresh a lightweight read-only count at session start, focus and bounded foreground intervals, and clear it after RPC response or logout. Keep case-insensitive recipient filtering, existing park/project identities, Supabase RLS, authenticated-only access and write RPCs; discard stale account responses. No new CSS, font, live database mutation, allometry, species/density, GIS, maps, measurements or accepted-data change. Generated HTML/runtime versions and only the listed locked files receive audited hashes.",
+      "validation": [
+        "node --test test/project-invite-notifications.test.mjs test/park-invites.test.mjs",
+        "npm run check",
+        "npm run check:phone",
+        "npm run check:accessibility"
+      ],
+      "files": [
+        {"path":"index.html","previous_sha256":"1e534dfe5996b2ff3871b72d57a09b2b475972abfee0198903ade792eae42800","sha256":"137e96645c34885258c241e5498b002892e1a4a200ab2ef5ed882b5b72d4e3c6"},
+        {"path":"partials/shell.html","previous_sha256":"0dbebdc85cff7524c1a922bcde46308ee095bbbbfab03186035b1e325905e0e1","sha256":"24e8bc25f8d07a1e2ebaea9867b481f525ab84bfa94a202fd92eb7fcf56ea726"},
+        {"path":"src/services/park-invites.js","previous_sha256":"7e9ea0aed696581924d2bbbc3b9330ec901328e18fcb32d0444897b238d6b92b","sha256":"22f10d68bfadb825c6d0e1ce352c7a062380efa134cd7e9a8b9f6f5c2dbab3e0"},
+        {"path":"src/ui/park-invite-inbox.js","previous_sha256":"43ba818b8e268129ed5f0425f30d342b36ff2f7b39161a20f2f3042409e0e4e1","sha256":"73c22ebca5079982c6994235fbf914771697818a789f68eb637338b2e019b0e3"},
+        {"path":"src/ui/shell.js","previous_sha256":"eb57acd661f483f8ac500122336afc40bfa23dc5812063c324b2565a6e822c7f","sha256":"325536d7be1185662f80d8afc5c064341d8998474083b7421cd656620a32c487"}
+      ]
     }
   ]
 }
