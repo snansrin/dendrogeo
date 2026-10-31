@@ -10314,6 +10314,29 @@
           "sha256": "e3287d885f1fc4cc587212adee06cfe33fdf2ee9d576ed9eed40f672353bedb9"
         }
       ]
+    },
+    {
+      "date": "2026-10-31",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized waypoint privacy and project access hardening. Review a new SQL-only security migration in DBH/form migration allowlists while leaving every scientific, numeric, DBH, species and carbon assertion unchanged. No changes to allometry, GIS, surface methods, user themes or stored observations. The precise two protected test edits are SHA-256 chained; production policies require separate verification.",
+      "validation": [
+        "npm run check",
+        "Supabase fresh reset",
+        "GitHub Chromium and WebKit CI",
+        "read-only RLS impersonation"
+      ],
+      "files": [
+        {
+          "path": "test/dbh-qa.test.mjs",
+          "previous_sha256": "0fb93d8cccbb806c23f164408e53db76ae19b48fb9cbcb2ba641b576338ac6f2",
+          "sha256": "a34ed4c471c56de9d6869d5251854a050d5cda8cadb9c200b65b0a12ca113ee4"
+        },
+        {
+          "path": "test/form-qa.test.mjs",
+          "previous_sha256": "d19d0c6ab9cd7872f0c01178e907f05e342b917a0d6bac6996579398d0f75742",
+          "sha256": "af275b06915a40877e7f52885997e6f0408b51a9416b794b73cf713d913a6d22"
+        }
+      ]
     }
   ]
 }
