@@ -244,6 +244,32 @@ test('bootstrap restores selected cached project only after resolving the lazy s
  assert.deepEqual(order,['load lazy engine','read 33/53/core-v1','load lazy engine','read 33/53/core-v1'],
   'a completion seal never hides already stored evidence');
 });
+test('restored stage parent survives drawPark clearing the old stage editor before reopening stage 53',async()=>{
+ const root={},events=[];let ports,editorParent=null;
+ root.DG_LIVE_MAP_PROJECT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_ACCOUNT_STORE={create:()=>({flush:()=>{}})};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT={reviewBasis:()=>null,create:()=>({save:async()=>true,restore:async()=>null})};
+ root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI={create:value=>(ports=value,{})};
+ root.DG_LIVE_MAP_PROJECT_CANDIDATE={candidate:row=>({name:row.name,osmKey:row.osm_key})};
+ root.DG_PARK_STAGES={
+  clear(){events.push('clear stage editor');editorParent=null;},
+  async present({park,row}){
+   if(!row){editorParent=null;events.push('forget parent');return;}
+   if(!row.geom_json?.stage_scope){editorParent=row;events.push('parent '+row.id);return;}
+   events.push('stage '+row.id);assert.equal(editorParent?.osm_key,row.geom_json.stage_scope.parentKey);
+  }
+ };
+ const env={window:root,sb:{},USER:{id:'same-owner'},DG_PARK:{id:53},
+  document:{addEventListener:()=>{}},
+  drawPark:async()=>{root.DG_PARK_STAGES.clear();events.push('draw stage');}};
+ runInNewContext(readFileSync(new URL('../src/bootstrap/live-map-project-workspace.js',import.meta.url),'utf8'),env);
+ const parent={...goksu,id:57,name:'Dikmen Vadisi',osm_key:'relation/14290362',created_by:'same-owner'};
+ await ports.prepareParent(parent);
+ await ports.draw({stageRow:stage,name:stage.name},stage);
+ assert.deepEqual(events,['parent 57','clear stage editor','draw stage','parent 57','stage 53']);
+ assert.equal(editorParent.id,57,'the verified parent context must still exist when revision controls render');
+});
 test('saved grid and waypoint visibility are both restored when switching between projects',async()=>{
  const root={};let apply;
  root.DG_LIVE_MAP_PROJECT_STORE={create:()=>({})};
