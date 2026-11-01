@@ -15,7 +15,7 @@ create table if not exists public.project_workspace_archives (
 );
 
 alter table public.project_workspace_archives enable row level security;
-revoke all on public.project_workspace_archives from public, anon;
+revoke all on public.project_workspace_archives from public, anon, authenticated;
 grant select, insert, update on public.project_workspace_archives to authenticated;
 
 create policy dg_workspace_archive_select on public.project_workspace_archives
