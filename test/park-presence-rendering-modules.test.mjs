@@ -40,6 +40,7 @@ test('summary reports the collaborator count and clears when no peers remain',()
   const render=setup().DG_RENDER_PARK_LIVE_COLLABORATOR_COUNT.render,box={textContent:'old'};
   render({element:box,count:2,translate:(value,vars)=>value.replace('{n}',vars.n)});assert.match(box.textContent,/2 ortak/);
   render({element:box,count:0,translate:value=>value});assert.equal(box.textContent,'');
+  render({element:box,count:0,connected:true,translate:value=>value});assert.match(box.textContent,/GPS ve konum paylaşımını açmalı/);
 });
 
 test('presence rendering modules load before the locked map service and are precached',()=>{

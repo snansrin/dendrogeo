@@ -173,7 +173,7 @@ async function loadProjects__scroll(){
  if(!USER)return;
  await window.DG_LOAD_MEASUREMENT_PROJECT_DIRECTORY.load({
   fetchOwned:()=>window.DG_OWNED_MEASUREMENT_PROJECTS.fetch({client:sb,userId:USER.id,onRelationError:dgParkSchemaMissing}),
-  fetchShared:owned=>window.DG_SHARED_MEASUREMENT_PROJECTS.fetch({client:sb,ownedProjects:owned,listMyParks:typeof dgMyParks==="function"?dgMyParks:undefined}),
+  fetchShared:owned=>window.DG_SHARED_MEASUREMENT_PROJECTS.fetch({client:sb,userId:USER.id,ownedProjects:owned,listMyParks:typeof dgMyParks==="function"?dgMyParks:undefined}),
   merge:(owned,shared)=>window.DG_MERGE_MEASUREMENT_PROJECTS.merge(owned,shared),
   onState:state=>{PROJ_LIST=state.projects;},
   render:projects=>window.DG_MEASUREMENT_PROJECT_DIRECTORY_UI.render({projects,element:$,escape:esc,optionLabel:dgProjectOptionLabel,restore:dgProjectRestore,renderCard:dgProjectCard,editing:EDIT_PROJ,actions:{leave:id=>dgParkLeaveProject(id),openMeasure:dgProjectOpenMeasure,publish:id=>window.dgUserPubOpen?.(id),startParkScan:id=>startParkScan({projectId:id,returnTo:"projects"}),edit:editProject,delete:deleteProject}}),

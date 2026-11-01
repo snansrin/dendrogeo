@@ -267,8 +267,9 @@ function dgParkShareFail(){
 const DG_MATE_COLORS=["#c2452d","#2b6cb0","#7c3aed","#0f766e","#be185d","#4d7c0f","#b45309","#0e7490"];
 function dgMateColor(id){return window.DG_PARK_LIVE_MEMBER_COLOR.color(id,DG_MATE_COLORS);}
 function dgLiveShareProjectId(){
- const selected=typeof DG_CUR_VIEW!=="undefined"&&DG_CUR_VIEW==="nav"?$("nProject"):$("mProject");
- return Number(selected?.value)||0;
+ // The team layer belongs to navMap. Changing to the measurement screen must
+ // never silently move its channel to a different mProject selection.
+ return Number($("nProject")?.value)||Number($("mProject")?.value)||0;
 }
 function dgLiveShareToggle(on){
  DG_LIVE_ON=!!on;
@@ -338,5 +339,14 @@ function dgLiveMatesDraw(){
   const view=window.DG_BUILD_PARK_LIVE_COLLABORATOR_VIEW.build({member,color:id=>dgMateColor(id),now,format:dgCf});
   window.DG_RENDER_PARK_LIVE_COLLABORATOR_MARKER.render({layer,leaflet:L,member,view,escape:esc,translate:_tmf});
  }
- window.DG_RENDER_PARK_LIVE_COLLABORATOR_COUNT.render({element:$("dgMatesNote"),count:members.length,translate:_tmff});
+ window.DG_RENDER_PARK_LIVE_COLLABORATOR_COUNT.render({element:$("dgMatesNote"),count:members.length,connected:DG_PARK_CH_LIVE,translate:_tmff});
+}
+/* Safari can suspend the socket while the field app is in the background.
+ * A bounded retry may already be exhausted; resume only after an actual
+ * connectivity, foreground, or refreshed-auth event. No polling or DB writes. */
+function dgLiveShareResume(){
+ if(!DG_LIVE_ON||typeof DG_CUR_VIEW==="undefined"||DG_CUR_VIEW!=="nav")return;
+ if(DG_PARK_CH_LIVE){dgLiveSharePing();return;}
+ DG_PARK_CH_RETRY=0;
+ void dgLiveShareJoinCurrent();
 }
