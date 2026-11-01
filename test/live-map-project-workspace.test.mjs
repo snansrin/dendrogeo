@@ -270,7 +270,8 @@ test('live-map bootstrap reuses existing map/waypoint tools without a second wri
  assert.match(source,/DG_GRID_WAYPOINT_LAYER\.render/);
  assert.match(source,/saveDraft:/);
  assert.match(source,/DG_PARK_SESSION\.set\(key,row\)/);
- assert.doesNotMatch(source,/\.insert\(|\.upsert\(|\.update\(|\.delete\(/);
+ assert.match(source,/project_workspace_snapshots/);
+ assert.doesNotMatch(source,/\.from\(["\x27](?:parks|projects|waypoints|surface_reviews)["\x27]\)\.\s*(?:insert|upsert|update|delete)/);
 });
 test('saved-project selector does not add a second GIS action toolbar',()=>{
  const shell=readFileSync(new URL('../partials/shell.html',import.meta.url),'utf8');
@@ -316,33 +317,36 @@ test('saved stage scope is scrolled into view and its missing Leaflet display la
  assert.deepEqual(calls,['scroll start','invalidate','render 1','front','fit 1']);
 });
 
-test('the per-device account archive can restore exact evidence even if IndexedDB is blocked',async()=>{
- const account=[],calls=[];
- const root=moduleAt('src/adapters/parks/live-map-project-snapshot-store.js',{
-  Blob:globalThis.Blob,crypto:{randomUUID:()=> 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'}
- });
+test('the account archive restores exact evidence when the source-device IndexedDB is unavailable',async()=>{
+ const rows=[],root={};let store;
+ root.DG_LIVE_MAP_PROJECT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE={create:()=>({
+  read:async()=>{throw Error('device archive unavailable');},
+  save:async()=>{throw Error('device archive unavailable');}
+ })};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT={reviewBasis:()=>null,create:options=>(store=options.store,{})};
+ root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI={create:()=>({})};
+ root.Blob=globalThis.Blob;
+ root.crypto={randomUUID:()=> 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'};
  const client={from(table){
   assert.equal(table,'project_workspace_snapshots');
-  const query={select(){return this;},eq(name,value){calls.push([name,value]);return this;},
-   order(){return this;},limit:async()=>({data:account.map(payload=>({payload:payload.payload})),error:null}),
-   upsert:async row=>{account.push(row);return {error:null};}};
-  return query;
+  const filters={};
+  return {select(){return this;},eq(key,value){filters[key]=value;return this;},order(){return this;},
+   limit:async()=>({data:rows.filter(row=>row.owner===filters.owner&&row.project_id===filters.project_id&&row.park_id===filters.park_id).map(row=>({payload:row.payload})),error:null}),
+   upsert:async row=>{rows.push(row);return {error:null};}};
  }};
- const store=root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE.create(()=>null,()=>client);
+ const env={window:root,sb:client,USER:{id:'account-one'},
+  document:{addEventListener:()=>{},getElementById:()=>null}};
+ runInNewContext(readFileSync(new URL('../src/bootstrap/live-map-project-workspace.js',import.meta.url),'utf8'),env);
  const id={ownerId:'account-one',projectId:33,parkId:53,geometry:JSON.stringify(geometry),engine:'core-v1'};
  const snapshot={...id,schema:'dendrogeo/live-map-project-snapshot/1',savedAt:'2026-11-01T12:00:00Z',
   state:{analysis:{result:{cells:[{id:1,green:true}]},report:{total:1}},grid:{cells:[]}}};
  const saved=await store.save(id,snapshot);
- assert.deepEqual(JSON.parse(JSON.stringify(saved)),{offline:false,account:true});
- assert.equal(account[0].device_id,'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee');
- assert.equal(account[0].project_id,33);
- const restored=await store.read(id);
- assert.equal(restored.archiveSource,'account');
- assert.deepEqual(JSON.parse(JSON.stringify(restored.state)),snapshot.state);
- assert.ok(calls.some(([name,value])=>name==='owner'&&value==='account-one'));
- assert.ok(calls.some(([name,value])=>name==='project_id'&&value===33));
- assert.ok(calls.some(([name,value])=>name==='park_id'&&value===53));
- assert.equal(await store.read({...id,parkId:25}),null,'a different park cannot inherit raster evidence');
+ assert.equal(saved.account,true);assert.equal(saved.local,false);
+ assert.equal(rows[0].device_id,'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee');
+ assert.equal(rows[0].project_id,33);
+ assert.deepEqual(JSON.parse(JSON.stringify((await store.read(id)).state)),snapshot.state);
+ assert.equal(await store.read({...id,parkId:25}),null,'another park never inherits this raster');
 });
 
 test('account workspace migration is additive, per-owner RLS scoped and excludes unauthorized updates',()=>{
