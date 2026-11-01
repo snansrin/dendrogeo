@@ -59,7 +59,6 @@
     <div class="dg-png-head"><div><div class="dg-png-kicker">1 · KONUM</div><h3 class="dg-png-title" id="measureLocationTitle">Saha konumu</h3><p class="dg-png-sub">Kaydederken park içinde olduğunuz doğrulanır.</p></div><span class="dg-png-badge" id="gpsBadge">konum kapalı</span></div>
     <div class="measure-gps-row"><div class="gpsring" id="gpsRing" hidden aria-hidden="true"><div class="val" id="gpsAcc">—</div></div><div id="gpsState" class="alert info" role="status" hidden>Konum servisi kapalı.</div><button type="button" id="gpsBtn" class="dg-png-btn primary" data-dg-measure-action="gps">📡 Konumu Etkinleştir</button></div>
     <details class="measure-details"><summary>Konum ayrıntıları ve paylaşım</summary><p class="measure-help">Kayıt için GPS doğruluğu en fazla ±60 m olmalıdır.</p><div class="measure-coordinates"><div><span class="lbl">Enlem</span><div class="mono" id="gLat">—</div></div><div><span class="lbl">Boylam</span><div class="mono" id="gLon">—</div></div><div><span class="lbl">Rakım</span><div class="mono" id="gAlt">—</div></div><div><span class="lbl">Sinyal</span><div class="mono" id="gQ">—</div></div></div>
-     <label class="measure-share"><input type="checkbox" class="dg-switch" id="dgLiveShare" checked data-dg-measure-action="live-share"><span>Canlı konumumu park ekibiyle paylaş<small>Geçicidir; veritabanına yazılmaz.</small></span></label><div id="dgMatesNote" class="dg-meta"></div>
     </details>
    </section>
    <section class="card measure-tree" aria-labelledby="measureTreeTitle">
@@ -105,7 +104,8 @@
    <details id="wpMapPanel" class="card waypoint-map" data-dg-waypoint-action="map-panel">
     <summary><span>🗺 Harita</span><small>hedef · konum · tamamlananlar</small></summary>
     <div id="navMap" class="notranslate" translate="no"></div>
-    <div class="waypoint-map-legend"><span><i class="wp-legend-dot pending"></i>Ölçüm noktası</span><span><i class="wp-legend-dot done"></i>Tamamlandı</span><span><i class="wp-legend-dot me"></i>Konumun</span></div>
+    <div class="waypoint-map-legend"><span><i class="wp-legend-dot pending"></i>Ölçüm noktası</span><span><i class="wp-legend-dot done"></i>Tamamlandı</span><span><i class="wp-legend-dot me"></i>Konumun</span><span>👥 Ortaklar</span></div>
+    <label class="measure-share"><input type="checkbox" class="dg-switch" id="dgLiveShare" checked data-dg-measure-action="live-share"><span>Canlı konumumu park ekibiyle paylaş<small>Geçicidir; veritabanına yazılmaz.</small></span></label><div id="dgMatesNote" class="dg-meta"></div>
    </details>
 
    <section class="card waypoint-list" aria-labelledby="waypointListTitle">

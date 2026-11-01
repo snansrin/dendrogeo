@@ -92,7 +92,7 @@ test('manual target focusing cancels delayed automatic park framing',async()=>{
 
 test('navigation shell listens to project selection and map-panel opening',()=>{
  const shell=readFileSync(new URL('../src/ui/shell.js',import.meta.url),'utf8');
- assert.match(shell,/event\.target\?\.id==="nProject"\)dgFocusSelectedWaypointPark\(\)/);
+ assert.match(shell,/event\.target\?\.id==="nProject"\)\{[\s\S]*?dgFocusSelectedWaypointPark\(\);[\s\S]*?dgLiveMatesDraw\(\);[\s\S]*?dgLiveShareJoinCurrent\(\);/);
  assert.match(shell,/event\.target\?\.id!=="wpMapPanel"/);
  assert.match(shell,/refreshNavigation:\(\)=>\{navMap&&navMap\.invalidateSize\(\);dgFocusSelectedWaypointPark\(\);\}/);
 });

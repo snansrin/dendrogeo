@@ -1,0 +1,70 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+
+const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
+
+function setup(){
+ const drawn=[],navMap={name:'waypoints'},liveMap={name:'live-map'},elements={nProject:{value:'7'},mProject:{value:'9'},dgMatesNote:{textContent:''}};
+ const layer={clearLayers(){drawn.push('clear');}};
+ const window={
+  DG_PARK_PRESENCE_CHANNEL_ADAPTER:{presence:()=>({})},
+  DG_PREPARE_PARK_LIVE_COLLABORATOR_LAYER:{prepare:ports=>{drawn.push(['prepare',ports.map]);ports.setLayer(layer);return layer;}},
+  DG_SELECT_PARK_LIVE_COLLABORATORS:{select:()=>[{id:'friend'}]},
+  DG_BUILD_PARK_LIVE_COLLABORATOR_VIEW:{build:()=>({})},
+  DG_RENDER_PARK_LIVE_COLLABORATOR_MARKER:{render:ports=>drawn.push(['marker',ports.layer])},
+  DG_RENDER_PARK_LIVE_COLLABORATOR_COUNT:{render:ports=>drawn.push(['count',ports.count])},
+  DG_LEAVE_PARK_PRESENCE_CHANNEL:{leave:ports=>{drawn.push(['leave',ports.map]);ports.setChannel(null);ports.setLayer(null);ports.setParkId(0);}},
+  DG_PARK_LIVE_MEMBER_COLOR:{color:()=> '#123456'}
+ };
+ const ctx=vm.createContext({window,$:id=>elements[id],DG_CUR_VIEW:'nav',navMap,map:liveMap,L:{},USER:{id:'self'},_tmff:value=>value,_tmf:value=>value,dgCf:value=>value,esc:value=>value});
+ vm.runInContext(read('src/services/map.js'),ctx,{filename:'src/services/map.js'});
+ return{ctx,drawn,navMap,liveMap,elements,run:source=>vm.runInContext(source,ctx)};
+}
+
+test('park colleagues are drawn only on the Waypoint map and the selected project',()=>{
+ const {run,drawn,navMap,liveMap,elements}=setup();
+ run('DG_PARK_CH={};DG_PARK_CH_ID=14;DG_PARK_CH_PROJECT_ID=7;dgLiveMatesDraw()');
+ assert.ok(drawn.some(item=>item[0]==='prepare'&&item[1]===navMap));
+ assert.ok(drawn.some(item=>item[0]==='marker'));
+ assert.ok(!drawn.some(item=>Array.isArray(item)&&item[1]===liveMap));
+ elements.nProject.value='8';
+ drawn.length=0;
+ run('dgLiveMatesDraw()');
+ assert.deepEqual(drawn,['clear',['count',0]],'changing projects clears the previous team immediately');
+ run('dgLiveShareLeave()');
+ assert.ok(drawn.some(item=>item[0]==='leave'&&item[1]===navMap));
+});
+
+test('rapidly reopening the same project reuses its in-flight join while a changed project invalidates stale callbacks',async()=>{
+ const {ctx,run,elements}=setup(),requests=[],resolve=[];
+ ctx.window.DG_JOIN_LIVE_SHARE_PARK={join:ports=>{requests.push(ports);return new Promise(done=>resolve.push(done));}};
+ const first=run('dgLiveShareJoinCurrent()');
+ const repeat=run('dgLiveShareJoinCurrent()');
+ assert.equal(requests.length,1,'same project has exactly one pending join');
+ assert.equal(requests[0].isCurrent(),true);
+ elements.nProject.value='8';
+ const next=run('dgLiveShareJoinCurrent()');
+ assert.equal(requests.length,2);
+ assert.equal(requests[0].isCurrent(),false,'old callback cannot change the new map');
+ assert.equal(requests[1].isCurrent(),true);
+ resolve[0]({status:'stale'});resolve[1]({status:'joined',parkId:22});
+ await Promise.all([first,repeat,next]);
+});
+
+test('sharing controls and collaborator note belong to the Waypoint map, not the Live Map',()=>{
+ const shell=read('partials/shell.html'),nav=shell.split('id="v-nav"')[1].split('id="v-map"')[0],measure=shell.split('id="v-measure"')[1].split('id="v-nav"')[0];
+ assert.match(nav,/id="navMap"/);
+ assert.match(nav,/id="dgLiveShare" checked data-dg-measure-action="live-share"/);
+ assert.match(nav,/id="dgMatesNote"/);
+ assert.match(nav,/👥 Ortaklar/);
+ assert.doesNotMatch(measure,/id="dgLiveShare"|id="dgMatesNote"/);
+ assert.equal((shell.match(/id="dgLiveShare"/g)||[]).length,1);
+});
+
+test('waypoint project changes update teammate markers and rejoin the correct park',()=>{
+ const shell=read('src/ui/shell.js');
+ assert.match(shell,/event\.target\?\.id==="nProject"\)[\s\S]*?dgLiveMatesDraw\(\);[\s\S]*?dgLiveShareJoinCurrent\(\)/);
+ assert.match(shell,/\(v==="measure"\|\|v==="nav"\)/);
+});
