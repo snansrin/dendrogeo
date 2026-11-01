@@ -108,25 +108,15 @@
   let cached={restored:false,reason:"unavailable"};
   try{cached=await snapshots.restore(id);}catch(error){console.warn("DENDROGEO · proje cihaz arşivi:",error.message);}
   if(cached.scan)return {...cached,mode:"cached"};
-  // Account review and same-device drafts are the established, scoped sources.
-  // If raster evidence was never cached, recreate it once automatically after
-  // the user explicitly opens this project; never silently accept a new result.
+  // Never initiate a fresh raster calculation while reopening a saved project.
+  // Historical edits can only be reviewed against their original evidence.
+  // A saved review without a portable raster is reported, not recalculated.
   const [local,remote]=await Promise.all([
    root.DG_LC_VALIDATE?.loadCampaigns(park.id).catch(()=>[])||Promise.resolve([]),
    root.DG_SURFACE_REVIEW?.load(park.id,USER.id).catch(()=>null)||Promise.resolve(null)
   ]);
   const drafts=(local||[]).some(row=>String(row.owner)===String(USER.id));
-  if(!drafts&&!remote)return {...cached,mode:cached.grid?"cached":"none"};
-  const result=await openSurfaceSaved();
-  let retainedGrid=cached.grid||0;
-  if(result.ready){
-   // A legacy grid-only snapshot may have been built against a different
-   // surface revision. Restore it only if the review still matches; never
-   // overwrite its archived cells with a newly scanned empty grid.
-   if(cached.grid){const after=await snapshots.restore(id);retainedGrid=after.grid||0;}
-   if(!cached.grid||retainedGrid)await snapshots.save(id);
-  }
-  return {restored:!!result.restored,scan:!!result.ready,grid:retainedGrid,mode:result.ready?"review":"failed"};
+  return {...cached,mode:drafts||remote?"evidence-missing":cached.grid?"cached":"none"};
  }
  async function openSurfaceSaved(){return root.DG_LIVE_MAP_PROJECT_SURFACE_UI.restore({
   parkId:Number(DG_PARK?.id||0),currentParkId:()=>Number(DG_PARK?.id||0),
@@ -137,9 +127,26 @@
   openSavedReview:()=>root.DG_LC_SENS.mount("lcSens",{freshAnalysis:false})
  });}
  function focusPark(){
-  if(!map||!PARK_POLY?.length)return;
-  map.invalidateSize({pan:false});root.DG_PARK_BOUNDARY_LAYER_UI.fit({leaflet:L,map,outer:PARK_POLY,holes:PARK_HOLES||[]});
-  document.getElementById("map")?.scrollIntoView({block:"nearest"});
+  if(!map||!PARK_POLY?.length||!Number(DG_PARK?.id))return;
+  const selected=workspaceIdentity;
+  if(selected&&Number(DG_PARK.id)!==Number(selected.park.id))return;
+  // On mobile the project details and the eight GIS controls may push the
+  // actual Leaflet map below the viewport. Bring the map itself into view.
+  document.getElementById("map")?.scrollIntoView({block:"start"});
+  const repaint=()=>{
+   if(selected&&Number(DG_PARK?.id)!==Number(selected.park.id))return;
+   map.invalidateSize({pan:false});
+   // Recover the *display layer* if another menu removed it. The verified
+   // saved geometry/park identity remains authoritative and unchanged.
+   if(!PARK_LAYER||!map.hasLayer(PARK_LAYER)){
+    root.DG_PARK_BOUNDARY_LAYER_UI.render({leaflet:L,map,outer:PARK_POLY,holes:PARK_HOLES||[],
+     onCreated:layer=>{PARK_LAYER=layer;}});
+   }
+   if(typeof PARK_LAYER?.eachLayer==="function")PARK_LAYER.eachLayer(layer=>layer.bringToFront?.());
+   root.DG_PARK_BOUNDARY_LAYER_UI.fit({leaflet:L,map,outer:PARK_POLY,holes:PARK_HOLES||[]});
+  };
+  if(typeof root.requestAnimationFrame==="function")root.requestAnimationFrame(repaint);
+  else repaint();
  }
  document.addEventListener("visibilitychange",()=>{if(document.hidden&&workspaceIdentity)void saveWorkspace(workspaceIdentity.projectId,workspaceIdentity.park).catch(()=>{});});
  root.DG_LIVE_MAP_PROJECTS=root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI.create({
