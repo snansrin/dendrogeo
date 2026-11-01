@@ -12644,6 +12644,13 @@
       "files": [
         {"path":"index.html","previous_sha256":"b2d8031e9532f0bba513008f1e79b5cf26a4b04a46ddb90c4e16d1e8f714549a","sha256":"0e599906d173780d01dbed0a15a807314f893526ffd92cde28072312f45dc259"}
       ]
+    },
+    {
+      "date":"2026-11-01",
+      "audit_chain":"sha256-v1",
+      "scope":"User-authorized saved Dikmen stage activation and account-scoped workspace recovery: bump only two versioned static loader URLs so iOS receives the actual reviewed project-selection and project-snapshot bootstrap fixes. Preserve all frozen scientific, stage, measurement and storage modules; add an RLS-scoped snapshot table for future saves. No existing project, park, stage, raster or waypoint rows changed.",
+      "validation":["node --test test/live-map-project-workspace.test.mjs test/live-map-project-cloud.test.mjs","npm run check","GitHub Actions mobile and WebKit CI; fresh Supabase reset"],
+      "files":[{"path":"index.html","previous_sha256":"0e599906d173780d01dbed0a15a807314f893526ffd92cde28072312f45dc259","sha256":"755107795951f2637dce6ed868cd546333b37085b2d1dadde2ca3348537caae7"}]
     }
   ]
 }

@@ -55,7 +55,7 @@
      if(parent)ports.candidate(parent);
      else missingParent=true;
     }
-    const changing=active!==Number(project.id)||ports.activeParkId()!==Number(park.id);
+    const changing=active!==Number(project.id)||ports.activeParkId()!==Number(park.id)||ports.activeBoundaryMatches?.(park)===false;
     if(changing){
      const saved=await ports.saveDraft();if(!saved)throw Error(t("Açık yüzey taslağı kaydedilemedi. Harita değiştirilmedi."));
      if(active&&ports.saveWorkspace)await ports.saveWorkspace(active,ports.activeParkId());
@@ -65,7 +65,7 @@
      else if(missingParent)await ports.forgetParent(); // never reuse an old parent editor session
      note(t("Kaydedilmiş sınır haritaya yükleniyor…"));
      await ports.draw(candidate,park);
-     if(ports.activeParkId()!==Number(park.id))throw Error(t("Harita seçilen park kimliğine bağlanamadı. Kayıtlar değiştirilmedi."));
+     if(ports.activeParkId()!==Number(park.id)||ports.activeBoundaryMatches?.(park)===false)throw Error(t("Seçilen etap/park poligonu canlı haritada etkinleşmedi. Kayıtlar değiştirilmedi."));
     }
     note(t("Kayıtlı ölçüm noktaları yükleniyor…"));
     const points=await ports.readWaypoints(project.id);

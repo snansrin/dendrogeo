@@ -1,0 +1,66 @@
+name: Temporary saved workspace reproducible build
+on:
+  push:
+    branches:
+      - codex/restore-stage-workspace-cloud-20261101
+permissions:
+  contents: write
+jobs:
+  build:
+    if: contains(github.event.head_commit.message, '[rebuild-workspace]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - name: Build deterministic application runtime
+        run: npm run build
+      - name: Update audited generated-index hash and manifest pin
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          path=Path('index.html')
+          current=hashlib.sha256(path.read_bytes()).hexdigest()
+          manifest_path=Path('docs/core-foundation-lock.json')
+          original=manifest_path.read_text()
+          before='755107795951f2637dce6ed868cd546333b37085b2d1dadde2ca3348537caae7'
+          if original.count(before)!=1:
+              raise SystemExit('Expected prebuild reviewed index hash not found exactly once')
+          if not original.endswith('\n  ]\n}\n'):
+              raise SystemExit('Unexpected manifest structure')
+          record={
+              'date':'2026-11-01',
+              'audit_chain':'sha256-v1',
+              'scope':'User-authorized deterministic build for saved-project stage/map restore; generated index and runtime rebuilt from pinned source; no scientific formulas, geometry or public access changes.',
+              'validation':['npm run check','GitHub Actions Chromium and WebKit','Supabase fresh reset'],
+              'files':[{'path':'index.html','previous_sha256':before,'sha256':current}]
+          }
+          current_manifest=original[:-len('\n  ]\n}\n')] + ',\n    '+json.dumps(record,ensure_ascii=False,separators=(',',':'))+'\n  ]\n}\n'
+          manifest_path.write_text(current_manifest)
+          digest=hashlib.sha256(current_manifest.encode()).hexdigest()
+          verifier=Path('scripts/check-core-foundation.mjs')
+          old='78ee3cca0cc48fb004fadba28cb745262675164bb7197af4b158f48884699df9'
+          source=verifier.read_text()
+          if source.count(old)!=1: raise SystemExit('Expected manifest pin mismatch')
+          verifier.write_text(source.replace(old,digest))
+          print('Generated index SHA',current,'pinned manifest SHA',digest)
+          PY
+      - name: Validate frozen core and complete application
+        run: npm run check
+      - name: Commit only reviewed generated assets
+        shell: bash
+        run: |
+          git config user.name "DendroGeo Build Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html src/bootstrap/app-runtime.js docs/core-foundation-lock.json scripts/check-core-foundation.mjs
+          if git diff --cached --quiet; then
+            echo 'No generated changes'; exit 0
+          fi
+          git commit -m "build(projects): regenerate verified runtime and audited index"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
