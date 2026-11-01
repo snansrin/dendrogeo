@@ -10,8 +10,11 @@ try{for(const width of [360,390,430]){
  await page.locator('#side .item').nth(1).focus();await page.keyboard.press('Enter');await page.locator('#v-measure.on').waitFor({state:'visible'});
  assert.equal(await page.locator('[name="girth_cm"]').count(),1);
  await page.locator('#v-measure .measure-details summary').focus();await page.keyboard.press('Enter');
+ await page.locator('#side .item').nth(2).focus();await page.keyboard.press('Enter');await page.locator('#v-nav.on').waitFor({state:'visible'});
+ await page.locator('#wpMapPanel summary').focus();await page.keyboard.press('Enter');
  await page.locator('#dgLiveShare').focus();const checked=await page.locator('#dgLiveShare').isChecked();await page.keyboard.press('Space');assert.equal(await page.locator('#dgLiveShare').isChecked(),!checked);
  const focus=await page.locator('#dgLiveShare').evaluate(e=>({visible:e.matches(':focus-visible'),outline:getComputedStyle(e).outlineWidth}));assert.equal(focus.visible,true);assert.notEqual(focus.outline,'0px');
+ await page.locator('#wpMapPanel summary').focus();await page.keyboard.press('Enter');
  const views=await page.locator('.view').evaluateAll(elements=>elements.map(e=>e.id));
  for(const view of views){
   await page.evaluate(id=>{document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id===id));},view);

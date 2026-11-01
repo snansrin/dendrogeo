@@ -12684,6 +12684,15 @@
         {"path":"test/park-presence-channel-modules.test.mjs","previous_sha256":"e6047dccfdf720208ecc9e7487210b7051ea76eaf916b8a896c5819ed5f38d50","sha256":"44318ebd11a8519fe6eed5c891f5fa5fe2a7fbc72b577c3fc9aa9a1aaf40f289"},
         {"path":"test/shell-workflow-modules.test.mjs","previous_sha256":"a7ddfd75981251c43f420908f53d1a1b4c25a7c667264c55f7799f6eb26fb3a7","sha256":"d2f760b7c7e72016ec17ab5586291bebc2ef794912df4faebb72a58a39a4f749"}
       ]
+    },
+    {
+      "date": "2026-11-01",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up CI accessibility fixture correction after the park sharing control moved into the Waypoint map. Keep the existing measurement disclosure keyboard check, then activate the Waypoint view, expand its map, verify the same switch via keyboard and focus-visible assertions and close that disclosure before the unchanged axe scan. Only the test selector/navigation changes; no runtime, scientific, database, map geometry, raster, membership or RLS changes.",
+      "validation": ["npm run check:core-foundation", "npm run check", "GitHub Actions Chromium mobile keyboard/axe plus WebKit regression"],
+      "files": [
+        {"path":"scripts/check-accessibility.mjs","previous_sha256":"451345e56956ace19b70d3c868dac6be658f8ffd75dcbb38a7456560f4fe5eda","sha256":"10a7eb28728cc9ffbe1f1e47201c7d99fd11949846a4e86408a940edd826f841"}
+      ]
     }
   ]
 }
