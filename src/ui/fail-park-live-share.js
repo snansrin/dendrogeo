@@ -4,7 +4,7 @@
 window.DG_FAIL_PARK_LIVE_SHARE={
   fail({setLive,retries,setRetries,note,translate,setTimer,removeChannel,resetChannel,isEnabled,join}){
     setLive(false);
-    if(note)note.textContent=translate("⚠ Gerçek zamanlı katman kapalı — canlı konum gösterilemiyor (Supabase → Dashboard → Realtime).");
+    if(note)note.textContent=translate("⚠ Ortak konumu bağlanamadı (Supabase Realtime). İnternet, oturum veya park erişimi kontrol edilmeli. Canlı konum şu anda gösterilemiyor.");
     try{removeChannel();}catch(error){}
     resetChannel();
     if(retries()<2){

@@ -13036,6 +13036,58 @@
           "sha256": "7e00bdd68a43dc36372c68b8b51cd4605809477d5c769cc96a0fa8418a42b0b2"
         }
       ]
+    },
+    {
+      "date": "2026-11-01",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up repair of shared project directory and Waypoint teammate Presence. Filter founder/admin-visible same-park rows by the current verified owner's accepted invitation and membership epoch; keep historic same-name accounts and all data intact. Keep teammates on navMap across measurement tab changes, recover bounded Presence joins after Safari foreground/online/auth events, and distinguish connected-with-no-GPS-peers from a failed connection. Scientific models, park/stage geometry, GIS raster, database schema, RLS and all persisted records unchanged.",
+      "validation": [
+        "node --test test/measurement-project-directory-modules.test.mjs test/waypoint-team-presence.test.mjs test/park-presence-rendering-modules.test.mjs test/project-invite-scope-security.test.mjs",
+        "npm run check",
+        "GitHub Actions Chromium/WebKit mobile tests before merge"
+      ],
+      "files": [
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "a4ded253795b33af45dd86388f95c7c5ef8e7489fca57713ae1cf3a482cedae1",
+          "sha256": "d11f3b6083db80f679645eba61563f8e21e51120bf31f33d52084a03fb4fedd5"
+        },
+        {
+          "path": "src/ui/shell.js",
+          "previous_sha256": "90542376fee981868b62377202641cd3112391d2bb0941d1a68ce39fa1b5ff7f",
+          "sha256": "d50034042d1e5d5f72f57ef854b81a1541f9abf859d6de19c817407ac5c2203f"
+        },
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "3f0bc833b5a00eb49573a643c9c48c33d185e951875f2f9f3bd65802aef64a64",
+          "sha256": "43c26ac9ebb2c61771a6963dc2452534ba9451974d4c619e67bb22b1ae8dbbd1"
+        },
+        {
+          "path": "src/adapters/trees/fetch-shared-measurement-projects.js",
+          "previous_sha256": "1d952d29b8cb77d126f7519a3b1433104c8f4865d9b62e96340b5e43f575a68b",
+          "sha256": "6db51fe67fd202c057e1150ec6494c5b6186e3d73ba151582691de3481a332bf"
+        },
+        {
+          "path": "src/ui/fail-park-live-share.js",
+          "previous_sha256": "59ba5e39eae304789c235e8c9958e6564e50d1ad37c972eb48c8ea3c9cc96bc4",
+          "sha256": "662f42660705dab679c5c88e20f25a566eb3b5f30a4ffe33565ad7e9b704cf9f"
+        },
+        {
+          "path": "src/ui/render-park-live-collaborator-count.js",
+          "previous_sha256": "171e55d92f96470f8c6904f4744aaa1e3105de5bdc2c68b742042b92302e579d",
+          "sha256": "52b8860424e28b079eb0ac49930f1fce3100ea004b1fe2e205f6b8d4288755d4"
+        },
+        {
+          "path": "test/park-presence-rendering-modules.test.mjs",
+          "previous_sha256": "617b95caeecba22b1bf1a63dcb20bc9b9eeddbb357d2bb06a8778e3675b94a38",
+          "sha256": "e62318c7dbba9802c6ed68900eb4d1e38627eb3caf8b90f04b342825307f202a"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "7e00bdd68a43dc36372c68b8b51cd4605809477d5c769cc96a0fa8418a42b0b2",
+          "sha256": "1b78ba2dd1dd166d3b5625acf1953b34e2c9a8dd1d4d0fca6b51502c7ec3eee3"
+        }
+      ]
     }
   ]
 }

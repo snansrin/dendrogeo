@@ -53,6 +53,25 @@ test('rapidly reopening the same project reuses its in-flight join while a chang
  await Promise.all([first,repeat,next]);
 });
 
+test('the Waypoint project remains the team channel across measurement tab changes',()=>{
+ const {run,elements}=setup();
+ assert.equal(run('dgLiveShareProjectId()'),7);
+ assert.equal(run('DG_CUR_VIEW="measure";dgLiveShareProjectId()'),7,'a different measurement selection cannot hijack navMap');
+ elements.nProject.value='';
+ assert.equal(run('dgLiveShareProjectId()'),9,'an empty Waypoint selection can use the measurement project');
+});
+
+test('foreground recovery resets exhausted retries and reuses the selected Waypoint project',async()=>{
+ const {run,ctx}=setup(),requests=[];
+ ctx.window.DG_JOIN_LIVE_SHARE_PARK={join:async ports=>{requests.push(ports.projectId);return {status:'joined'};}};
+ run('DG_PARK_CH_RETRY=2;DG_PARK_CH_LIVE=false;dgLiveShareResume()');
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.deepEqual(requests,[7]);
+ assert.equal(run('DG_PARK_CH_RETRY'),0);
+ run('DG_CUR_VIEW="map";dgLiveShareResume()');
+ assert.deepEqual(requests,[7],'the Live Map never opens a teammate channel');
+});
+
 test('sharing controls and collaborator note belong to the Waypoint map, not the Live Map',()=>{
  const shell=read('partials/shell.html'),nav=shell.split('id="v-nav"')[1].split('id="v-map"')[0],measure=shell.split('id="v-measure"')[1].split('id="v-nav"')[0];
  assert.match(nav,/id="navMap"/);
@@ -67,4 +86,7 @@ test('waypoint project changes update teammate markers and rejoin the correct pa
  const shell=read('src/ui/shell.js');
  assert.match(shell,/event\.target\?\.id==="nProject"\)[\s\S]*?dgLiveMatesDraw\(\);[\s\S]*?dgLiveShareJoinCurrent\(\)/);
  assert.match(shell,/\(v==="measure"\|\|v==="nav"\)/);
+ assert.match(shell,/addEventListener\("visibilitychange",\(\)=>\{if\(!document\.hidden\)dgLiveShareResume\(\)/);
+ assert.match(shell,/onAuthStateChange\(event=>\{/);
+ assert.match(shell,/addEventListener\("online",\(\)=>\{if\(!document\.hidden\)dgLiveShareResume\(\)/);
 });

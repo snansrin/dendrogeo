@@ -304,6 +304,15 @@ document.addEventListener("toggle",event=>{
  if(typeof window.requestAnimationFrame==="function")window.requestAnimationFrame(apply);else setTimeout(apply,0);
 },true);
 
+/* Mobile Safari may suspend private Presence after the app is backgrounded.
+ * UI owns browser events; the adapter owns Auth, and map owns only the
+ * project-scoped reconnect operation. Avoid polling Supabase. */
+window.addEventListener("online",()=>{if(!document.hidden)dgLiveShareResume();});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)dgLiveShareResume();});
+window.DG_AUTH_SESSION_STORE.create(()=>sb).onAuthStateChange(event=>{
+ if(event==="SIGNED_IN"||event==="TOKEN_REFRESHED")setTimeout(()=>{if(!document.hidden)dgLiveShareResume();},0);
+});
+
 boot().catch(error=>{window.DG_STARTUP_SCREEN?.finish();initLanding();console.error("DENDROGEO · Giriş başlatılamadı:",error);toast(dgCf("Giriş başlatılamadı. Lütfen tekrar deneyin."),"err");});
 
 /* 0035d: DİL DEĞİŞİNCE aktif görünümü YENİDEN ÇİZ — dil düğmesine basıldığında
