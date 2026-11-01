@@ -17,10 +17,11 @@ window.DG_PARK_PRESENCE_CHANNEL_ADAPTER={
     const channel=client.channel("dg-park-"+parkId,{config:{private:true,presence:{key:String(userId)}}});
     setChannel(channel);
     channel.on("presence",{event:"sync"},onSync);
-    channel.subscribe(onStatus);
+    // Arm before subscribe: a synchronous SUBSCRIBED must clear this timer.
     if(getWatch())clearTimer(getWatch());
-    setWatch(setTimer(onWatchdog,8000));
+    setWatch(setTimer(()=>{if(isCurrent())onWatchdog();},20000));
+    channel.subscribe(status=>{if(isCurrent())onStatus(status);});
     return channel;
-    }catch(error){onStatus("CHANNEL_ERROR");return null;}
+    }catch(error){if(isCurrent())onStatus("CHANNEL_ERROR");return null;}
   }
 };

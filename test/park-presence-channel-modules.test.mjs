@@ -16,8 +16,8 @@ function setup(){const window={};const context=vm.createContext({window,String,M
 test('park Presence failures show the realtime state and retry at most twice',()=>{
   const fail=setup().DG_FAIL_PARK_LIVE_SHARE.fail,events=[],state={live:true,retries:0},note={textContent:''};
   const ports={setLive:value=>{state.live=value;},retries:()=>state.retries,setRetries:value=>{state.retries=value;},note,translate:value=>value,setTimer:(fn,ms)=>events.push(['timer',fn,ms]),removeChannel:()=>events.push('remove'),resetChannel:()=>events.push('reset'),isEnabled:()=>true,join:()=>events.push('join')};
-  fail(ports);assert.equal(state.live,false);assert.equal(state.retries,1);assert.match(note.textContent,/Supabase/);assert.equal(events[0][2],3000);events[0][1]();assert.deepEqual(events.slice(1),['remove','reset','join']);
-  state.retries=2;events.length=0;fail(ports);assert.equal(events.length,0);
+  fail(ports);assert.equal(state.live,false);assert.equal(state.retries,1);assert.match(note.textContent,/Supabase/);assert.deepEqual(events.slice(0,2),['remove','reset']);assert.equal(events[2][2],3000);events[2][1]();assert.equal(events[3],'join');
+  state.retries=2;events.length=0;fail(ports);assert.deepEqual(events,['remove','reset']);
 });
 
 test('collaborator colors are stable and selected from the supplied palette',()=>{
@@ -30,7 +30,7 @@ test('private park Presence authenticates before joining and installs its watchd
   let currentChannel=null,watch=null;
   const result=await join({client,parkId:9,userId:3,onSync:()=>{},onStatus:()=>{},setChannel:value=>{currentChannel=value;events.push('set-channel');},getWatch:()=>watch,setWatch:value=>{watch=value;},clearTimer:value=>events.push(['clear',value]),setTimer:(fn,ms)=>{events.push(['timer',ms]);return 77;},onWatchdog:()=>{}});
   await new Promise(resolve=>setTimeout(resolve,0));
-  assert.equal(result,channel);assert.equal(currentChannel,channel);assert.equal(watch,77);assert.deepEqual(events.filter(e=>Array.isArray(e)).map(e=>e[0]).slice(0,4),['auth','channel','on','timer']);assert.ok(events.indexOf('auth')<events.indexOf('subscribe'));assert.deepEqual(JSON.parse(JSON.stringify(events.find(e=>Array.isArray(e)&&e[0]==='channel')[2])),{config:{private:true,presence:{key:'3'}}});assert.ok(events.some(e=>Array.isArray(e)&&e[0]==='timer'&&e[1]===8000));
+  assert.equal(result,channel);assert.equal(currentChannel,channel);assert.equal(watch,77);assert.deepEqual(events.filter(e=>Array.isArray(e)).map(e=>e[0]).slice(0,4),['auth','channel','on','timer']);assert.ok(events.indexOf('auth')<events.indexOf('subscribe'));assert.deepEqual(JSON.parse(JSON.stringify(events.find(e=>Array.isArray(e)&&e[0]==='channel')[2])),{config:{private:true,presence:{key:'3'}}});assert.ok(events.some(e=>Array.isArray(e)&&e[0]==='timer'&&e[1]===20000));assert.ok(events.findIndex(e=>Array.isArray(e)&&e[0]==='timer')<events.indexOf('subscribe'));
 });
 
 test('a stale waypoint selection never creates a private Presence channel after auth',async()=>{
@@ -65,4 +65,14 @@ test('park presence modules load before the locked map service and are precached
   const head=read('partials/head.html'),sw=read('sw.js'),map=read('src/services/map.js');
   for(const path of modules){assert.ok(head.includes(`src="${path}?v=`),`${path} script`);assert.ok(sw.includes(`'/${path}'`),`${path} precache`);assert.ok(head.indexOf(`src="${path}?v=`)<head.indexOf('src="src/services/map.js?'),`${path} precedes locked service`);}
   for(const name of ['DG_FAIL_PARK_LIVE_SHARE','DG_PARK_LIVE_MEMBER_COLOR','DG_PARK_PRESENCE_CHANNEL_ADAPTER','DG_LEAVE_PARK_PRESENCE_CHANNEL','DG_TRACK_PARK_LIVE_POSITION'])assert.ok(map.includes(name));
+});
+
+test('a synchronous subscription success can clear the watchdog before it fires',async()=>{
+ const join=setup().DG_PARK_PRESENCE_CHANNEL_ADAPTER.join,events=[];
+ let watch=null;
+ const channel={on(){return this;},subscribe(callback){callback('SUBSCRIBED');return this;}};
+ await join({client:{auth:{getSession:async()=>({data:{session:{access_token:'jwt'}}})},realtime:{setAuth:async()=>{}},channel:()=>channel},parkId:5,userId:7,
+ onSync(){},onStatus:status=>{if(status==='SUBSCRIBED'&&watch){events.push('clear-success');watch=null;}},
+ setChannel(){},getWatch:()=>watch,setWatch:value=>{watch=value;},clearTimer:()=>{},setTimer:()=>{events.push('arm');return 9;},onWatchdog:()=>events.push('timeout')});
+ assert.deepEqual(events,['arm','clear-success']);assert.equal(watch,null);
 });

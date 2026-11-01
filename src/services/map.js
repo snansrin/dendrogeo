@@ -258,7 +258,11 @@ function switchBaseLayer(type){
  * kapalıysa özellik sessizce devre dışı kalır, ölçüm akışı etkilenmez. */
 let DG_PARK_CH=null,DG_PARK_CH_ID=0,DG_PARK_CH_PROJECT_ID=0,DG_PARK_JOIN_SERIAL=0,DG_PARK_JOIN_PROJECT_ID=0,DG_PARK_JOIN_PENDING=null,DG_LIVE_ON=true,DG_MATES_LAYER=null,DG_LAST_PING=0,DG_PARK_CH_RETRY=0,DG_PARK_CH_WATCH=null,DG_PARK_CH_LIVE=false;
 function dgParkShareFail(){
- return window.DG_FAIL_PARK_LIVE_SHARE.fail({setLive:value=>{DG_PARK_CH_LIVE=value;},retries:()=>DG_PARK_CH_RETRY,setRetries:value=>{DG_PARK_CH_RETRY=value;},note:$('dgMatesNote'),translate:_tmf,setTimer:setTimeout,removeChannel:()=>window.DG_PARK_PRESENCE_CHANNEL_ADAPTER.remove({client:sb,channel:DG_PARK_CH}),resetChannel:()=>{DG_PARK_CH=null;DG_PARK_CH_ID=0;DG_PARK_CH_PROJECT_ID=0;DG_MATES_LAYER?.clearLayers();},isEnabled:()=>DG_LIVE_ON,join:dgLiveShareJoinCurrent});
+ DG_PARK_JOIN_SERIAL++;
+ DG_PARK_JOIN_PENDING=null;
+ if(DG_PARK_CH_WATCH){clearTimeout(DG_PARK_CH_WATCH);DG_PARK_CH_WATCH=null;}
+ const failedChannel=DG_PARK_CH;
+ return window.DG_FAIL_PARK_LIVE_SHARE.fail({setLive:value=>{DG_PARK_CH_LIVE=value;},retries:()=>DG_PARK_CH_RETRY,setRetries:value=>{DG_PARK_CH_RETRY=value;},note:$('dgMatesNote'),translate:_tmf,setTimer:setTimeout,removeChannel:()=>window.DG_PARK_PRESENCE_CHANNEL_ADAPTER.remove({client:sb,channel:failedChannel}),resetChannel:()=>{if(DG_PARK_CH===failedChannel){DG_PARK_CH=null;DG_PARK_CH_ID=0;DG_PARK_CH_PROJECT_ID=0;}DG_MATES_LAYER?.clearLayers();},isEnabled:()=>DG_LIVE_ON,join:dgLiveShareJoinCurrent});
 }
 const DG_MATE_COLORS=["#c2452d","#2b6cb0","#7c3aed","#0f766e","#be185d","#4d7c0f","#b45309","#0e7490"];
 function dgMateColor(id){return window.DG_PARK_LIVE_MEMBER_COLOR.color(id,DG_MATE_COLORS);}
@@ -268,7 +272,7 @@ function dgLiveShareProjectId(){
 }
 function dgLiveShareToggle(on){
  DG_LIVE_ON=!!on;
- if(!DG_LIVE_ON){DG_PARK_JOIN_SERIAL++;DG_PARK_JOIN_PENDING=null;dgLiveShareLeave();}else dgLiveShareJoinCurrent();
+ if(!DG_LIVE_ON){DG_PARK_JOIN_SERIAL++;DG_PARK_JOIN_PENDING=null;DG_PARK_CH_RETRY=0;dgLiveShareLeave();}else{DG_PARK_CH_RETRY=0;dgLiveShareJoinCurrent();}
  if(typeof toast==="function")toast(_tmf(on?"Canlı konum paylaşımı açık (bu parkın ortaklarıyla).":"Canlı konum paylaşımı kapalı."),"info","👥");
 }
 async function dgLiveShareJoinCurrent(){
@@ -276,34 +280,42 @@ async function dgLiveShareJoinCurrent(){
  const projectId=dgLiveShareProjectId();
  // Repeated openings of the same project must not invalidate its channel
  // callbacks, and concurrent park lookups must not create duplicate channels.
- if(DG_PARK_JOIN_PROJECT_ID!==projectId){DG_PARK_JOIN_PROJECT_ID=projectId;DG_PARK_JOIN_SERIAL++;}
+ if(DG_PARK_JOIN_PROJECT_ID!==projectId){DG_PARK_JOIN_PROJECT_ID=projectId;DG_PARK_JOIN_SERIAL++;DG_PARK_CH_RETRY=0;}
  const serial=DG_PARK_JOIN_SERIAL;
  if(DG_PARK_JOIN_PENDING?.projectId===projectId&&DG_PARK_JOIN_PENDING.serial===serial)return DG_PARK_JOIN_PENDING.promise;
  const isCurrent=()=>serial===DG_PARK_JOIN_SERIAL&&DG_LIVE_ON&&dgLiveShareProjectId()===projectId;
  try{
  const task=join.join({
   enabled:DG_LIVE_ON,user:typeof USER!=="undefined"?USER:null,client:typeof sb!=="undefined"?sb:null,
-  projectId,currentParkId:DG_PARK_CH_ID,channel:DG_PARK_CH,isCurrent,
+  projectId,currentParkId:DG_PARK_CH_ID,channel:DG_PARK_CH_PROJECT_ID===projectId?DG_PARK_CH:null,isCurrent,
   resolve:input=>resolve.resolve(input),readParkId:id=>store.fetch({client:sb,projectId:id}),leave:dgLiveShareLeave,
   setParkId:value=>{DG_PARK_CH_ID=value;DG_PARK_CH_PROJECT_ID=value?projectId:0;},
   showConnecting:()=>connection.connecting({element:$("dgMatesNote"),translate:_tmf}),
-  subscribe:({parkId,userId,onSync,onStatus})=>presence.join({
-   client:sb,parkId,userId,onSync,isCurrent,setChannel:value=>{DG_PARK_CH=value;},
-   getWatch:()=>DG_PARK_CH_WATCH,setWatch:value=>{DG_PARK_CH_WATCH=value;},clearTimer:clearTimeout,
-   setTimer,onWatchdog:()=>dgParkShareFail(),onStatus
-  }),
+  subscribe:({parkId,userId,onSync,onStatus})=>{
+   let joinedChannel=null;
+   return presence.join({
+    client:sb,parkId,userId,isCurrent,
+    setChannel:value=>{joinedChannel=value;DG_PARK_CH=value;},
+    onSync:()=>{if(isCurrent()&&joinedChannel&&DG_PARK_CH===joinedChannel)onSync();},
+    onStatus:st=>{if(isCurrent()&&(!joinedChannel||DG_PARK_CH===joinedChannel))onStatus(st);},
+    getWatch:()=>DG_PARK_CH_WATCH,setWatch:value=>{DG_PARK_CH_WATCH=value;},clearTimer:clearTimeout,
+    setTimer,onWatchdog:()=>{if(isCurrent()&&joinedChannel&&DG_PARK_CH===joinedChannel)dgParkShareFail();}
+   });
+  },
   onSync:()=>{if(isCurrent())dgLiveMatesDraw();},
-  onStatus:st=>{if(isCurrent())status.handle(st,{getWatch:()=>DG_PARK_CH_WATCH,setWatch:value=>{DG_PARK_CH_WATCH=value;},clearTimer:clearTimeout,setLive:value=>{DG_PARK_CH_LIVE=value;},setLastPing:value=>{DG_LAST_PING=value;},ping:dgLiveSharePing,draw:dgLiveMatesDraw,fail:dgParkShareFail});}
+  onStatus:st=>{if(isCurrent())status.handle(st,{getWatch:()=>DG_PARK_CH_WATCH,setWatch:value=>{DG_PARK_CH_WATCH=value;},clearTimer:clearTimeout,setLive:value=>{DG_PARK_CH_LIVE=value;},setLastPing:value=>{DG_LAST_PING=value;},onConnected:()=>{DG_PARK_CH_RETRY=0;},ping:dgLiveSharePing,draw:dgLiveMatesDraw,fail:dgParkShareFail});}
  });
  DG_PARK_JOIN_PENDING={projectId,serial,promise:task};
  const result=await task;
  if(isCurrent()&&result?.status==="reused"){DG_PARK_CH_PROJECT_ID=projectId;dgLiveMatesDraw();}
  return result;
- }catch(error){if(isCurrent()){DG_PARK_CH=null;DG_PARK_CH_ID=0;DG_PARK_CH_PROJECT_ID=0;}return;}
+ }catch(error){if(isCurrent())dgParkShareFail();return;}
  finally{if(DG_PARK_JOIN_PENDING?.projectId===projectId&&DG_PARK_JOIN_PENDING.serial===serial)DG_PARK_JOIN_PENDING=null;}
 }
 function dgLiveShareLeave(){
  DG_PARK_CH_PROJECT_ID=0;
+ DG_PARK_CH_LIVE=false;
+ if(DG_PARK_CH_WATCH){clearTimeout(DG_PARK_CH_WATCH);DG_PARK_CH_WATCH=null;}
  return window.DG_LEAVE_PARK_PRESENCE_CHANNEL.leave({channel:DG_PARK_CH,client:typeof sb!=="undefined"?sb:null,layer:DG_MATES_LAYER,map:typeof navMap!=="undefined"?navMap:null,setChannel:value=>{DG_PARK_CH=value;},setParkId:value=>{DG_PARK_CH_ID=value;},setLayer:value=>{DG_MATES_LAYER=value;},note:$("dgMatesNote")});
 }
 function dgLiveSharePing(){
