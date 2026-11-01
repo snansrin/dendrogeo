@@ -28,6 +28,8 @@ const DG_I18N_EN={
 "Kayıtlı ölçüm noktaları yükleniyor…":"Loading saved waypoints…",
 "Kayıtlı tarama, grid ve yüzey düzeltmeleri proje kapsamında aranıyor…":"Looking for saved scan, grid and surface edits for this project…",
 "{n} ölçüm noktası, kaydedilmiş {g} grid hücresi ve {s} yüzey taraması bu cihazdan geri açıldı.":"Restored {n} waypoints, {g} saved grid cells and {s} surface scan from this device.",
+"{n} ölçüm noktası, kaydedilmiş {g} grid hücresi ve {s} yüzey taraması hesap arşivinden geri açıldı.":"Restored {n} waypoints, {g} saved grid cells and {s} surface scan from the account archive.",
+"Etap sınırı ve {n} ölçüm noktası açıldı. Yüzey düzeltmesi kaydı var, fakat orijinal tarama görüntüsü bu cihazda yok; yeni tarama yapılmadı.":"The stage boundary and {n} waypoints loaded. A surface review exists, but its original scan is not available here; no new scan was run.",
 "{n} ölçüm noktası ve kayıtlı yüzey düzeltmeleri otomatik hazırlandı. Yeni analiz kabul edilmedi.":"{n} waypoints and saved surface corrections are ready. No new analysis was accepted.",
 "Ana park kaydı eksik; etap sınırı düzenlenemez.":"The parent park record is missing; the stage boundary cannot be revised.",
 "Etaplar menüsü doğrulanan ana parka yeniden bağlandı.":"The Stages menu was reconnected to the verified parent park.",
