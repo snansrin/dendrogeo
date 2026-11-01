@@ -13179,6 +13179,24 @@
           "sha256": "046495ebad35c5c52cc358a7fd7d3e9ce7b05bc4575e60e655439a34dda595f1"
         }
       ]
+    },
+    {
+      "date": "2026-11-01",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: Explicit user-requested Dikmen stage editing recovery: the saved-project opener had prepared the verified canonical replacement parent, but drawPark cleared the stage workspace before rendering the stage. Reattach that same verified parent only after the existing draw pipeline finishes, then re-present the original immutable stage ID. A regression simulates the clear and confirms the original stage editor retains the parent. Only the generated site script hash changes; owner, projects, waypoints, accepted surface, park/stage geometry and scientific calculations do not.",
+      "validation": [
+        "node --test test/live-map-project-workspace.test.mjs",
+        "npm run build:check",
+        "npm run check:core-foundation",
+        "GitHub Actions full CI, mobile/WebKit and Supabase fresh reset before merge"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "600e2fd120cebf84e517e61ef96181609d97db4c5419a475087c4b45941798a8",
+          "sha256": "4819101f9debfd98b28dc07fe6d93b0bb500fb92af04da6dd91ebe52ef551fc8"
+        }
+      ]
     }
   ]
 }
