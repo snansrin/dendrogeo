@@ -18,6 +18,16 @@ import vm from 'node:vm';
 
 const swKaynak = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
 
+test('new cache revision rotates all client asset caches without caching Supabase auth or REST', () => {
+  const revision = swKaynak.match(/^const CACHE_VERSION = 'dendrogeo-sw-v2-r(\d+)';$/m);
+  assert.ok(revision, 'worker cache revision must be explicit and numeric');
+  assert.equal(Number(revision[1]), 445, 'this authorized cache refresh must advance r444 once');
+  for (const cache of ['PRECACHE', 'RUNTIME', 'TILE_CACHE', 'API_CACHE', 'IMG_CACHE']) {
+    assert.match(swKaynak, new RegExp('const ' + cache + ' = `[^`]*\\$\\{CACHE_VERSION\\}`'));
+  }
+  assert.match(swKaynak, /url\.hostname\.includes\('supabase\.co'\)[\s\S]*?event\.respondWith\(fetch\(request\)\)/);
+});
+
 /* ---------- Sahte CacheStorage ---------- */
 class FakeCache {
   constructor() { this.map = new Map(); this.sira = []; }
