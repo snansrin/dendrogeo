@@ -1,0 +1,34 @@
+name: Temporary branch build sync
+on:
+  push:
+    branches:
+      - fix/live-stage-active-boundary-20261101
+    paths:
+      - .github/workflows/temporary-branch-build-sync.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  generate:
+    if: github.repository == 'snansrin/dendrogeo'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/live-stage-active-boundary-20261101
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Commit only deterministic generated artifacts
+        run: |
+          git config user.name "DendroGeo Build Bot"
+          git config user.email "bot@dendrogeo.local"
+          git add index.html src/bootstrap/app-runtime.js
+          if ! git diff --cached --quiet; then
+            git commit -m "build: synchronize generated GIS runtime and index"
+            git push origin HEAD:fix/live-stage-active-boundary-20261101
+          fi
