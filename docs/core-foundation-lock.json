@@ -13116,7 +13116,7 @@
     {
       "date": "2026-11-01",
       "audit_chain": "sha256-v1",
-      "scope": "User-authorized release follow-up for saved-project workspace recovery: load completed-project evidence without unlocking scientific records, avoid implicit rescan, and add a separately RLS-scoped account archive for exact existing project/raster/grid snapshots. Static loader and offline manifest rebuilt deterministically. No park/stage/measurement/source-surface rows or scientific formula changes.",
+      "scope": "User-authorized release follow-up for saved-project workspace recovery: load completed-project evidence without unlocking scientific records, avoid implicit rescan, and add a separately RLS-scoped account archive for exact existing project/raster/grid snapshots. Static loader and offline manifest rebuilt deterministically. WebKit stage-revision smoke test pans a real obscured segment into view before pointer insertion. No park/stage/measurement/source-surface rows or scientific formula changes.",
       "validation": [
         "node --test test/live-map-project-workspace.test.mjs test/live-map-project-account-store.test.mjs test/park-stage-workspace.test.mjs",
         "npm run check",
@@ -13149,6 +13149,11 @@
           "path": "test/form-qa.test.mjs",
           "previous_sha256": "9f81677979d4d4282387114043150ba02ed6ff57d3edb36fca9e3a938e6b9c09",
           "sha256": "72c4051d1330ae08ce22ecbdb02e21c1eedea4152af8e866b9418bc8b338bd25"
+        },
+        {
+          "path": "scripts/park-stage-assisted-smoke.mjs",
+          "previous_sha256": "0fdd2f96970a43c7db6e24b501ea8d8cf75add6b5065c4b06a38e6664061809b",
+          "sha256": "65d691f201f4f513c642ff5a105d2409def3871e86ece79f4bc2330ad24c00bb"
         }
       ]
     }
