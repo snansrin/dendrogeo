@@ -12648,7 +12648,7 @@
     {
       "date": "2026-11-01",
       "audit_chain": "sha256-v1",
-      "scope": "User-authorized bug fix for explicit opening of existing Dikmen Vadisi stage #53 as the active park-analysis GIS polygon. Verify its saved immutable boundary and stage identity, draw any missing visualization via the existing boundary layer, and distinguish absent legacy raster/grid evidence from a successful restore. Keep the eight standard menus, 42 original waypoints, existing geom_json, scientific engines, formulae, accepted analyses and RLS unchanged. Rebuild only generated runtime and index to publish the narrowly scoped UI bridge; no database modifications.",
+      "scope": "User-authorized release follow-up bug fix for explicit opening of existing Dikmen Vadisi stage #53 as the active park-analysis GIS polygon. Verify its saved immutable boundary and stage identity, draw any missing visualization via the existing boundary layer, and distinguish absent legacy raster/grid evidence from a successful restore. Keep the eight standard menus, 42 original waypoints, existing geom_json, scientific engines, formulae, accepted analyses and RLS unchanged. Rebuild only generated runtime and index to publish the narrowly scoped UI bridge; no database modifications.",
       "validation": [
         "node --test test/live-map-project-workspace.test.mjs",
         "npm run check",
