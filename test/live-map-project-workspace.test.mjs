@@ -278,3 +278,45 @@ test('saved-project selector does not add a second GIS action toolbar',()=>{
  assert.match(shell,/id="surfaceMenuBar"/);
  assert.doesNotMatch(shell,/dgLiveProjectActions|data-live-project-action="(?:stages|surface|waypoints|save)"/);
 });
+
+test('selected stage activates the existing analysis mode and verifies its map polygon before points are shown',async()=>{
+ const x=uiScenario({readParent:async()=>null,
+  activateParkAnalysis:()=>x.calls.push('activate park mode'),
+  verifyBoundary:park=>{assert.equal(park.id,53);x.calls.push('verified stage boundary');}});
+ x.select.value='33';await x.ui.open();
+ assert.deepEqual(x.calls,['forget deleted parent','draw','activate park mode','verified stage boundary','points 42','select 33','remember 33']);
+ assert.doesNotMatch(x.status.textContent,/Proje açılamadı/);
+});
+test('a stage cannot be reported loaded if the GIS polygon was not mounted',async()=>{
+ const x=uiScenario({readParent:async()=>null,verifyBoundary:()=>{throw Error('Etap sınırı haritada yok');}});
+ x.select.value='33';await x.ui.open();
+ assert.deepEqual(x.calls,['forget deleted parent','draw'],'no measurement overlays should be falsely reported');
+ assert.match(x.status.textContent,/Proje açılamadı: Etap sınırı haritada yok/);
+});
+test('missing legacy surface evidence is labelled unavailable without claiming that a scan was restored',async()=>{
+ const x=uiScenario({readParent:async()=>null,restoreWorkspace:async()=>({restored:false,scan:false,grid:0,mode:'none'})});
+ x.select.value='33';await x.ui.open();
+ assert.match(x.status.textContent,/Eski yüzey taraması ve grid görüntüsü/);
+ assert.match(x.status.textContent,/yeni analiz yapılmadı/);
+});
+test('saved-stage boundary bridge checks real active GIS rings and recreates only a missing visual layer',()=>{
+ const root={},calls=[];let ports;
+ root.DG_LIVE_MAP_PROJECT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT={reviewBasis:()=>null,create:()=>({save:async()=>true,restore:async()=>({})})};
+ root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI={create:x=>(ports=x,{})};
+ root.DG_PARK_BOUNDARY_LAYER_UI={render:args=>{calls.push('render');args.onCreated('boundary');}};
+ const env={window:root,sb:{},DG_PARK:{id:53},PARK_POLY:geometry.outer,PARK_HOLES:[],
+  PARK_LAYER:null,PARK_MODE:false,L:{},map:{hasLayer:layer=>layer==='boundary'},
+  document:{addEventListener:()=>{},getElementById:()=>null},
+  toggleParkMode:()=>{env.PARK_MODE=true;calls.push('standard mode');}};
+ runInNewContext(readFileSync(new URL('../src/bootstrap/live-map-project-workspace.js',import.meta.url),'utf8'),env);
+ ports.activateParkAnalysis();
+ assert.equal(env.PARK_MODE,true);
+ assert.equal(ports.verifyBoundary(stage),true);
+ assert.equal(env.PARK_LAYER,'boundary');
+ assert.deepEqual(calls,['standard mode','render']);
+ assert.throws(()=>ports.verifyBoundary({...stage,geom_json:{...stage.geom_json,outer:[[[0,0],[0,1],[1,0],[0,0]]]}}),/aktif park poligonu/);
+ env.DG_PARK={id:25};
+ assert.throws(()=>ports.verifyBoundary(stage),/aktif park poligonu/);
+});
