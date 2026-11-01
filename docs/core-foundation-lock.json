@@ -13197,6 +13197,30 @@
           "sha256": "4819101f9debfd98b28dc07fe6d93b0bb500fb92af04da6dd91ebe52ef551fc8"
         }
       ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: advance the DendroGeo service-worker deployment cache revision exactly once from r444 to r445 after normal-profile browsers retained obsolete project-list assets while private browsing displayed shared projects. Rebuild all deterministic JS/CSS versioned asset URLs, runtime and public pages. Preserve the published v3.0.1 Zenodo/DOI citation, existing SW network-first and offline behavior, Supabase auth and RLS, project data, stage boundaries, measurements and scientific calculations.",
+      "validation": [
+        "node --test test/sw-cache.test.mjs",
+        "npm run build:check",
+        "npm run check:versions",
+        "npm run check",
+        "GitHub Actions full CI, mobile and WebKit smoke checks before merge"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "4819101f9debfd98b28dc07fe6d93b0bb500fb92af04da6dd91ebe52ef551fc8",
+          "sha256": "007c83b2a82cd7accf51ac571299ce1afecb4027404e45a6589fdfd469500a45"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "b3f706fb76c3bdb930bd21fee3c669199da53d819b3e3485d483af5216151d6f",
+          "sha256": "81202b33dfaf1f94fbb8299fcc0ebc2ac70467593f794fa0293123fa237a88a1"
+        }
+      ]
     }
   ]
 }
