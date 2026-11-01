@@ -18,7 +18,7 @@
   else document.getElementById("parkInfo")?.scrollIntoView({behavior:"smooth",block:"nearest"});
  }
  const snapshots=root.DG_LIVE_MAP_PROJECT_SNAPSHOT.create({
-  store:root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE.create(()=>root.indexedDB),
+  store:root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE.create(()=>root.indexedDB,()=>sb),
   capture:()=>{
    const session=DG_GRID_SESSION,record=root.DG_LC_SENS?.state;
    return {
@@ -88,7 +88,7 @@
   const schedule=()=>{if(saveTimer)clearTimeout(saveTimer);saveTimer=setTimeout(()=>{
    if(Number(DG_PARK?.id)!==Number(park.id)||workspaceIdentity?.projectId!==projectId)return;
    void saveWorkspace(projectId,park).catch(error=>console.warn("DENDROGEO · proje cihaz anlık görüntüsü:",error.message));
-  },1300);};
+  },3000);};
   for(const id of ["gridSummary","lcSens"]){const element=document.getElementById(id);if(!element)continue;
    const observer=new root.MutationObserver(schedule);observer.observe(element,{childList:true,characterData:true,subtree:true});watching.push(observer);
   }
