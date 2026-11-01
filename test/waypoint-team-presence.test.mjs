@@ -53,6 +53,39 @@ test('rapidly reopening the same project reuses its in-flight join while a chang
  await Promise.all([first,repeat,next]);
 });
 
+test('a real private Presence join receives its watchdog timer port and publishes the GPS fix',async()=>{
+ const {ctx,run}=setup(),events=[],failures=[];
+ ctx.setTimeout=setTimeout;ctx.clearTimeout=clearTimeout;
+ ctx.GPS={latitude:39.0,longitude:32.0};ctx.PROFILE={full_name:'Test teammate'};
+ for(const path of [
+  'src/domain/parks/resolve-live-share-join.js',
+  'src/application/parks/join-live-share-park.js',
+  'src/application/parks/handle-live-share-channel-status.js',
+  'src/application/parks/track-park-live-position.js',
+  'src/adapters/parks/park-presence-channel.js'
+ ])vm.runInContext(read(path),ctx,{filename:path});
+ ctx.window.DG_FETCH_LIVE_SHARE_PROJECT_PARK={fetch:async()=>14};
+ ctx.window.DG_PARK_LIVE_SHARE_CONNECTION_UI={connecting:()=>events.push('connecting')};
+ ctx.window.DG_FAIL_PARK_LIVE_SHARE={fail:()=>failures.push('failed')};
+ const channel={
+  on(type,{event},callback){assert.equal(type,'presence');assert.equal(event,'sync');this.onSync=callback;return this;},
+  subscribe(callback){events.push('subscribed');callback('SUBSCRIBED');return this;},
+  track(payload){events.push(['track',payload.la,payload.lo]);return Promise.resolve('ok');},
+  presenceState(){return{};}
+ };
+ ctx.sb={
+  auth:{getSession:async()=>({data:{session:{access_token:'test-token'}}})},
+  realtime:{setAuth:async token=>{assert.equal(token,'test-token');events.push('authenticated');}},
+  channel:(topic,options)=>{assert.equal(topic,'dg-park-14');assert.equal(options.config.private,true);events.push('channel');return channel;},
+  removeChannel:()=>{}
+ };
+ await run('dgLiveShareJoinCurrent()');
+ assert.deepEqual(failures,[],'the join must not fail before channel.subscribe');
+ assert.deepEqual(events.slice(0,4),['connecting','authenticated','channel','subscribed']);
+ assert.ok(events.some(event=>Array.isArray(event)&&event[0]==='track'&&event[1]===39&&event[2]===32));
+ assert.equal(run('DG_PARK_CH_LIVE'),true);
+});
+
 test('the Waypoint project remains the team channel across measurement tab changes',()=>{
  const {run,elements}=setup();
  assert.equal(run('dgLiveShareProjectId()'),7);

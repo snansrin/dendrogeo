@@ -300,7 +300,7 @@ async function dgLiveShareJoinCurrent(){
     onSync:()=>{if(isCurrent()&&joinedChannel&&DG_PARK_CH===joinedChannel)onSync();},
     onStatus:st=>{if(isCurrent()&&(!joinedChannel||DG_PARK_CH===joinedChannel))onStatus(st);},
     getWatch:()=>DG_PARK_CH_WATCH,setWatch:value=>{DG_PARK_CH_WATCH=value;},clearTimer:clearTimeout,
-    setTimer,onWatchdog:()=>{if(isCurrent()&&joinedChannel&&DG_PARK_CH===joinedChannel)dgParkShareFail();}
+    setTimer:setTimeout,onWatchdog:()=>{if(isCurrent()&&joinedChannel&&DG_PARK_CH===joinedChannel)dgParkShareFail();}
    });
   },
   onSync:()=>{if(isCurrent())dgLiveMatesDraw();},
