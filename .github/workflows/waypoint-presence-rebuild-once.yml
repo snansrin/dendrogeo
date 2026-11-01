@@ -13,6 +13,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: true
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -28,7 +29,7 @@ jobs:
           const digest=data=>createHash('sha256').update(data).digest('hex');
           const mp='docs/core-foundation-lock.json',vp='scripts/check-core-foundation.mjs';
           const manifest=JSON.parse(readFileSync(mp,'utf8'));
-          const changed=[...new Set([...execFileSync('git',['diff','--name-only','HEAD^','HEAD'],{encoding:'utf8'}).trim().split('\n'),...execFileSync('git',['diff','--name-only','HEAD'],{encoding:'utf8'}).trim().split('\n')].filter(Boolean))];
+          const changed=[...new Set([...execFileSync('git',['diff','--name-only','origin/main','HEAD'],{encoding:'utf8'}).trim().split('\n'),...execFileSync('git',['diff','--name-only','HEAD'],{encoding:'utf8'}).trim().split('\n')].filter(Boolean))];
           const records=[];
           for(const path of changed){
             if(!Object.hasOwn(manifest.sha256,path))continue;
