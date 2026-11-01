@@ -13088,6 +13088,28 @@
           "sha256": "1b78ba2dd1dd166d3b5625acf1953b34e2c9a8dd1d4d0fca6b51502c7ec3eee3"
         }
       ]
+    },
+    {
+      "date": "2026-11-01",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: Waypoint teammate Presence repair replaces the undefined setTimer port in the park-channel join with the existing setTimeout browser timer. A real join regression first reproduced the hidden ReferenceError before subscription, then verified authenticated private-channel subscription and a GPS track after the single-line fix. No changes to scientific formulas, GIS, surface/stage geometry, database, RLS, permissions, theme or stored data.",
+      "validation": [
+        "node --test test/waypoint-team-presence.test.mjs",
+        "npm run check",
+        "GitHub Actions Chromium/WebKit mobile checks before merge"
+      ],
+      "files": [
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "d11f3b6083db80f679645eba61563f8e21e51120bf31f33d52084a03fb4fedd5",
+          "sha256": "8fd455af6cc8e99863a5f890c049425bf46a631e0c47b74f3de6d4a63b39b441"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "1b78ba2dd1dd166d3b5625acf1953b34e2c9a8dd1d4d0fca6b51502c7ec3eee3",
+          "sha256": "81523f4cf46bbe4549c11b42b541897449a9e5044296998c3b16d0d26f6e88f4"
+        }
+      ]
     }
   ]
 }
