@@ -33,6 +33,14 @@ test('private park Presence authenticates before joining and installs its watchd
   assert.equal(result,channel);assert.equal(currentChannel,channel);assert.equal(watch,77);assert.deepEqual(events.filter(e=>Array.isArray(e)).map(e=>e[0]).slice(0,4),['auth','channel','on','timer']);assert.ok(events.indexOf('auth')<events.indexOf('subscribe'));assert.deepEqual(JSON.parse(JSON.stringify(events.find(e=>Array.isArray(e)&&e[0]==='channel')[2])),{config:{private:true,presence:{key:'3'}}});assert.ok(events.some(e=>Array.isArray(e)&&e[0]==='timer'&&e[1]===8000));
 });
 
+test('a stale waypoint selection never creates a private Presence channel after auth',async()=>{
+  const join=setup().DG_PARK_PRESENCE_CHANNEL_ADAPTER.join,events=[];
+  const client={auth:{getSession:async()=>({data:{session:{access_token:'jwt'}}})},realtime:{setAuth:async()=>{events.push('auth');}},channel:()=>{events.push('channel');throw new Error('obsolete project channel');}};
+  const result=await join({client,parkId:9,userId:3,isCurrent:()=>false});
+  assert.equal(result,null);
+  assert.deepEqual(events,['auth']);
+});
+
 test('Realtime client details stay inside the channel adapter',()=>{
   const adapter=read('src/adapters/parks/park-presence-channel.js'),map=read('src/services/map.js');
   assert.match(adapter,/presence\(\{channel\}\)/);

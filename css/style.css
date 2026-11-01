@@ -899,6 +899,8 @@ label.lbl{display:block}
 #v-nav .waypoint-map #navMap{height:380px;margin:0}
 #v-nav .waypoint-map-legend{display:flex;gap:16px;flex-wrap:wrap;padding:9px 14px;color:var(--mut);font-size:.7rem}
 #v-nav .waypoint-map-legend span{display:flex;align-items:center;gap:6px}
+#v-nav .waypoint-map>.measure-share{margin:4px 14px 0}
+#v-nav .waypoint-map>#dgMatesNote{padding:0 14px 12px}
 #v-nav .wp-legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--red)}
 #v-nav .wp-legend-dot.done{background:var(--green)}
 #v-nav .wp-legend-dot.me{background:var(--blue)}

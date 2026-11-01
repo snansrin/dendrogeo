@@ -4,7 +4,7 @@ window.DG_SHELL_VIEW_EFFECTS={run(view,ports){const {schedule,getDataLoader}=por
  if(view==='dash'){if(data())data().load(view);else ports.loadWaypoints().then(()=>ports.loadDash());}
  if(view==='measure'){ports.refreshParkGate();ports.scheduleLiveShare();}
  if(view==='map')schedule(ports.refreshMap,150);
- if(view==='nav'){schedule(ports.refreshNavigation,150);if(data())data().load(view);else ports.loadWaypoints();}
+ if(view==='nav'){schedule(ports.refreshNavigation,150);ports.scheduleLiveShare();if(data())data().load(view);else ports.loadWaypoints();}
  if((view==='records'||view==='world')&&data())data().load(view);
  if(view==='world')schedule(ports.refreshWorld,150);
  if(view==='admin')ports.loadAdmin();

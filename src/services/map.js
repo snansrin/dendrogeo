@@ -256,45 +256,70 @@ function switchBaseLayer(type){
  * aynı parkın kanalındaki kullanıcılar görür. Kırmızı çizgiler (şema, RLS,
  * migration) hiç devreye girmez. Her adım typeof/try korumalı: Realtime
  * kapalıysa özellik sessizce devre dışı kalır, ölçüm akışı etkilenmez. */
-let DG_PARK_CH=null,DG_PARK_CH_ID=0,DG_LIVE_ON=true,DG_MATES_LAYER=null,DG_LAST_PING=0,DG_PARK_CH_RETRY=0,DG_PARK_CH_WATCH=null,DG_PARK_CH_LIVE=false;
+let DG_PARK_CH=null,DG_PARK_CH_ID=0,DG_PARK_CH_PROJECT_ID=0,DG_PARK_JOIN_SERIAL=0,DG_PARK_JOIN_PROJECT_ID=0,DG_PARK_JOIN_PENDING=null,DG_LIVE_ON=true,DG_MATES_LAYER=null,DG_LAST_PING=0,DG_PARK_CH_RETRY=0,DG_PARK_CH_WATCH=null,DG_PARK_CH_LIVE=false;
 function dgParkShareFail(){
- return window.DG_FAIL_PARK_LIVE_SHARE.fail({setLive:value=>{DG_PARK_CH_LIVE=value;},retries:()=>DG_PARK_CH_RETRY,setRetries:value=>{DG_PARK_CH_RETRY=value;},note:$('dgMatesNote'),translate:_tmf,setTimer:setTimeout,removeChannel:()=>window.DG_PARK_PRESENCE_CHANNEL_ADAPTER.remove({client:sb,channel:DG_PARK_CH}),resetChannel:()=>{DG_PARK_CH=null;DG_PARK_CH_ID=0;},isEnabled:()=>DG_LIVE_ON,join:dgLiveShareJoinCurrent});
+ return window.DG_FAIL_PARK_LIVE_SHARE.fail({setLive:value=>{DG_PARK_CH_LIVE=value;},retries:()=>DG_PARK_CH_RETRY,setRetries:value=>{DG_PARK_CH_RETRY=value;},note:$('dgMatesNote'),translate:_tmf,setTimer:setTimeout,removeChannel:()=>window.DG_PARK_PRESENCE_CHANNEL_ADAPTER.remove({client:sb,channel:DG_PARK_CH}),resetChannel:()=>{DG_PARK_CH=null;DG_PARK_CH_ID=0;DG_PARK_CH_PROJECT_ID=0;DG_MATES_LAYER?.clearLayers();},isEnabled:()=>DG_LIVE_ON,join:dgLiveShareJoinCurrent});
 }
 const DG_MATE_COLORS=["#c2452d","#2b6cb0","#7c3aed","#0f766e","#be185d","#4d7c0f","#b45309","#0e7490"];
 function dgMateColor(id){return window.DG_PARK_LIVE_MEMBER_COLOR.color(id,DG_MATE_COLORS);}
+function dgLiveShareProjectId(){
+ const selected=typeof DG_CUR_VIEW!=="undefined"&&DG_CUR_VIEW==="nav"?$("nProject"):$("mProject");
+ return Number(selected?.value)||0;
+}
 function dgLiveShareToggle(on){
  DG_LIVE_ON=!!on;
- if(!DG_LIVE_ON)dgLiveShareLeave();else dgLiveShareJoinCurrent();
+ if(!DG_LIVE_ON){DG_PARK_JOIN_SERIAL++;DG_PARK_JOIN_PENDING=null;dgLiveShareLeave();}else dgLiveShareJoinCurrent();
  if(typeof toast==="function")toast(_tmf(on?"Canlı konum paylaşımı açık (bu parkın ortaklarıyla).":"Canlı konum paylaşımı kapalı."),"info","👥");
 }
 async function dgLiveShareJoinCurrent(){
  const join=window.DG_JOIN_LIVE_SHARE_PARK,resolve=window.DG_RESOLVE_LIVE_SHARE_JOIN,store=window.DG_FETCH_LIVE_SHARE_PROJECT_PARK,connection=window.DG_PARK_LIVE_SHARE_CONNECTION_UI,status=window.DG_HANDLE_LIVE_SHARE_CHANNEL_STATUS,presence=window.DG_PARK_PRESENCE_CHANNEL_ADAPTER;
- try{return await join.join({
+ const projectId=dgLiveShareProjectId();
+ // Repeated openings of the same project must not invalidate its channel
+ // callbacks, and concurrent park lookups must not create duplicate channels.
+ if(DG_PARK_JOIN_PROJECT_ID!==projectId){DG_PARK_JOIN_PROJECT_ID=projectId;DG_PARK_JOIN_SERIAL++;}
+ const serial=DG_PARK_JOIN_SERIAL;
+ if(DG_PARK_JOIN_PENDING?.projectId===projectId&&DG_PARK_JOIN_PENDING.serial===serial)return DG_PARK_JOIN_PENDING.promise;
+ const isCurrent=()=>serial===DG_PARK_JOIN_SERIAL&&DG_LIVE_ON&&dgLiveShareProjectId()===projectId;
+ try{
+ const task=join.join({
   enabled:DG_LIVE_ON,user:typeof USER!=="undefined"?USER:null,client:typeof sb!=="undefined"?sb:null,
-  projectId:(()=>{const selected=$("mProject");return selected&&selected.value?+selected.value:0;})(),
-  currentParkId:DG_PARK_CH_ID,channel:DG_PARK_CH,
-  resolve:input=>resolve.resolve(input),readParkId:projectId=>store.fetch({client:sb,projectId}),leave:dgLiveShareLeave,
-  setParkId:value=>{DG_PARK_CH_ID=value;},
+  projectId,currentParkId:DG_PARK_CH_ID,channel:DG_PARK_CH,isCurrent,
+  resolve:input=>resolve.resolve(input),readParkId:id=>store.fetch({client:sb,projectId:id}),leave:dgLiveShareLeave,
+  setParkId:value=>{DG_PARK_CH_ID=value;DG_PARK_CH_PROJECT_ID=value?projectId:0;},
   showConnecting:()=>connection.connecting({element:$("dgMatesNote"),translate:_tmf}),
   subscribe:({parkId,userId,onSync,onStatus})=>presence.join({
-   client:sb,parkId,userId,onSync,setChannel:value=>{DG_PARK_CH=value;},
+   client:sb,parkId,userId,onSync,isCurrent,setChannel:value=>{DG_PARK_CH=value;},
    getWatch:()=>DG_PARK_CH_WATCH,setWatch:value=>{DG_PARK_CH_WATCH=value;},clearTimer:clearTimeout,
    setTimer,onWatchdog:()=>dgParkShareFail(),onStatus
   }),
-  onSync:()=>dgLiveMatesDraw(),
-  onStatus:st=>status.handle(st,{getWatch:()=>DG_PARK_CH_WATCH,setWatch:value=>{DG_PARK_CH_WATCH=value;},clearTimer:clearTimeout,setLive:value=>{DG_PARK_CH_LIVE=value;},setLastPing:value=>{DG_LAST_PING=value;},ping:dgLiveSharePing,draw:dgLiveMatesDraw,fail:dgParkShareFail})
- });}catch(error){DG_PARK_CH=null;DG_PARK_CH_ID=0;return;}
+  onSync:()=>{if(isCurrent())dgLiveMatesDraw();},
+  onStatus:st=>{if(isCurrent())status.handle(st,{getWatch:()=>DG_PARK_CH_WATCH,setWatch:value=>{DG_PARK_CH_WATCH=value;},clearTimer:clearTimeout,setLive:value=>{DG_PARK_CH_LIVE=value;},setLastPing:value=>{DG_LAST_PING=value;},ping:dgLiveSharePing,draw:dgLiveMatesDraw,fail:dgParkShareFail});}
+ });
+ DG_PARK_JOIN_PENDING={projectId,serial,promise:task};
+ const result=await task;
+ if(isCurrent()&&result?.status==="reused"){DG_PARK_CH_PROJECT_ID=projectId;dgLiveMatesDraw();}
+ return result;
+ }catch(error){if(isCurrent()){DG_PARK_CH=null;DG_PARK_CH_ID=0;DG_PARK_CH_PROJECT_ID=0;}return;}
+ finally{if(DG_PARK_JOIN_PENDING?.projectId===projectId&&DG_PARK_JOIN_PENDING.serial===serial)DG_PARK_JOIN_PENDING=null;}
 }
 function dgLiveShareLeave(){
- return window.DG_LEAVE_PARK_PRESENCE_CHANNEL.leave({channel:DG_PARK_CH,client:typeof sb!=="undefined"?sb:null,layer:DG_MATES_LAYER,map:typeof map!=="undefined"?map:null,setChannel:value=>{DG_PARK_CH=value;},setParkId:value=>{DG_PARK_CH_ID=value;},setLayer:value=>{DG_MATES_LAYER=value;},note:$("dgMatesNote")});
+ DG_PARK_CH_PROJECT_ID=0;
+ return window.DG_LEAVE_PARK_PRESENCE_CHANNEL.leave({channel:DG_PARK_CH,client:typeof sb!=="undefined"?sb:null,layer:DG_MATES_LAYER,map:typeof navMap!=="undefined"?navMap:null,setChannel:value=>{DG_PARK_CH=value;},setParkId:value=>{DG_PARK_CH_ID=value;},setLayer:value=>{DG_MATES_LAYER=value;},note:$("dgMatesNote")});
 }
 function dgLiveSharePing(){
  return window.DG_TRACK_PARK_LIVE_POSITION.ping({channel:DG_PARK_CH,live:DG_PARK_CH_LIVE,enabled:DG_LIVE_ON,gps:typeof GPS!=="undefined"?GPS:null,userId:typeof USER!=="undefined"?USER?.id:null,name:typeof PROFILE!=="undefined"&&PROFILE?PROFILE.full_name:null,lastPing:DG_LAST_PING,now:Date.now(),setLastPing:value=>{DG_LAST_PING=value;}});
 }
 function dgLiveMatesDraw(){
- if(typeof map==="undefined"||!map||!DG_PARK_CH||typeof L==="undefined")return;
+ if(typeof navMap==="undefined"||!navMap||typeof L==="undefined")return;
+ // Never keep the previous project's teammate positions on a newly selected
+ // waypoint map, even while the next private channel is being authorized.
+ if(!DG_PARK_CH||!DG_LIVE_ON||DG_PARK_CH_PROJECT_ID!==Number($("nProject")?.value||0)){
+  DG_MATES_LAYER?.clearLayers();
+  window.DG_RENDER_PARK_LIVE_COLLABORATOR_COUNT.render({element:$("dgMatesNote"),count:0,translate:_tmff});
+  return;
+ }
  const presence=window.DG_PARK_PRESENCE_CHANNEL_ADAPTER.presence({channel:DG_PARK_CH});
- const layer=window.DG_PREPARE_PARK_LIVE_COLLABORATOR_LAYER.prepare({layer:DG_MATES_LAYER,map,leaflet:L,setLayer:value=>{DG_MATES_LAYER=value;}});
+ const layer=window.DG_PREPARE_PARK_LIVE_COLLABORATOR_LAYER.prepare({layer:DG_MATES_LAYER,map:navMap,leaflet:L,setLayer:value=>{DG_MATES_LAYER=value;}});
  const members=window.DG_SELECT_PARK_LIVE_COLLABORATORS.select({presence,currentUserId:USER.id});
  const now=Date.now();
  for(const member of members){

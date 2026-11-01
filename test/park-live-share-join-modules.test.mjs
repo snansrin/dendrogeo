@@ -51,6 +51,20 @@ test('join skips unavailable sessions and leaves projects without a park',async(
   assert.deepEqual(events,['leave']);
 });
 
+test('switching waypoint projects during the park lookup cannot tear down the newer subscription',async()=>{
+  const join=app().DG_JOIN_LIVE_SHARE_PARK.join,events=[];
+  let finishRead;
+  const pending=new Promise(resolve=>{finishRead=resolve;});
+  let selected=7;
+  const task=join({enabled:true,user:{id:3},client:{},projectId:7,currentParkId:0,channel:null,
+    resolve:input=>app().DG_RESOLVE_LIVE_SHARE_JOIN.resolve(input),readParkId:()=>pending,isCurrent:()=>selected===7,
+    leave:()=>events.push('leave'),setParkId:()=>events.push('park'),showConnecting:()=>events.push('connecting'),subscribe:()=>events.push('subscribe')});
+  selected=8;
+  finishRead(9);
+  assert.deepEqual(JSON.parse(JSON.stringify(await task)),{status:'stale'});
+  assert.deepEqual(events,[]);
+});
+
 test('channel status keeps subscribed side-effect order and routes terminal errors',()=>{
   const handle=app().DG_HANDLE_LIVE_SHARE_CHANNEL_STATUS.handle,events=[];
   const ports={getWatch:()=>42,setWatch:value=>events.push(['watch',value]),clearTimer:value=>events.push(['clear',value]),setLive:value=>events.push(['live',value]),setLastPing:value=>events.push(['last',value]),ping:()=>events.push('ping'),draw:()=>events.push('draw'),fail:()=>events.push('fail')};

@@ -257,7 +257,7 @@ if(v==="dash"){if(window._dgShellViewData)window._dgShellViewData.load(v);else l
   * yoksa form kilitli gelir ve kullanıcı park algılama ekranına yönlendirilir.
   * (2026-09-24 · park-registry.js dgParkGate) */
  if(v==="measure"&&typeof dgParkGate==="function")dgParkGate(true);
- if(v==="measure"&&typeof dgLiveShareJoinCurrent==="function")setTimeout(()=>{try{dgLiveShareJoinCurrent();}catch(e){}},400);
+ if((v==="measure"||v==="nav")&&typeof dgLiveShareJoinCurrent==="function")setTimeout(()=>{try{dgLiveShareJoinCurrent();}catch(e){}},400);
  /* CANLI HARİTA TAZELEME KAPISI (2026-09-26 · kullanıcı bildirimi):
   * ESKİ: if(!liveLoaded){liveLoaded=true;loadLiveMap();}
   *      → sekme bir oturumda YALNIZ BİR KEZ yükleniyordu. Yönetici ölçümü
@@ -292,7 +292,11 @@ if(v==="export"){if(window._dgShellViewData)window._dgShellViewData.load(v);else
 }
 
 document.addEventListener("change",event=>{
- if(event.target?.id==="nProject")dgFocusSelectedWaypointPark();
+ if(event.target?.id==="nProject"){
+  dgFocusSelectedWaypointPark();
+  if(typeof dgLiveMatesDraw==="function")dgLiveMatesDraw();
+  if(typeof dgLiveShareJoinCurrent==="function")void dgLiveShareJoinCurrent();
+ }
 });
 document.addEventListener("toggle",event=>{
  if(event.target?.id!=="wpMapPanel"||!event.target.open)return;

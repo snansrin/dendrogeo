@@ -12661,6 +12661,38 @@
           "sha256": "fae43e1340227a1bd342951088d1244d7ac4f8fe467ddecc890d1514564636f7"
         }
       ]
+    },
+    {
+      "date": "2026-11-01",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up for park team Presence: show temporary park colleagues only in the existing Waypoint map (navMap), never the Live Map; bind private subscriptions to the selected Waypoint project, discard stale asynchronous joins, retain the ten-second GPS throttle, and move the existing sharing switch and team count beside the Waypoint map. Preserve the current private park membership authorization, RLS, database schema and migrations, GPS consent, scientific calculations, allometry, geometry, raster, themes, and existing working maps. Rebuild the static page and runtime and add focused regression coverage without any production data writes.",
+      "validation": [
+        "node --test test/waypoint-team-presence.test.mjs test/park-presence-channel-modules.test.mjs test/park-live-share-join-modules.test.mjs test/shell-workflow-modules.test.mjs",
+        "npm run check:release",
+        "GitHub Actions Chromium/WebKit mobile QA before merge"
+      ],
+      "files": [
+        {"path":"css/style.css","previous_sha256":"5366240a409100f77cdbc270e5228907428c18e695c30683e655676b3f2b43d6","sha256":"c098bdf5dfcca6ba30d86de855ae4c9379a25fe5774ec495c5771dcf6cf3838d"},
+        {"path":"index.html","previous_sha256":"fae43e1340227a1bd342951088d1244d7ac4f8fe467ddecc890d1514564636f7","sha256":"9e50b11f93ec56990bed35163b3fc8c5b64a4cea37c0d9041a39330120b899a6"},
+        {"path":"partials/shell.html","previous_sha256":"2de6cba68130b28ad4a0b521b50fb08ebfb53fbe9a76654f82127ab9ba29d01b","sha256":"a9af04e1e6da5e39a9ffaa15347904da9d2a6c66a4f51b34ea3a50a16848f69c"},
+        {"path":"src/adapters/parks/park-presence-channel.js","previous_sha256":"f44d0f6577239975d92cefa05608ebf46ebe9f6b3d0c2e7cf744b6f1d565eb74","sha256":"64d2d99384582d98a6bcfaba082dc47da2e34f8bac0ddaa962b47831cf676bf5"},
+        {"path":"src/application/parks/join-live-share-park.js","previous_sha256":"a6f2bd9ed7a97c717108150f147c0857c2e5dcdc41cbec6f5038670e9b859a16","sha256":"634bf364d65700d17ebb3c3ad6073fd9b94d531021c0f499caf7523cfed26c65"},
+        {"path":"src/services/map.js","previous_sha256":"fb103641ab12be650099f5ba2b69774e96e822881949c097ca8388b71308f677","sha256":"8c289302998552c33fcde9eee5374c37fc892872ea471bddb01ffd6d12f29fed"},
+        {"path":"src/ui/shell-view-effects.js","previous_sha256":"f85d2ed54e29126ede3e54e02c8567d109270e43e987c6176eb2c35f09217780","sha256":"34a24824de2600d0d45c7703554e423b2688337ebb2a1e1ff131274987006350"},
+        {"path":"src/ui/shell.js","previous_sha256":"325536d7be1185662f80d8afc5c064341d8998474083b7421cd656620a32c487","sha256":"90542376fee981868b62377202641cd3112391d2bb0941d1a68ce39fa1b5ff7f"},
+        {"path":"test/park-live-share-join-modules.test.mjs","previous_sha256":"b801856d998594659768d4ce93ff0d5fce36cbb0566205fde1c0d291a91ac055","sha256":"6456eb5fc839ef855a6989f0de1867fb39eb7f00ec687cc03e92a101e757036d"},
+        {"path":"test/park-presence-channel-modules.test.mjs","previous_sha256":"e6047dccfdf720208ecc9e7487210b7051ea76eaf916b8a896c5819ed5f38d50","sha256":"44318ebd11a8519fe6eed5c891f5fa5fe2a7fbc72b577c3fc9aa9a1aaf40f289"},
+        {"path":"test/shell-workflow-modules.test.mjs","previous_sha256":"a7ddfd75981251c43f420908f53d1a1b4c25a7c667264c55f7799f6eb26fb3a7","sha256":"d2f760b7c7e72016ec17ab5586291bebc2ef794912df4faebb72a58a39a4f749"}
+      ]
+    },
+    {
+      "date": "2026-11-01",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up CI accessibility fixture correction after the park sharing control moved into the Waypoint map. Keep the existing measurement disclosure keyboard check, then activate the Waypoint view, expand its map, verify the same switch via keyboard and focus-visible assertions and close that disclosure before the unchanged axe scan. Only the test selector/navigation changes; no runtime, scientific, database, map geometry, raster, membership or RLS changes.",
+      "validation": ["npm run check:core-foundation", "npm run check", "GitHub Actions Chromium mobile keyboard/axe plus WebKit regression"],
+      "files": [
+        {"path":"scripts/check-accessibility.mjs","previous_sha256":"451345e56956ace19b70d3c868dac6be658f8ffd75dcbb38a7456560f4fe5eda","sha256":"10a7eb28728cc9ffbe1f1e47201c7d99fd11949846a4e86408a940edd826f841"}
+      ]
     }
   ]
 }
