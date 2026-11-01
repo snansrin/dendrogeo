@@ -67,6 +67,11 @@
      await ports.draw(candidate,park);
      if(ports.activeParkId()!==Number(park.id))throw Error(t("Harita seçilen park kimliğine bağlanamadı. Kayıtlar değiştirilmedi."));
     }
+    // An active database identity alone is not a mounted stage polygon.
+    // Explicit project choice must activate the regular analysis mode and
+    // verify the actual GIS boundary before claiming restoration.
+    if(park.geom_json?.stage_scope)ports.activateParkAnalysis?.();
+    ports.verifyBoundary?.(park);
     note(t("Kayıtlı ölçüm noktaları yükleniyor…"));
     const points=await ports.readWaypoints(project.id);
     if(!projects().some(row=>Number(row.id)===Number(project.id)))throw Error(t("Proje erişimi güncellendi; yeniden deneyin."));
@@ -83,6 +88,7 @@
     if(restoreError)note(t("Etap ve {n} ölçüm noktası açıldı; çalışma görüntüsü yüklenemedi: {error}",{n:points.length,error:String(restoreError.message||restoreError)}),"warn");
     else if(restored?.mode==="cached")note(t("{n} ölçüm noktası, kaydedilmiş {g} grid hücresi ve {s} yüzey taraması bu cihazdan geri açıldı.",{n:points.length,g:restored.grid||0,s:restored.scan?1:0})+(missingParent?" "+t("Ana park kaydı eksik; etap sınırı düzenlenemez."):reconnectedParent?" "+t("Etaplar menüsü doğrulanan ana parka yeniden bağlandı."):""),missingParent?"warn":"ok");
     else if(restored?.mode==="review")note(t("{n} ölçüm noktası ve kayıtlı yüzey düzeltmeleri otomatik hazırlandı. Yeni analiz kabul edilmedi.",{n:points.length})+(missingParent?" "+t("Ana park kaydı eksik; etap sınırı düzenlenemez."):reconnectedParent?" "+t("Etaplar menüsü doğrulanan ana parka yeniden bağlandı."):""),missingParent?"warn":"ok");
+    else if(restored?.mode==="none")note(t("{n} kayıtlı ölçüm noktası ve aktif etap poligonu açıldı. Eski yüzey taraması ve grid görüntüsü bu cihazda veya hesapta bulunamadı; yeni analiz yapılmadı.",{n:points.length})+(missingParent?" "+t("Ana park kaydı eksik; yalnız etap sınırı düzenlemesi kapalı."):reconnectedParent?" "+t("Etaplar menüsü doğrulanan ana parka yeniden bağlandı."):""),"warn");
     else note(project.is_locked?t("{n} ölçüm noktası salt okunur görüntülendi. Kilitli proje yeni saha çalışmasının hedefi yapılamaz.",{n:points.length}):missingParent?t("{n} kayıtlı ölçüm noktası ve etap sınırı yüklendi. Ana park kaydı eksik; etap sınırı düzenlenemez, yüzey ve ölçüm kayıtları açılabilir.",{n:points.length}):reconnectedParent?t("{n} kayıtlı ölçüm noktası ve seçilen etap değişmeden açıldı. Etaplar menüsü doğrulanan ana parka yeniden bağlandı.",{n:points.length}):t("{n} kayıtlı ölçüm noktası yüklendi. Etap sınırı ve varsa kabul edilmiş yüzey sonucu mevcut araçlarla düzenlenebilir.",{n:points.length}),missingParent?"warn":"ok");
    }catch(error){ports.resumeWatching?.();note(t("Proje açılamadı: {error}",{error:String(error.message||error)}),"err");}
    finally{busy(false);}
