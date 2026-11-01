@@ -63,6 +63,17 @@ test('archive migration is additive, account/project-scoped and protects locked 
  assert.doesNotMatch(sql,/alter table public\.(?:parks|projects|measurements|waypoints|surface_reviews)\b/i);
 });
 
+test('project archive does not make the live projects-to-parks REST embed ambiguous (PGRST201)',()=>{
+ const archive=readFileSync(new URL('../supabase/migrations/20261101210000_project_workspace_archives.sql',import.meta.url),'utf8');
+ const repair=readFileSync(new URL('../supabase/migrations/20261101220000_fix_workspace_archive_parks_embed_ambiguity.sql',import.meta.url),'utf8');
+ assert.match(archive,/project_id bigint not null references public\.projects\(id\)/i);
+ assert.match(archive,/park_id bigint not null references public\.parks\(id\)/i);
+ // A dual-FK bridge exposes a second projects->parks path through the archive,
+ // making the existing select('*,parks(...)') fail with HTTP 300 / PGRST201.
+ assert.match(repair,/alter table public\.project_workspace_archives\s+drop constraint if exists project_workspace_archives_park_id_fkey\s*;/i);
+ assert.doesNotMatch(repair,/\b(?:delete|truncate|update)\s+public\.(?:projects|parks|measurements|waypoints|surface_reviews)\b/i);
+});
+
 test('project loading never executes an implicit second raster scan',()=>{
  const source=readFileSync(new URL('../src/bootstrap/live-map-project-workspace.js',import.meta.url),'utf8');
  const body=source.slice(source.indexOf('async function restoreWorkspace('),source.indexOf('async function openSurfaceSaved('));
