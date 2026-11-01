@@ -3,8 +3,8 @@
 begin;
 do $$
 begin
- if (select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r')<>13 then
-  raise exception 'RESET_CONTRACT: expected 13 public application tables';
+ if (select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r')<>14 then
+  raise exception 'RESET_CONTRACT: expected 14 public application tables';
  end if;
  if exists(select 1 from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r' and not c.relrowsecurity) then
   raise exception 'RESET_CONTRACT: unprotected public application table';
@@ -38,6 +38,25 @@ begin
  if (select count(*) from public.projects)<>1 then raise exception 'RESET_CONTRACT: unrelated project exposed'; end if;
  if (select count(*) from storage.objects where bucket_id='dendro-photos')<>1 then raise exception 'RESET_CONTRACT: other-account photo exposed or own photo denied'; end if;
 end $$;
+
+-- Saved GIS evidence is private to its author, not to everyone who can view a
+-- park; the existing project relationship must still be valid.
+insert into public.project_workspace_archives(owner,project_id,park_id,payload)
+ select p.owner,p.id,p.park_id,jsonb_build_object(
+  'schema','dendrogeo/live-map-project-snapshot/1',
+  'ownerId',p.owner::text,'projectId',p.id,'parkId',p.park_id,
+  'savedAt','2026-11-01T10:00:00.000Z','state',jsonb_build_object('grid',jsonb_build_object('cells',jsonb_build_array()))
+ ) from public.projects p where p.owner='00000000-0000-0000-0000-000000000001'::uuid;
+do $$ begin
+ if (select count(*) from public.project_workspace_archives)<>1 then raise exception 'RESET_CONTRACT: author cannot read own workspace'; end if;
+end $$;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
+select set_config('request.jwt.claims','{"sub":"00000000-0000-0000-0000-000000000002","role":"authenticated"}',true);
+do $$ begin
+ if exists(select 1 from public.project_workspace_archives) then raise exception 'RESET_CONTRACT: another author can read saved workspace'; end if;
+end $$;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
+select set_config('request.jwt.claims','{"sub":"00000000-0000-0000-0000-000000000001","role":"authenticated"}',true);
 
 reset role;
 insert into public.park_collaborators(park_id,user_id)

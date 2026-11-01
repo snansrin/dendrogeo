@@ -41,6 +41,7 @@
       "src/adapters/parks/fetch-nominatim-osm-way.js",
       "src/adapters/parks/fetch-osm-park-ring.js",
       "src/adapters/parks/insert-grid-waypoints.js",
+      "src/adapters/parks/live-map-project-account-store.js",
       "src/adapters/parks/live-map-project-snapshot-store.js",
       "src/adapters/parks/live-map-project-store.js",
       "src/adapters/parks/nominatim-client.js",
@@ -1218,6 +1219,7 @@
     "src/adapters/parks/fetch-nominatim-osm-way.js": "420db8cc16ac51d0bd2dcd26b380bf2b2367c8cefa9f04b9049ee42c065a382d",
     "src/adapters/parks/fetch-osm-park-ring.js": "e1c1baec5daf1092c522d0dbe114283eaa2880b864a378bf2ba67a73993ec0b7",
     "src/adapters/parks/insert-grid-waypoints.js": "ae136309c895acb79b76b134ad913cec15213ffa5fbeb60fde23e5dc587d526d",
+    "src/adapters/parks/live-map-project-account-store.js": "ee2b197e84b71a97561d88f1d291df2720308386d664e5ec1b36f43a8cbe55ba",
     "src/adapters/parks/live-map-project-store.js": "8e13ca52749711ba0a1e5308b7b8260370b16c551d7fa3e455c8883882c038a8",
     "src/adapters/parks/live-map-project-snapshot-store.js": "27ba827145656892f2bfc5bb4f5408beb9363eff9fb986d1238afb989f9ede61",
     "src/adapters/parks/leave-park-presence-channel.js": "7721cacb7a41d61e25d646ab88100eab9b7b7b7aa32acd1de51a24dfa4a80e8c",
@@ -13108,6 +13110,35 @@
           "path": "index.html",
           "previous_sha256": "1b78ba2dd1dd166d3b5625acf1953b34e2c9a8dd1d4d0fca6b51502c7ec3eee3",
           "sha256": "81523f4cf46bbe4549c11b42b541897449a9e5044296998c3b16d0d26f6e88f4"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-01",
+      "audit_chain": "sha256-v1",
+      "scope": "User-requested saved-project workspace recovery: load completed-project evidence without unlocking scientific records, avoid implicit rescan, and add a separately RLS-scoped account archive for exact existing project/raster/grid snapshots. Static loader and offline manifest rebuilt deterministically. No park/stage/measurement/source-surface rows or scientific formula changes.",
+      "validation": [
+        "node --test test/live-map-project-workspace.test.mjs test/live-map-project-account-store.test.mjs test/park-stage-workspace.test.mjs",
+        "npm run check",
+        "npm run check:phone",
+        "GitHub Actions Chromium/WebKit and SQL migration checks before merge"
+      ],
+      "added_protected_files": ["src/adapters/parks/live-map-project-account-store.js"],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "81523f4cf46bbe4549c11b42b541897449a9e5044296998c3b16d0d26f6e88f4",
+          "sha256": "600e2fd120cebf84e517e61ef96181609d97db4c5419a475087c4b45941798a8"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "9e6c210d2482677151c14c1cb5e27a1061d9637f776e9176de2aad8e89e4243b",
+          "sha256": "b3f706fb76c3bdb930bd21fee3c669199da53d819b3e3485d483af5216151d6f"
+        },
+        {
+          "path": "partials/boot.html",
+          "previous_sha256": "aed5c91a3e8e216dd8f8fc0e4e2d5b6698576263d11b768337e7f1bbb5c7e5da",
+          "sha256": "bbedfe6bc8f686273a6f6ee4f411223862e179859b7db8b35afe2dbfd19f3df6"
         }
       ]
     }
