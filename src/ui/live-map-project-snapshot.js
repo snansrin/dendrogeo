@@ -13,8 +13,8 @@
  function create({store,capture,apply}){
   async function save(input){const id=identity(input);if(!id)throw Error("Proje kimliği veya kayıtlı sınır eksik.");
    const state=capture();if(!state?.analysis&&!state?.grid?.cells?.length)return {saved:false,empty:true};
-   const snapshot={schema,...id,savedAt:new Date().toISOString(),state};await store.save(id,snapshot);
-   return {saved:true,scan:!!state.analysis,grid:state.grid?.cells?.length||0};
+   const snapshot={schema,...id,savedAt:new Date().toISOString(),state};const saved=await store.save(id,snapshot);
+   return {saved:true,scan:!!state.analysis,grid:state.grid?.cells?.length||0,account:!!saved?.account};
   }
   async function restore(input){const id=identity(input);if(!id)return {restored:false,reason:"identity"};
    const snapshot=await store.read(id);
@@ -23,7 +23,7 @@
    const state=snapshot.state;
    if(!state||(!state.analysis&&!state.grid?.cells?.length))return {restored:false,reason:"empty"};
    const result=await apply(state,id);
-   return {restored:!!(result?.scan||result?.grid),scan:!!result?.scan,grid:Number(result?.grid||0),savedAt:snapshot.savedAt};
+   return {restored:!!(result?.scan||result?.grid),scan:!!result?.scan,grid:Number(result?.grid||0),savedAt:snapshot.savedAt,source:snapshot.archiveSource==="account"?"account":"device"};
   }
   return Object.freeze({save,restore});
  }
