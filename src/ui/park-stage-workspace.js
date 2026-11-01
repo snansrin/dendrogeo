@@ -28,7 +28,7 @@
     // Etaplar tab in place, but never offer geometry edits without that park.
     const label=current?.row?.geom_json?.stage_scope?.label||current?.row?.name||"";
     host.innerHTML=`<div class="dg-png-title">Etap yönetimi</div><p class="dg-meta">${ports.escape(label)}</p>`+
-     `<p id="dgStageStatus" class="dg-meta" role="status" aria-live="polite">Ana park kaydı eksik. Kayıtlı etap haritada görüntülenebilir; ana park sınırı olmadan etap düzenlenemez. Grid, ölçüm noktaları ve yüzey araçları mevcut menülerdedir.</p>`;
+     `<p id="dgStageStatus" class="dg-meta" role="status" aria-live="polite">Kayıtlı etap aktif çalışma poligonudur. Ana park kaydı eksik olduğu için yalnız ana park sınırına bağlı etap düzenleme kapalıdır. Grid, ölçüm noktaları ve yüzey araçları mevcut menülerdedir.</p>`;
     menu.refresh();return;
    }
    draftName=host.querySelector("#dgStageName")?.value??draftName;

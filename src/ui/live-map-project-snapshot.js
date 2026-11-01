@@ -11,9 +11,9 @@
   return {ownerId:String(ownerId),projectId,parkId,geometry:JSON.stringify([geometry.outer,geometry.inner||[]]),engine:String(engine||"")};
  }
  function create({store,capture,apply}){
-  async function save(input){const id=identity(input);if(!id)throw Error("Proje kimliği veya kayıtlı sınır eksik.");
+  async function save(input,options={}){const id=identity(input);if(!id)throw Error("Proje kimliği veya kayıtlı sınır eksik.");
    const state=capture();if(!state?.analysis&&!state?.grid?.cells?.length)return {saved:false,empty:true};
-   const snapshot={schema,...id,savedAt:new Date().toISOString(),state};await store.save(id,snapshot);
+   const snapshot={schema,...id,savedAt:new Date().toISOString(),state};await store.save(id,snapshot,options);
    return {saved:true,scan:!!state.analysis,grid:state.grid?.cells?.length||0};
   }
   async function restore(input){const id=identity(input);if(!id)return {restored:false,reason:"identity"};

@@ -18,7 +18,7 @@
   else document.getElementById("parkInfo")?.scrollIntoView({behavior:"smooth",block:"nearest"});
  }
  const snapshots=root.DG_LIVE_MAP_PROJECT_SNAPSHOT.create({
-  store:root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE.create(()=>root.indexedDB),
+  store:root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE.create(()=>root.indexedDB,()=>sb),
   capture:()=>{
    const session=DG_GRID_SESSION,record=root.DG_LC_SENS?.state;
    return {
@@ -73,10 +73,10 @@
  });
  let watching=[],watchedInputs=[],saveTimer=null,workspaceIdentity=null;
  const identity=(projectId,park)=>({ownerId:typeof USER!=="undefined"?USER?.id:null,projectId:Number(projectId),parkId:Number(park?.id||0),geometry:park?.geom_json,engine:typeof DG_LC_ENGINE_VERSION!=="undefined"?DG_LC_ENGINE_VERSION:""});
- async function saveWorkspace(projectId,park){
+ async function saveWorkspace(projectId,park,{flush=false}={}){
   if(!projectId||!park||Number(DG_PARK?.id)!==Number(park.id))return true;
   if(typeof dgEnsureLulc==="function"&&!root.DG_LC_SENS?.mount)await dgEnsureLulc();
-  return snapshots.save(identity(projectId,park));
+  return snapshots.save(identity(projectId,park),{flush});
  }
  function stopWatching(){for(const observer of watching)observer.disconnect();watching=[];
   for(const [element,event,handler] of watchedInputs)element.removeEventListener(event,handler);watchedInputs=[];
@@ -138,10 +138,19 @@
  });}
  function focusPark(){
   if(!map||!PARK_POLY?.length)return;
-  map.invalidateSize({pan:false});root.DG_PARK_BOUNDARY_LAYER_UI.fit({leaflet:L,map,outer:PARK_POLY,holes:PARK_HOLES||[]});
-  document.getElementById("map")?.scrollIntoView({block:"nearest"});
+  // On small screens the expanded stage menu can keep the actual map below
+  // the fold. Focus the selected polygon after layout; never change geometry.
+  document.getElementById("dgStageToolsMenu")?.removeAttribute("open");
+  document.getElementById("map")?.scrollIntoView({block:"start"});
+  const fit=()=>{
+   if(!map||!PARK_POLY?.length)return;
+   map.invalidateSize({pan:false});
+   root.DG_PARK_BOUNDARY_LAYER_UI.fit({leaflet:L,map,outer:PARK_POLY,holes:PARK_HOLES||[]});
+   PARK_LAYER?.eachLayer?.(layer=>layer.bringToFront?.());
+  };
+  fit();if(typeof root.requestAnimationFrame==="function")root.requestAnimationFrame(fit);
  }
- document.addEventListener("visibilitychange",()=>{if(document.hidden&&workspaceIdentity)void saveWorkspace(workspaceIdentity.projectId,workspaceIdentity.park).catch(()=>{});});
+ document.addEventListener("visibilitychange",()=>{if(document.hidden&&workspaceIdentity)void saveWorkspace(workspaceIdentity.projectId,workspaceIdentity.park,{flush:true}).catch(()=>{});});
  root.DG_LIVE_MAP_PROJECTS=root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI.create({
   document,projects:()=>typeof USER!=="undefined"&&USER&&typeof PROJ_LIST!=="undefined"?PROJ_LIST:[],
   translate:(template,values)=>typeof dgTf==="function"?dgTf(template,values):template,
@@ -150,9 +159,12 @@
   reloadProjects:()=>loadProjects(),readProject:id=>store.project(id),readPark:id=>store.park(id),readParent:id=>store.parent(id),readParentByKey:key=>store.parentByKey(key),readWaypoints:id=>store.waypoints(id),
   candidate:row=>root.DG_LIVE_MAP_PROJECT_CANDIDATE.candidate(row),
   activeParkId:()=>typeof DG_PARK!=="undefined"?Number(DG_PARK?.id||0):0,
+  activeBoundaryMatches:park=>!!(park?.geom_json?.outer?.length&&map&&PARK_LAYER&&map.hasLayer(PARK_LAYER)&&
+   JSON.stringify(PARK_POLY)===JSON.stringify(park.geom_json.outer)&&
+   JSON.stringify(PARK_HOLES||[])===JSON.stringify(park.geom_json.inner||[])),
   isEditing:()=>!!(root._dgLandCoverBusy||root.DG_LC_SENS?.state?.busy||root.DG_LC_SENS?.state?.saving||root.DG_LC_SENS?.state?.brush||root.DG_LC_SENS?.state?.draw||root.DG_LC_SENS?.state?.objectPick||root.DG_PARK_STAGES?.isDrawing()||document.querySelector('#dgUxMapTools [data-tool][aria-pressed="true"]')),
   saveDraft:async()=>!root.DG_LC_SENS?.state?.record||typeof dgSensSave!=="function"||!!(await dgSensSave()),
-  saveWorkspace:async(projectId,parkId)=>{if(!projectId)return true;return saveWorkspace(projectId,DG_PARK&&Number(DG_PARK.id)===parkId?DG_PARK:null);},
+  saveWorkspace:async(projectId,parkId)=>{if(!projectId)return true;return saveWorkspace(projectId,DG_PARK&&Number(DG_PARK.id)===parkId?DG_PARK:null,{flush:true});},
   restoreWorkspace,watchWorkspace,focusPark,stopWatching,
   resumeWatching:()=>{if(workspaceIdentity&&Number(DG_PARK?.id)===Number(workspaceIdentity.park?.id))watchWorkspace(workspaceIdentity.projectId,workspaceIdentity.park);},
   prepareParent:row=>root.DG_PARK_STAGES.present({park:root.DG_LIVE_MAP_PROJECT_CANDIDATE.candidate(row),row}),
@@ -182,7 +194,7 @@
   openSurface:async()=>{
    const current=Number(DG_PARK?.id||0),record=root.DG_LC_SENS?.state?.record;
    if(Number(record?.parkId)===current&&DG_LC_LAST?.result?.cells?.length){document.getElementById("lcSens")?.scrollIntoView({block:"nearest"});return {ready:true,restored:true};}
-   const result=await openSurfaceSaved();if(result.ready&&workspaceIdentity)await saveWorkspace(workspaceIdentity.projectId,workspaceIdentity.park);
+   const result=await openSurfaceSaved();if(result.ready&&workspaceIdentity)await saveWorkspace(workspaceIdentity.projectId,workspaceIdentity.park,{flush:true});
    return result;
   },
   openStages
