@@ -11,5 +11,5 @@ test('every historical migration replays offline and fresh-install security cont
  const report=JSON.parse(result.stdout);
  assert.equal(report.status,'passed');assert.equal(report.completed,report.total);
  assert.equal(report.contracts,'passed');assert.equal(report.securityMigrationIdempotent,true);
- assert.equal(report.public_tables,13);
+ assert.equal(report.public_tables,14);
 });

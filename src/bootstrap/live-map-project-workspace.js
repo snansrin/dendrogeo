@@ -17,14 +17,20 @@
   if(box){box.scrollIntoView({behavior:"smooth",block:"nearest"});box.querySelector("#dgStageSelect")?.focus({preventScroll:true});}
   else document.getElementById("parkInfo")?.scrollIntoView({behavior:"smooth",block:"nearest"});
  }
+ const accountSnapshotStore=root.DG_LIVE_MAP_PROJECT_ACCOUNT_STORE.create({
+  client:sb,device:root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE.create(()=>root.indexedDB)
+ });
  const snapshots=root.DG_LIVE_MAP_PROJECT_SNAPSHOT.create({
-  store:root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE.create(()=>root.indexedDB),
+  store:accountSnapshotStore,
   capture:()=>{
    const session=DG_GRID_SESSION,record=root.DG_LC_SENS?.state;
    return {
     // The last raster result is global; it must not leak into the next park
     // if that park has not yet mounted its own review.
     analysis:Number(record?.record?.parkId)===Number(DG_PARK?.id)&&typeof DG_LC_LAST!=="undefined"&&Array.isArray(DG_LC_LAST?.result?.cells)&&DG_LC_LAST.result.cells.length?DG_LC_LAST:null,
+    // Hand-drawn buildings, boundary features, brush corrections and their
+    // original evidence fingerprint are essential for an editable resume.
+    review:Number(record?.record?.parkId)===Number(DG_PARK?.id)&&String(record.record.owner)===String(USER?.id)?record.record:null,
     grid:{cells:session.getCells(),selected:[...session.getSelection()],meta:session.getMeta(),source:session.getSource(),
      reviewBasis:root.DG_LIVE_MAP_PROJECT_SNAPSHOT.reviewBasis(record),
      options:{size:document.getElementById("gridSize")?.value||"20",clearance:document.getElementById("gridClearance")?.value||"3",
@@ -40,6 +46,23 @@
    }
    if(last?.result?.cells?.length&&last.result.cells.length<=60000&&last.report&&root.DG_LC_SENS?.mount){
     DG_LC_LAST=last;
+    const savedReview=state.review;
+    if(savedReview?.id&&Number(savedReview.parkId)===parkId&&String(savedReview.owner)===String(USER?.id)&&
+       root.DG_LC_VALIDATE?.loadCampaigns&&root.DG_LC_VALIDATE?.saveCampaign&&root.DG_SURFACE_REVIEW?.fingerprint){
+     // Never overwrite newer device or account decisions. Restore only a
+     // review backed by the exact original raster+park+engine fingerprint.
+     const original=await root.DG_SURFACE_REVIEW.fingerprint(last.result.cells,PARK_POLY,PARK_HOLES||[],{
+      year:last.report.year,engine:DG_LC_ENGINE_VERSION
+     });
+     if(savedReview.fingerprint===original){
+      const campaigns=await root.DG_LC_VALIDATE.loadCampaigns(parkId);
+      const device=campaigns.find(value=>value.id===savedReview.id&&value.owner===savedReview.owner);
+      const remote=await root.DG_SURFACE_REVIEW.load(parkId,USER.id).catch(()=>null);
+      const changedAt=value=>Date.parse(value?.modifiedAt||value?.draftSavedAt||value?.acceptedAt||0)||0;
+      if(changedAt(savedReview)>changedAt(device)&&changedAt(savedReview)>changedAt(remote?.payload))
+       await root.DG_LC_VALIDATE.saveCampaign(savedReview);
+     }
+    }
     const report=document.getElementById("landCoverReport");
     if(report&&root.DG_LANDCOVER_RENDER_REPORT){report.style.display="block";root.DG_LANDCOVER_RENDER_REPORT(report,last.report,parkAreaM2());}
     document.getElementById("v-map")?.classList.add("surface-review-active");
@@ -73,10 +96,11 @@
  });
  let watching=[],watchedInputs=[],saveTimer=null,workspaceIdentity=null;
  const identity=(projectId,park)=>({ownerId:typeof USER!=="undefined"?USER?.id:null,projectId:Number(projectId),parkId:Number(park?.id||0),geometry:park?.geom_json,engine:typeof DG_LC_ENGINE_VERSION!=="undefined"?DG_LC_ENGINE_VERSION:""});
- async function saveWorkspace(projectId,park){
+ async function saveWorkspace(projectId,park,{flush=false}={}){
   if(!projectId||!park||Number(DG_PARK?.id)!==Number(park.id))return true;
   if(typeof dgEnsureLulc==="function"&&!root.DG_LC_SENS?.mount)await dgEnsureLulc();
-  return snapshots.save(identity(projectId,park));
+  const id=identity(projectId,park);if(flush)accountSnapshotStore.flush(id);
+  return snapshots.save(id);
  }
  function stopWatching(){for(const observer of watching)observer.disconnect();watching=[];
   for(const [element,event,handler] of watchedInputs)element.removeEventListener(event,handler);watchedInputs=[];
@@ -100,7 +124,8 @@
   }
  }
  async function restoreWorkspace(project,park){
-  if(project.is_locked)return {restored:false,mode:"readonly"};
+  // A project completion seal prevents new measurements, not read-only
+  // restoration of its already saved scientific workspace evidence.
   // The scan engine version is loaded lazily. Resolve it before comparing
   // historical snapshots; otherwise a fresh tab would always look incompatible.
   if(typeof dgEnsureLulc==="function"&&!root.DG_LC_SENS?.mount)await dgEnsureLulc();
@@ -108,25 +133,9 @@
   let cached={restored:false,reason:"unavailable"};
   try{cached=await snapshots.restore(id);}catch(error){console.warn("DENDROGEO · proje cihaz arşivi:",error.message);}
   if(cached.scan)return {...cached,mode:"cached"};
-  // Account review and same-device drafts are the established, scoped sources.
-  // If raster evidence was never cached, recreate it once automatically after
-  // the user explicitly opens this project; never silently accept a new result.
-  const [local,remote]=await Promise.all([
-   root.DG_LC_VALIDATE?.loadCampaigns(park.id).catch(()=>[])||Promise.resolve([]),
-   root.DG_SURFACE_REVIEW?.load(park.id,USER.id).catch(()=>null)||Promise.resolve(null)
-  ]);
-  const drafts=(local||[]).some(row=>String(row.owner)===String(USER.id));
-  if(!drafts&&!remote)return {...cached,mode:cached.grid?"cached":"none"};
-  const result=await openSurfaceSaved();
-  let retainedGrid=cached.grid||0;
-  if(result.ready){
-   // A legacy grid-only snapshot may have been built against a different
-   // surface revision. Restore it only if the review still matches; never
-   // overwrite its archived cells with a newly scanned empty grid.
-   if(cached.grid){const after=await snapshots.restore(id);retainedGrid=after.grid||0;}
-   if(!cached.grid||retainedGrid)await snapshots.save(id);
-  }
-  return {restored:!!result.restored,scan:!!result.ready,grid:retainedGrid,mode:result.ready?"review":"failed"};
+  // Opening a saved project must not run a fresh scan and present it as the
+  // saved raster, because that would discard/reinterpret hand edits.
+  return {...cached,mode:cached.grid?"cached":"none"};
  }
  async function openSurfaceSaved(){return root.DG_LIVE_MAP_PROJECT_SURFACE_UI.restore({
   parkId:Number(DG_PARK?.id||0),currentParkId:()=>Number(DG_PARK?.id||0),
@@ -167,7 +176,7 @@
   root.DG_PARK_BOUNDARY_LAYER_UI.fit({leaflet:L,map,outer:PARK_POLY,holes:PARK_HOLES||[]});
   document.getElementById("map")?.scrollIntoView({block:"center"});
  }
- document.addEventListener("visibilitychange",()=>{if(document.hidden&&workspaceIdentity)void saveWorkspace(workspaceIdentity.projectId,workspaceIdentity.park).catch(()=>{});});
+ document.addEventListener("visibilitychange",()=>{if(document.hidden&&workspaceIdentity)void saveWorkspace(workspaceIdentity.projectId,workspaceIdentity.park,{flush:true}).catch(()=>{});});
  root.DG_LIVE_MAP_PROJECTS=root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI.create({
   document,projects:()=>typeof USER!=="undefined"&&USER&&typeof PROJ_LIST!=="undefined"?PROJ_LIST:[],
   translate:(template,values)=>typeof dgTf==="function"?dgTf(template,values):template,
@@ -178,7 +187,7 @@
   activeParkId:()=>typeof DG_PARK!=="undefined"?Number(DG_PARK?.id||0):0,
   isEditing:()=>!!(root._dgLandCoverBusy||root.DG_LC_SENS?.state?.busy||root.DG_LC_SENS?.state?.saving||root.DG_LC_SENS?.state?.brush||root.DG_LC_SENS?.state?.draw||root.DG_LC_SENS?.state?.objectPick||root.DG_PARK_STAGES?.isDrawing()||document.querySelector('#dgUxMapTools [data-tool][aria-pressed="true"]')),
   saveDraft:async()=>!root.DG_LC_SENS?.state?.record||typeof dgSensSave!=="function"||!!(await dgSensSave()),
-  saveWorkspace:async(projectId,parkId)=>{if(!projectId)return true;return saveWorkspace(projectId,DG_PARK&&Number(DG_PARK.id)===parkId?DG_PARK:null);},
+  saveWorkspace:async(projectId,parkId)=>{if(!projectId)return true;return saveWorkspace(projectId,DG_PARK&&Number(DG_PARK.id)===parkId?DG_PARK:null,{flush:true});},
   restoreWorkspace,watchWorkspace,focusPark,stopWatching,
   verifyBoundary:verifyActiveBoundary,activateParkAnalysis,
   resumeWatching:()=>{if(workspaceIdentity&&Number(DG_PARK?.id)===Number(workspaceIdentity.park?.id))watchWorkspace(workspaceIdentity.projectId,workspaceIdentity.park);},

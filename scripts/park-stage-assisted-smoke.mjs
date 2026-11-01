@@ -72,6 +72,10 @@ try{for(const width of [360,390,430]){
  await page.waitForFunction(()=>!document.querySelector('#map .leaflet-zoom-anim'));
  const beforeHandles=await page.locator('.dg-stage-reference').count(),startHandles=await page.locator('.dg-stage-reference[title^="Başlangıç"]').count(),segments=page.locator('path.dg-stage-cut-segment');
  const segmentIndex=await segments.evaluateAll((paths,count)=>paths.slice(0,count-1).map((path,index)=>({index,length:path.getTotalLength()})).sort((a,b)=>b.length-a.length)[0].index,startHandles);
+ // On narrow WebKit screens the collapsed left-side editor can still cover
+ // a segment. Pan the stage into the visible map before a real pointer click,
+ // just as a field worker would; never force-click through the controls.
+ await page.evaluate(()=>map.panBy([-150,0],{animate:false}));
  await segments.nth(segmentIndex).click();await page.waitForFunction(n=>document.querySelectorAll('.dg-stage-reference').length===n,beforeHandles+1);
  const midpoint=await page.locator('.dg-stage-reference[title="Başlangıç · referans '+(segmentIndex+2)+'"]').boundingBox();await page.mouse.move(midpoint.x+22,midpoint.y+22);await page.mouse.down();await page.mouse.move(midpoint.x+22,midpoint.y+14,{steps:5});await page.mouse.up();await page.waitForFunction(()=>!document.querySelector('[data-cut-action="save"]').disabled);
  await openTools();await panel.locator('[data-cut-boundary="0"]').click();await page.waitForFunction(()=>!document.querySelector('[data-cut-action="save"]').disabled);

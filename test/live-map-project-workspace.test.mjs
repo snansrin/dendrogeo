@@ -15,6 +15,7 @@ test('saved project controls retain English labels for mobile language switching
  const source=readFileSync(new URL('../src/config/i18n-en.js',import.meta.url),'utf8');
  const translations=runInNewContext(source+'\nDG_I18N_EN');
  assert.equal(translations['💾 Çalışmayı bu cihazda sakla'],'💾 Save workspace on this device');
+ assert.match(translations['{n} ölçüm noktası, kaydedilmiş {g} grid hücresi ve {s} yüzey taraması çalışma arşivinden geri açıldı.'],/saved project archive/);
  assert.match(translations['Etaplar menüsü doğrulanan ana parka yeniden bağlandı.'],/Stages menu was reconnected/);
  assert.match(translations['{n} kayıtlı ölçüm noktası ve seçilen etap değişmeden açıldı. Etaplar menüsü doğrulanan ana parka yeniden bağlandı.'],/original stage/);
  assert.equal(translations['Haritada açmak için bir proje seç.'],'Select a project to open it on the map.');
@@ -226,6 +227,7 @@ test('bootstrap restores selected cached project only after resolving the lazy s
  const order=[],root={};let ports;
  root.DG_LIVE_MAP_PROJECT_STORE={create:()=>({})};
  root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_ACCOUNT_STORE={create:()=>({flush:()=>{}})};
  root.DG_LIVE_MAP_PROJECT_SNAPSHOT={reviewBasis:()=>null,create:()=>({
   save:async()=>{order.push('save device');return true;},
   restore:async scope=>{order.push('read '+scope.projectId+'/'+scope.parkId+'/'+scope.engine);return{scan:true,grid:12};}
@@ -238,13 +240,15 @@ test('bootstrap restores selected cached project only after resolving the lazy s
  assert.equal(restored.mode,'cached');
  assert.deepEqual(order,['load lazy engine','read 33/53/core-v1']);
  const locked=await ports.restoreWorkspace({id:33,is_locked:true},stage);
- assert.equal(locked.restored,false);assert.equal(locked.mode,'readonly');
- assert.deepEqual(order,['load lazy engine','read 33/53/core-v1'],'locked projects never load editable snapshots');
+ assert.equal(locked.mode,'cached');assert.equal(locked.scan,true);
+ assert.deepEqual(order,['load lazy engine','read 33/53/core-v1','load lazy engine','read 33/53/core-v1'],
+  'a completion seal never hides already stored evidence');
 });
 test('saved grid and waypoint visibility are both restored when switching between projects',async()=>{
  const root={};let apply;
  root.DG_LIVE_MAP_PROJECT_STORE={create:()=>({})};
  root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_ACCOUNT_STORE={create:()=>({flush:()=>{}})};
  root.DG_LIVE_MAP_PROJECT_SNAPSHOT={reviewBasis:()=>null,create:ports=>{apply=ports.apply;return{save:async()=>true,restore:async()=>({})};}};
  root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI={create:()=>({})};
  root.DG_LC_SENS={state:{record:null}};
@@ -262,6 +266,30 @@ test('saved grid and waypoint visibility are both restored when switching betwee
  await apply({grid:{...grid,options:{gridVisible:false,waypointVisible:true,greenOnly:false}}},{parkId:25});
  assert.equal(controls.togGrid.checked,false);assert.equal(controls.togWp.checked,true);
  assert.equal(layers.has('grid'),false);assert.equal(layers.has('wp'),true);
+});
+test('saved hand-drawn buildings and brush decisions return before the editor mounts, without a new scan',async()=>{
+ const events=[],root={};let apply;
+ root.DG_LIVE_MAP_PROJECT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_ACCOUNT_STORE={create:()=>({flush:()=>{}})};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT={reviewBasis:()=>null,create:ports=>{apply=ports.apply;return{save:async()=>true,restore:async()=>({})};}};
+ root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI={create:()=>({})};
+ root.DG_LC_VALIDATE={loadCampaigns:async()=>[],saveCampaign:async record=>{events.push('save hand edits');assert.equal(record.features[0].type,'building');assert.equal(record.corrections.c1.to,'hard');}};
+ root.DG_SURFACE_REVIEW={fingerprint:async()=> 'same-fingerprint',load:async()=>null};
+ root.DG_LC_SENS={state:{record:null},mount:async()=>{events.push('mount saved editor');root.DG_LC_SENS.state.record={parkId:53};}};
+ const env={window:root,sb:{},USER:{id:'account-one'},DG_PARK:{id:53,geom_json:stage.geom_json},
+  DG_LC_ENGINE_VERSION:'core',DG_LC_LAST:null,PARK_POLY:geometry.outer,PARK_HOLES:[],
+  document:{addEventListener:()=>{},getElementById:()=>null}};
+ runInNewContext(readFileSync(new URL('../src/bootstrap/live-map-project-workspace.js',import.meta.url),'utf8'),env);
+ const review={id:'surface-account-one-53',owner:'account-one',parkId:53,fingerprint:'same-fingerprint',
+  modifiedAt:'2026-11-01T10:00:00Z',draftDirty:true,features:[{type:'building'}],corrections:{c1:{to:'hard'}}};
+ const analysis={report:{year:2021},result:{cells:[{classKey:'green'}]}};
+ const result=await apply({analysis,review},{parkId:53});
+ assert.equal(result.scan,true);
+ assert.deepEqual(events,['save hand edits','mount saved editor']);
+ const mismatch={...review,fingerprint:'other-raster'};
+ events.length=0;await apply({analysis,review:mismatch},{parkId:53});
+ assert.deepEqual(events,['mount saved editor'],'a mismatched scan cannot import old boundaries');
 });
 test('live-map bootstrap reuses existing map/waypoint tools without a second writer',()=>{
  const source=readFileSync(new URL('../src/bootstrap/live-map-project-workspace.js',import.meta.url),'utf8');
@@ -303,6 +331,7 @@ test('saved-stage boundary bridge checks real active GIS rings and recreates onl
  const root={},calls=[];let ports;
  root.DG_LIVE_MAP_PROJECT_STORE={create:()=>({})};
  root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_ACCOUNT_STORE={create:()=>({flush:()=>{}})};
  root.DG_LIVE_MAP_PROJECT_SNAPSHOT={reviewBasis:()=>null,create:()=>({save:async()=>true,restore:async()=>({})})};
  root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI={create:x=>(ports=x,{})};
  root.DG_PARK_BOUNDARY_LAYER_UI={render:args=>{calls.push('render');args.onCreated('boundary');}};
