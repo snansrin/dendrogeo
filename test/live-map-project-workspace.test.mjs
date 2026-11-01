@@ -315,3 +315,43 @@ test('saved stage scope is scrolled into view and its missing Leaflet display la
  ports.focusPark();
  assert.deepEqual(calls,['scroll start','invalidate','render 1','front','fit 1']);
 });
+
+test('the per-device account archive can restore exact evidence even if IndexedDB is blocked',async()=>{
+ const account=[],calls=[];
+ const root=moduleAt('src/adapters/parks/live-map-project-snapshot-store.js',{
+  Blob:globalThis.Blob,crypto:{randomUUID:()=> 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'}
+ });
+ const client={from(table){
+  assert.equal(table,'project_workspace_snapshots');
+  const query={select(){return this;},eq(name,value){calls.push([name,value]);return this;},
+   order(){return this;},limit:async()=>({data:account.map(payload=>({payload:payload.payload})),error:null}),
+   upsert:async row=>{account.push(row);return {error:null};}};
+  return query;
+ }};
+ const store=root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE.create(()=>null,()=>client);
+ const id={ownerId:'account-one',projectId:33,parkId:53,geometry:JSON.stringify(geometry),engine:'core-v1'};
+ const snapshot={...id,schema:'dendrogeo/live-map-project-snapshot/1',savedAt:'2026-11-01T12:00:00Z',
+  state:{analysis:{result:{cells:[{id:1,green:true}]},report:{total:1}},grid:{cells:[]}}};
+ const saved=await store.save(id,snapshot);
+ assert.deepEqual(JSON.parse(JSON.stringify(saved)),{offline:false,account:true});
+ assert.equal(account[0].device_id,'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee');
+ assert.equal(account[0].project_id,33);
+ const restored=await store.read(id);
+ assert.equal(restored.archiveSource,'account');
+ assert.deepEqual(JSON.parse(JSON.stringify(restored.state)),snapshot.state);
+ assert.ok(calls.some(([name,value])=>name==='owner'&&value==='account-one'));
+ assert.ok(calls.some(([name,value])=>name==='project_id'&&value===33));
+ assert.ok(calls.some(([name,value])=>name==='park_id'&&value===53));
+ assert.equal(await store.read({...id,parkId:25}),null,'a different park cannot inherit raster evidence');
+});
+
+test('account workspace migration is additive, per-owner RLS scoped and excludes unauthorized updates',()=>{
+ const sql=readFileSync(new URL('../supabase/migrations/20261101000100_project_workspace_snapshots.sql',import.meta.url),'utf8');
+ assert.match(sql,/create table if not exists public\.project_workspace_snapshots/);
+ assert.match(sql,/enable row level security/);
+ assert.match(sql,/owner=auth\.uid\(\)/);
+ assert.match(sql,/project\.park_id=project_workspace_snapshots\.park_id/);
+ assert.match(sql,/project\.is_locked=false/);
+ assert.match(sql,/grant select,insert,update/);
+ assert.doesNotMatch(sql,/grant.*delete/);
+});
