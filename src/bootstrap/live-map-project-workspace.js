@@ -94,7 +94,7 @@
    return {scan,grid};
   }
  });
- let watching=[],watchedInputs=[],saveTimer=null,workspaceIdentity=null;
+ let watching=[],watchedInputs=[],saveTimer=null,workspaceIdentity=null,preparedStageParent=null;
  const identity=(projectId,park)=>({ownerId:typeof USER!=="undefined"?USER?.id:null,projectId:Number(projectId),parkId:Number(park?.id||0),geometry:park?.geom_json,engine:typeof DG_LC_ENGINE_VERSION!=="undefined"?DG_LC_ENGINE_VERSION:""});
  async function saveWorkspace(projectId,park,{flush=false}={}){
   if(!projectId||!park||Number(DG_PARK?.id)!==Number(park.id))return true;
@@ -191,9 +191,12 @@
   restoreWorkspace,watchWorkspace,focusPark,stopWatching,
   verifyBoundary:verifyActiveBoundary,activateParkAnalysis,
   resumeWatching:()=>{if(workspaceIdentity&&Number(DG_PARK?.id)===Number(workspaceIdentity.park?.id))watchWorkspace(workspaceIdentity.projectId,workspaceIdentity.park);},
-  prepareParent:row=>root.DG_PARK_STAGES.present({park:root.DG_LIVE_MAP_PROJECT_CANDIDATE.candidate(row),row}),
-  forgetParent:()=>root.DG_PARK_STAGES.present({park:null,row:null}),
-  draw:(candidate,row)=>{
+  prepareParent:row=>{
+   preparedStageParent={park:root.DG_LIVE_MAP_PROJECT_CANDIDATE.candidate(row),row};
+   return root.DG_PARK_STAGES.present(preparedStageParent);
+  },
+  forgetParent:()=>{preparedStageParent=null;return root.DG_PARK_STAGES.present({park:null,row:null});},
+  draw:async(candidate,row)=>{
    // The shared drawPark registration hook would otherwise be allowed to
    // insert a park on a key miss (notably for historical manual parks).
    // Resolve the *already verified* row from the existing session cache;
@@ -206,7 +209,17 @@
     if(!key||!DG_PARK_SESSION?.set)throw Error("Kayıtlı park kimliği güvenle yüklenemedi.");
     DG_PARK_SESSION.set(key,row);
    }
-   return drawPark(candidate);
+   await drawPark(candidate);
+   // drawPark clears the previous park (and DG_PARK_STAGES.clear()), so the
+   // verified parent shown before drawing must be reattached AFTER drawing.
+   // Otherwise a historical stage whose parent was recreated under another
+   // ID still displays the uneditable "Ana park kaydı eksik" panel.
+   if(candidate.stageRow&&Number(DG_PARK?.id)===Number(row.id)&&preparedStageParent&&
+      preparedStageParent.row.osm_key===row.geom_json?.stage_scope?.parentKey&&
+      preparedStageParent.row.created_by===row.created_by){
+    await root.DG_PARK_STAGES.present(preparedStageParent);
+    await root.DG_PARK_STAGES.present({park:candidate,row});
+   }
   },
   showWaypoints:rows=>{
    const previous=DG_GRID_SESSION.getWaypointLayer();
