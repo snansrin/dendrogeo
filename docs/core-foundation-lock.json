@@ -12458,20 +12458,76 @@
         "GitHub Actions CI"
       ],
       "files": [
-        {"path":"index.html","previous_sha256":"962d68f02c4e9e1899c37502fc295647efe9b7356924e12a1359e6f486bb2af5","sha256":"831765572e9b347d5e5a330bf61bcc960eda72869ccc668be2319d41cdebea58"},
-        {"path":"src/adapters/trees/persist-measurement-project.js","previous_sha256":"e76fc2730ee86bbf8c41c34e771e44e9d889ddae4cd423a0a324c020c2431d28","sha256":"6968d2ef746ae57de6892dc3ffc89ff5f55c63f3c576904ca0c6707931176cb3"},
-        {"path":"src/adapters/trees/project-selection-memory.js","previous_sha256":"1b2d3b0bead2e2e6261af155564df269118e8d44a23d66c7c4d8cea8e1efa2b8","sha256":"3def409a01ba61dff30597f0dfc34e0d52cc9002b1b7766a5fe22f6db55a0902"},
-        {"path":"src/ui/admin-measurement-row.js","previous_sha256":"dbf2bac166ef4d07aedc574ae64c1409f191027db5c334006aa6ed2b765590f3","sha256":"952e27d36660d48302dbd4ce249cc96188a79fc46bff601885f204634a88eb6b"},
-        {"path":"src/ui/admin-tree-actions.js","previous_sha256":"89aacf1c996f9fcac92a7bd16402b488e77e119f52d8d1f0af7f1e7b35e04b43","sha256":"5d306c3f559522b3bc9a8273959b6f4e2beb47a682e1d460d5b6653a5442c215"},
-        {"path":"src/ui/admin-tree-measurement-row.js","previous_sha256":"8527ca6e472a047ab394aa521746c045be73cfb918aa807490087aba93792d0a","sha256":"d326d1e9a7a6193f2d1aaf6994146ec65c5f0ec2f542123f6389dc3e1ae037ca"},
-        {"path":"src/ui/measurement-project-card.js","previous_sha256":"32240c1e2fc05122e8ee5b81e7514576fa931fd96a934cc2e11ab83f6163bb21","sha256":"7e4807d2a58232daf79ff4ced3117ff990242e20acc1c90b454500298d8f77fa"},
-        {"path":"src/ui/open-project-for-measurement.js","previous_sha256":"a3d1b2f055d9c697ba4e094029ba10ba088785290b30230c0ce74db1968d6d2d","sha256":"6f10e484a0df9e76c32e1eeac8d4b52180b7c61bb54a3fdc521282a2f1a7f4ab"},
-        {"path":"src/ui/park-project-options.js","previous_sha256":"66aa3e884ac2b5d8689979507f4e93d23c0858a4e67f4bcbb4508cd8e3c64ef7","sha256":"f168ae579f1bb0e3ee0ca5620e8011f83075ecfcfd35d2a0dea08ed6553d4ccf"},
-        {"path":"src/ui/render-measurement-project-directory.js","previous_sha256":"7a8f070a697a7135850447d46da28cb58870d4c190ca3e7eae3b0779690011e1","sha256":"741c5a0f72daaee26b5a2e12db8058bf2ff5dfde27e876f12df5c8d3b4e31476"},
-        {"path":"src/ui/shared-park-inventory-export.js","previous_sha256":"ddb609e190c13cf070636b510502be1a6729bafd1ae36ca02c693a7eb0745368","sha256":"7e8f8167d06cdf9fe9e07daf65777f01109b806c604899b7e4405029a9166781"},
-        {"path":"src/ui/validate-measurement-save-form.js","previous_sha256":"021d08428e56afa34ed8eb0ce1e6a24c6c02685bf13a3149a27f53f3472cbad3","sha256":"2bb05d7d3bbd4bd15f03d0ecc94be89cd6cd6a57c19f59baf4b660643faeeccb"},
-        {"path":"test/form-qa.test.mjs","previous_sha256":"4727cfe175c51eebb3994a5ed46429f5d3f84f4f7062ef655a60fa3a7fd94f4e","sha256":"9f81677979d4d4282387114043150ba02ed6ff57d3edb36fca9e3a938e6b9c09"},
-        {"path":"test/dbh-qa.test.mjs","previous_sha256":"8654cf646121ae06ae23a4b6e5c261272b6c10b04b8285f7e20f0daa150b7210","sha256":"3ee5863d9936c1b7d510c0c020d04db1a3669ab75646e0bf02a59a3d61031eeb"}
+        {
+          "path": "index.html",
+          "previous_sha256": "962d68f02c4e9e1899c37502fc295647efe9b7356924e12a1359e6f486bb2af5",
+          "sha256": "831765572e9b347d5e5a330bf61bcc960eda72869ccc668be2319d41cdebea58"
+        },
+        {
+          "path": "src/adapters/trees/persist-measurement-project.js",
+          "previous_sha256": "e76fc2730ee86bbf8c41c34e771e44e9d889ddae4cd423a0a324c020c2431d28",
+          "sha256": "6968d2ef746ae57de6892dc3ffc89ff5f55c63f3c576904ca0c6707931176cb3"
+        },
+        {
+          "path": "src/adapters/trees/project-selection-memory.js",
+          "previous_sha256": "1b2d3b0bead2e2e6261af155564df269118e8d44a23d66c7c4d8cea8e1efa2b8",
+          "sha256": "3def409a01ba61dff30597f0dfc34e0d52cc9002b1b7766a5fe22f6db55a0902"
+        },
+        {
+          "path": "src/ui/admin-measurement-row.js",
+          "previous_sha256": "dbf2bac166ef4d07aedc574ae64c1409f191027db5c334006aa6ed2b765590f3",
+          "sha256": "952e27d36660d48302dbd4ce249cc96188a79fc46bff601885f204634a88eb6b"
+        },
+        {
+          "path": "src/ui/admin-tree-actions.js",
+          "previous_sha256": "89aacf1c996f9fcac92a7bd16402b488e77e119f52d8d1f0af7f1e7b35e04b43",
+          "sha256": "5d306c3f559522b3bc9a8273959b6f4e2beb47a682e1d460d5b6653a5442c215"
+        },
+        {
+          "path": "src/ui/admin-tree-measurement-row.js",
+          "previous_sha256": "8527ca6e472a047ab394aa521746c045be73cfb918aa807490087aba93792d0a",
+          "sha256": "d326d1e9a7a6193f2d1aaf6994146ec65c5f0ec2f542123f6389dc3e1ae037ca"
+        },
+        {
+          "path": "src/ui/measurement-project-card.js",
+          "previous_sha256": "32240c1e2fc05122e8ee5b81e7514576fa931fd96a934cc2e11ab83f6163bb21",
+          "sha256": "7e4807d2a58232daf79ff4ced3117ff990242e20acc1c90b454500298d8f77fa"
+        },
+        {
+          "path": "src/ui/open-project-for-measurement.js",
+          "previous_sha256": "a3d1b2f055d9c697ba4e094029ba10ba088785290b30230c0ce74db1968d6d2d",
+          "sha256": "6f10e484a0df9e76c32e1eeac8d4b52180b7c61bb54a3fdc521282a2f1a7f4ab"
+        },
+        {
+          "path": "src/ui/park-project-options.js",
+          "previous_sha256": "66aa3e884ac2b5d8689979507f4e93d23c0858a4e67f4bcbb4508cd8e3c64ef7",
+          "sha256": "f168ae579f1bb0e3ee0ca5620e8011f83075ecfcfd35d2a0dea08ed6553d4ccf"
+        },
+        {
+          "path": "src/ui/render-measurement-project-directory.js",
+          "previous_sha256": "7a8f070a697a7135850447d46da28cb58870d4c190ca3e7eae3b0779690011e1",
+          "sha256": "741c5a0f72daaee26b5a2e12db8058bf2ff5dfde27e876f12df5c8d3b4e31476"
+        },
+        {
+          "path": "src/ui/shared-park-inventory-export.js",
+          "previous_sha256": "ddb609e190c13cf070636b510502be1a6729bafd1ae36ca02c693a7eb0745368",
+          "sha256": "7e8f8167d06cdf9fe9e07daf65777f01109b806c604899b7e4405029a9166781"
+        },
+        {
+          "path": "src/ui/validate-measurement-save-form.js",
+          "previous_sha256": "021d08428e56afa34ed8eb0ce1e6a24c6c02685bf13a3149a27f53f3472cbad3",
+          "sha256": "2bb05d7d3bbd4bd15f03d0ecc94be89cd6cd6a57c19f59baf4b660643faeeccb"
+        },
+        {
+          "path": "test/form-qa.test.mjs",
+          "previous_sha256": "4727cfe175c51eebb3994a5ed46429f5d3f84f4f7062ef655a60fa3a7fd94f4e",
+          "sha256": "9f81677979d4d4282387114043150ba02ed6ff57d3edb36fca9e3a938e6b9c09"
+        },
+        {
+          "path": "test/dbh-qa.test.mjs",
+          "previous_sha256": "8654cf646121ae06ae23a4b6e5c261272b6c10b04b8285f7e20f0daa150b7210",
+          "sha256": "3ee5863d9936c1b7d510c0c020d04db1a3669ab75646e0bf02a59a3d61031eeb"
+        }
       ]
     },
     {
@@ -12484,9 +12540,21 @@
         "npm run check:phone"
       ],
       "files": [
-        {"path":"index.html","previous_sha256":"831765572e9b347d5e5a330bf61bcc960eda72869ccc668be2319d41cdebea58","sha256":"1e534dfe5996b2ff3871b72d57a09b2b475972abfee0198903ade792eae42800"},
-        {"path":"src/ui/shell.js","previous_sha256":"aaad18a7a92f0062b49fd2b19491b0b686fe7a44ca6ff8ec5280619db1460c4f","sha256":"eb57acd661f483f8ac500122336afc40bfa23dc5812063c324b2565a6e822c7f"},
-        {"path":"src/ui/waypoint-map-viewport.js","previous_sha256":"d302214df223907c1dcb52c8fc54679629740997e12678d6f5750e675bd7154b","sha256":"24420b54d2cc2c87ab67ac9e37e37ed61c18881eb332d81d3eb3d03803008da5"}
+        {
+          "path": "index.html",
+          "previous_sha256": "831765572e9b347d5e5a330bf61bcc960eda72869ccc668be2319d41cdebea58",
+          "sha256": "1e534dfe5996b2ff3871b72d57a09b2b475972abfee0198903ade792eae42800"
+        },
+        {
+          "path": "src/ui/shell.js",
+          "previous_sha256": "aaad18a7a92f0062b49fd2b19491b0b686fe7a44ca6ff8ec5280619db1460c4f",
+          "sha256": "eb57acd661f483f8ac500122336afc40bfa23dc5812063c324b2565a6e822c7f"
+        },
+        {
+          "path": "src/ui/waypoint-map-viewport.js",
+          "previous_sha256": "d302214df223907c1dcb52c8fc54679629740997e12678d6f5750e675bd7154b",
+          "sha256": "24420b54d2cc2c87ab67ac9e37e37ed61c18881eb332d81d3eb3d03803008da5"
+        }
       ]
     },
     {
@@ -12500,11 +12568,31 @@
         "npm run check:accessibility"
       ],
       "files": [
-        {"path":"index.html","previous_sha256":"1e534dfe5996b2ff3871b72d57a09b2b475972abfee0198903ade792eae42800","sha256":"137e96645c34885258c241e5498b002892e1a4a200ab2ef5ed882b5b72d4e3c6"},
-        {"path":"partials/shell.html","previous_sha256":"0dbebdc85cff7524c1a922bcde46308ee095bbbbfab03186035b1e325905e0e1","sha256":"24e8bc25f8d07a1e2ebaea9867b481f525ab84bfa94a202fd92eb7fcf56ea726"},
-        {"path":"src/services/park-invites.js","previous_sha256":"7e9ea0aed696581924d2bbbc3b9330ec901328e18fcb32d0444897b238d6b92b","sha256":"22f10d68bfadb825c6d0e1ce352c7a062380efa134cd7e9a8b9f6f5c2dbab3e0"},
-        {"path":"src/ui/park-invite-inbox.js","previous_sha256":"43ba818b8e268129ed5f0425f30d342b36ff2f7b39161a20f2f3042409e0e4e1","sha256":"73c22ebca5079982c6994235fbf914771697818a789f68eb637338b2e019b0e3"},
-        {"path":"src/ui/shell.js","previous_sha256":"eb57acd661f483f8ac500122336afc40bfa23dc5812063c324b2565a6e822c7f","sha256":"325536d7be1185662f80d8afc5c064341d8998474083b7421cd656620a32c487"}
+        {
+          "path": "index.html",
+          "previous_sha256": "1e534dfe5996b2ff3871b72d57a09b2b475972abfee0198903ade792eae42800",
+          "sha256": "137e96645c34885258c241e5498b002892e1a4a200ab2ef5ed882b5b72d4e3c6"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "0dbebdc85cff7524c1a922bcde46308ee095bbbbfab03186035b1e325905e0e1",
+          "sha256": "24e8bc25f8d07a1e2ebaea9867b481f525ab84bfa94a202fd92eb7fcf56ea726"
+        },
+        {
+          "path": "src/services/park-invites.js",
+          "previous_sha256": "7e9ea0aed696581924d2bbbc3b9330ec901328e18fcb32d0444897b238d6b92b",
+          "sha256": "22f10d68bfadb825c6d0e1ce352c7a062380efa134cd7e9a8b9f6f5c2dbab3e0"
+        },
+        {
+          "path": "src/ui/park-invite-inbox.js",
+          "previous_sha256": "43ba818b8e268129ed5f0425f30d342b36ff2f7b39161a20f2f3042409e0e4e1",
+          "sha256": "73c22ebca5079982c6994235fbf914771697818a789f68eb637338b2e019b0e3"
+        },
+        {
+          "path": "src/ui/shell.js",
+          "previous_sha256": "eb57acd661f483f8ac500122336afc40bfa23dc5812063c324b2565a6e822c7f",
+          "sha256": "325536d7be1185662f80d8afc5c064341d8998474083b7421cd656620a32c487"
+        }
       ]
     },
     {
@@ -12523,11 +12611,31 @@
         "src/domain/parks/live-map-project-candidate.js"
       ],
       "files": [
-        {"path":"index.html","previous_sha256":"137e96645c34885258c241e5498b002892e1a4a200ab2ef5ed882b5b72d4e3c6","sha256":"c766c39e49772acdf1f2da829f5a36f5b30f18bdc8f7ab6aa2c3bba339c9eb2d"},
-        {"path":"partials/boot.html","previous_sha256":"28bdf11fc3c3e2ceacffa382b8d677e6bd3087de99803b664a79bcce9f81332b","sha256":"9b13ef5e302038e14cb8eeaabd4ddf03424d77d3534d576ae24f27b3cc9190f8"},
-        {"path":"partials/head.html","previous_sha256":"388071a5cc7994693425345d765939dca452e3a6d11cfad1bdb62a29b8b4ac9d","sha256":"260e8e6061399e14122bfcdf5ab645c42b6e2bddb61039d1747217506a1f8e75"},
-        {"path":"partials/shell.html","previous_sha256":"24e8bc25f8d07a1e2ebaea9867b481f525ab84bfa94a202fd92eb7fcf56ea726","sha256":"b02c466bada5492e8dbd638e05e067df2b4ff8aad42c43b13f2e457b290c01fb"},
-        {"path":"sw.js","previous_sha256":"6bc4cc62de849c4a9b4a646a4a6933717b14260e48f663b6c886a51402592689","sha256":"bf7f17b704f13754dd65130f5a24305bbc2501f98a888341d398d456f7c54fdb"}
+        {
+          "path": "index.html",
+          "previous_sha256": "137e96645c34885258c241e5498b002892e1a4a200ab2ef5ed882b5b72d4e3c6",
+          "sha256": "c766c39e49772acdf1f2da829f5a36f5b30f18bdc8f7ab6aa2c3bba339c9eb2d"
+        },
+        {
+          "path": "partials/boot.html",
+          "previous_sha256": "28bdf11fc3c3e2ceacffa382b8d677e6bd3087de99803b664a79bcce9f81332b",
+          "sha256": "9b13ef5e302038e14cb8eeaabd4ddf03424d77d3534d576ae24f27b3cc9190f8"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "388071a5cc7994693425345d765939dca452e3a6d11cfad1bdb62a29b8b4ac9d",
+          "sha256": "260e8e6061399e14122bfcdf5ab645c42b6e2bddb61039d1747217506a1f8e75"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "24e8bc25f8d07a1e2ebaea9867b481f525ab84bfa94a202fd92eb7fcf56ea726",
+          "sha256": "b02c466bada5492e8dbd638e05e067df2b4ff8aad42c43b13f2e457b290c01fb"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "6bc4cc62de849c4a9b4a646a4a6933717b14260e48f663b6c886a51402592689",
+          "sha256": "bf7f17b704f13754dd65130f5a24305bbc2501f98a888341d398d456f7c54fdb"
+        }
       ]
     },
     {
@@ -12540,7 +12648,11 @@
         "GitHub Actions: Chromium + WebKit mobile-language smoke"
       ],
       "files": [
-        {"path":"index.html","previous_sha256":"c766c39e49772acdf1f2da829f5a36f5b30f18bdc8f7ab6aa2c3bba339c9eb2d","sha256":"a42b2192347443d970962c00bdc4cb9bcc499f5ed51bfedc8d199a6a28ab22b1"}
+        {
+          "path": "index.html",
+          "previous_sha256": "c766c39e49772acdf1f2da829f5a36f5b30f18bdc8f7ab6aa2c3bba339c9eb2d",
+          "sha256": "a42b2192347443d970962c00bdc4cb9bcc499f5ed51bfedc8d199a6a28ab22b1"
+        }
       ]
     },
     {
@@ -12554,13 +12666,35 @@
         "npm run check:accessibility",
         "GitHub Actions: Chromium, WebKit and three-park GIS QA"
       ],
-      "added_protected_files": ["src/ui/live-map-project-surface.js"],
+      "added_protected_files": [
+        "src/ui/live-map-project-surface.js"
+      ],
       "files": [
-        {"path":"index.html","previous_sha256":"a42b2192347443d970962c00bdc4cb9bcc499f5ed51bfedc8d199a6a28ab22b1","sha256":"37e03c3e020f14d60c9d8f0fd5091ca37712b40ec4ee992656f127bbf5f14d8d"},
-        {"path":"partials/boot.html","previous_sha256":"9b13ef5e302038e14cb8eeaabd4ddf03424d77d3534d576ae24f27b3cc9190f8","sha256":"598e6267be1fad2c32b589b25c8281a67a34feade91ab1dbfccb8d3ee8d15bf1"},
-        {"path":"sw.js","previous_sha256":"bf7f17b704f13754dd65130f5a24305bbc2501f98a888341d398d456f7c54fdb","sha256":"1e4430249661cdbe288208279a504643c7b7f1dee72b416d32d52773a4b90f4e"},
-        {"path":"src/adapters/parks/live-map-project-store.js","previous_sha256":"8e13ca52749711ba0a1e5308b7b8260370b16c551d7fa3e455c8883882c038a8","sha256":"b55d186cb0551f61083793c2934762e4d009a7dbd8c08002108d80098ce0d106"},
-        {"path":".github/workflows/mobile-smoke.yml","previous_sha256":"c097b13d7de6ac212dde8d2ab7c9f715d29290170377d665c42222bf31f9ba1f","sha256":"791909a00ebb0ec8445106dae45d20fcda2ddd505f8749668a5cac93c757d21d"}
+        {
+          "path": "index.html",
+          "previous_sha256": "a42b2192347443d970962c00bdc4cb9bcc499f5ed51bfedc8d199a6a28ab22b1",
+          "sha256": "37e03c3e020f14d60c9d8f0fd5091ca37712b40ec4ee992656f127bbf5f14d8d"
+        },
+        {
+          "path": "partials/boot.html",
+          "previous_sha256": "9b13ef5e302038e14cb8eeaabd4ddf03424d77d3534d576ae24f27b3cc9190f8",
+          "sha256": "598e6267be1fad2c32b589b25c8281a67a34feade91ab1dbfccb8d3ee8d15bf1"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "bf7f17b704f13754dd65130f5a24305bbc2501f98a888341d398d456f7c54fdb",
+          "sha256": "1e4430249661cdbe288208279a504643c7b7f1dee72b416d32d52773a4b90f4e"
+        },
+        {
+          "path": "src/adapters/parks/live-map-project-store.js",
+          "previous_sha256": "8e13ca52749711ba0a1e5308b7b8260370b16c551d7fa3e455c8883882c038a8",
+          "sha256": "b55d186cb0551f61083793c2934762e4d009a7dbd8c08002108d80098ce0d106"
+        },
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "c097b13d7de6ac212dde8d2ab7c9f715d29290170377d665c42222bf31f9ba1f",
+          "sha256": "791909a00ebb0ec8445106dae45d20fcda2ddd505f8749668a5cac93c757d21d"
+        }
       ]
     },
     {
@@ -12572,77 +12706,188 @@
         "npm run check",
         "GitHub Actions: Chromium + WebKit mobile workspace smoke and three-park GIS"
       ],
-      "added_protected_files": ["src/adapters/parks/live-map-project-snapshot-store.js", "src/ui/live-map-project-snapshot.js"],
+      "added_protected_files": [
+        "src/adapters/parks/live-map-project-snapshot-store.js",
+        "src/ui/live-map-project-snapshot.js"
+      ],
       "files": [
-        {"path":"index.html","previous_sha256":"37e03c3e020f14d60c9d8f0fd5091ca37712b40ec4ee992656f127bbf5f14d8d","sha256":"4ab08ced11b1b86a8786e53bd4e3f3acb0670b29c76aa66657a44a7a6c69abce"},
-        {"path":"partials/boot.html","previous_sha256":"598e6267be1fad2c32b589b25c8281a67a34feade91ab1dbfccb8d3ee8d15bf1","sha256":"aed5c91a3e8e216dd8f8fc0e4e2d5b6698576263d11b768337e7f1bbb5c7e5da"},
-        {"path":"partials/shell.html","previous_sha256":"b02c466bada5492e8dbd638e05e067df2b4ff8aad42c43b13f2e457b290c01fb","sha256":"87ba33a203316d759ebd4cddaba746286cbd8af0201ad715060b84c1acc1d0fc"},
-        {"path":"sw.js","previous_sha256":"1e4430249661cdbe288208279a504643c7b7f1dee72b416d32d52773a4b90f4e","sha256":"9e6c210d2482677151c14c1cb5e27a1061d9637f776e9176de2aad8e89e4243b"}
+        {
+          "path": "index.html",
+          "previous_sha256": "37e03c3e020f14d60c9d8f0fd5091ca37712b40ec4ee992656f127bbf5f14d8d",
+          "sha256": "4ab08ced11b1b86a8786e53bd4e3f3acb0670b29c76aa66657a44a7a6c69abce"
+        },
+        {
+          "path": "partials/boot.html",
+          "previous_sha256": "598e6267be1fad2c32b589b25c8281a67a34feade91ab1dbfccb8d3ee8d15bf1",
+          "sha256": "aed5c91a3e8e216dd8f8fc0e4e2d5b6698576263d11b768337e7f1bbb5c7e5da"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "b02c466bada5492e8dbd638e05e067df2b4ff8aad42c43b13f2e457b290c01fb",
+          "sha256": "87ba33a203316d759ebd4cddaba746286cbd8af0201ad715060b84c1acc1d0fc"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "1e4430249661cdbe288208279a504643c7b7f1dee72b416d32d52773a4b90f4e",
+          "sha256": "9e6c210d2482677151c14c1cb5e27a1061d9637f776e9176de2aad8e89e4243b"
+        }
       ]
     },
     {
       "date": "2026-10-31",
       "audit_chain": "sha256-v1",
       "scope": "User-authorized modularization: narrow UI repair approved explicitly by the user. Keep the saved-project stage action accessible; open the existing parent-scoped stage editor when available and explain read-only access for an orphan stage; avoid GIS menu overlap with the fixed header; correct the landing Chromium test's invalid assumption that themed icon foreground colors must differ. No park or stage boundary data, surface raster classification, allometry, carbon formulas, species or wood-density inputs are changed.",
-      "validation": ["node --test test/live-map-project-workspace.test.mjs test/park-stage-workspace.test.mjs test/gis-workspace-menu-position.test.mjs", "npm run check", "GitHub Actions mobile and WebKit push CI"],
+      "validation": [
+        "node --test test/live-map-project-workspace.test.mjs test/park-stage-workspace.test.mjs test/gis-workspace-menu-position.test.mjs",
+        "npm run check",
+        "GitHub Actions mobile and WebKit push CI"
+      ],
       "files": [
-        {"path":"scripts/landing-showcase-smoke.mjs","previous_sha256":"597c73ede9d05b1d868b2b4d01a0a0b0f0e00c3044da828e4b920751df739b0b","sha256":"60bc529aa84e3f076313714ccb6e545e21ded0c7c006b439aab9c4f7900bcb30"},
-        {"path":"src/ui/gis-workspace-menu-position.js","previous_sha256":"22af41bd0dc0237a1b7136010176ce408c0e56f7f145e74ed214ad12a01dc159","sha256":"815a1ed5dae2420d64f99223d7be7b5ff04fb23fa722a642b122686d7dcf0406"},
-        {"path":"src/ui/park-stage-workspace.js","previous_sha256":"8df920cf962f127f74bc49c82afe4a53a65352de0d3fdf8f99c8ba1b0aa576b1","sha256":"c7245d792ff9b8dbbc8aa511f67c8c0141c4af7519de6297cf7cff4abf56018d"},
-        {"path":"index.html","previous_sha256":"4ab08ced11b1b86a8786e53bd4e3f3acb0670b29c76aa66657a44a7a6c69abce","sha256":"fa376f93f4e7750cd67b996cfa52655911af35a2f3a06c8e2d38dfc7a2baf6a0"}
+        {
+          "path": "scripts/landing-showcase-smoke.mjs",
+          "previous_sha256": "597c73ede9d05b1d868b2b4d01a0a0b0f0e00c3044da828e4b920751df739b0b",
+          "sha256": "60bc529aa84e3f076313714ccb6e545e21ded0c7c006b439aab9c4f7900bcb30"
+        },
+        {
+          "path": "src/ui/gis-workspace-menu-position.js",
+          "previous_sha256": "22af41bd0dc0237a1b7136010176ce408c0e56f7f145e74ed214ad12a01dc159",
+          "sha256": "815a1ed5dae2420d64f99223d7be7b5ff04fb23fa722a642b122686d7dcf0406"
+        },
+        {
+          "path": "src/ui/park-stage-workspace.js",
+          "previous_sha256": "8df920cf962f127f74bc49c82afe4a53a65352de0d3fdf8f99c8ba1b0aa576b1",
+          "sha256": "c7245d792ff9b8dbbc8aa511f67c8c0141c4af7519de6297cf7cff4abf56018d"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "4ab08ced11b1b86a8786e53bd4e3f3acb0670b29c76aa66657a44a7a6c69abce",
+          "sha256": "fa376f93f4e7750cd67b996cfa52655911af35a2f3a06c8e2d38dfc7a2baf6a0"
+        }
       ]
     },
     {
       "date": "2026-10-31",
       "audit_chain": "sha256-v1",
       "scope": "User-authorized release follow-up of the same live-map UI fix: replace an English waypoint noun in the orphan-stage warning with the existing Turkish measurement-points terminology. Rebuild only the matching static runtime and its CSP/version hashes. No scientific engine, geometry, measurement or account data changed.",
-      "validation": ["node --test test/measurement-points-labels.test.mjs", "npm run check", "GitHub Actions CI"],
+      "validation": [
+        "node --test test/measurement-points-labels.test.mjs",
+        "npm run check",
+        "GitHub Actions CI"
+      ],
       "files": [
-        {"path":"index.html","previous_sha256":"fa376f93f4e7750cd67b996cfa52655911af35a2f3a06c8e2d38dfc7a2baf6a0","sha256":"a0fbef8868d2897957c7abb8954f2e2aab8ae55eab14bf0822ee915d3ccd349b"}
+        {
+          "path": "index.html",
+          "previous_sha256": "fa376f93f4e7750cd67b996cfa52655911af35a2f3a06c8e2d38dfc7a2baf6a0",
+          "sha256": "a0fbef8868d2897957c7abb8954f2e2aab8ae55eab14bf0822ee915d3ccd349b"
+        }
       ]
     },
     {
       "date": "2026-11-01",
       "audit_chain": "sha256-v1",
       "scope": "User-authorized modularization: standard-toolbar restoration for existing saved projects. Remove only the duplicate measurement, surface, local-save and stage action row from the project selector, leaving the established eight GIS menus intact. Keep the original Etaplar tab mounted for an orphan stage such as Dikmen #53 whose historical parent #50 is inaccessible, but display its existing label as read-only and offer no geometry editing without that verified parent. Existing parent-scoped edit controls, project-scoped saved raster/grid/waypoint restoration and map focus are unchanged. No park reconstruction, database write, permission change, raster/classification logic, allometry, wood density or carbon formula modification.",
-      "validation": ["node --test test/live-map-project-workspace.test.mjs test/park-stage-workspace.test.mjs", "npm run check", "GitHub Actions Chromium and WebKit mobile stage-menu smoke"],
+      "validation": [
+        "node --test test/live-map-project-workspace.test.mjs test/park-stage-workspace.test.mjs",
+        "npm run check",
+        "GitHub Actions Chromium and WebKit mobile stage-menu smoke"
+      ],
       "files": [
-        {"path":"index.html","previous_sha256":"a0fbef8868d2897957c7abb8954f2e2aab8ae55eab14bf0822ee915d3ccd349b","sha256":"b1fea2a202462c8b55b11f3d94a1c204c9548a73efdd88c0c2c5c03203ac9635"},
-        {"path":"partials/shell.html","previous_sha256":"87ba33a203316d759ebd4cddaba746286cbd8af0201ad715060b84c1acc1d0fc","sha256":"2de6cba68130b28ad4a0b521b50fb08ebfb53fbe9a76654f82127ab9ba29d01b"},
-        {"path":"src/ui/park-stage-workspace.js","previous_sha256":"c7245d792ff9b8dbbc8aa511f67c8c0141c4af7519de6297cf7cff4abf56018d","sha256":"ccbe2de9c5e8d1d98559c4f40381bc4a4f873e066f128800396d03db582eabdb"},
-        {"path":"scripts/park-stage-workspace-smoke.mjs","previous_sha256":"01042110946c4fa8c1e7e57773cf029c3e8879b2e8c898e6f18a6a6d7672e0c3","sha256":"66951a3406ef334ad7c8afb3600be71016ffbdbaa33024f52bb546218121c75b"},
-        {"path":"test/park-stage-workspace.test.mjs","previous_sha256":"587701e53db3601d1717b193344ab6cea4d8ea1bb1b51f52864ed07873a2248b","sha256":"19694bd13facc412884bf8cf18e25b150d4cd64de54b2e6824b15a76ca92ca83"}
+        {
+          "path": "index.html",
+          "previous_sha256": "a0fbef8868d2897957c7abb8954f2e2aab8ae55eab14bf0822ee915d3ccd349b",
+          "sha256": "b1fea2a202462c8b55b11f3d94a1c204c9548a73efdd88c0c2c5c03203ac9635"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "87ba33a203316d759ebd4cddaba746286cbd8af0201ad715060b84c1acc1d0fc",
+          "sha256": "2de6cba68130b28ad4a0b521b50fb08ebfb53fbe9a76654f82127ab9ba29d01b"
+        },
+        {
+          "path": "src/ui/park-stage-workspace.js",
+          "previous_sha256": "c7245d792ff9b8dbbc8aa511f67c8c0141c4af7519de6297cf7cff4abf56018d",
+          "sha256": "ccbe2de9c5e8d1d98559c4f40381bc4a4f873e066f128800396d03db582eabdb"
+        },
+        {
+          "path": "scripts/park-stage-workspace-smoke.mjs",
+          "previous_sha256": "01042110946c4fa8c1e7e57773cf029c3e8879b2e8c898e6f18a6a6d7672e0c3",
+          "sha256": "66951a3406ef334ad7c8afb3600be71016ffbdbaa33024f52bb546218121c75b"
+        },
+        {
+          "path": "test/park-stage-workspace.test.mjs",
+          "previous_sha256": "587701e53db3601d1717b193344ab6cea4d8ea1bb1b51f52864ed07873a2248b",
+          "sha256": "19694bd13facc412884bf8cf18e25b150d4cd64de54b2e6824b15a76ca92ca83"
+        }
       ]
     },
     {
       "date": "2026-11-01",
       "audit_chain": "sha256-v1",
       "scope": "User-authorized modularization: recover editing of the existing immutable Dikmen 2.etap stage #53 when its historical parent #50 was deleted and its exact OSM parent identity was re-registered as #54. Enforce matching canonical parent OSM key and same creator through read-only RLS queries, keep stage #53 and its project, geometry, accepted surface, grid and 42 measurement points unchanged; show the original stage in the standard Etaplar editor while disabling deletion through the replacement parent. Explicit boundary revisions still create new stage versions under the existing SQL guards. No parent or stage row creation, mutation, reassignment, altered styles, scientific algorithms, database migrations or permission changes.",
-      "validation": ["node --test test/live-map-project-workspace.test.mjs test/park-stage-workspace.test.mjs", "npm run check", "GitHub Actions Chromium and WebKit mobile stage-menu smoke"],
+      "validation": [
+        "node --test test/live-map-project-workspace.test.mjs test/park-stage-workspace.test.mjs",
+        "npm run check",
+        "GitHub Actions Chromium and WebKit mobile stage-menu smoke"
+      ],
       "files": [
-        {"path":"index.html","previous_sha256":"b1fea2a202462c8b55b11f3d94a1c204c9548a73efdd88c0c2c5c03203ac9635","sha256":"b2d8031e9532f0bba513008f1e79b5cf26a4b04a46ddb90c4e16d1e8f714549a"},
-        {"path":"src/adapters/parks/live-map-project-store.js","previous_sha256":"b55d186cb0551f61083793c2934762e4d009a7dbd8c08002108d80098ce0d106","sha256":"17ebf9611f9423f1d1a242d494c1b4951fda7d6cd45b766259151ebea28d5427"},
-        {"path":"src/ui/park-stage-workspace.js","previous_sha256":"ccbe2de9c5e8d1d98559c4f40381bc4a4f873e066f128800396d03db582eabdb","sha256":"067e7231e5a92eb0a96b71b016f21cd06ce642bf01a73df5e8c8c91d70017831"},
-        {"path":"scripts/park-stage-workspace-smoke.mjs","previous_sha256":"66951a3406ef334ad7c8afb3600be71016ffbdbaa33024f52bb546218121c75b","sha256":"328935a28a76f1dd382ce5502f8c631e2d76c7463bb9daba4da650056b8415d0"},
-        {"path":"test/park-stage-workspace.test.mjs","previous_sha256":"19694bd13facc412884bf8cf18e25b150d4cd64de54b2e6824b15a76ca92ca83","sha256":"ea593c292d8c9fe5f64b27cdb9a8b076253b144dc92c079175c81b7e13be9cde"}
+        {
+          "path": "index.html",
+          "previous_sha256": "b1fea2a202462c8b55b11f3d94a1c204c9548a73efdd88c0c2c5c03203ac9635",
+          "sha256": "b2d8031e9532f0bba513008f1e79b5cf26a4b04a46ddb90c4e16d1e8f714549a"
+        },
+        {
+          "path": "src/adapters/parks/live-map-project-store.js",
+          "previous_sha256": "b55d186cb0551f61083793c2934762e4d009a7dbd8c08002108d80098ce0d106",
+          "sha256": "17ebf9611f9423f1d1a242d494c1b4951fda7d6cd45b766259151ebea28d5427"
+        },
+        {
+          "path": "src/ui/park-stage-workspace.js",
+          "previous_sha256": "ccbe2de9c5e8d1d98559c4f40381bc4a4f873e066f128800396d03db582eabdb",
+          "sha256": "067e7231e5a92eb0a96b71b016f21cd06ce642bf01a73df5e8c8c91d70017831"
+        },
+        {
+          "path": "scripts/park-stage-workspace-smoke.mjs",
+          "previous_sha256": "66951a3406ef334ad7c8afb3600be71016ffbdbaa33024f52bb546218121c75b",
+          "sha256": "328935a28a76f1dd382ce5502f8c631e2d76c7463bb9daba4da650056b8415d0"
+        },
+        {
+          "path": "test/park-stage-workspace.test.mjs",
+          "previous_sha256": "19694bd13facc412884bf8cf18e25b150d4cd64de54b2e6824b15a76ca92ca83",
+          "sha256": "ea593c292d8c9fe5f64b27cdb9a8b076253b144dc92c079175c81b7e13be9cde"
+        }
       ]
     },
     {
       "date": "2026-11-01",
       "audit_chain": "sha256-v1",
       "scope": "User-authorized modularization CI follow-up: repair only the new synthetic mobile stage-menu smoke fixture by supplying its required immutable stage_scope.schema marker. The live stage geometry, editor, project data, 42 measurements, styling, scientific engines, RLS and runtime outputs are unchanged.",
-      "validation": ["node --test test/live-map-project-workspace.test.mjs test/park-stage-workspace.test.mjs", "npm run check:core-foundation", "GitHub Actions Chromium and WebKit mobile stage-menu smoke"],
+      "validation": [
+        "node --test test/live-map-project-workspace.test.mjs test/park-stage-workspace.test.mjs",
+        "npm run check:core-foundation",
+        "GitHub Actions Chromium and WebKit mobile stage-menu smoke"
+      ],
       "files": [
-        {"path":"scripts/park-stage-workspace-smoke.mjs","previous_sha256":"328935a28a76f1dd382ce5502f8c631e2d76c7463bb9daba4da650056b8415d0","sha256":"1eeaf65948a97cae6b411d68fee0ecb115e81e111008687afd728566a62b429f"}
+        {
+          "path": "scripts/park-stage-workspace-smoke.mjs",
+          "previous_sha256": "328935a28a76f1dd382ce5502f8c631e2d76c7463bb9daba4da650056b8415d0",
+          "sha256": "1eeaf65948a97cae6b411d68fee0ecb115e81e111008687afd728566a62b429f"
+        }
       ]
     },
     {
       "date": "2026-11-01",
       "audit_chain": "sha256-v1",
       "scope": "User-authorized modularization bug fix for a reported saved-project opening error: a missing, inaccessible or geometry-less historical parent and same-OSM replacement must not block loading the persisted Dikmen 2.etap #53 boundary, project #33, its 42 waypoints, and project-scoped raster/grid snapshots. The optional parent editor is disabled until a valid recorded parent boundary can be verified. Preserve the standard GIS menu, no automatic project selection, saved stage geometry, scientific calculations, measurements, accepted reviews, database writes and RLS. Add explicit regression tests for missing-parent geometry and optional read failures; regenerate the static runtime only.",
-      "validation": ["node --test test/live-map-project-workspace.test.mjs test/park-stage-workspace.test.mjs", "npm run check", "GitHub Actions Chromium and WebKit mobile stage-menu smoke"],
+      "validation": [
+        "node --test test/live-map-project-workspace.test.mjs test/park-stage-workspace.test.mjs",
+        "npm run check",
+        "GitHub Actions Chromium and WebKit mobile stage-menu smoke"
+      ],
       "files": [
-        {"path":"index.html","previous_sha256":"b2d8031e9532f0bba513008f1e79b5cf26a4b04a46ddb90c4e16d1e8f714549a","sha256":"0e599906d173780d01dbed0a15a807314f893526ffd92cde28072312f45dc259"}
+        {
+          "path": "index.html",
+          "previous_sha256": "b2d8031e9532f0bba513008f1e79b5cf26a4b04a46ddb90c4e16d1e8f714549a",
+          "sha256": "0e599906d173780d01dbed0a15a807314f893526ffd92cde28072312f45dc259"
+        }
       ]
     },
     {
@@ -12672,26 +12917,124 @@
         "GitHub Actions Chromium/WebKit mobile QA before merge"
       ],
       "files": [
-        {"path":"css/style.css","previous_sha256":"5366240a409100f77cdbc270e5228907428c18e695c30683e655676b3f2b43d6","sha256":"c098bdf5dfcca6ba30d86de855ae4c9379a25fe5774ec495c5771dcf6cf3838d"},
-        {"path":"index.html","previous_sha256":"fae43e1340227a1bd342951088d1244d7ac4f8fe467ddecc890d1514564636f7","sha256":"9e50b11f93ec56990bed35163b3fc8c5b64a4cea37c0d9041a39330120b899a6"},
-        {"path":"partials/shell.html","previous_sha256":"2de6cba68130b28ad4a0b521b50fb08ebfb53fbe9a76654f82127ab9ba29d01b","sha256":"a9af04e1e6da5e39a9ffaa15347904da9d2a6c66a4f51b34ea3a50a16848f69c"},
-        {"path":"src/adapters/parks/park-presence-channel.js","previous_sha256":"f44d0f6577239975d92cefa05608ebf46ebe9f6b3d0c2e7cf744b6f1d565eb74","sha256":"64d2d99384582d98a6bcfaba082dc47da2e34f8bac0ddaa962b47831cf676bf5"},
-        {"path":"src/application/parks/join-live-share-park.js","previous_sha256":"a6f2bd9ed7a97c717108150f147c0857c2e5dcdc41cbec6f5038670e9b859a16","sha256":"634bf364d65700d17ebb3c3ad6073fd9b94d531021c0f499caf7523cfed26c65"},
-        {"path":"src/services/map.js","previous_sha256":"fb103641ab12be650099f5ba2b69774e96e822881949c097ca8388b71308f677","sha256":"8c289302998552c33fcde9eee5374c37fc892872ea471bddb01ffd6d12f29fed"},
-        {"path":"src/ui/shell-view-effects.js","previous_sha256":"f85d2ed54e29126ede3e54e02c8567d109270e43e987c6176eb2c35f09217780","sha256":"34a24824de2600d0d45c7703554e423b2688337ebb2a1e1ff131274987006350"},
-        {"path":"src/ui/shell.js","previous_sha256":"325536d7be1185662f80d8afc5c064341d8998474083b7421cd656620a32c487","sha256":"90542376fee981868b62377202641cd3112391d2bb0941d1a68ce39fa1b5ff7f"},
-        {"path":"test/park-live-share-join-modules.test.mjs","previous_sha256":"b801856d998594659768d4ce93ff0d5fce36cbb0566205fde1c0d291a91ac055","sha256":"6456eb5fc839ef855a6989f0de1867fb39eb7f00ec687cc03e92a101e757036d"},
-        {"path":"test/park-presence-channel-modules.test.mjs","previous_sha256":"e6047dccfdf720208ecc9e7487210b7051ea76eaf916b8a896c5819ed5f38d50","sha256":"44318ebd11a8519fe6eed5c891f5fa5fe2a7fbc72b577c3fc9aa9a1aaf40f289"},
-        {"path":"test/shell-workflow-modules.test.mjs","previous_sha256":"a7ddfd75981251c43f420908f53d1a1b4c25a7c667264c55f7799f6eb26fb3a7","sha256":"d2f760b7c7e72016ec17ab5586291bebc2ef794912df4faebb72a58a39a4f749"}
+        {
+          "path": "css/style.css",
+          "previous_sha256": "5366240a409100f77cdbc270e5228907428c18e695c30683e655676b3f2b43d6",
+          "sha256": "c098bdf5dfcca6ba30d86de855ae4c9379a25fe5774ec495c5771dcf6cf3838d"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "fae43e1340227a1bd342951088d1244d7ac4f8fe467ddecc890d1514564636f7",
+          "sha256": "9e50b11f93ec56990bed35163b3fc8c5b64a4cea37c0d9041a39330120b899a6"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "2de6cba68130b28ad4a0b521b50fb08ebfb53fbe9a76654f82127ab9ba29d01b",
+          "sha256": "a9af04e1e6da5e39a9ffaa15347904da9d2a6c66a4f51b34ea3a50a16848f69c"
+        },
+        {
+          "path": "src/adapters/parks/park-presence-channel.js",
+          "previous_sha256": "f44d0f6577239975d92cefa05608ebf46ebe9f6b3d0c2e7cf744b6f1d565eb74",
+          "sha256": "64d2d99384582d98a6bcfaba082dc47da2e34f8bac0ddaa962b47831cf676bf5"
+        },
+        {
+          "path": "src/application/parks/join-live-share-park.js",
+          "previous_sha256": "a6f2bd9ed7a97c717108150f147c0857c2e5dcdc41cbec6f5038670e9b859a16",
+          "sha256": "634bf364d65700d17ebb3c3ad6073fd9b94d531021c0f499caf7523cfed26c65"
+        },
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "fb103641ab12be650099f5ba2b69774e96e822881949c097ca8388b71308f677",
+          "sha256": "8c289302998552c33fcde9eee5374c37fc892872ea471bddb01ffd6d12f29fed"
+        },
+        {
+          "path": "src/ui/shell-view-effects.js",
+          "previous_sha256": "f85d2ed54e29126ede3e54e02c8567d109270e43e987c6176eb2c35f09217780",
+          "sha256": "34a24824de2600d0d45c7703554e423b2688337ebb2a1e1ff131274987006350"
+        },
+        {
+          "path": "src/ui/shell.js",
+          "previous_sha256": "325536d7be1185662f80d8afc5c064341d8998474083b7421cd656620a32c487",
+          "sha256": "90542376fee981868b62377202641cd3112391d2bb0941d1a68ce39fa1b5ff7f"
+        },
+        {
+          "path": "test/park-live-share-join-modules.test.mjs",
+          "previous_sha256": "b801856d998594659768d4ce93ff0d5fce36cbb0566205fde1c0d291a91ac055",
+          "sha256": "6456eb5fc839ef855a6989f0de1867fb39eb7f00ec687cc03e92a101e757036d"
+        },
+        {
+          "path": "test/park-presence-channel-modules.test.mjs",
+          "previous_sha256": "e6047dccfdf720208ecc9e7487210b7051ea76eaf916b8a896c5819ed5f38d50",
+          "sha256": "44318ebd11a8519fe6eed5c891f5fa5fe2a7fbc72b577c3fc9aa9a1aaf40f289"
+        },
+        {
+          "path": "test/shell-workflow-modules.test.mjs",
+          "previous_sha256": "a7ddfd75981251c43f420908f53d1a1b4c25a7c667264c55f7799f6eb26fb3a7",
+          "sha256": "d2f760b7c7e72016ec17ab5586291bebc2ef794912df4faebb72a58a39a4f749"
+        }
       ]
     },
     {
       "date": "2026-11-01",
       "audit_chain": "sha256-v1",
       "scope": "User-authorized release follow-up CI accessibility fixture correction after the park sharing control moved into the Waypoint map. Keep the existing measurement disclosure keyboard check, then activate the Waypoint view, expand its map, verify the same switch via keyboard and focus-visible assertions and close that disclosure before the unchanged axe scan. Only the test selector/navigation changes; no runtime, scientific, database, map geometry, raster, membership or RLS changes.",
-      "validation": ["npm run check:core-foundation", "npm run check", "GitHub Actions Chromium mobile keyboard/axe plus WebKit regression"],
+      "validation": [
+        "npm run check:core-foundation",
+        "npm run check",
+        "GitHub Actions Chromium mobile keyboard/axe plus WebKit regression"
+      ],
       "files": [
-        {"path":"scripts/check-accessibility.mjs","previous_sha256":"451345e56956ace19b70d3c868dac6be658f8ffd75dcbb38a7456560f4fe5eda","sha256":"10a7eb28728cc9ffbe1f1e47201c7d99fd11949846a4e86408a940edd826f841"}
+        {
+          "path": "scripts/check-accessibility.mjs",
+          "previous_sha256": "451345e56956ace19b70d3c868dac6be658f8ffd75dcbb38a7456560f4fe5eda",
+          "sha256": "10a7eb28728cc9ffbe1f1e47201c7d99fd11949846a4e86408a940edd826f841"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-01",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up for Waypoint-only park Presence recovery: discard terminal and stale private channels, reconnect within the selected authorized park, extend connection timeout; preserve membership RLS, database, scientific formulas, carbon model, park geometry, raster, GPS consent and ten-second throttle.",
+      "validation": [
+        "npm run check",
+        "GitHub Chromium/WebKit mobile checks before merge"
+      ],
+      "files": [
+        {
+          "path": "src/adapters/parks/park-presence-channel.js",
+          "previous_sha256": "64d2d99384582d98a6bcfaba082dc47da2e34f8bac0ddaa962b47831cf676bf5",
+          "sha256": "fcb5402bcf45ca6c6c3017260ac913fb703dfae0c2e5dc2aca3ec4b076cf891f"
+        },
+        {
+          "path": "src/application/parks/handle-live-share-channel-status.js",
+          "previous_sha256": "b44e5ddf9790e9bd8c9f971463e8cb90daaef2585286848796e29c496828c394",
+          "sha256": "967c4b9f5dc369a987550e6a0d501e2c73be31611c709930b312dc2151493ac9"
+        },
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "8c289302998552c33fcde9eee5374c37fc892872ea471bddb01ffd6d12f29fed",
+          "sha256": "a4ded253795b33af45dd86388f95c7c5ef8e7489fca57713ae1cf3a482cedae1"
+        },
+        {
+          "path": "src/ui/fail-park-live-share.js",
+          "previous_sha256": "43393e3ef92a117df87aab40b8fe75b690b915fad9ed5d1a9e61c4ae006e2e36",
+          "sha256": "59ba5e39eae304789c235e8c9958e6564e50d1ad37c972eb48c8ea3c9cc96bc4"
+        },
+        {
+          "path": "test/landing-claims.test.mjs",
+          "previous_sha256": "457936086a56f4e9ce4376a4c64084fbfce1be256ad7f9fa9bc87dec00dc1448",
+          "sha256": "59188982774e6537b3e9ed11bb41079dae75b3133ccb80b4563ed76bd06195db"
+        },
+        {
+          "path": "test/park-presence-channel-modules.test.mjs",
+          "previous_sha256": "44318ebd11a8519fe6eed5c891f5fa5fe2a7fbc72b577c3fc9aa9a1aaf40f289",
+          "sha256": "e703dfa0df2238a7e9c7c3f8ac4a7c25d26c5725cdbc45354ca82d272c78d94b"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "9e50b11f93ec56990bed35163b3fc8c5b64a4cea37c0d9041a39330120b899a6",
+          "sha256": "7e00bdd68a43dc36372c68b8b51cd4605809477d5c769cc96a0fa8418a42b0b2"
+        }
       ]
     }
   ]
