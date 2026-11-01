@@ -28,7 +28,7 @@
     // Etaplar tab in place, but never offer geometry edits without that park.
     const label=current?.row?.geom_json?.stage_scope?.label||current?.row?.name||"";
     host.innerHTML=`<div class="dg-png-title">Etap yönetimi</div><p class="dg-meta">${ports.escape(label)}</p>`+
-     `<p id="dgStageStatus" class="dg-meta" role="status" aria-live="polite">Aktif çalışma alanı: kaydedilmiş kullanıcı tanımlı etap poligonu. Bu etabın grid, ölçüm ve yüzey araçları standart menülerdedir. Eski ana park kaydı eksik olduğundan yalnız etap sınırını yeniden düzenleme kapalıdır; etabın kendisi çalışma alanı olarak kullanılabilir.</p>`;
+     `<p id="dgStageStatus" class="dg-meta" role="status" aria-live="polite">Aktif çalışma alanı: kaydedilmiş kullanıcı tanımlı etap poligonu. Bu etabın grid, ölçüm ve yüzey araçları standart menülerdedir. Ana park kaydı eksik. Bu nedenle yalnız etap sınırını yeniden düzenleme kapalıdır; etabın kendisi çalışma alanı olarak kullanılabilir.</p>`;
     menu.refresh();return;
    }
    draftName=host.querySelector("#dgStageName")?.value??draftName;
