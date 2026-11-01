@@ -12644,6 +12644,23 @@
       "files": [
         {"path":"index.html","previous_sha256":"b2d8031e9532f0bba513008f1e79b5cf26a4b04a46ddb90c4e16d1e8f714549a","sha256":"0e599906d173780d01dbed0a15a807314f893526ffd92cde28072312f45dc259"}
       ]
+    },
+    {
+      "date": "2026-11-01",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized bug fix for explicit opening of existing Dikmen Vadisi stage #53 as the active park-analysis GIS polygon. Verify its saved immutable boundary and stage identity, draw any missing visualization via the existing boundary layer, and distinguish absent legacy raster/grid evidence from a successful restore. Keep the eight standard menus, 42 original waypoints, existing geom_json, scientific engines, formulae, accepted analyses and RLS unchanged. Rebuild only generated runtime and index to publish the narrowly scoped UI bridge; no database modifications.",
+      "validation": [
+        "node --test test/live-map-project-workspace.test.mjs",
+        "npm run check",
+        "GitHub Actions Chromium/WebKit mobile QA and static deployment"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "0e599906d173780d01dbed0a15a807314f893526ffd92cde28072312f45dc259",
+          "sha256": "fae43e1340227a1bd342951088d1244d7ac4f8fe467ddecc890d1514564636f7"
+        }
+      ]
     }
   ]
 }
