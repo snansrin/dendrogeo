@@ -17,8 +17,51 @@
   if(box){box.scrollIntoView({behavior:"smooth",block:"nearest"});box.querySelector("#dgStageSelect")?.focus({preventScroll:true});}
   else document.getElementById("parkInfo")?.scrollIntoView({behavior:"smooth",block:"nearest"});
  }
+ // Account sync wraps the frozen device store without modifying scientific or
+ // protected storage modules. Supabase policies enforce exact account/project/stage.
+ const deviceSnapshotStore=root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE.create(()=>root.indexedDB);
+ const pendingFlush=new Set(),lastAccountWrite=new Map();
+ const scopeKey=id=>String(id.ownerId)+":"+id.projectId+":"+id.parkId;
+ const accountSnapshotStore=Object.freeze({
+  markFlush:id=>pendingFlush.add(scopeKey(id)),
+  async read(id){
+   let local=null,cloud=null;
+   try{local=await deviceSnapshotStore.read(id);}catch(error){console.warn("DENDROGEO · cihaz çalışma arşivi:",error.message);}
+   try{
+    const {data,error}=await sb.from("project_workspace_snapshots").select("payload")
+     .eq("owner",id.ownerId).eq("project_id",id.projectId).eq("park_id",id.parkId).maybeSingle();
+    if(error)throw error;
+    cloud=data?.payload||null;
+   }catch(error){console.warn("DENDROGEO · hesap çalışma arşivi:",error.message);}
+   // Never allow another engine version or geometry revision to supersede
+   // a valid same-device snapshot.
+   if(cloud&&(cloud.ownerId!==id.ownerId||cloud.projectId!==id.projectId||
+      cloud.parkId!==id.parkId||cloud.geometry!==id.geometry||cloud.engine!==id.engine||
+      cloud.schema!=="dendrogeo/live-map-project-snapshot/1"))cloud=null;
+   return cloud&&(!local||Date.parse(cloud.savedAt)>Date.parse(local.savedAt))?cloud:local;
+  },
+  async save(id,snapshot){
+   const k=scopeKey(id),urgent=pendingFlush.delete(k);
+   let savedDevice=false,deviceError=null;
+   try{await deviceSnapshotStore.save(id,snapshot);savedDevice=true;}catch(error){deviceError=error;}
+   let savedAccount=false;
+   if(urgent||Date.now()-(lastAccountWrite.get(k)||0)>30000){
+    try{
+     const body=JSON.stringify(snapshot);
+     if(body.length>8*1024*1024)throw Error("Hesap çalışma arşivi boyut sınırını aşıyor.");
+     const {error}=await sb.from("project_workspace_snapshots").upsert({
+      owner:id.ownerId,project_id:id.projectId,park_id:id.parkId,payload:snapshot
+     },{onConflict:"owner,project_id,park_id"});
+     if(error)throw error;
+     lastAccountWrite.set(k,Date.now());savedAccount=true;
+    }catch(error){console.warn("DENDROGEO · hesap çalışma arşivi kaydedilemedi:",error.message);}
+   }
+   if(!savedDevice&&!savedAccount)throw deviceError||Error("Proje çalışma arşivi kaydedilemedi.");
+   return {savedDevice,savedAccount};
+  }
+ });
  const snapshots=root.DG_LIVE_MAP_PROJECT_SNAPSHOT.create({
-  store:root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE.create(()=>root.indexedDB,()=>sb),
+  store:accountSnapshotStore,
   capture:()=>{
    const session=DG_GRID_SESSION,record=root.DG_LC_SENS?.state;
    return {
@@ -76,7 +119,8 @@
  async function saveWorkspace(projectId,park,{flush=false}={}){
   if(!projectId||!park||Number(DG_PARK?.id)!==Number(park.id))return true;
   if(typeof dgEnsureLulc==="function"&&!root.DG_LC_SENS?.mount)await dgEnsureLulc();
-  return snapshots.save(identity(projectId,park),{flush});
+  const id=identity(projectId,park);if(flush)accountSnapshotStore.markFlush(id);
+  return snapshots.save(id);
  }
  function stopWatching(){for(const observer of watching)observer.disconnect();watching=[];
   for(const [element,event,handler] of watchedInputs)element.removeEventListener(event,handler);watchedInputs=[];
