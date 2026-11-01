@@ -3,8 +3,8 @@
 begin;
 do $$
 begin
- if (select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r')<>13 then
-  raise exception 'RESET_CONTRACT: expected 13 public application tables';
+ if (select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r')<>14 then
+  raise exception 'RESET_CONTRACT: expected 14 public application tables';
  end if;
  if exists(select 1 from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r' and not c.relrowsecurity) then
   raise exception 'RESET_CONTRACT: unprotected public application table';
@@ -25,6 +25,13 @@ insert into public.parks(osm_key,name,name_norm,created_by) values
  ('manual/reset-two','Reset Two','reset two','00000000-0000-0000-0000-000000000002');
 insert into public.projects(owner,name,park_id,label)
  select p.created_by,p.name,p.id,'fixture' from public.parks p where p.osm_key in('manual/reset-one','manual/reset-two');
+-- Owner-scoped portable map snapshots must never expose another account's
+-- raster or grid, even when park collaboration grants project visibility.
+insert into public.project_workspace_snapshots(owner,project_id,park_id,device_id,payload)
+ select p.owner,p.id,p.park_id,'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'::uuid,
+  '{"codec":"json","snapshot":{"test":1}}'::jsonb
+ from public.projects p;
+
 insert into storage.objects(bucket_id,name) values
  ('dendro-photos','00000000-0000-0000-0000-000000000001/reset.jpg'),
  ('dendro-photos','00000000-0000-0000-0000-000000000002/reset.jpg');
@@ -36,6 +43,12 @@ select set_config('request.jwt.claims','{"sub":"00000000-0000-0000-0000-00000000
 do $$
 begin
  if (select count(*) from public.projects)<>1 then raise exception 'RESET_CONTRACT: unrelated project exposed'; end if;
+ if (select count(*) from public.project_workspace_snapshots)<>1 then
+  raise exception 'RESET_CONTRACT: other-account map snapshot exposed';
+ end if;
+ update public.project_workspace_snapshots set payload='{"changed":true}'::jsonb
+  where owner='00000000-0000-0000-0000-000000000002'::uuid;
+ if found then raise exception 'RESET_CONTRACT: foreign map snapshot update allowed'; end if;
  if (select count(*) from storage.objects where bucket_id='dendro-photos')<>1 then raise exception 'RESET_CONTRACT: other-account photo exposed or own photo denied'; end if;
 end $$;
 
@@ -64,6 +77,9 @@ select set_config('request.jwt.claim.sub','',true);
 select set_config('request.jwt.claim.role','anon',true);
 select set_config('request.jwt.claims','{"role":"anon"}',true);
 do $$ begin
+ if has_table_privilege('anon','public.project_workspace_snapshots','SELECT') then
+  raise exception 'RESET_CONTRACT: anonymous project snapshot listing';
+ end if;
  if has_table_privilege('anon','storage.objects','SELECT') then
   if exists(select 1 from storage.objects where bucket_id='dendro-photos') then raise exception 'RESET_CONTRACT: anonymous photo enumeration'; end if;
  end if;

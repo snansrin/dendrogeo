@@ -270,11 +270,92 @@ test('live-map bootstrap reuses existing map/waypoint tools without a second wri
  assert.match(source,/DG_GRID_WAYPOINT_LAYER\.render/);
  assert.match(source,/saveDraft:/);
  assert.match(source,/DG_PARK_SESSION\.set\(key,row\)/);
- assert.doesNotMatch(source,/\.insert\(|\.upsert\(|\.update\(|\.delete\(/);
+ assert.match(source,/project_workspace_snapshots/);
+ assert.doesNotMatch(source,/\.from\(["\x27](?:parks|projects|waypoints|surface_reviews)["\x27]\)\.\s*(?:insert|upsert|update|delete)/);
 });
 test('saved-project selector does not add a second GIS action toolbar',()=>{
  const shell=readFileSync(new URL('../partials/shell.html',import.meta.url),'utf8');
  assert.match(shell,/id="dgLiveProjectSelect"/);
  assert.match(shell,/id="surfaceMenuBar"/);
  assert.doesNotMatch(shell,/dgLiveProjectActions|data-live-project-action="(?:stages|surface|waypoints|save)"/);
+});
+
+test('a saved review without its original raster never triggers an automatic rescan',async()=>{
+ const root={};let ports,scans=0;
+ root.DG_LIVE_MAP_PROJECT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT={reviewBasis:()=>null,create:()=>({
+  save:async()=>true,restore:async()=>({restored:false,scan:false,grid:0})
+ })};
+ root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI={create:value=>(ports=value,{})};
+ root.DG_LC_VALIDATE={loadCampaigns:async()=>[{owner:'account-one'}]};
+ root.DG_SURFACE_REVIEW={load:async()=>({revision:7})};
+ const env={window:root,sb:{},USER:{id:'account-one'},DG_PARK:{id:53,geom_json:stage.geom_json},
+  document:{addEventListener:()=>{}},runLandCoverAnalysis:async()=>{scans++;throw Error('must never scan');}};
+ runInNewContext(readFileSync(new URL('../src/bootstrap/live-map-project-workspace.js',import.meta.url),'utf8'),env);
+ const result=await ports.restoreWorkspace({id:33,is_locked:false},stage);
+ assert.equal(result.mode,'evidence-missing');
+ assert.equal(scans,0,'saved surface records cannot be silently replaced with new raster calculations');
+});
+
+test('saved stage scope is scrolled into view and its missing Leaflet display layer is restored',()=>{
+ const calls=[],root={};let ports;
+ root.DG_LIVE_MAP_PROJECT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT={reviewBasis:()=>null,create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI={create:value=>(ports=value,{})};
+ root.DG_PARK_BOUNDARY_LAYER_UI={
+  render:({outer,onCreated})=>{calls.push('render '+outer.length);onCreated({eachLayer:fn=>fn({bringToFront:()=>calls.push('front')})});},
+  fit:({outer})=>calls.push('fit '+outer.length)
+ };
+ const map={hasLayer:()=>false,invalidateSize:()=>calls.push('invalidate')};
+ const env={window:root,sb:{},USER:{id:'account-one'},DG_PARK:{id:53,geom_json:stage.geom_json},
+  PARK_POLY:stage.geom_json.outer,PARK_HOLES:[],PARK_LAYER:null,L:{},map,
+  document:{addEventListener:()=>{},getElementById:id=>id==='map'?{scrollIntoView:options=>calls.push('scroll '+options.block)}:null}};
+ runInNewContext(readFileSync(new URL('../src/bootstrap/live-map-project-workspace.js',import.meta.url),'utf8'),env);
+ ports.focusPark();
+ assert.deepEqual(calls,['scroll start','invalidate','render 1','front','fit 1']);
+});
+
+test('the account archive restores exact evidence when the source-device IndexedDB is unavailable',async()=>{
+ const rows=[],root={};let store;
+ root.DG_LIVE_MAP_PROJECT_STORE={create:()=>({})};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE={create:()=>({
+  read:async()=>{throw Error('device archive unavailable');},
+  save:async()=>{throw Error('device archive unavailable');}
+ })};
+ root.DG_LIVE_MAP_PROJECT_SNAPSHOT={reviewBasis:()=>null,create:options=>(store=options.store,{})};
+ root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI={create:()=>({})};
+ root.Blob=globalThis.Blob;
+ root.crypto={randomUUID:()=> 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee'};
+ const client={from(table){
+  assert.equal(table,'project_workspace_snapshots');
+  const filters={};
+  return {select(){return this;},eq(key,value){filters[key]=value;return this;},order(){return this;},
+   limit:async()=>({data:rows.filter(row=>row.owner===filters.owner&&row.project_id===filters.project_id&&row.park_id===filters.park_id).map(row=>({payload:row.payload})),error:null}),
+   upsert:async row=>{rows.push(row);return {error:null};}};
+ }};
+ const env={window:root,sb:client,USER:{id:'account-one'},
+  document:{addEventListener:()=>{},getElementById:()=>null}};
+ runInNewContext(readFileSync(new URL('../src/bootstrap/live-map-project-workspace.js',import.meta.url),'utf8'),env);
+ const id={ownerId:'account-one',projectId:33,parkId:53,geometry:JSON.stringify(geometry),engine:'core-v1'};
+ const snapshot={...id,schema:'dendrogeo/live-map-project-snapshot/1',savedAt:'2026-11-01T12:00:00Z',
+  state:{analysis:{result:{cells:[{id:1,green:true}]},report:{total:1}},grid:{cells:[]}}};
+ const saved=await store.save(id,snapshot);
+ assert.equal(saved.account,true);assert.equal(saved.local,false);
+ assert.equal(rows[0].device_id,'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee');
+ assert.equal(rows[0].project_id,33);
+ assert.deepEqual(JSON.parse(JSON.stringify((await store.read(id)).state)),snapshot.state);
+ assert.equal(await store.read({...id,parkId:25}),null,'another park never inherits this raster');
+});
+
+test('account workspace migration is additive, per-owner RLS scoped and excludes unauthorized updates',()=>{
+ const sql=readFileSync(new URL('../supabase/migrations/20261101000100_project_workspace_snapshots.sql',import.meta.url),'utf8');
+ assert.match(sql,/create table if not exists public\.project_workspace_snapshots/);
+ assert.match(sql,/enable row level security/);
+ assert.match(sql,/owner=auth\.uid\(\)/);
+ assert.match(sql,/project\.park_id=project_workspace_snapshots\.park_id/);
+ assert.match(sql,/project\.is_locked=false/);
+ assert.match(sql,/grant select,insert,update/);
+ assert.doesNotMatch(sql,/grant.*delete/);
 });

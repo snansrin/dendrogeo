@@ -17,8 +17,106 @@
   if(box){box.scrollIntoView({behavior:"smooth",block:"nearest"});box.querySelector("#dgStageSelect")?.focus({preventScroll:true});}
   else document.getElementById("parkInfo")?.scrollIntoView({behavior:"smooth",block:"nearest"});
  }
+
+ // Account archive is an additive transport around the immutable IndexedDB
+ // snapshot store. No existing review, stage, waypoint or scientific row is
+ // read or written through this transport.
+ function createAccountProjectArchive(local){
+  const table="project_workspace_snapshots",maxBytes=7*1024*1024,maxLocal=32*1024*1024;
+  let device=null,uploadQueue=Promise.resolve();
+  const matches=(id,s)=>!!(s&&s.ownerId===String(id.ownerId)&&s.projectId===id.projectId&&s.parkId===id.parkId&&
+   s.geometry===id.geometry&&s.engine===id.engine);
+  function deviceId(){
+   if(device)return device;
+   const key="dg_live_projects_device_id";
+   try{const cached=root.localStorage?.getItem(key);
+    if(cached&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cached))return device=cached;
+   }catch{}
+   const random=()=>Math.floor(Math.random()*16).toString(16);
+   device=typeof root.crypto?.randomUUID==="function"?root.crypto.randomUUID():
+    "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>c==="x"?random():((8+Math.floor(Math.random()*4)).toString(16)));
+   try{root.localStorage?.setItem(key,device);}catch{}
+   return device;
+  }
+  function encode(bytes){let binary="";for(let i=0;i<bytes.length;i+=16384)binary+=String.fromCharCode(...bytes.subarray(i,i+16384));return root.btoa(binary);}
+  function decode(value){const binary=root.atob(value),bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return bytes;}
+  async function pack(snapshot){
+   const body=JSON.stringify(snapshot),blob=new root.Blob([body]);
+   if(blob.size<=1024*1024)return {codec:"json",snapshot};
+   if(!root.CompressionStream||!root.btoa||!root.Response)throw Error("Büyük arşiv için sıkıştırma desteği bulunamadı.");
+   const stream=blob.stream().pipeThrough(new root.CompressionStream("gzip"));
+   const compressed=new Uint8Array(await new root.Response(stream).arrayBuffer());
+   if(compressed.length*4/3>maxBytes)throw Error("Hesap yedeği boyut sınırını aşıyor; cihaz kaydı korundu.");
+   return {codec:"gzip-base64",data:encode(compressed)};
+  }
+  async function unpack(payload){
+   if(payload?.codec==="json")return payload.snapshot||null;
+   if(payload?.codec!=="gzip-base64"||typeof payload.data!=="string"||!root.DecompressionStream||!root.atob||!root.Response)return null;
+   if(payload.data.length>maxBytes)return null;
+   const stream=new root.Blob([decode(payload.data)]).stream().pipeThrough(new root.DecompressionStream("gzip"));
+   const body=await new root.Response(stream).text();if(body.length>maxLocal)return null;
+   return JSON.parse(body);
+  }
+  async function readAccount(id){
+   const {data,error}=await sb.from(table).select("payload,updated_at").eq("owner",String(id.ownerId))
+    .eq("project_id",id.projectId).eq("park_id",id.parkId).order("updated_at",{ascending:false}).limit(8);
+   if(error)throw error;
+   for(const row of data||[]){
+    try{const snapshot=await unpack(row.payload);if(matches(id,snapshot))return snapshot;}
+    catch(error){console.warn("DENDROGEO · hesap arşivi okunamadı:",error.message);}
+   }
+   return null;
+  }
+  async function writeAccount(id,snapshot){
+   const payload=await pack(snapshot);
+   const {error}=await sb.from(table).upsert({owner:String(id.ownerId),project_id:id.projectId,park_id:id.parkId,
+    device_id:deviceId(),payload,updated_at:new Date().toISOString()},{onConflict:"owner,project_id,park_id,device_id"});
+   if(error)throw error;
+   return true;
+  }
+  function warning(error){
+   console.warn("DENDROGEO · hesap proje arşivi:",error.message);
+   const status=document.getElementById("dgLiveProjectStatus");
+   if(status&&status.dataset.status!=="err"){
+    status.textContent="Çalışma bu cihazda saklandı; hesap yedeği güncellenemedi. Önceki kayıtlar değiştirilmedi.";
+    status.dataset.status="warn";
+   }
+  }
+  return Object.freeze({
+   async read(id){
+    const [localResult,accountResult]=await Promise.allSettled([local.read(id),readAccount(id)]);
+    const device=localResult.status==="fulfilled"&&matches(id,localResult.value)?localResult.value:null;
+    const account=accountResult.status==="fulfilled"?accountResult.value:null;
+    const selected=device&&account
+     ?Date.parse(account.savedAt||"")>Date.parse(device.savedAt||"")?account:device
+     :device||account;
+    // Migration path for existing desktop-only archives: the first visit on
+    // that same browser uploads its intact raster without requiring a rescan.
+    if(device&&selected===device){
+     const queued=uploadQueue.catch(()=>{}).then(()=>writeAccount(id,device));
+     uploadQueue=queued;void queued.catch(warning);
+    }
+    if(selected)return selected;
+    if(localResult.status==="rejected")throw localResult.reason;
+    if(accountResult.status==="rejected")throw accountResult.reason;
+    return null;
+   },
+   async save(id,snapshot){
+    let localOK=false,accountOK=false,localError=null,remoteError=null;
+    try{await local.save(id,snapshot);localOK=true;}catch(error){localError=error;}
+    try{
+     // Serial requests avoid delayed writes replacing a newer save on this device.
+     const queued=uploadQueue.catch(()=>{}).then(()=>writeAccount(id,snapshot));
+     uploadQueue=queued;await queued;accountOK=true;
+    }catch(error){remoteError=error;if(localOK)warning(error);}
+    if(!localOK&&!accountOK)throw localError||remoteError||Error("Proje arşivi saklanamadı.");
+    return {local:localOK,account:accountOK};
+   }
+  });
+ }
+
  const snapshots=root.DG_LIVE_MAP_PROJECT_SNAPSHOT.create({
-  store:root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE.create(()=>root.indexedDB),
+  store:createAccountProjectArchive(root.DG_LIVE_MAP_PROJECT_SNAPSHOT_STORE.create(()=>root.indexedDB)),
   capture:()=>{
    const session=DG_GRID_SESSION,record=root.DG_LC_SENS?.state;
    return {
@@ -88,7 +186,7 @@
   const schedule=()=>{if(saveTimer)clearTimeout(saveTimer);saveTimer=setTimeout(()=>{
    if(Number(DG_PARK?.id)!==Number(park.id)||workspaceIdentity?.projectId!==projectId)return;
    void saveWorkspace(projectId,park).catch(error=>console.warn("DENDROGEO · proje cihaz anlık görüntüsü:",error.message));
-  },1300);};
+  },3000);};
   for(const id of ["gridSummary","lcSens"]){const element=document.getElementById(id);if(!element)continue;
    const observer=new root.MutationObserver(schedule);observer.observe(element,{childList:true,characterData:true,subtree:true});watching.push(observer);
   }
@@ -108,25 +206,15 @@
   let cached={restored:false,reason:"unavailable"};
   try{cached=await snapshots.restore(id);}catch(error){console.warn("DENDROGEO · proje cihaz arşivi:",error.message);}
   if(cached.scan)return {...cached,mode:"cached"};
-  // Account review and same-device drafts are the established, scoped sources.
-  // If raster evidence was never cached, recreate it once automatically after
-  // the user explicitly opens this project; never silently accept a new result.
+  // Never initiate a fresh raster calculation while reopening a saved project.
+  // Historical edits can only be reviewed against their original evidence.
+  // A saved review without a portable raster is reported, not recalculated.
   const [local,remote]=await Promise.all([
    root.DG_LC_VALIDATE?.loadCampaigns(park.id).catch(()=>[])||Promise.resolve([]),
    root.DG_SURFACE_REVIEW?.load(park.id,USER.id).catch(()=>null)||Promise.resolve(null)
   ]);
   const drafts=(local||[]).some(row=>String(row.owner)===String(USER.id));
-  if(!drafts&&!remote)return {...cached,mode:cached.grid?"cached":"none"};
-  const result=await openSurfaceSaved();
-  let retainedGrid=cached.grid||0;
-  if(result.ready){
-   // A legacy grid-only snapshot may have been built against a different
-   // surface revision. Restore it only if the review still matches; never
-   // overwrite its archived cells with a newly scanned empty grid.
-   if(cached.grid){const after=await snapshots.restore(id);retainedGrid=after.grid||0;}
-   if(!cached.grid||retainedGrid)await snapshots.save(id);
-  }
-  return {restored:!!result.restored,scan:!!result.ready,grid:retainedGrid,mode:result.ready?"review":"failed"};
+  return {...cached,mode:drafts||remote?"evidence-missing":cached.grid?"cached":"none"};
  }
  async function openSurfaceSaved(){return root.DG_LIVE_MAP_PROJECT_SURFACE_UI.restore({
   parkId:Number(DG_PARK?.id||0),currentParkId:()=>Number(DG_PARK?.id||0),
@@ -137,9 +225,26 @@
   openSavedReview:()=>root.DG_LC_SENS.mount("lcSens",{freshAnalysis:false})
  });}
  function focusPark(){
-  if(!map||!PARK_POLY?.length)return;
-  map.invalidateSize({pan:false});root.DG_PARK_BOUNDARY_LAYER_UI.fit({leaflet:L,map,outer:PARK_POLY,holes:PARK_HOLES||[]});
-  document.getElementById("map")?.scrollIntoView({block:"nearest"});
+  if(!map||!PARK_POLY?.length||!Number(DG_PARK?.id))return;
+  const selected=workspaceIdentity;
+  if(selected&&Number(DG_PARK.id)!==Number(selected.park.id))return;
+  // On mobile the project details and the eight GIS controls may push the
+  // actual Leaflet map below the viewport. Bring the map itself into view.
+  document.getElementById("map")?.scrollIntoView({block:"start"});
+  const repaint=()=>{
+   if(selected&&Number(DG_PARK?.id)!==Number(selected.park.id))return;
+   map.invalidateSize({pan:false});
+   // Recover the *display layer* if another menu removed it. The verified
+   // saved geometry/park identity remains authoritative and unchanged.
+   if(!PARK_LAYER||!map.hasLayer(PARK_LAYER)){
+    root.DG_PARK_BOUNDARY_LAYER_UI.render({leaflet:L,map,outer:PARK_POLY,holes:PARK_HOLES||[],
+     onCreated:layer=>{PARK_LAYER=layer;}});
+   }
+   if(typeof PARK_LAYER?.eachLayer==="function")PARK_LAYER.eachLayer(layer=>layer.bringToFront?.());
+   root.DG_PARK_BOUNDARY_LAYER_UI.fit({leaflet:L,map,outer:PARK_POLY,holes:PARK_HOLES||[]});
+  };
+  if(typeof root.requestAnimationFrame==="function")root.requestAnimationFrame(repaint);
+  else repaint();
  }
  document.addEventListener("visibilitychange",()=>{if(document.hidden&&workspaceIdentity)void saveWorkspace(workspaceIdentity.projectId,workspaceIdentity.park).catch(()=>{});});
  root.DG_LIVE_MAP_PROJECTS=root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI.create({
