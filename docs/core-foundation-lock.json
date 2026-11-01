@@ -13160,7 +13160,7 @@
     {
       "date": "2026-11-01",
       "audit_chain": "sha256-v1",
-      "scope": "Urgent user-reported regression recovery: the newly added project workspace archive introduced a second PostgREST projects-to-parks relationship (PGRST201 / HTTP 300), which hid owned/shared project embeds. A follow-up additive migration drops only the archive's redundant park foreign key, retaining the project and owner foreign keys, owner-only RLS and archived raster/brush evidence. The frozen project migration allowlist tests are amended only to acknowledge this reviewed corrective migration. No changes to project/invite/measurement/stage records or scientific calculations.",
+      "scope": "User-authorized release follow-up for urgent regression recovery: the newly added project workspace archive introduced a second PostgREST projects-to-parks relationship (PGRST201 / HTTP 300), which hid owned/shared project embeds. A follow-up additive migration drops only the archive's redundant park foreign key, retaining the project and owner foreign keys, owner-only RLS and archived raster/brush evidence. The frozen project migration allowlist tests are amended only to acknowledge this reviewed corrective migration. No changes to project/invite/measurement/stage records or scientific calculations.",
       "validation": [
         "Live Supabase REST projects-to-parks embed HTTP 300 before, HTTP 200 after",
         "node --test test/live-map-project-account-store.test.mjs test/dbh-qa.test.mjs test/form-qa.test.mjs",
