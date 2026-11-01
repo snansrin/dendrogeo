@@ -136,10 +136,36 @@
   currentRecordParkId:()=>Number(root.DG_LC_SENS?.state?.record?.parkId||0),savedRecord:()=>root.DG_LC_SENS?.state?.record,
   openSavedReview:()=>root.DG_LC_SENS.mount("lcSens",{freshAnalysis:false})
  });}
+ function verifyActiveBoundary(park){
+  // The selected stage is its own immutable analysis polygon, not its deleted
+  // historical parent. Do not report a restored workspace until the actual GIS
+  // map uses exactly the persisted stage rings.
+  const geometry=park?.geom_json;
+  if(!map||!geometry?.outer?.length||Number(DG_PARK?.id)!==Number(park.id)||
+     JSON.stringify(PARK_POLY)!==JSON.stringify(geometry.outer)||
+     JSON.stringify(PARK_HOLES||[])!==JSON.stringify(geometry.inner||[]))
+    throw Error("Kayıtlı etap sınırı aktif park poligonu olarak yüklenemedi. Veriler değiştirilmedi.");
+  // A map layer can disappear during a previous clear/late render. Repair
+  // only the visual layer through the existing renderer, never the geometry.
+  if(!PARK_LAYER||!map.hasLayer(PARK_LAYER)){
+    root.DG_PARK_BOUNDARY_LAYER_UI.render({leaflet:L,map,outer:PARK_POLY,holes:PARK_HOLES||[],
+      onCreated:layer=>{PARK_LAYER=layer;}});
+  }
+  return true;
+ }
+ function activateParkAnalysis(){
+  // Saved project selection is an explicit park-analysis action. Reuse the
+  // standard mode controller so UI, map click binding and ARIA stay in sync.
+  if(!PARK_MODE&&typeof toggleParkMode==="function")toggleParkMode();
+  if(!PARK_MODE)throw Error("Park Analizi Modu etkinleştirilemedi. Harita değiştirilmedi.");
+ }
  function focusPark(){
   if(!map||!PARK_POLY?.length)return;
-  map.invalidateSize({pan:false});root.DG_PARK_BOUNDARY_LAYER_UI.fit({leaflet:L,map,outer:PARK_POLY,holes:PARK_HOLES||[]});
-  document.getElementById("map")?.scrollIntoView({block:"nearest"});
+  const stageMenu=document.getElementById("dgStageToolsMenu");
+  if(stageMenu?.open)stageMenu.open=false;
+  map.invalidateSize({pan:false});
+  root.DG_PARK_BOUNDARY_LAYER_UI.fit({leaflet:L,map,outer:PARK_POLY,holes:PARK_HOLES||[]});
+  document.getElementById("map")?.scrollIntoView({block:"center"});
  }
  document.addEventListener("visibilitychange",()=>{if(document.hidden&&workspaceIdentity)void saveWorkspace(workspaceIdentity.projectId,workspaceIdentity.park).catch(()=>{});});
  root.DG_LIVE_MAP_PROJECTS=root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI.create({
@@ -154,6 +180,7 @@
   saveDraft:async()=>!root.DG_LC_SENS?.state?.record||typeof dgSensSave!=="function"||!!(await dgSensSave()),
   saveWorkspace:async(projectId,parkId)=>{if(!projectId)return true;return saveWorkspace(projectId,DG_PARK&&Number(DG_PARK.id)===parkId?DG_PARK:null);},
   restoreWorkspace,watchWorkspace,focusPark,stopWatching,
+  verifyBoundary:verifyActiveBoundary,activateParkAnalysis,
   resumeWatching:()=>{if(workspaceIdentity&&Number(DG_PARK?.id)===Number(workspaceIdentity.park?.id))watchWorkspace(workspaceIdentity.projectId,workspaceIdentity.park);},
   prepareParent:row=>root.DG_PARK_STAGES.present({park:root.DG_LIVE_MAP_PROJECT_CANDIDATE.candidate(row),row}),
   forgetParent:()=>root.DG_PARK_STAGES.present({park:null,row:null}),
