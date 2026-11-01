@@ -13116,7 +13116,7 @@
     {
       "date": "2026-11-01",
       "audit_chain": "sha256-v1",
-      "scope": "User-requested saved-project workspace recovery: load completed-project evidence without unlocking scientific records, avoid implicit rescan, and add a separately RLS-scoped account archive for exact existing project/raster/grid snapshots. Static loader and offline manifest rebuilt deterministically. No park/stage/measurement/source-surface rows or scientific formula changes.",
+      "scope": "User-authorized release follow-up for saved-project workspace recovery: load completed-project evidence without unlocking scientific records, avoid implicit rescan, and add a separately RLS-scoped account archive for exact existing project/raster/grid snapshots. Static loader and offline manifest rebuilt deterministically. No park/stage/measurement/source-surface rows or scientific formula changes.",
       "validation": [
         "node --test test/live-map-project-workspace.test.mjs test/live-map-project-account-store.test.mjs test/park-stage-workspace.test.mjs",
         "npm run check",
@@ -13139,6 +13139,16 @@
           "path": "partials/boot.html",
           "previous_sha256": "aed5c91a3e8e216dd8f8fc0e4e2d5b6698576263d11b768337e7f1bbb5c7e5da",
           "sha256": "bbedfe6bc8f686273a6f6ee4f411223862e179859b7db8b35afe2dbfd19f3df6"
+        },
+        {
+          "path": "test/dbh-qa.test.mjs",
+          "previous_sha256": "3ee5863d9936c1b7d510c0c020d04db1a3669ab75646e0bf02a59a3d61031eeb",
+          "sha256": "32a413bc48e404882d04d8c3f6307738de713737943573d16dbd5f8d6720f4a5"
+        },
+        {
+          "path": "test/form-qa.test.mjs",
+          "previous_sha256": "9f81677979d4d4282387114043150ba02ed6ff57d3edb36fca9e3a938e6b9c09",
+          "sha256": "72c4051d1330ae08ce22ecbdb02e21c1eedea4152af8e866b9418bc8b338bd25"
         }
       ]
     }
