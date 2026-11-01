@@ -40,7 +40,7 @@ jobs:
           if(!records.length)throw Error('No audited protected change; refusing empty release');
           manifest.authorized_modularizations.push({
             date:'2026-11-01',audit_chain:'sha256-v1',
-            scope:'User-approved Waypoint-only park Presence recovery: discard terminal and stale private channels, reconnect within the selected authorized park, extend connection timeout; preserve membership RLS, database, scientific formulas, carbon model, park geometry, raster, GPS consent and ten-second throttle.',
+            scope:'User-authorized release follow-up for Waypoint-only park Presence recovery: discard terminal and stale private channels, reconnect within the selected authorized park, extend connection timeout; preserve membership RLS, database, scientific formulas, carbon model, park geometry, raster, GPS consent and ten-second throttle.',
             validation:['npm run check','GitHub Chromium/WebKit mobile checks before merge'],files:records
           });
           writeFileSync(mp,JSON.stringify(manifest,null,2)+'\n');
