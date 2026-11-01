@@ -332,9 +332,9 @@ describe('0036 · özellik ve EN bütünlük kilitleri', () => {
     assert.match(mp, /presence=window\.DG_PARK_PRESENCE_CHANNEL_ADAPTER/);
     assert.match(mp, /presence\.join\(/, 'service Presence adapter’ını çağırır');
     const presence = rd('src/adapters/parks/park-presence-channel.js');
-    assert.ok(presence.indexOf('client.auth.getSession()') < presence.indexOf('channel.subscribe(onStatus)'), 'JWT kanala katılmadan önce kurulur');
+    assert.ok(presence.indexOf('client.auth.getSession()') < presence.indexOf('channel.subscribe('), 'JWT kanala katılmadan önce kurulur');
     assert.match(presence,/private:true/);
-    assert.match(presence, /setTimer\(onWatchdog,8000\)/, '8 sn watchdog adapter’da');
+    assert.match(presence, /setTimer\([\s\S]*?20000\)/, '20 sn private RLS join watchdog adapter’da');
     assert.match(presence, /await client\.realtime\.setAuth\(token\)/, 'JWT güncellemesi adapter sınırında kalır');
     assert.match(mp, /DG_PARK_CH_WATCH/, 'park kanalı watchdog');
     assert.match(mp, /DG_PARK_CH_LIVE/, 'track yalnız SUBSCRIBED sonrası');
