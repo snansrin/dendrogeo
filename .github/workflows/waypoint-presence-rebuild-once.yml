@@ -2,7 +2,7 @@ name: Waypoint presence one-time release build
 on:
   push:
     branches: [fix/waypoint-presence-recovery-20261101]
-    paths: [src/services/map.js]
+    paths: [src/services/map.js, .github/workflows/waypoint-presence-rebuild-once.yml]
 permissions:
   contents: write
 jobs:
@@ -28,7 +28,7 @@ jobs:
           const digest=data=>createHash('sha256').update(data).digest('hex');
           const mp='docs/core-foundation-lock.json',vp='scripts/check-core-foundation.mjs';
           const manifest=JSON.parse(readFileSync(mp,'utf8'));
-          const changed=execFileSync('git',['diff','--name-only','HEAD'],{encoding:'utf8'}).trim().split('\n').filter(Boolean);
+          const changed=[...new Set([...execFileSync('git',['diff','--name-only','HEAD^','HEAD'],{encoding:'utf8'}).trim().split('\n'),...execFileSync('git',['diff','--name-only','HEAD'],{encoding:'utf8'}).trim().split('\n')].filter(Boolean))];
           const records=[];
           for(const path of changed){
             if(!Object.hasOwn(manifest.sha256,path))continue;
