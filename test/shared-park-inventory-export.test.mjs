@@ -74,15 +74,19 @@ test('waypoint CSV project choices include owned and accepted shared projects, n
   {id:25,owner:'sinan',park_id:8,name:'Saha A',parks:{name:'Göksu Parkı'}},
   {id:26,owner:'nagihan',park_id:8,name:'Saha B',parks:{name:'Göksu Parkı'}},
   {id:30,owner:'sinan',park_id:9,name:'Saha C',parks:{name:'Başkent Parkı'}},
+  {id:32,owner:'sinan',park_id:9,name:'Başkent Parkı',parks:{name:'Başkent Parkı'}},
   {id:31,owner:'outsider',park_id:10,name:'İzinsiz',parks:{name:'Özel Park'}}
  ],memberships:[{park_id:8,user_id:'sinan',added_at:'2026-10-30T10:00:00Z'}],
  invites:[{park_id:8,invited_by:'nagihan',email:'sinan@example.org',status:'Kabul',responded_at:'2026-10-30T11:00:00Z'}],
  profiles:[{id:'nagihan',role:'user',active:true}],
  user:{id:'sinan',email:'sinan@example.org',email_confirmed_at:'2026-10-01T00:00:00Z'}
  });
- const eligible=await api.listParticipantProjects(client,{userId:'sinan',role:'user'}),options=api.waypointProjectOptions(eligible);
- assert.deepEqual(Array.from(options,entry=>[entry.project.id,entry.label]),[
-  [30,'Başkent Parkı · Saha C'],[25,'Göksu Parkı · Saha A'],[26,'Göksu Parkı · Saha B']
+ const eligible=await api.listParticipantProjects(client,{userId:'sinan',role:'user'}),groups=api.waypointProjectGroups(eligible,'sinan');
+ assert.deepEqual(JSON.parse(JSON.stringify(Array.from(groups,group=>[group.key,group.name,group.projects.length]))),
+  JSON.parse(JSON.stringify(Array.from(api.groupProjects(eligible).values(),group=>[group.key,group.name,group.projects.length]).sort((a,b)=>a[1].localeCompare(b[1],'tr')))));
+ assert.deepEqual(JSON.parse(JSON.stringify(Array.from(groups,group=>[group.name,group.projects.map(entry=>[entry.project.id,entry.label])]))),[
+  ['Başkent Parkı',[[32,'Proje #32 · Sana ait'],[30,'Saha C · #30 · Sana ait']]],
+  ['Göksu Parkı',[[25,'Saha A · #25 · Sana ait'],[26,'Saha B · #26 · Ortak erişim']]]
  ]);
 });
 
@@ -97,24 +101,40 @@ test('waypoint CSV rechecks participant access and reads exactly the selected ow
   profiles:[{id:'nagihan',role:'user',active:true}],
   user:{id:'sinan',email:'sinan@example.org',email_confirmed_at:'2026-10-01T00:00:00Z'}
  });
- const reads=[],fetchWaypoints={async fetch(args){reads.push(args.projectId);return{data:[{wp_id:4,lat:39.9,lon:32.8,visited:true}],error:null};}},formats={waypointsCSV(rows){return `rows=${rows.length};wp=${rows[0].wp_id}`;}};
+ const reads=[],metadata=[],fetchWaypoints={async fetch(args){reads.push(args.projectId);return{data:[{project_id:args.projectId,wp_id:4,lat:39.9,lon:32.8,visited:true}],error:null};}},formats={waypointsCSV(rows,source){metadata.push(source);return `rows=${rows.length};wp=${rows[0].wp_id};project=${source.id}`;}};
  const shared=await api.buildWaypointCSV({client,userId:'sinan',role:'user',projectId:'26',fetchWaypoints,formats});
  assert.equal(shared.project.id,26);
+ assert.equal(shared.csv,'rows=1;wp=4;project=26');
  const result=await api.buildWaypointCSV({client,userId:'sinan',role:'user',projectId:'25',
   fetchWaypoints,
-  formats:{waypointsCSV(rows){return `rows=${rows.length};wp=${rows[0].wp_id}`;}}
+  formats
  });
  assert.equal(result.project.id,25);
- assert.equal(result.csv,'rows=1;wp=4');
+ assert.equal(result.csv,'rows=1;wp=4;project=25');
  assert.equal(result.count,1);
  assert.deepEqual(reads,[26,25]);
+ assert.deepEqual(metadata.map(source=>[source.id,source.name,source.parkId,source.parkName]),[[26,'Saha B',8,'Göksu Parkı'],[25,'Saha A',8,'Göksu Parkı']]);
  await assert.rejects(()=>api.buildWaypointCSV({client,userId:'sinan',role:'user',projectId:'999',fetchWaypoints,formats}),/erişimin artık yok/);
+});
+
+test('waypoint CSV fails closed on mixed-project rows and a mismatched signed-in account',async()=>{
+ const api=app(),user={id:'sinan',email:'sinan@example.org',email_confirmed_at:'2026-10-01T00:00:00Z'};
+ const client=scopeClient({projects:[{id:25,owner:'sinan',park_id:8,name:'Saha A',parks:{name:'Göksu Parkı'}}],user});
+ const formats={waypointsCSV(){assert.fail('mixed rows must never reach the CSV serializer');}};
+ await assert.rejects(()=>api.buildWaypointCSV({client,userId:'sinan',role:'user',projectId:25,
+  fetchWaypoints:{async fetch(){return{data:[{project_id:25,wp_id:1},{project_id:26,wp_id:2}],error:null};}},formats
+ }),/Karışık CSV oluşturulmadı/);
+ await assert.rejects(()=>api.buildWaypointCSV({client,userId:'different-user',role:'user',projectId:25,
+  fetchWaypoints:{async fetch(){assert.fail('mismatched sessions must stop before waypoint reads');}},formats
+ }),/Oturum doğrulanamadı/);
 });
 
 test('waypoint CSV controls occupy a full-width row in the existing export grid',()=>{
  const source=readFileSync(new URL('../src/ui/shared-park-inventory-export.js',import.meta.url),'utf8');
  assert.match(source,/find\(card=>card\.querySelector\("h3"\)\?\.textContent\.trim\(\)==="Standart CSV"\)/);
  assert.match(source,/section\.style\.gridColumn="1 \/ -1"/);
+ assert.match(source,/createElement\("optgroup"\)/);
+ assert.match(source,/CSV’ye proje kimliği ve adı eklenir/);
  assert.doesNotMatch(source,/exportGrid\.append\(card\)/);
  assert.match(source,/exportBody\.append\(section\)/,'Park · Tam Envanter remains in its own report section');
 });
@@ -190,6 +210,19 @@ test('admin-issued accepted invitation requires an active privileged sender, and
  const denied=scopeClient({...base,profiles:[{id:'manager',role:'admin',active:false}]});
  assert.deepEqual(Array.from(await api.listParticipantProjects(denied,{userId:'sinan',role:'admin'}),p=>p.id),[1]);
  assert.equal((await api.listProjects(permitted)).length,3,'administrator-only directory keeps the full accessible set');
+});
+
+test('large accepted project sets stay paginated and participant-scoped',async()=>{
+ const api=app(),projects=Array.from({length:1005},(_,i)=>({id:i+1,owner:'partner',park_id:8,name:`Saha ${i+1}`,parks:{name:'Göksu Parkı'}}));
+ const client=scopeClient({projects,memberships:[{park_id:8,user_id:'sinan',added_at:'2026-10-30T10:00:00Z'}],
+  invites:[{park_id:8,invited_by:'manager',email:'sinan@example.org',status:'Kabul',responded_at:'2026-10-30T11:00:00Z'}],
+  profiles:[{id:'manager',role:'admin',active:true}],
+  user:{id:'sinan',email:'sinan@example.org',email_confirmed_at:'2026-10-01T00:00:00Z'}
+ });
+ const eligible=await api.listParticipantProjects(client,{userId:'sinan',role:'admin'});
+ assert.equal(eligible.length,1005);
+ assert.deepEqual(client.calls.filter(call=>call.table==='projects').map(call=>call.from),[0,0,1000]);
+ assert.ok(client.calls.every(call=>call.table!=='measurements'));
 });
 
 test('only trusted Supabase photo links are clickable and all DB text is escaped',()=>{

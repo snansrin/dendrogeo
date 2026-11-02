@@ -16,6 +16,11 @@
  async function listInventoryProjects(client){
   return pages(()=>client.from("projects").select(PROJECT_FIELDS).order("id",{ascending:true}));
  }
+ async function isCurrentParticipant(client,userId){
+  if(!userId)return false;
+  const {data,error}=await client.auth.getUser();
+  return !error&&data?.user?.id===userId;
+ }
  /* Participant export must never inherit an administrator's unrestricted projects SELECT.
     Only owned projects or projects backed by a CURRENT, verified accepted invitation
     and collaborator membership can appear in the non-admin export selector. */
@@ -45,14 +50,26 @@
    senders=new Map(senderRows.filter(row=>row.active===true).map(row=>[row.id,row]));
   }
   const parks=[...new Set(accepted.map(invite=>Number(invite.park_id)).filter(Boolean))];
+  const authorizedByPark=new Map();
+  for(const invite of accepted){
+   const parkId=Number(invite.park_id),access=authorizedByPark.get(parkId)||{owners:new Set(),adminShare:false};
+   if(privileged){
+    const sender=senders.get(invite.invited_by);
+    if(sender&&["admin","owner"].includes(sender.role))access.adminShare=true;
+    else if(sender)access.owners.add(invite.invited_by);
+   }
+   authorizedByPark.set(parkId,access);
+  }
   const shared=[];
   for(let start=0;start<parks.length;start+=100){
    const ids=parks.slice(start,start+100);
    const projects=await pages(()=>client.from("projects").select(PROJECT_FIELDS).in("park_id",ids).order("id",{ascending:true}));
    for(const project of projects){
-    if(accepted.some(invite=>Number(invite.park_id)===Number(project.park_id)&&(
-     !privileged||(()=>{const sender=senders.get(invite.invited_by);return sender&&(invite.invited_by===project.owner||["admin","owner"].includes(sender.role));})()
-    )))shared.push(project);
+    const access=authorizedByPark.get(Number(project.park_id));
+    // Ordinary participants still rely on project RLS for exact owner/invite
+    // authorization. Admins bypass that RLS, so the bounded lookup here mirrors
+    // the invite issuer's project ownership or explicit administrator role.
+    if(access&&(!privileged||access.adminShare||access.owners.has(project.owner)))shared.push(project);
    }
   }
   return [...new Map([...owned,...shared].map(project=>[Number(project.id),project])).values()];
@@ -76,5 +93,5 @@
   }
   return rows.sort(sortPoints);
  }
-  root.DG_SHARED_PARK_INVENTORY_STORE=Object.freeze({listProjects:listInventoryProjects,listParticipantProjects:listParticipantInventoryProjects,readAll});
+  root.DG_SHARED_PARK_INVENTORY_STORE=Object.freeze({listProjects:listInventoryProjects,listParticipantProjects:listParticipantInventoryProjects,isCurrentParticipant,readAll});
 })(window);

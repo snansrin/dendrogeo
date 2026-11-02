@@ -2,7 +2,7 @@
 /* Additive report controls for Export and administrator export, using existing theme. */
 (function(root){
  const {sortPoints,slug,photoURL,parkOf,groupProjects}=root.DG_SHARED_PARK_INVENTORY_DOMAIN;
- const {listProjects,listParticipantProjects,readAll}=root.DG_SHARED_PARK_INVENTORY_STORE;
+ const {listProjects,listParticipantProjects,isCurrentParticipant,readAll}=root.DG_SHARED_PARK_INVENTORY_STORE;
  const escape=value=>String(value??"").replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
  let visibleParks=new Map(),busy=false,loadedFor=null;
  const num=value=>value===null||value===undefined||value===""?null:Number(value);
@@ -66,16 +66,23 @@
   const link=doc.createElement("a");link.href=url;link.download=fileName;doc.body.append(link);link.click();link.remove();
   root.setTimeout(()=>root.URL.revokeObjectURL(url),30000);
  }
- function waypointProjectOptions(projects){
-  // listParticipantProjects is the authorization boundary: it returns only
-  // owned projects and projects covered by a current accepted collaboration.
-  return (projects||[]).map(project=>({
-   project,
-   label:`${parkOf(project).name} · ${project.name||`Proje ${project.id}`}`
-  })).sort((a,b)=>a.label.localeCompare(b.label,"tr")||Number(a.project.id)-Number(b.project.id));
+ function waypointProjectGroups(projects,userId){
+  // The participant query is the access boundary; show its project-level
+  // results under the same park groups used by the full-inventory picker.
+  const groups=new Map();
+  for(const project of projects||[]){
+   const park=parkOf(project),group=groups.get(park.key)||{...park,projects:[]};
+   const sameName=String(project.name||"").trim().toLocaleLowerCase("tr-TR")===park.name.trim().toLocaleLowerCase("tr-TR");
+   const identity=sameName?`Proje #${project.id}`:`${project.name||"Proje"} · #${project.id}`;
+   group.projects.push({project,label:`${identity} · ${String(project.owner)===String(userId)?"Sana ait":"Ortak erişim"}`});
+   groups.set(park.key,group);
+  }
+  return [...groups.values()].map(group=>({...group,projects:group.projects.sort((a,b)=>a.label.localeCompare(b.label,"tr")||Number(a.project.id)-Number(b.project.id))}))
+   .sort((a,b)=>a.name.localeCompare(b.name,"tr")||String(a.key).localeCompare(String(b.key)));
  }
  async function buildWaypointCSV({client,userId,role,projectId,fetchWaypoints=root.DG_FETCH_PROJECT_WAYPOINTS,formats=root.DG_PARK_EXPORT_FORMATS}={}){
   if(!userId||!Number.isSafeInteger(Number(projectId))||Number(projectId)<=0)throw Error("Ölçüm noktaları için bir proje seç.");
+  if(!await isCurrentParticipant(client,userId))throw Error("Oturum doğrulanamadı. Yeniden giriş yapıp projeleri yenile.");
   const projects=await listParticipantProjects(client,{userId,role});
   const project=projects.find(row=>Number(row.id)===Number(projectId));
   if(!project)throw Error("Bu projeye erişimin artık yok. Projeleri yenile.");
@@ -84,7 +91,9 @@
   if(response?.error)throw Error(response.error.message||"Ölçüm noktaları okunamadı.");
   const rows=response?.data||[];
   if(!rows.length)throw Error("Seçili projede dışa aktarılacak ölçüm noktası yok.");
-  return{project,csv:formats.waypointsCSV(rows),count:rows.length};
+  if(rows.some(row=>Number(row.project_id)!==Number(project.id)))throw Error("Seçilen proje dışında nokta bulundu. Karışık CSV oluşturulmadı.");
+  const park=parkOf(project);
+  return{project,csv:formats.waypointsCSV(rows,{id:Number(project.id),name:project.name||`Proje ${project.id}`,parkId:park.id,parkName:park.name}),count:rows.length};
  }
  function openPreview(title,html,fileName){
   const doc=root.document,modal=doc.getElementById("previewModal");
@@ -111,11 +120,12 @@
    if(groups.has(previous))el.value=previous;
    else if(groups.size===1)el.value=groups.keys().next().value;
    if(waypointSelect){
-    const priorProject=waypointSelect.value,options=waypointProjectOptions(participantProjects);
-    waypointSelect.replaceChildren(new Option("Proje seç", ""),...options.map(({project,label})=>new Option(label,String(project.id))));
+     const priorProject=waypointSelect.value,groups=waypointProjectGroups(participantProjects,user),options=groups.flatMap(group=>group.projects);
+     const optgroups=groups.map(group=>{const optgroup=root.document.createElement("optgroup");optgroup.label=`${group.name} · ${group.projects.length} proje`;for(const entry of group.projects)optgroup.append(new Option(entry.label,String(entry.project.id)));return optgroup;});
+     waypointSelect.replaceChildren(new Option("Park ve proje seç", ""),...optgroups);
     if(options.some(({project})=>String(project.id)===priorProject))waypointSelect.value=priorProject;
     else if(options.length===1)waypointSelect.value=String(options[0].project.id);
-    status("dgWaypointExportStatus",options.length?`${options.length} erişilebilir proje · CSV yalnızca seçtiğin projenin noktalarını içerir.`:"Erişebildiğin proje bulunamadı.",!options.length);
+     status("dgWaypointExportStatus",options.length?`${options.length} yetkili proje · Parklara göre gruplanmıştır; CSV tek seçili projeyi içerir.`:"Erişebildiğin proje bulunamadı.",!options.length);
    }
    const formatCount=root.document.querySelector("#v-export .export-summary-note");if(formatCount)formatCount.textContent="4 biçim";
    status("dgSharedParkStatus",`${groups.size} sahip/ortak parkı · Yalnız sana ait veya kabul edilmiş ortaklıkla eriştiğin projeler gösterilir.`);
@@ -130,7 +140,7 @@
   try{
    const result=await buildWaypointCSV({client:sb,userId:user,role:PROFILE?.role,projectId:selected});
    if(USER?.id!==user||select.value!==selected){status("dgWaypointExportStatus","Oturum veya proje seçimi değişti. Yeniden dene.",true);return;}
-   const fileName=`dendrogeo_olcum_noktalari_${slug(result.project.name||`proje_${result.project.id}`)}.csv`;
+    const fileName=`dendrogeo_olcum_noktalari_${slug(result.project.name||`proje_${result.project.id}`)}_${result.project.id}.csv`;
    const url=root.URL.createObjectURL(new root.Blob([result.csv],{type:"text/csv;charset=utf-8;"}));
    const link=root.document.createElement("a");link.href=url;link.download=fileName;root.document.body.append(link);link.click();link.remove();
    root.setTimeout(()=>root.URL.revokeObjectURL(url),30000);
@@ -181,7 +191,7 @@
    const csvCard=[...exportGrid.querySelectorAll(".export-format-card")].find(card=>card.querySelector("h3")?.textContent.trim()==="Standart CSV");
    if(csvCard){
     const section=root.document.createElement("section");section.className="export-format-card";section.style.gridColumn="1 / -1";
-    section.innerHTML='<div class="export-format-top"><span class="export-format-icon">📍</span><span class="badge on">ÖLÇÜM NOKTALARI</span></div><h3>Ölçüm Noktaları CSV</h3><p>Seçtiğin kendi veya kabul edilmiş ortak projedeki ölçüm noktalarını mevcut durumlarıyla CSV olarak indir.</p><div class="grid g3"><div><label class="lbl" for="dgWaypointExportProject">Proje / ortak çalışma</label><select id="dgWaypointExportProject"><option value="">Projeler yükleniyor…</option></select></div><div style="align-self:end"><button type="button" class="btn sm blue" data-dg-park-inventory-action="waypoints-csv">⬇ CSV indir</button></div><div style="align-self:end"><button type="button" class="btn sm ghost" data-dg-park-inventory-action="refresh">↻ Projeleri yenile</button></div></div><p id="dgWaypointExportStatus" class="dg-meta" role="status">Erişilebilir projeler yükleniyor…</p>';
+    section.innerHTML='<div class="export-format-top"><span class="export-format-icon">📍</span><span class="badge on">ÖLÇÜM NOKTALARI</span></div><h3>Ölçüm Noktaları CSV</h3><p>Yalnızca erişim yetkin olan projeler listelenir. Parklar altında gruplanır; CSV’ye proje kimliği ve adı eklenir.</p><label class="lbl" for="dgWaypointExportProject">Yetkili park / proje</label><div class="export-actions" style="align-items:center;max-width:960px"><select id="dgWaypointExportProject" style="flex:1 1 360px;max-width:560px;min-width:220px"><option value="">Projeler yükleniyor…</option></select><button type="button" class="btn sm blue" data-dg-park-inventory-action="waypoints-csv">⬇ CSV indir</button><button type="button" class="btn sm ghost" data-dg-park-inventory-action="refresh">↻ Yenile</button></div><p id="dgWaypointExportStatus" class="dg-meta" role="status">Erişilebilir projeler yükleniyor…</p>';
     exportGrid.append(section);
    }
   }
@@ -206,6 +216,6 @@
   if(view&&root.MutationObserver){new root.MutationObserver(()=>{if(view.classList.contains("on"))refresh();}).observe(view,{attributes:true,attributeFilter:["class"]});}
   if(view?.classList.contains("on"))refresh();
  }
- root.DG_SHARED_PARK_INVENTORY_EXPORT=Object.freeze({photoURL,groupProjects,readAll,sortPoints,renderGroup,documentHTML,listProjects,listParticipantProjects,downloadHTML,waypointProjectOptions,buildWaypointCSV,init});
+  root.DG_SHARED_PARK_INVENTORY_EXPORT=Object.freeze({photoURL,groupProjects,readAll,sortPoints,renderGroup,documentHTML,listProjects,listParticipantProjects,downloadHTML,waypointProjectGroups,buildWaypointCSV,init});
  if(root.document?.readyState==="loading")root.document.addEventListener("DOMContentLoaded",init,{once:true});else if(root.document)init();
 })(window);
