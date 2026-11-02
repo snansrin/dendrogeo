@@ -2,7 +2,7 @@
 /* Paginated RLS-scoped reads; no service role, view, schema or auth-policy changes. */
 (function(root){
  const PAGE=1000,sortPoints=root.DG_SHARED_PARK_INVENTORY_DOMAIN.sortPoints;
- const PROJECT_FIELDS="id,owner,name,park_id,park_name,parks(id,name,area_m2)";
+ const PROJECT_FIELDS="id,owner,name,park_id,park_name,parks!projects_park_id_fkey(id,name,area_m2)";
  async function pages(makeQuery){
   const rows=[];
   for(let from=0;;from+=PAGE){

@@ -176,7 +176,11 @@ async function loadProjects__scroll(){
   scope:userId,isCurrent:()=>USER?.id===userId,
   fetchOwned:()=>window.DG_OWNED_MEASUREMENT_PROJECTS.fetch({client:sb,userId,onRelationError:dgParkSchemaMissing}),
   fetchShared:owned=>window.DG_SHARED_MEASUREMENT_PROJECTS.fetch({client:sb,userId,ownedProjects:owned}),
-  onError:()=>toast(_tms("Proje listesi yenilenemedi. Bağlantınızı kontrol edip Projeler ekranını yeniden açın."),"err"),
+  onError:error=>{
+   for(const item of error.failures||[])console.warn("DENDROGEO · proje okuma hatası",{source:item.source,code:item.error?.code||item.error?.name||"READ_FAILED",message:item.error?.message||"Read failed"});
+   const sources=error.failures?.map(item=>item.source)||[];
+   toast(_tms(sources.length===1&&sources[0]==="shared"?"Paylaşılan projeler yüklenemedi. Kendi projelerin kullanılabilir.":sources.length===1?"Kendi projelerin yüklenemedi. Paylaşılan projelerin kullanılabilir.":"Proje listesi yüklenemedi. Projeler ekranından yeniden deneyin."),"err");
+  },
   merge:(owned,shared)=>window.DG_MERGE_MEASUREMENT_PROJECTS.merge(owned,shared),
   onState:state=>{PROJ_LIST=state.projects;},
   render:projects=>window.DG_MEASUREMENT_PROJECT_DIRECTORY_UI.render({projects,element:$,escape:esc,optionLabel:dgProjectOptionLabel,restore:dgProjectRestore,renderCard:dgProjectCard,editing:EDIT_PROJ,actions:{leave:id=>dgParkLeaveProject(id),openMeasure:dgProjectOpenMeasure,publish:id=>window.dgUserPubOpen?.(id),startParkScan:id=>startParkScan({projectId:id,returnTo:"projects"}),edit:editProject,delete:deleteProject}}),

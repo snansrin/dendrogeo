@@ -24,14 +24,36 @@ test('late successful and failed requests cannot replace newer directory results
 });
 test('temporary failures retain known rows and surface the error; a later retry recovers',async()=>{
  const w=setup(),load=w.DG_LOAD_MEASUREMENT_PROJECT_DIRECTORY.load;
- await load(ports([{id:30,is_locked:true}]));
+ await load(ports([{id:30,shared:true,is_locked:true}]));
  const notified=[];
- await assert.rejects(load(ports([],{fetchShared:async()=>{throw Error('session refreshing');},onError:e=>notified.push(e.message)})),/session refreshing/);
+ await load(ports([],{fetchShared:async()=>{throw Error('session refreshing');},onError:e=>notified.push(e.failures[0].error.message)}));
  assert.equal(w.DG_MEASUREMENT_PROJECT_DIRECTORY_STATE.getState().projects[0].id,30);
  assert.deepEqual(notified,['session refreshing']);
  await load(ports([{id:33,is_locked:true}]));
  assert.equal(w.DG_MEASUREMENT_PROJECT_DIRECTORY_STATE.getState().error,null);
  assert.equal(w.DG_MEASUREMENT_PROJECT_DIRECTORY_STATE.getState().projects[0].is_locked,true);
+});
+
+test('first load renders owned rows even when shared Auth lookup fails',async()=>{
+ const w=setup(),rendered=[],authError=Object.assign(Error('Auth service unavailable'),{code:'unexpected_failure'});
+ const rows=await w.DG_LOAD_MEASUREMENT_PROJECT_DIRECTORY.load(ports([],{fetchOwned:async()=>[{id:10}],fetchShared:async()=>{throw authError;},render:rows=>rendered.push(rows)}));
+ assert.equal(rows[0].id,10);assert.equal(rendered[0][0].id,10);
+ const state=w.DG_MEASUREMENT_PROJECT_DIRECTORY_STATE.getState();
+ assert.equal(state.loading,false);assert.equal(state.error.failures[0].source,'shared');assert.equal(state.error.failures[0].error,authError);
+});
+
+test('owned failure does not prevent independent shared read or erase its rows',async()=>{
+ const w=setup();
+ const rows=await w.DG_LOAD_MEASUREMENT_PROJECT_DIRECTORY.load(ports([{id:30,shared:true,is_locked:true}],{fetchOwned:async()=>{throw Error('owned read unavailable');}}));
+ assert.equal(rows[0].id,30);assert.equal(rows[0].is_locked,true);
+ assert.equal(w.DG_MEASUREMENT_PROJECT_DIRECTORY_STATE.getState().error.failures[0].source,'owned');
+});
+
+test('both failed reads report both causes and never reuse another account data',async()=>{
+ const w=setup(),load=w.DG_LOAD_MEASUREMENT_PROJECT_DIRECTORY.load;
+ await load(ports([{id:1}],{scope:'a'}));
+ await assert.rejects(load(ports([],{scope:'b',fetchOwned:async()=>{throw Error('owned');},fetchShared:async()=>{throw Error('shared');}})),e=>e.failures.length===2);
+ assert.equal(w.DG_MEASUREMENT_PROJECT_DIRECTORY_STATE.getState().projects.length,0);
 });
 test('an account switch rejects the old result and clears the previous account facade',async()=>{
  const w=setup(),pending=deferred();let active='a';
