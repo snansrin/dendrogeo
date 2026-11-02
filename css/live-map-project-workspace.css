@@ -14,3 +14,10 @@
  .dg-live-projects-fields .btn{flex:1 1 auto}
  .dg-live-projects-actions .btn{flex:1 1 100%}
 }
+
+summary.dg-live-projects-head{cursor:pointer;list-style:none;margin-bottom:0;min-height:44px}
+summary.dg-live-projects-head::-webkit-details-marker{display:none}
+.dg-live-projects-chevron{color:var(--mut);font-size:1.1rem}
+.dg-live-projects[open]>.dg-live-projects-head{margin-bottom:8px}
+.dg-live-projects[open]>.dg-live-projects-head>.dg-live-projects-chevron{transform:rotate(180deg)}
+#dgLiveParkName{width:100%;min-width:0}

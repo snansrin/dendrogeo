@@ -59,10 +59,11 @@ function renderParkScanCard({element:el,park,candidate:cand,showManual,scanActiv
        * oluşturamıyorum". GPS yalnızca ÖNERİ içindir; ada göre arama herhangi
        * bir yerdeki parkı bulur → proje açılabilir. ÖLÇÜM kapısı ayrı kalır:
        * saveMeas konum çitiyle parkta olmayı zorunlu tutar. */
+      (root.document?.getElementById("dgLiveParkSearch")?"":
       `<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">`+
         `<input id="scanRemote" class="dg-png-input" placeholder="uzaktaki parkın adı (örn. Göksu Parkı, Mersin)" style="flex:1;min-width:200px">`+
         `<button class="btn sm blue" data-park-scan-action="findByName">🔍 Ada göre bul (uzak park)</button>`+
-      `</div>`+
+      `</div>`)+
       `<div class="dg-tree-meta" style="margin-top:6px">Uzak parkta <b>proje açabilirsin</b>; ölçüm ve fotoğraf için parkta olman gerekir (konum çiti 0007).</div>`+
       `<div style="display:flex;gap:8px;flex-wrap:wrap">`+
         `<button class="btn sm ghost" data-park-scan-action="showManualForm">✍️ OSM'de yok — elle oluştur</button>`+

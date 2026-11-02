@@ -14094,6 +14094,95 @@
           "sha256": "7c142faed128c8243e90aa025520591caab7f78edc4e6a7bda4a2d77b539aaaf"
         }
       ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: make the saved live-map workspace a native keyboard-accessible disclosure, restore continuously available park-name search outside the conditional scan card using the existing search use case, prevent search/project switches during active work, and allow the existing park-boundary network query to try two Overpass providers within the unchanged deadline after a primary 502. Add Chromium/WebKit mobile coverage. No changes to park geometry extraction/selection, numeric analysis, raster/surface engines, allometry, species/density data, project locks, RLS or records. Widget CSS uses existing theme/font/button tokens.",
+      "validation": [
+        "Primary 502 / secondary success regression preserves exact large-park geometry; existing OSM budget/recovery tests",
+        "Persistent search submit/deduplication/edit guard and disclosure tests",
+        "Chromium and WebKit 360/390/430/1280px keyboard, accessibility and theme checks",
+        "npm run check and PR CI gates"
+      ],
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "bcbb2f8890d0b5d0192a6b35bdc53d6e73bee14c38099c85daea2ab9182ec3ec",
+          "sha256": "ef09d10a3f148e27129411a048fa8068a830c3c9609e5cc20e696ef07d43975c"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "e22e384c44bf8c1f667b2925aef5ea978e6a38507301f8ac0389d58eba28fa2d",
+          "sha256": "aa678d03093035ce2580fefb97010df2ad69ec3dffd6ab9149965dd3a0d2c7b4"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "cfad11fd0776792ab2f1e27bc3e78221b117b5b48841730bb34c6a6e4d4f1650",
+          "sha256": "312a0cdcdb779093332650a854d43a80d4d3332f3e18987400383b826585d74c"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "33ee7d14fa15346625662ee2d704e4f8cdfd1d0c270e71199442eba35771f9da",
+          "sha256": "b65819e6981b8a268b8df6dbaa07db577acf9914ddf366165444542ceaf60738"
+        },
+        {
+          "path": "src/services/park-query.js",
+          "previous_sha256": "c534f8d6d1f82f8e7b10643f86c4d1c9eefd89c0f94602706b6918d66134a434",
+          "sha256": "08487de70b34b6a81c6398e3ac9fa3d850c05e156da93ec7f25c12c4e0473a3e"
+        },
+        {
+          "path": "src/ui/live-map-controls.js",
+          "previous_sha256": "3527bfb04571eedb15e61394d8ba358ae780e5a4eb176a1db9dc30800de57c2b",
+          "sha256": "ff72dc38a298320849aab151b53109289b097d6e7d00f215a973981bc405e603"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: make the saved live-map workspace a native keyboard-accessible disclosure, restore continuously available park-name search outside the conditional scan card using the existing search use case, prevent search/project switches during active work, and allow the existing park-boundary network query to try two Overpass providers within the unchanged deadline after a primary 502. Add Chromium/WebKit mobile coverage. No changes to park geometry extraction/selection, numeric analysis, raster/surface engines, allometry, species/density data, project locks, RLS or records. Widget CSS uses existing theme/font/button tokens.",
+      "validation": [
+        "Primary 502 / secondary success regression preserves exact large-park geometry; existing OSM budget/recovery tests",
+        "Persistent search submit/deduplication/edit guard and disclosure tests",
+        "Chromium and WebKit 360/390/430/1280px keyboard, accessibility and theme checks",
+        "npm run check and PR CI gates"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "aa678d03093035ce2580fefb97010df2ad69ec3dffd6ab9149965dd3a0d2c7b4",
+          "sha256": "56b1b7f045aa414aad2f015bf0d932acffba51fca56bb80c36da82cbad32adec"
+        },
+        {
+          "path": "src/ui/live-map-controls.js",
+          "previous_sha256": "ff72dc38a298320849aab151b53109289b097d6e7d00f215a973981bc405e603",
+          "sha256": "ab756c4ba8c69f41e749c104fe6f71c38e64b606eb3fbf25c44ee01297d7dc0a"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: make the saved live-map workspace a native keyboard-accessible disclosure, restore continuously available park-name search outside the conditional scan card using the existing search use case, prevent search/project switches during active work, and allow the existing park-boundary network query to try two Overpass providers within the unchanged deadline after a primary 502. Add Chromium/WebKit mobile coverage. No changes to park geometry extraction/selection, numeric analysis, raster/surface engines, allometry, species/density data, project locks, RLS or records. Widget CSS uses existing theme/font/button tokens.",
+      "validation": [
+        "Primary 502 / secondary success regression preserves exact large-park geometry; existing OSM budget/recovery tests",
+        "Persistent search submit/deduplication/edit guard and disclosure tests",
+        "Chromium and WebKit 360/390/430/1280px keyboard, accessibility and theme checks",
+        "npm run check and PR CI gates"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "56b1b7f045aa414aad2f015bf0d932acffba51fca56bb80c36da82cbad32adec",
+          "sha256": "208d5daceaf204ee721a017c3eae7f95a932c502d82d31c1aa057260fa241c77"
+        },
+        {
+          "path": "src/ui/park-scan-card.js",
+          "previous_sha256": "71c6e299598b62619f4c4231872fde188d95b2011c759dddf6ca9cf4ad904f51",
+          "sha256": "b5eafff1cd4036b6ffcc461d499cddd2634905775fa5b1dc702171789c82ef43"
+        }
+      ]
     }
   ]
 }
