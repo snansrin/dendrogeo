@@ -14221,6 +14221,47 @@
           "sha256": "4843f5710bf272c0da4273e276de458dfc531efae8b32a596fc55936737d475f"
         }
       ]
+    },
+    {
+      "date": "2026-11-03",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: Hyde Park repair: focus the searched location immediately and fit detected geometry before optional OSM coverage finishes. Bound review-feature union calls to 128 operands per level to prevent Maximum call stack size exceeded for large surface previews/exports; retain every part, class area, hole and manual method. Use streaming min/max with identical Sentinel bounding-box padding after the Richmond live QA reproduced argument overflow. Add Hyde Park and Richmond Park current-year live GIS QA jobs alongside the three existing Ankara parks. No raster classification, scientific formula, RLS, project-lock or record changes.",
+      "validation": [
+        "Delayed-coverage immediate-focus and registered/geocoded search regressions",
+        "150000-part overflow reproduction now passes; exact class totals, holes/disjoint geometry and manual methods preserved",
+        "Chromium and WebKit 360/390/430/1280px actual Leaflet surface rendering; no remote data requests",
+        "Full npm run check and CI required before release"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "edce45399c3f5ccfdcee6e73e055551a1146641fa6e7783d3fe2d52440c80805",
+          "sha256": "de1997927416a9dc1a38b11aadf7c44c65baebfd9cf163ac9a0f7fcfea8ee195"
+        },
+        {
+          "path": "src/domain/surface/build-sentinel-profile-bbox.js",
+          "previous_sha256": "4e8ed2e14a792a2953cc72007131c5e41d3033091e0d72b631ac31bc16c81df0",
+          "sha256": "89d0b7bf45962b1ae587d547b95149af0a9b75e810bc26ad39ab185eb223b6fd"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-03",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: Hyde Park repair: focus the searched location immediately and fit detected geometry before optional OSM coverage finishes. Bound review-feature union calls to 128 operands per level to prevent Maximum call stack size exceeded for large surface previews/exports; retain every part, class area, hole and manual method. Use streaming min/max with identical Sentinel bounding-box padding after the Richmond live QA reproduced argument overflow. Add Hyde Park and Richmond Park current-year live GIS QA jobs alongside the three existing Ankara parks. No raster classification, scientific formula, RLS, project-lock or record changes.",
+      "validation": [
+        "Delayed-coverage immediate-focus and registered/geocoded search regressions",
+        "150000-part overflow reproduction now passes; exact class totals, holes/disjoint geometry and manual methods preserved",
+        "Chromium and WebKit 360/390/430/1280px actual Leaflet surface rendering; no remote data requests",
+        "Full npm run check and CI required before release"
+      ],
+      "files": [
+        {
+          "path": "test/park-drawing-export-modules.test.mjs",
+          "previous_sha256": "4b27b36eb9289c1de1c6c789215338799e2761274202cf11e1867977a2f67a53",
+          "sha256": "eafbf946acc8a8a8443518f240a6021163819068b3e870f11a88576b7b7b8c6a"
+        }
+      ]
     }
   ]
 }
