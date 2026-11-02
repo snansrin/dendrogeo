@@ -14360,6 +14360,23 @@
           "sha256": "798b584a1d025269f71fd81cba12a20ba91d3740232a78d48424abb42a34b180"
         }
       ]
+    },
+    {
+      "date": "2026-11-03",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: increase only the normal live-map viewport height, retain analysis/stage layout rules, and keep measurement photo popups within the visible map/browser intersection. Add a separate UI lifecycle module for open/scroll/resize/photo load and cleanup, preserve marker coordinates/palette/clustering and popup data, and avoid cached-image update loops. Add Chromium/WebKit scrolled-map, late portrait, landscape resize, close/reopen/ESC regression coverage plus existing full CI and five-park QA. No changes to raster/scientific calculations, data writes, RLS, project locks or accepted records.",
+      "validation": [
+        "Real Leaflet Chromium and WebKit at 360/390/430/1280px with partly scrolled map, delayed portrait photo and 780x420 viewport",
+        "Marker/chunk/presentation/palette regressions and full npm run check",
+        "Complete mobile/accessibility suites and five-park GIS QA before merge"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "798b584a1d025269f71fd81cba12a20ba91d3740232a78d48424abb42a34b180",
+          "sha256": "aeefb3e362e2e6b2191ef5aff1ea5fb04ea10e945eebf67e12ce3f6fad6ea5a2"
+        }
+      ]
     }
   ]
 }
