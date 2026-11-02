@@ -66,6 +66,24 @@
   const link=doc.createElement("a");link.href=url;link.download=fileName;doc.body.append(link);link.click();link.remove();
   root.setTimeout(()=>root.URL.revokeObjectURL(url),30000);
  }
+ function waypointProjectOptions(groups){
+  return [...groups.values()].flatMap(group=>group.projects.map(project=>({
+   project,
+   label:`${group.name} · ${project.name||`Proje ${project.id}`}`
+  }))).sort((a,b)=>a.label.localeCompare(b.label,"tr")||Number(a.project.id)-Number(b.project.id));
+ }
+ async function buildWaypointCSV({client,userId,role,projectId,fetchWaypoints=root.DG_FETCH_PROJECT_WAYPOINTS,formats=root.DG_PARK_EXPORT_FORMATS}={}){
+  if(!userId||!Number.isSafeInteger(Number(projectId))||Number(projectId)<=0)throw Error("Ölçüm noktaları için bir proje seç.");
+  const projects=await listParticipantProjects(client,{userId,role});
+  const project=projects.find(row=>Number(row.id)===Number(projectId));
+  if(!project)throw Error("Bu projeye erişimin artık yok. Projeleri yenile.");
+  if(!fetchWaypoints?.fetch||!formats?.waypointsCSV)throw Error("Ölçüm noktaları dışa aktarma modülü yüklenemedi.");
+  const response=await fetchWaypoints.fetch({client,projectId:Number(project.id)});
+  if(response?.error)throw Error(response.error.message||"Ölçüm noktaları okunamadı.");
+  const rows=response?.data||[];
+  if(!rows.length)throw Error("Seçili projede dışa aktarılacak ölçüm noktası yok.");
+  return{project,csv:formats.waypointsCSV(rows),count:rows.length};
+ }
  function openPreview(title,html,fileName){
   const doc=root.document,modal=doc.getElementById("previewModal");
   const titleEl=doc.getElementById("pvTitle"),body=doc.getElementById("pvBody"),button=doc.getElementById("pvDownload");
@@ -77,10 +95,11 @@
   root.DG_EXPORT_PREVIEW_UI.open(modal);
  }
  function status(id,message,error=false){const el=root.document.getElementById(id);if(el){el.textContent=message;el.style.color=error?"var(--red)":"var(--mut)";}}
- function setBusy(value){busy=value;root.document.querySelectorAll('[data-dg-park-inventory-action="preview"],[data-dg-park-inventory-action="admin"]').forEach(btn=>{btn.disabled=value;});}
+ function setBusy(value){busy=value;root.document.querySelectorAll('[data-dg-park-inventory-action="preview"],[data-dg-park-inventory-action="admin"],[data-dg-park-inventory-action="waypoints-csv"]').forEach(btn=>{btn.disabled=value;});}
  async function refresh(){
   const el=root.document.getElementById("dgSharedParkSelect");if(!el)return;
-  if(typeof USER==="undefined"||!USER?.id){status("dgSharedParkStatus","Oturum açıldığında ortak parklar görüntülenir.");return;}
+  const waypointSelect=root.document.getElementById("dgWaypointExportProject");
+  if(typeof USER==="undefined"||!USER?.id){status("dgSharedParkStatus","Oturum açıldığında ortak parklar görüntülenir.");if(waypointSelect)status("dgWaypointExportStatus","Ölçüm noktalarını indirmek için oturum aç.",true);return;}
   const user=USER.id;status("dgSharedParkStatus","Erişebildiğin parklar yükleniyor…");
   try{
    const groups=groupProjects(await listParticipantProjects(sb,{userId:user,role:PROFILE?.role}));if(USER?.id!==user)return;
@@ -89,8 +108,32 @@
    el.replaceChildren(new Option("Park seç", ""),...[...groups.values()].sort((a,b)=>a.name.localeCompare(b.name,"tr")).map(g=>new Option(`${g.name} · ${g.projects.length} proje`,g.key)));
    if(groups.has(previous))el.value=previous;
    else if(groups.size===1)el.value=groups.keys().next().value;
+   if(waypointSelect){
+    const priorProject=waypointSelect.value,options=waypointProjectOptions(groups);
+    waypointSelect.replaceChildren(new Option("Proje seç", ""),...options.map(({project,label})=>new Option(label,String(project.id))));
+    if(options.some(({project})=>String(project.id)===priorProject))waypointSelect.value=priorProject;
+    else if(options.length===1)waypointSelect.value=String(options[0].project.id);
+    status("dgWaypointExportStatus",options.length?`${options.length} erişilebilir proje · Her CSV yalnız seçili projenin noktalarını içerir.`:"Erişebildiğin proje bulunamadı.",!options.length);
+   }
+   const formatCount=root.document.querySelector("#v-export .export-summary-note");if(formatCount)formatCount.textContent="4 biçim";
    status("dgSharedParkStatus",`${groups.size} sahip/ortak parkı · Yalnız sana ait veya kabul edilmiş ortaklıkla eriştiğin projeler gösterilir.`);
-  }catch(error){visibleParks=new Map();loadedFor=null;el.replaceChildren(new Option("Parklar yüklenemedi", ""));status("dgSharedParkStatus","Parklar yüklenemedi: "+error.message,true);}
+  }catch(error){visibleParks=new Map();loadedFor=null;el.replaceChildren(new Option("Parklar yüklenemedi", ""));if(waypointSelect)waypointSelect.replaceChildren(new Option("Projeler yüklenemedi", ""));status("dgWaypointExportStatus","Projeler yüklenemedi: "+error.message,true);status("dgSharedParkStatus","Parklar yüklenemedi: "+error.message,true);}
+ }
+ async function downloadWaypoints(){
+  if(busy)return;
+  const select=root.document.getElementById("dgWaypointExportProject"),selected=select?.value;
+  if(!USER?.id){status("dgWaypointExportStatus","Önce oturum açmalısın.",true);return;}
+  if(!selected){status("dgWaypointExportStatus","CSV için bir proje seç.",true);return;}
+  const user=USER.id;setBusy(true);status("dgWaypointExportStatus","Seçili projenin ölçüm noktaları alınıyor…");
+  try{
+   const result=await buildWaypointCSV({client:sb,userId:user,role:PROFILE?.role,projectId:selected});
+   if(USER?.id!==user||select.value!==selected){status("dgWaypointExportStatus","Oturum veya proje seçimi değişti. Yeniden dene.",true);return;}
+   const fileName=`dendrogeo_olcum_noktalari_${slug(result.project.name||`proje_${result.project.id}`)}.csv`;
+   const url=root.URL.createObjectURL(new root.Blob([result.csv],{type:"text/csv;charset=utf-8;"}));
+   const link=root.document.createElement("a");link.href=url;link.download=fileName;root.document.body.append(link);link.click();link.remove();
+   root.setTimeout(()=>root.URL.revokeObjectURL(url),30000);
+   status("dgWaypointExportStatus",`${result.count} ölçüm noktası indirildi · ${result.project.name||`Proje ${result.project.id}`}.`);
+  }catch(error){status("dgWaypointExportStatus","CSV indirilemedi: "+error.message,true);}finally{setBusy(false);}
  }
  async function preview(){
   if(busy)return;
@@ -131,6 +174,12 @@
  }
  function mount(){
   const exportBody=root.document.querySelector?.("#v-export .export-panel-body"),adminCard=root.document.getElementById?.("admExpCountry")?.closest?.(".card");
+  const exportGrid=root.document.querySelector?.("#v-export .export-format-grid");
+  if(exportGrid&&!root.document.getElementById("dgWaypointExportProject")){
+   const card=root.document.createElement("article");card.className="export-format-card";
+   card.innerHTML='<div class="export-format-top"><span class="export-format-icon">📍</span><span class="badge on">NOKTA</span></div><h3>Ölçüm Noktaları CSV</h3><p>Seçtiğin projedeki ölçüm noktası koordinatlarını, mevcut ölçüm durumlarıyla CSV olarak indir.</p><label class="lbl" for="dgWaypointExportProject">Proje / ortak çalışma</label><select id="dgWaypointExportProject"><option value="">Projeler yükleniyor…</option></select><div class="export-actions"><button type="button" class="btn sm blue" data-dg-park-inventory-action="waypoints-csv">⬇ CSV indir</button><button type="button" class="btn sm ghost" data-dg-park-inventory-action="refresh">↻ Projeleri yenile</button></div><p id="dgWaypointExportStatus" class="dg-meta" role="status">Erişilebilir projeler yükleniyor…</p>';
+   exportGrid.append(card);
+  }
   if(exportBody&&!root.document.getElementById("dgSharedParkSelect")){
    const section=root.document.createElement("section");section.className="export-format-card";section.style.marginTop="14px";
    section.innerHTML='<h3>🌳 Park · Tam Envanter</h3><p>Yalnız oluşturduğun projeler ve davetini kabul ettiğin ortak çalışmalar gösterilir. Point ID sıralı ölçümler, tıklanabilir fotoğraflarla DendroGeo envanter raporunda sunulur. Yöneticinin tüm kullanıcı çıktısı yalnız yönetim bölümündedir.</p><div class="grid g3"><div><label class="lbl" for="dgSharedParkSelect">Park / ortak proje</label><select id="dgSharedParkSelect"><option value="">Parklar yükleniyor…</option></select></div><div style="align-self:end"><button type="button" class="btn sm ghost" data-dg-park-inventory-action="refresh">↻ Parkları yenile</button></div><div style="align-self:end"><button type="button" class="btn sm" data-dg-park-inventory-action="preview">📄 DendroGeo raporu / HTML indir</button></div></div><p id="dgSharedParkStatus" class="dg-meta" role="status">Ortak parkları görmek için bu sekmeyi aç.</p>';
@@ -146,12 +195,12 @@
   mount();
   root.document.addEventListener("click",event=>{
    const action=event.target?.closest?.("[data-dg-park-inventory-action]")?.dataset.dgParkInventoryAction;
-   if(action==="refresh")refresh();else if(action==="preview")preview();else if(action==="admin")admin();
+   if(action==="refresh")refresh();else if(action==="preview")preview();else if(action==="admin")admin();else if(action==="waypoints-csv")downloadWaypoints();
   });
   const view=root.document.getElementById?.("v-export");
   if(view&&root.MutationObserver){new root.MutationObserver(()=>{if(view.classList.contains("on"))refresh();}).observe(view,{attributes:true,attributeFilter:["class"]});}
   if(view?.classList.contains("on"))refresh();
  }
- root.DG_SHARED_PARK_INVENTORY_EXPORT=Object.freeze({photoURL,groupProjects,readAll,sortPoints,renderGroup,documentHTML,listProjects,listParticipantProjects,downloadHTML,init});
+ root.DG_SHARED_PARK_INVENTORY_EXPORT=Object.freeze({photoURL,groupProjects,readAll,sortPoints,renderGroup,documentHTML,listProjects,listParticipantProjects,downloadHTML,waypointProjectOptions,buildWaypointCSV,init});
  if(root.document?.readyState==="loading")root.document.addEventListener("DOMContentLoaded",init,{once:true});else if(root.document)init();
 })(window);
