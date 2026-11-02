@@ -21,7 +21,7 @@
       `<div id="parkGridTools" class="dg-png-card">`+
         `<div class="dg-png-head">`+
           `<div>`+
-            `<div class="dg-png-kicker">1 · GRID & ÖLÇÜM NOKTALARI</div>`+
+            `<div class="dg-png-kicker">1 · GRID</div>`+
             `<div class="dg-png-title">🔲 Grid sistemi</div>`+
             `<div class="dg-png-sub">Ölçüm alanını otomatik böl</div>`+
           `</div>`+
@@ -68,6 +68,12 @@
         `</button>`+
       `</div>`+
 
+      `<div id="parkWaypointTools" class="dg-png-card">`+
+        `<div class="dg-png-title">📍 Ölçüm noktaları</div>`+
+        `<p class="dg-meta">Gridin uygun veya elle seçilmiş hücrelerinden noktalar üretin. Haritada istediğiniz yere yeni nokta ekleyebilir, ölçümü olmayan noktaları sürükleyebilirsiniz.</p>`+
+        `<div id="dgWaypointGridActions"></div>`+
+        `<div id="dgWaypointEditor"></div>`+
+      `</div>`+
       `<div id="parkSurfaceAction" class="dg-png-card">`+
         `<div class="dg-png-head">`+
           `<div>`+

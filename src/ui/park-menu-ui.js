@@ -3,13 +3,13 @@
 (function(root){
  function mount({document:doc,clearMenus,arrangeMenus,translate,escape,editorUi}){
   const host=doc.getElementById("surfaceParkTools");if(!host)return;
-  const panel=doc.getElementById("parkInfo"),retained=new Map(["parkGridTools","parkLayerTools","gridSummary"].map(id=>[id,panel?.querySelector?.("#"+id)||doc.getElementById(id)]));
+  const panel=doc.getElementById("parkInfo"),retained=new Map(["parkGridTools","parkWaypointTools","parkLayerTools","gridSummary"].map(id=>[id,panel?.querySelector?.("#"+id)||doc.getElementById(id)]));
   clearMenus("park");
   host.replaceChildren();
   const nav=doc.createElement("nav");nav.className="dg-editor-menubar";nav.setAttribute("aria-label",translate("Harita menüsü"));
-  for(const [id,label,icon,description] of [["parkGridTools","Grid & Ölçüm noktaları","grid","Grid oluşturma ve ölçüm noktası araçları"],["parkLayerTools","Katmanlar","layers","Haritada gösterilecek katmanlar"]]){
+  for(const [id,label,icon,description] of [["parkGridTools","Grid","grid","Grid oluşturma araçları"],["parkWaypointTools","Ölçüm noktaları","grid","Otomatik, seçili hücreler veya haritada serbest yerleştirme"],["parkLayerTools","Katmanlar","layers","Haritada gösterilecek katmanlar"]]){
    const controls=retained.get(id);if(!controls)continue;
-   const menu=doc.createElement("details");menu.className="dg-editor-menu";menu.setAttribute("data-menu-owner","park");menu.setAttribute("data-menu-order",id==="parkGridTools"?"30":"40");
+   const menu=doc.createElement("details");menu.className="dg-editor-menu";menu.setAttribute("data-menu-owner","park");menu.setAttribute("data-menu-order",id==="parkGridTools"?"30":id==="parkWaypointTools"?"35":"40");
    const title=translate(label),subtitle=translate(description),safeTitle=escape(title),safeSubtitle=escape(subtitle);
    const summary=doc.createElement("summary");summary.innerHTML=editorUi?.menuLabel(icon,safeTitle)||safeTitle+" ⌄";
    const body=doc.createElement("div");body.className="dg-editor-menu-body";body.innerHTML=editorUi?.panelHead(icon,safeTitle,safeSubtitle)||"";body.append(controls);

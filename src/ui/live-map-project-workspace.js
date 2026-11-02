@@ -75,7 +75,7 @@
     note(t("Kayıtlı ölçüm noktaları yükleniyor…"));
     const points=await ports.readWaypoints(project.id);
     if(!projects().some(row=>Number(row.id)===Number(project.id)))throw Error(t("Proje erişimi güncellendi; yeniden deneyin."));
-    ports.showWaypoints(points);
+    ports.showWaypoints(points,project);
     if(!project.is_locked)ports.selectProject(project.id);
     active=Number(project.id);ports.remember(active);
     let restored=null,restoreError=null;
@@ -106,7 +106,14 @@
   function entering(){if(mapView?.classList.contains("on"))refresh();}
   if(mapView&&typeof ports.observe==="function")ports.observe(mapView,entering);
   entering();
-  return Object.freeze({refresh,open,activeProjectId(){const row=projects().find(row=>Number(row.id)===active);return row&&Number(row.park_id)===ports.activeParkId()?active:0;}});
+  async function refreshWaypoints(projectId){
+   const parkId=ports.activeParkId(),row=projects().find(row=>Number(row.id)===Number(projectId));
+   if(!row||Number(row.park_id)!==parkId||(active&&active!==Number(projectId)))return false;
+   const points=await ports.readWaypoints(Number(projectId));
+   if(ports.activeParkId()!==parkId||(active&&active!==Number(projectId))||!projects().some(item=>Number(item.id)===Number(projectId)))return false;
+   ports.showWaypoints(points,row);return true;
+  }
+  return Object.freeze({refresh,open,refreshWaypoints,activeProjectId(){const row=projects().find(row=>Number(row.id)===active);return row&&Number(row.park_id)===ports.activeParkId()?active:0;}});
  }
  root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI=Object.freeze({create});
 })(window);

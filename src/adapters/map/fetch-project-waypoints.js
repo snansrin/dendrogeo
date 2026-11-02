@@ -1,7 +1,8 @@
 "use strict";
 
-window.DG_FETCH_PROJECT_WAYPOINTS={
-  async fetch({client,projectId}){
+(function(root){
+ const pendingByClient=new WeakMap();
+ async function read({client,projectId}){
     const response=await client.from("waypoints").select("*").eq("project_id",projectId).order("wp_id",{ascending:true});
     if(response.error||!response.data?.length)return response;
     // Read only measurement evidence for these project points, under existing RLS.
@@ -21,4 +22,9 @@ window.DG_FETCH_PROJECT_WAYPOINTS={
     }
     return{...response,data:response.data.map(row=>({...row,visited:measured.has(Number(row.wp_id)),hasMeasurement:hasMeasurement.has(Number(row.wp_id))}))};
   }
-};
+ root.DG_FETCH_PROJECT_WAYPOINTS={fetch(args){
+  let requests=pendingByClient.get(args.client);if(!requests){requests=new Map();pendingByClient.set(args.client,requests);}
+  const key=String(args.projectId);if(requests.has(key))return requests.get(key);
+  const pending=read(args).finally(()=>requests.delete(key));requests.set(key,pending);return pending;
+ }};
+})(window);

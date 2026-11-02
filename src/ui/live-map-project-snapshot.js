@@ -12,7 +12,8 @@
  }
  function create({store,capture,apply}){
   async function save(input){const id=identity(input);if(!id)throw Error("Proje kimliği veya kayıtlı sınır eksik.");
-   const state=capture();if(!state?.analysis&&!state?.grid?.cells?.length)return {saved:false,empty:true};
+   const captured=capture();if(!captured?.analysis&&!captured?.grid?.cells?.length)return {saved:false,empty:true};
+   const state=typeof structuredClone==="function"?structuredClone(captured):JSON.parse(JSON.stringify(captured));
    const snapshot={schema,...id,savedAt:new Date().toISOString(),state};await store.save(id,snapshot);
    return {saved:true,scan:!!state.analysis,grid:state.grid?.cells?.length||0};
   }
