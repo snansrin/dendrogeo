@@ -52,6 +52,7 @@ const DG_I18N_EN={
 "Açık yüzey taslağı kaydedilemedi. Yeni tarama başlatılmadı.":"The current surface draft could not be saved. A new scan was not started.",
 "Proje açılamadı: {error}":"Could not open project: {error}",
 "Proje listesi yenilenemedi: {error}":"Could not refresh project list: {error}",
+"Proje listesi yenilenemedi. Bağlantınızı kontrol edip Projeler ekranını yeniden açın.":"Could not refresh projects. Check your connection and reopen Projects.",
 "Seçilen projeyi haritada açarak kayıtlarını görüntüleyebilirsin.":"Open the selected project on the map to view its records.",
 "Projenin kayıtlı park sınırı bulunamadı. Kayıt değiştirilmedi.":"The project's saved park boundary is missing. No records were changed.",
 "Kayıtlı park kimliği tanınmadı. Kayıt değiştirilmedi.":"The saved park identity is unknown. No records were changed.",

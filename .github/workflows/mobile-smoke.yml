@@ -26,6 +26,7 @@ jobs:
         run: |
           npm run check:phone
           node scripts/live-map-project-workspace-smoke.mjs
+          node scripts/project-directory-recovery-smoke.mjs
       - name: Klavye, odak ve erişilebilirlik
         run: npm run check:accessibility
       - uses: actions/upload-artifact@v4
@@ -64,6 +65,7 @@ jobs:
           node scripts/visitor-analytics-smoke.mjs
           node scripts/profile-smoke.mjs
           node scripts/projects-workspace-smoke.mjs
+          node scripts/project-directory-recovery-smoke.mjs
           node scripts/shared-park-surface-smoke.mjs
           node scripts/appearance-smoke.mjs
           node scripts/ui-consistency-smoke.mjs

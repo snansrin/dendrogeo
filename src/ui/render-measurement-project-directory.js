@@ -35,8 +35,12 @@ window.DG_MEASUREMENT_PROJECT_DIRECTORY_UI={
     const rows=projects||[];
     const options=rows.map(project=>`<option value="${project.id}" ${project.is_locked?'disabled data-locked="true"':project.park_id?'translate="no"':`data-i18n-text="⛔ {name} (park yok)" data-i18n-values="${escape(JSON.stringify({name:project.name||""}))}"`}>${project.is_locked?'🔒 ':''}${escape(optionLabel(project))}${project.is_locked?' · Salt okunur':''}</option>`).join("");
     const empty="<option value=''>Önce park algıla → proje oluştur</option>";
-    for(const id of ["mProject","nProject"]){const select=element(id);if(select)select.innerHTML=options||empty;}
+    const selections=new Map();
+    for(const id of ["mProject","nProject"]){const select=element(id);if(select){selections.set(id,select.value);select.innerHTML=options||empty;}}
     restore();
+    // Each screen can have a different active project. Keep it if still
+    // selectable; the remembered measurement choice must not replace Waypoint.
+    for(const [id,value]of selections)if(rows.some(row=>String(row.id)===value&&!row.is_locked))element(id).value=value;
     const own=rows.filter(project=>!project.shared),shared=rows.filter(project=>project.shared);
     const ownCount=element("projOwnCount"),sharedCount=element("projSharedCount");
     if(ownCount)ownCount.textContent=String(own.length);

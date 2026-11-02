@@ -15,6 +15,7 @@
         return once("projects",loadProjects).catch(error=>{console.warn("DENDROGEO · projeler yüklenemedi:",error?.message||error);return null;});
       },
       load(view){
+        if(view==="projects")return once("projects",loadProjects);
         if(view==="dash")return once("waypoints",loadWaypoints).then(()=>once("dashboard",loadDashboard));
         if(view==="nav")return once("waypoints",loadWaypoints);
         if(view==="records")return once("records",loadRecords);
