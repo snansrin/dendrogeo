@@ -5,6 +5,11 @@
   let cleanup=()=>{};
   marker.on?.('popupopen',event=>{
    cleanup();const popup=event.popup,element=popup.getElement?.(),container=element?.closest('.leaflet-container');if(!container)return;
+   // Keep the same photo nodes when Leaflet recalculates popup layout.
+   if(typeof popup.getContent?.()==='string'){
+    const content=element.querySelector('.leaflet-popup-content'),body=root.document.createElement('div');
+    if(content){while(content.firstChild)body.append(content.firstChild);popup.setContent(body);}
+   }
    let frame=null,closed=false,lastLayout=null,photoChanged=true;
    const update=()=>{
     frame=null;if(closed)return;
