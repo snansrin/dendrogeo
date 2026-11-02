@@ -10,6 +10,13 @@ try{for(const width of [360,390,430]){
  await isolateAccount(page);await page.goto(server.url);await page.waitForFunction(()=>document.getElementById('dgStartupScreen').hidden);await installStageFixture(page);
  const summary=page.locator('#dgStageToolsMenu > summary'),host=page.locator('#dgParkStageWorkspace');await summary.evaluate(el=>el.scrollIntoView({block:'start'}));await summary.click();
  const tools=page.locator('#dgStageToolsMenu'),openTools=async()=>{if(await page.locator('.dg-stage-cut-panel').count()){if(await tools.evaluate(el=>el.open))await summary.click();const body=page.locator('.dg-stage-cut-body');if(!await body.isVisible())await page.getByRole('button',{name:'Sınırları aç',exact:true}).click();}else if(!await tools.evaluate(el=>el.open))await summary.click();},closeTools=async()=>{if(await tools.evaluate(el=>el.open))await summary.click();if(await page.locator('.dg-stage-cut-body').isVisible())await page.getByRole('button',{name:'Küçült',exact:true}).click();};
+ // DG_PARK is assigned before the asynchronous stage list/menu has settled.
+ // Wait for the enabled replacement workspace before toggling its real summary.
+ const openStageMenu=async()=>{
+  await page.waitForFunction(()=>{const host=document.getElementById('dgParkStageWorkspace'),edit=host?.querySelector('[data-stage-action="edit"]');return host&&!host.hidden&&edit&&!edit.disabled;});
+  if(!await tools.evaluate(el=>el.open))await summary.click();
+  await host.locator('[data-stage-action="edit"]').waitFor({state:'visible'});
+ };
  const mapPositions=async points=>{await closeTools();await page.locator('#map').scrollIntoViewIfNeeded();return page.evaluate(points=>{map.stop();map.fitBounds(L.latLngBounds(__parentCandidate.rings.outer),{animate:false,padding:[24,24]});const box=map.getContainer().getBoundingClientRect();return points.map(point=>{const p=map.latLngToContainerPoint(point);return{x:box.left+p.x,y:box.top+p.y};});},points);};
  assert.equal(await host.evaluate(el=>el.closest('#surfaceMenuBar')!==null),true);
  await page.waitForFunction(()=>!document.querySelector('[data-stage-action="edit"]').disabled);
@@ -65,7 +72,7 @@ try{for(const width of [360,390,430]){
  for(const p of saved.geometry.flat())assert.ok(p[0]>=39-1e-10&&p[0]<=39.01+1e-10&&p[1]>=32-1e-10&&p[1]<=32.02+1e-10);
  // Edit the exact persisted boundary vertices. Inserting and dragging a numbered point
  // must create a new stage identity, leaving the original and parent untouched.
- await summary.click();assert.equal(await summary.textContent(),'🧩 Etaplar');assert.equal(await host.locator('[data-stage-action="apply"]').textContent(),'Seçili etapta çalış');
+ await openStageMenu();assert.equal(await summary.textContent(),'🧩 Etaplar');assert.equal(await host.locator('[data-stage-action="apply"]').textContent(),'Seçili etapta çalış');
  const original=await page.evaluate(()=>JSON.stringify(__stageFixture.rows[0]));
  await host.locator('[data-stage-action="revise"]').click();await page.waitForFunction(()=>!document.querySelector('[data-cut-action="save"]').disabled);
  assert.deepEqual(await page.evaluate(()=>Object.values(map._layers).filter(layer=>layer.options?.icon?.options?.className?.includes('dg-stage-reference')).map(layer=>{const p=layer.getLatLng();return[p.lat,p.lng];})),await page.evaluate(()=>[...__stageFixture.rows[0].geom_json.outer,...(__stageFixture.rows[0].geom_json.inner||[])].flatMap(ring=>ring.slice(0,-1))),'saved vertices must return exactly, without reconstructing caps');
@@ -91,10 +98,10 @@ try{for(const width of [360,390,430]){
  const revision=await page.evaluate(()=>({id:DG_PARK.id,writes:__stageFixture.writes,name:DG_PARK.name,old:JSON.stringify(__stageFixture.rows[0]),parentUnchanged:JSON.stringify(DG_PARK_SESSION.get('way/990001'))===JSON.stringify(__stageFixture.parent)}));
  assert.equal(revision.writes,2);assert.match(revision.name,/Detaylı etap sürümü/);assert.equal(revision.old,original);assert.equal(revision.parentUnchanged,true);
  // Switch scopes without any drawing active, then start numbered controls again.
- await summary.click();await host.locator('#dgStageSelect').selectOption('whole');await host.locator('[data-stage-action="apply"]').click();await page.waitForFunction(()=>DG_PARK.id===9001);
- await summary.click();await host.locator('[data-stage-action="edit"]').click();await host.locator('[data-stage-action="pick"]').click();for(const p of await mapPositions(startPoints))await page.mouse.click(p.x,p.y);await openTools();assert.match(await panel.locator('[data-cut-boundary="0"]').textContent(),/3 nokta/);assert.equal(await page.locator('.dg-stage-reference').first().textContent(),'1.1');await panel.locator('[data-cut-action="cancel"]').click();
- await summary.click();await host.locator('#dgStageSelect').selectOption('9003');await host.locator('[data-stage-action="apply"]').click();await page.waitForFunction(()=>DG_PARK.id===9003);
- await summary.click();page.once('dialog',dialog=>dialog.dismiss());await host.locator('[data-stage-action="delete"]').click();assert.equal(await page.evaluate(()=>__stageFixture.deletes),0);assert.equal(await page.evaluate(()=>DG_PARK.id),9003);
+ await openStageMenu();await host.locator('#dgStageSelect').selectOption('whole');await host.locator('[data-stage-action="apply"]').click();await page.waitForFunction(()=>DG_PARK.id===9001);
+ await openStageMenu();await host.locator('[data-stage-action="edit"]').click();await host.locator('[data-stage-action="pick"]').click();for(const p of await mapPositions(startPoints))await page.mouse.click(p.x,p.y);await openTools();assert.match(await panel.locator('[data-cut-boundary="0"]').textContent(),/3 nokta/);assert.equal(await page.locator('.dg-stage-reference').first().textContent(),'1.1');await panel.locator('[data-cut-action="cancel"]').click();
+ await openStageMenu();await host.locator('#dgStageSelect').selectOption('9003');await host.locator('[data-stage-action="apply"]').click();await page.waitForFunction(()=>DG_PARK.id===9003);
+ await openStageMenu();page.once('dialog',dialog=>dialog.dismiss());await host.locator('[data-stage-action="delete"]').click();assert.equal(await page.evaluate(()=>__stageFixture.deletes),0);assert.equal(await page.evaluate(()=>DG_PARK.id),9003);
  await host.locator('[data-stage-action="revise"]').click();await page.waitForFunction(()=>!document.querySelector('[data-cut-action="save"]').disabled);await openTools();
  await page.evaluate(()=>__stageFixture.blocked=[9003]);page.once('dialog',dialog=>dialog.accept());await panel.locator('[data-cut-action="delete-stage"]').click();await page.waitForFunction(()=>document.querySelector('[data-cut-status]').textContent.includes('Kayıtları korumak'));assert.equal(await page.evaluate(()=>DG_PARK.id),9003);assert.equal(await page.evaluate(()=>__stageFixture.deletes),0);
  await page.evaluate(()=>__stageFixture.blocked=[]);page.once('dialog',dialog=>dialog.accept());await panel.locator('[data-cut-action="delete-stage"]').click();await page.waitForFunction(()=>DG_PARK.id===9001);assert.equal(await page.evaluate(()=>__stageFixture.deletes),1);assert.equal(await page.evaluate(()=>__stageFixture.rows.some(r=>r.id===9003)),false);assert.equal(await page.evaluate(()=>JSON.stringify(__stageFixture.rows[0])),original);

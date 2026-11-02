@@ -14077,6 +14077,23 @@
           "sha256": "c050375bd9acfb70fc28e19d0bbdbcb8a15c3a9ae233c1c75d3c2e324ccc0f15"
         }
       ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: the WebKit stage regression waited only for DG_PARK identity, which is assigned before asynchronous workspace replacement and readiness. Wait for the enabled replacement stage menu before real summary clicks after saving or switching stages; preserve pointer actions, geometry assertions, exact footer containment and data immutability checks. Test-only synchronization change; no production stage, GIS, theme, database or scientific code changes.",
+      "validation": [
+        "Reproduced regressions fail before the fix and pass afterwards; selected-project pagination and measured-state retention; target measurement identity guard; account-switch report isolation",
+        "npm run check",
+        "Chromium/WebKit/mobile regression coverage and read-only live public-page checks"
+      ],
+      "files": [
+        {
+          "path": "scripts/park-stage-assisted-smoke.mjs",
+          "previous_sha256": "c050375bd9acfb70fc28e19d0bbdbcb8a15c3a9ae233c1c75d3c2e324ccc0f15",
+          "sha256": "7c142faed128c8243e90aa025520591caab7f78edc4e6a7bda4a2d77b539aaaf"
+        }
+      ]
     }
   ]
 }
