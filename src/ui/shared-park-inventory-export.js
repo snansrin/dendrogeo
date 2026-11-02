@@ -66,16 +66,16 @@
   const link=doc.createElement("a");link.href=url;link.download=fileName;doc.body.append(link);link.click();link.remove();
   root.setTimeout(()=>root.URL.revokeObjectURL(url),30000);
  }
- function waypointProjectOptions(groups){
-  return [...groups.values()].flatMap(group=>group.projects.map(project=>({
+ function waypointProjectOptions(projects,ownerId){
+  return (projects||[]).filter(project=>String(project.owner)===String(ownerId)).map(project=>({
    project,
-   label:`${group.name} · ${project.name||`Proje ${project.id}`}`
-  }))).sort((a,b)=>a.label.localeCompare(b.label,"tr")||Number(a.project.id)-Number(b.project.id));
+   label:`${parkOf(project).name} · ${project.name||`Proje ${project.id}`}`
+  })).sort((a,b)=>a.label.localeCompare(b.label,"tr")||Number(a.project.id)-Number(b.project.id));
  }
  async function buildWaypointCSV({client,userId,role,projectId,fetchWaypoints=root.DG_FETCH_PROJECT_WAYPOINTS,formats=root.DG_PARK_EXPORT_FORMATS}={}){
   if(!userId||!Number.isSafeInteger(Number(projectId))||Number(projectId)<=0)throw Error("Ölçüm noktaları için bir proje seç.");
   const projects=await listParticipantProjects(client,{userId,role});
-  const project=projects.find(row=>Number(row.id)===Number(projectId));
+  const project=projects.find(row=>Number(row.id)===Number(projectId)&&String(row.owner)===String(userId));
   if(!project)throw Error("Bu projeye erişimin artık yok. Projeleri yenile.");
   if(!fetchWaypoints?.fetch||!formats?.waypointsCSV)throw Error("Ölçüm noktaları dışa aktarma modülü yüklenemedi.");
   const response=await fetchWaypoints.fetch({client,projectId:Number(project.id)});
@@ -102,18 +102,18 @@
   if(typeof USER==="undefined"||!USER?.id){status("dgSharedParkStatus","Oturum açıldığında ortak parklar görüntülenir.");if(waypointSelect)status("dgWaypointExportStatus","Ölçüm noktalarını indirmek için oturum aç.",true);return;}
   const user=USER.id;status("dgSharedParkStatus","Erişebildiğin parklar yükleniyor…");
   try{
-   const groups=groupProjects(await listParticipantProjects(sb,{userId:user,role:PROFILE?.role}));if(USER?.id!==user)return;
+   const participantProjects=await listParticipantProjects(sb,{userId:user,role:PROFILE?.role}),groups=groupProjects(participantProjects);if(USER?.id!==user)return;
    visibleParks=groups;loadedFor=user;
    const previous=el.value;
    el.replaceChildren(new Option("Park seç", ""),...[...groups.values()].sort((a,b)=>a.name.localeCompare(b.name,"tr")).map(g=>new Option(`${g.name} · ${g.projects.length} proje`,g.key)));
    if(groups.has(previous))el.value=previous;
    else if(groups.size===1)el.value=groups.keys().next().value;
    if(waypointSelect){
-    const priorProject=waypointSelect.value,options=waypointProjectOptions(groups);
+    const priorProject=waypointSelect.value,options=waypointProjectOptions(participantProjects,user);
     waypointSelect.replaceChildren(new Option("Proje seç", ""),...options.map(({project,label})=>new Option(label,String(project.id))));
     if(options.some(({project})=>String(project.id)===priorProject))waypointSelect.value=priorProject;
     else if(options.length===1)waypointSelect.value=String(options[0].project.id);
-    status("dgWaypointExportStatus",options.length?`${options.length} erişilebilir proje · Her CSV yalnız seçili projenin noktalarını içerir.`:"Erişebildiğin proje bulunamadı.",!options.length);
+    status("dgWaypointExportStatus",options.length?`${options.length} sana ait proje · CSV yalnız seçtiğin kendi projenin noktalarını içerir.`:"Sana ait proje bulunamadı.",!options.length);
    }
    const formatCount=root.document.querySelector("#v-export .export-summary-note");if(formatCount)formatCount.textContent="4 biçim";
    status("dgSharedParkStatus",`${groups.size} sahip/ortak parkı · Yalnız sana ait veya kabul edilmiş ortaklıkla eriştiğin projeler gösterilir.`);
@@ -177,7 +177,7 @@
   const exportGrid=root.document.querySelector?.("#v-export .export-format-grid");
   if(exportGrid&&!root.document.getElementById("dgWaypointExportProject")){
    const card=root.document.createElement("article");card.className="export-format-card";
-   card.innerHTML='<div class="export-format-top"><span class="export-format-icon">📍</span><span class="badge on">NOKTA</span></div><h3>Ölçüm Noktaları CSV</h3><p>Seçtiğin projedeki ölçüm noktası koordinatlarını, mevcut ölçüm durumlarıyla CSV olarak indir.</p><label class="lbl" for="dgWaypointExportProject">Proje / ortak çalışma</label><select id="dgWaypointExportProject"><option value="">Projeler yükleniyor…</option></select><div class="export-actions"><button type="button" class="btn sm blue" data-dg-park-inventory-action="waypoints-csv">⬇ CSV indir</button><button type="button" class="btn sm ghost" data-dg-park-inventory-action="refresh">↻ Projeleri yenile</button></div><p id="dgWaypointExportStatus" class="dg-meta" role="status">Erişilebilir projeler yükleniyor…</p>';
+   card.innerHTML='<div class="export-format-top"><span class="export-format-icon">📍</span><span class="badge on">NOKTA</span></div><h3>Ölçüm Noktaları CSV</h3><p>Sana ait seçili projedeki ölçüm noktası koordinatlarını, mevcut ölçüm durumlarıyla CSV olarak indir.</p><label class="lbl" for="dgWaypointExportProject">Kendi projen</label><select id="dgWaypointExportProject"><option value="">Projeler yükleniyor…</option></select><div class="export-actions"><button type="button" class="btn sm blue" data-dg-park-inventory-action="waypoints-csv">⬇ CSV indir</button><button type="button" class="btn sm ghost" data-dg-park-inventory-action="refresh">↻ Projeleri yenile</button></div><p id="dgWaypointExportStatus" class="dg-meta" role="status">Kendi projelerin yükleniyor…</p>';
    exportGrid.append(card);
   }
   if(exportBody&&!root.document.getElementById("dgSharedParkSelect")){

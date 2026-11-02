@@ -69,19 +69,19 @@ test('same-park project groups are merged without disclosing unrelated parks',()
  assert.equal(groups.get('park:13').projects.length,1);
 });
 
-test('waypoint CSV project choices are flattened into separate projects, never merged by park',()=>{
- const api=app(),groups=api.groupProjects([
+test('waypoint CSV project choices contain only the signed-in owner’s projects',()=>{
+ const api=app(),projects=[
   {id:25,owner:'sinan',park_id:8,name:'Saha A',parks:{name:'Göksu Parkı'}},
   {id:26,owner:'nagihan',park_id:8,name:'Saha B',parks:{name:'Göksu Parkı'}},
   {id:30,owner:'sinan',park_id:9,name:'Saha C',parks:{name:'Başkent Parkı'}}
- ]);
- const options=api.waypointProjectOptions(groups);
+ ];
+ const options=api.waypointProjectOptions(projects,'sinan');
  assert.deepEqual(Array.from(options,entry=>[entry.project.id,entry.label]),[
-  [30,'Başkent Parkı · Saha C'],[25,'Göksu Parkı · Saha A'],[26,'Göksu Parkı · Saha B']
+  [30,'Başkent Parkı · Saha C'],[25,'Göksu Parkı · Saha A']
  ]);
 });
 
-test('waypoint CSV rechecks participant access and reads exactly the selected project',async()=>{
+test('waypoint CSV denies shared-owner projects and reads exactly one project owned by the signed-in user',async()=>{
  const api=app(),client=scopeClient({
   projects:[
    {id:25,owner:'sinan',park_id:8,name:'Saha A',parks:{name:'Göksu Parkı'}},
@@ -92,14 +92,18 @@ test('waypoint CSV rechecks participant access and reads exactly the selected pr
   profiles:[{id:'nagihan',role:'user',active:true}],
   user:{id:'sinan',email:'sinan@example.org',email_confirmed_at:'2026-10-01T00:00:00Z'}
  });
- const reads=[],result=await api.buildWaypointCSV({client,userId:'sinan',role:'user',projectId:'26',
+ await assert.rejects(()=>api.buildWaypointCSV({client,userId:'sinan',role:'user',projectId:'26',
+  fetchWaypoints:{async fetch(){assert.fail('a shared owner project must not be exported here');}},
+  formats:{waypointsCSV(){return'';}}
+ }),/erişimin artık yok/);
+ const reads=[],result=await api.buildWaypointCSV({client,userId:'sinan',role:'user',projectId:'25',
   fetchWaypoints:{async fetch(args){reads.push(args.projectId);return{data:[{wp_id:4,lat:39.9,lon:32.8,visited:true}],error:null};}},
   formats:{waypointsCSV(rows){return `rows=${rows.length};wp=${rows[0].wp_id}`;}}
  });
- assert.equal(result.project.id,26);
+ assert.equal(result.project.id,25);
  assert.equal(result.csv,'rows=1;wp=4');
  assert.equal(result.count,1);
- assert.deepEqual(reads,[26]);
+ assert.deepEqual(reads,[25]);
 });
 
 test('waypoint CSV denies revoked projects and stops when there are no points',async()=>{
