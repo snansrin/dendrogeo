@@ -193,7 +193,7 @@ const DG_PARK_SEARCH_USE_CASE=window.DG_PARK_SEARCH_APPLICATION.create({
 });
 async function dgScanSearchByName(name){
  const result=await DG_PARK_SEARCH_USE_CASE(name);
- if(window.DG_PRESENT_PARK_SEARCH_RESULT)return window.DG_PRESENT_PARK_SEARCH_RESULT.present(result,{toast,escape:esc,translate:_tpr,translateCommon:dgCf,selectPark:park=>{DG_PARK_CAND=null;DG_PARK=park;},renderCard:dgRenderScanCard,detectAt:dgDetectAt});
+ if(window.DG_PRESENT_PARK_SEARCH_RESULT)return window.DG_PRESENT_PARK_SEARCH_RESULT.present(result,{toast,escape:esc,translate:_tpr,translateCommon:dgCf,selectPark:park=>{DG_PARK_CAND=null;DG_PARK=park;},renderCard:dgRenderScanCard,focusPoint:(lat,lon)=>{if(lat!=null&&lon!=null&&Number.isFinite(+lat)&&Number.isFinite(+lon)&&typeof map!=="undefined"&&map)map.panTo([+lat,+lon]);},detectAt:dgDetectAt});
  if(result.status==="empty-query")return toast("Önce park adını yaz.","warn","🔍");
  if(result.status==="registered"){
   DG_PARK_CAND=null;DG_PARK=result.park;dgRenderScanCard();
