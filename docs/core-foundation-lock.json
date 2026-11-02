@@ -13829,6 +13829,24 @@
           "sha256": "73d7f3e1122af31167149736140b37357eaef3caa8cfdeee495a4ed84c19e14a"
         }
       ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: align authorized waypoint CSV options with the park groups used by the inventory picker; distinguish project IDs and ownership/share access, validate the current signed-in identity, reject cross-project rows, and include source project/park metadata in the CSV. Add a narrow waypoint SELECT policy using the existing project access guard; waypoint INSERT/UPDATE/DELETE rules and rows remain unchanged. No scientific calculations, allometry, species/density data, GIS/raster engines, measurements, project locks, theme/fonts/CSS or production data changed.",
+      "validation": [
+        "Focused project grouping, export provenance, current/revoked access and migration RLS tests",
+        "npm run check",
+        "Focused PostgreSQL authorization migration suite",
+        "PR CI Chromium/WebKit/mobile coverage"
+      ],
+      "files": [
+        {
+          "path": "test/project-invite-scope-security.test.mjs",
+          "previous_sha256": "73d7f3e1122af31167149736140b37357eaef3caa8cfdeee495a4ed84c19e14a",
+          "sha256": "bedfbbeaf2b75bc270f2149f5cace68d035827dbb8a2f5ef14090d31d56eead4"
+        }
+      ]
     }
   ]
 }

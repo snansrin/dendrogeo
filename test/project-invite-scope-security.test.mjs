@@ -28,8 +28,11 @@ async function fixture(){const db=new PGlite();await db.exec(`create role authen
  for(const table of['profiles','projects','measurements','waypoints','park_invites','park_collaborators'])await db.exec(`alter table ${table} enable row level security;`);
  await db.exec(`create policy wp_select on waypoints for select to authenticated using(true);
  create policy wp_insert on waypoints for insert to authenticated with check(owner=auth.uid() or private.is_admin());
- create policy wp_update on waypoints for update to authenticated using(owner=auth.uid() or private.is_admin() or owner is null);
- create policy wp_delete on waypoints for delete to authenticated using(owner=auth.uid() or private.is_admin());`);
+ create policy wp_update on waypoints for update to authenticated
+ using(owner=auth.uid() or private.is_admin() or owner is null or exists(select 1 from projects p where p.id=waypoints.project_id and p.owner=auth.uid()))
+ with check(owner=auth.uid() or private.is_admin() or owner is null or exists(select 1 from projects p where p.id=waypoints.project_id and p.owner=auth.uid()));
+ create policy wp_delete on waypoints for delete to authenticated
+ using(owner=auth.uid() or private.is_admin() or exists(select 1 from projects p where p.id=waypoints.project_id and p.owner=auth.uid()));`);
  for(const p of baseline.policies)await db.exec(`create policy "${p.name}" on public."${p.table}" for ${p.cmd} to ${p.roles.map(r=>'"'+r+'"').join(',')}${p.using?' using ('+p.using+')':''}${p.check?' with check ('+p.check+')':''};`);
  return db;
 }
