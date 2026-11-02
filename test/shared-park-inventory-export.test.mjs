@@ -138,8 +138,9 @@ test('waypoint CSV controls occupy a full-width row in the existing export grid'
  const source=readFileSync(new URL('../src/ui/shared-park-inventory-export.js',import.meta.url),'utf8');
  assert.match(source,/find\(card=>card\.querySelector\("h3"\)\?\.textContent\.trim\(\)==="Standart CSV"\)/);
  assert.match(source,/section\.style\.gridColumn="1 \/ -1"/);
- assert.match(source,/createElement\("optgroup"\)/);
- assert.match(source,/CSV’ye proje kimliği ve adı eklenir/);
+ assert.doesNotMatch(source,/createElement\("optgroup"\)/);
+ assert.match(source,/new Option\(`\$\{g.name\} · \$\{g.projects.length\} proje`,g.key\)/);
+ assert.match(source,/erişilebilir projelerindeki ölçüm noktalarını mevcut durumlarıyla/);
  assert.doesNotMatch(source,/exportGrid\.append\(card\)/);
  assert.match(source,/exportBody\.append\(section\)/,'Park · Tam Envanter remains in its own report section');
 });
