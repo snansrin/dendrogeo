@@ -69,6 +69,54 @@ test('same-park project groups are merged without disclosing unrelated parks',()
  assert.equal(groups.get('park:13').projects.length,1);
 });
 
+test('waypoint CSV project choices are flattened into separate projects, never merged by park',()=>{
+ const api=app(),groups=api.groupProjects([
+  {id:25,owner:'sinan',park_id:8,name:'Saha A',parks:{name:'Göksu Parkı'}},
+  {id:26,owner:'nagihan',park_id:8,name:'Saha B',parks:{name:'Göksu Parkı'}},
+  {id:30,owner:'sinan',park_id:9,name:'Saha C',parks:{name:'Başkent Parkı'}}
+ ]);
+ const options=api.waypointProjectOptions(groups);
+ assert.deepEqual(Array.from(options,entry=>[entry.project.id,entry.label]),[
+  [30,'Başkent Parkı · Saha C'],[25,'Göksu Parkı · Saha A'],[26,'Göksu Parkı · Saha B']
+ ]);
+});
+
+test('waypoint CSV rechecks participant access and reads exactly the selected project',async()=>{
+ const api=app(),client=scopeClient({
+  projects:[
+   {id:25,owner:'sinan',park_id:8,name:'Saha A',parks:{name:'Göksu Parkı'}},
+   {id:26,owner:'nagihan',park_id:8,name:'Saha B',parks:{name:'Göksu Parkı'}}
+  ],
+  memberships:[{park_id:8,user_id:'sinan',added_at:'2026-10-30T10:00:00Z'}],
+  invites:[{park_id:8,invited_by:'nagihan',email:'sinan@example.org',status:'Kabul',responded_at:'2026-10-30T11:00:00Z'}],
+  profiles:[{id:'nagihan',role:'user',active:true}],
+  user:{id:'sinan',email:'sinan@example.org',email_confirmed_at:'2026-10-01T00:00:00Z'}
+ });
+ const reads=[],result=await api.buildWaypointCSV({client,userId:'sinan',role:'user',projectId:'26',
+  fetchWaypoints:{async fetch(args){reads.push(args.projectId);return{data:[{wp_id:4,lat:39.9,lon:32.8,visited:true}],error:null};}},
+  formats:{waypointsCSV(rows){return `rows=${rows.length};wp=${rows[0].wp_id}`;}}
+ });
+ assert.equal(result.project.id,26);
+ assert.equal(result.csv,'rows=1;wp=4');
+ assert.equal(result.count,1);
+ assert.deepEqual(reads,[26]);
+});
+
+test('waypoint CSV denies revoked projects and stops when there are no points',async()=>{
+ const api=app(),projects=[
+  {id:25,owner:'sinan',park_id:8,name:'Owned',parks:{name:'Göksu Parkı'}},
+  {id:26,owner:'nagihan',park_id:8,name:'Revoked',parks:{name:'Göksu Parkı'}}
+ ],user={id:'sinan',email:'sinan@example.org',email_confirmed_at:'2026-10-01T00:00:00Z'};
+ const revoked=scopeClient({projects,user});
+ await assert.rejects(()=>api.buildWaypointCSV({client:revoked,userId:'sinan',role:'user',projectId:26,
+  fetchWaypoints:{async fetch(){assert.fail('revoked access must not read waypoint data');}},formats:{waypointsCSV(){return'';}}
+ }),/erişimin artık yok/);
+ const owned=scopeClient({projects,user});
+ await assert.rejects(()=>api.buildWaypointCSV({client:owned,userId:'sinan',role:'user',projectId:25,
+  fetchWaypoints:{async fetch({projectId}){assert.equal(projectId,25);return{data:[],error:null};}},formats:{waypointsCSV(){return'';}}
+ }),/dışa aktarılacak ölçüm noktası yok/);
+});
+
 test('administrator participant selector contains only own and verified partner projects, never the admin-wide directory',async()=>{
  const api=app(),who='sinan',partner='nagihan',other='outsider';
  const client=scopeClient({
