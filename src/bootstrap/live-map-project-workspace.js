@@ -223,7 +223,14 @@
   },
   showWaypoints:rows=>{
    const previous=DG_GRID_SESSION.getWaypointLayer();
-   const layer=root.DG_GRID_WAYPOINT_LAYER.render({map,previousLayer:previous,rows,leaflet:L});
+   const projectId=root.DG_LIVE_MAP_PROJECTS?.activeProjectId?.()||0;
+   const project=(typeof PROJ_LIST!=="undefined"?PROJ_LIST:[]).find(item=>Number(item.id)===Number(projectId));
+   const editable=!!project&&!project.is_locked&&String(project.owner)===String(USER?.id);
+   const layer=root.DG_GRID_WAYPOINT_LAYER.render({map,previousLayer:previous,rows,leaflet:L,editable,onSave:async change=>{
+    if(!editable||Number(change.projectId)!==Number(projectId)||Number(DG_PARK?.id)!==Number(project.park_id))throw Error("Yalnız kilitsiz kendi projenizde düzenleme yapabilirsiniz.");
+    const row=rows.find(item=>Number(item.id)===Number(change.id));if(!row||row.hasMeasurement||row.visited)throw Error("Ölçümü bulunan waypoint sabittir.");
+    return root.DG_MARK_WAYPOINT_VISITED.moveWaypoint({client:sb,change});
+   }});
    DG_GRID_SESSION.setWaypointLayer(layer);LAST_WP_ROWS=rows;
   },
   clearWaypoints:()=>{const layer=DG_GRID_SESSION.getWaypointLayer();if(layer&&map)map.removeLayer(layer);DG_GRID_SESSION.setWaypointLayer(null);LAST_WP_ROWS=[];},

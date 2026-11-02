@@ -13486,6 +13486,53 @@
           "sha256": "8fedb41e3570e314034680f1487546c9c95e17ff8419531a4c083d872c40fdcd"
         }
       ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized modularization: make loaded project waypoints visible as numbered measurement-map pins and explicitly editable in live map. Only unlocked owner projects and waypoints with no measurement rows may change coordinates or wp_id. Each write is conditional on current row identity, project and prior wp_id. Existing measured waypoints are immutable. No measurement writes, scientific/GIS engine changes, schema/RLS/lock changes, theme/font changes or other project data writes.",
+      "validation": [
+        "npm run check",
+        "waypoint adapter/render/save tests",
+        "Chromium and WebKit live-map editing smoke"
+      ],
+      "files": [
+        {
+          "path": "src/ui/grid-waypoint-layer.js",
+          "previous_sha256": "0c6db2a4329704ec9106735cc0a26b7ce01803666ee4b19d356c976d298eba2f",
+          "sha256": "bbd6bc3b9305e22755b4cc7d897048de46e7c5a300587df34eba16ed34be7223"
+        },
+        {
+          "path": "src/adapters/map/fetch-project-waypoints.js",
+          "previous_sha256": "fafc9ec6d54c67d4ce38f843e9985d97c37701292427df6d856b1d9c7e10712f",
+          "sha256": "88b28d0cfce25d51fb0b312ff74cc34d2dff33d8a0664635f7d8aa5f9eebaffc"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "5994e028bf09080757e1bb2e3559092970069a8b6906141ea40b993bbeb4b7da",
+          "sha256": "8d6cb3c81f96142de2b34313e2eadaaf2dec51c9e163a7444746d3a5128fef0e"
+        },
+        {
+          "path": "test/grid-waypoint-layer-ui.test.mjs",
+          "previous_sha256": "31ccb264800133a8f5e14fd057da1e739d55de4dce5a1c9c1618795c2a8a3272",
+          "sha256": "7f6873e94c99f651d1d890411bdd2e345f40b8fe3af09e4ad185de9aba712343"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "260e8e6061399e14122bfcdf5ab645c42b6e2bddb61039d1747217506a1f8e75",
+          "sha256": "260e8e6061399e14122bfcdf5ab645c42b6e2bddb61039d1747217506a1f8e75"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "1c1ffd3047d0092c4a0c37151ab577d8fe42a85985df35322f45bb2e5460bd83",
+          "sha256": "1c1ffd3047d0092c4a0c37151ab577d8fe42a85985df35322f45bb2e5460bd83"
+        },
+        {
+          "path": "src/adapters/map/mark-waypoint-visited.js",
+          "previous_sha256": "7bbb42b6038e16bec05b18597cfde45e57817a0e2342c0cedf6e3fc30da90a4a",
+          "sha256": "d10d6c626f4c674aa4e768336c45e62ead7f163ea236fc974456f5ba3a70ce6d"
+        }
+      ]
     }
   ]
 }
