@@ -32,7 +32,7 @@ window.DG_SHARED_MEASUREMENT_PROJECTS={
       });
       if(!accepted.length)return [];
       const allowedParks=[...new Set(accepted.map(invite=>Number(invite.park_id)))];
-      const{data,error}=await client.from("projects").select("*,parks(id,name,city,country,area_m2)").in("park_id",allowedParks);
+      const{data,error}=await client.from("projects").select("*,parks!projects_park_id_fkey(id,name,city,country,area_m2)").in("park_id",allowedParks);
       if(error)throw error;
       const candidates=(data||[]).filter(project=>!ownedIds.has(Number(project.id)));
       return candidates.filter(project=>accepted.some(invite=>Number(invite.park_id)===Number(project.park_id)&&invite.invited_by===project.owner)).map(project=>{

@@ -20,7 +20,7 @@ test('owned project adapter retains embedded park read and schema fallback',asyn
   const errors=[];
   const rows=await window.DG_OWNED_MEASUREMENT_PROJECTS.fetch({client,userId:'u1',onRelationError:error=>errors.push(error)});
   assert.deepEqual(rows,[{id:8}]);assert.deepEqual(errors,['projects↔parks: missing relation']);
-  assert.deepEqual(calls,[['from','projects'],['select','*,parks(id,name,city,country,area_m2)'],['eq','owner','u1'],['from','projects'],['select','*'],['eq','owner','u1']]);
+  assert.deepEqual(calls,[['from','projects'],['select','*,parks!projects_park_id_fkey(id,name,city,country,area_m2)'],['eq','owner','u1'],['from','projects'],['select','*'],['eq','owner','u1']]);
 });
 
 test('shared project adapter scopes collaborator parks and supplies missing park embeds',async()=>{

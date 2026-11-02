@@ -13334,6 +13334,34 @@
           "sha256": "06de7707586be312afbe57a0be1f317c0b4f61f84eddec0ab751b07de7d333d2"
         }
       ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up after the user supplied the exact authenticated production error: PGRST201 projects/parks relationship ambiguity persisted after PR #580. Explicitly select the existing projects_park_id_fkey in owned/shared directory, participant export and nested/admin read adapters. Existing parks result keys and columns, filters, RLS, table constraints, record and lock behavior are unchanged. Real shipped SDK HTTP fixture now rejects every unhinted project-park embed with the exact user error, proves the negative control, and verifies hinted recovery in Chromium/WebKit. No database or scientific source mutations.",
+      "validation": [
+        "node --test test/project-park-embed-relationship.test.mjs test/measurement-project-directory-modules.test.mjs test/project-directory-recovery.test.mjs",
+        "node scripts/project-directory-sdk-smoke.mjs Chromium and WebKit at 360/390/430/1280",
+        "npm run check",
+        "Full CI before merge"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "ee1f3a6a9406b60c6e35a94a0c0c25c604885930ae6c8e03d15f8da7278a8923",
+          "sha256": "43adf92fb12b9d0f53e5c1ba69706ddd4eb7d88f37667423999b40c27b1118f0"
+        },
+        {
+          "path": "src/adapters/trees/fetch-owned-measurement-projects.js",
+          "previous_sha256": "ef7aa79d57b712daec6b34195fbfd00c7c5e23f9984382b54dc6f25c991bf53d",
+          "sha256": "56f0d1dfabe71afb5209a4fdcca8d2d7881bc2f8820219b2e2c3dc733a02d901"
+        },
+        {
+          "path": "src/adapters/trees/fetch-shared-measurement-projects.js",
+          "previous_sha256": "c43ddc8efc27beaf485880f1bd69a389e9fcedc551ff6c063280e8891dc33ef0",
+          "sha256": "97bc0321a5feb5be546a3522aa5f6d0d36bd31880b2002c010d46a9a1bc0d4b1"
+        }
+      ]
     }
   ]
 }

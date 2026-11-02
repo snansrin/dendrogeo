@@ -9,9 +9,20 @@ const owner='22222222-2222-4222-8222-222222222222';
 const jwt=()=>[Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT'})).toString('base64url'),Buffer.from(JSON.stringify({sub:user.id,role:'authenticated',email:user.email,exp:Math.floor(Date.now()/1000)+3600})).toString('base64url'),'fixture-signature'].join('.');
 try{for(const width of [360,390,430,1280]){
  const context=await browser.newContext({viewport:{width,height:950},serviceWorkers:'block'}),page=await context.newPage();
- let failAuth=true,authRequests=0;const errors=[];
+ let failAuth=true,authRequests=0,hintedProjectReads=0;const errors=[];
  page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(({user,token})=>localStorage.setItem('sb-xjbpounwdxrhelmixvqm-auth-token',JSON.stringify({access_token:token,refresh_token:'fixture-refresh',expires_at:Math.floor(Date.now()/1000)+3600,expires_in:3600,token_type:'bearer',user})),{user,token:jwt()});
+ // WebKit's route.fulfill rejects HTTP 300 as a redirect. Return the exact
+ // fetch Response for that error at the SDK transport boundary in both engines.
+ await page.addInitScript(()=>{
+  const fetch=window.fetch.bind(window);
+  window.fetch=(input,options)=>{
+   const url=new URL(typeof input==='string'?input:input.url,location.href);
+   if(url.hostname==='xjbpounwdxrhelmixvqm.supabase.co'&&url.pathname==='/rest/v1/projects'&&(url.searchParams.get('select')||'').includes('parks('))
+    return Promise.resolve(new Response(JSON.stringify({code:'PGRST201',message:"Could not embed because more than one relationship was found for 'projects' and 'parks'",details:[{relationship:'projects_park_id_fkey'},{relationship:'workspace archive bridge'}],hint:'Choose projects_park_id_fkey'}),{status:300,headers:{'content-type':'application/json'}}));
+   return fetch(input,options);
+  };
+ });
  await page.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>route.abort());
  await page.routeWebSocket(/supabase\.co/,socket=>socket.close());
  await page.route('https://xjbpounwdxrhelmixvqm.supabase.co/**',async route=>{
@@ -25,7 +36,11 @@ try{for(const width of [360,390,430,1280]){
   if(table==='v_my_parks')return respond([{id:25,name:'Shared Park',role:'collaborator'}]);
   if(table==='park_collaborators')return respond([{park_id:25,user_id:user.id,added_at:'2026-11-01T12:00:00Z'}]);
   if(table==='park_invites')return respond(url.searchParams.get('status')==='eq.Kabul'?[{park_id:25,invited_by:owner,responded_at:'2026-11-01T12:00:00Z'}]:[]);
-  if(table==='projects')return respond(url.searchParams.has('owner')?[{id:10,owner:user.id,name:'My own project',park_id:7,parks:{id:7,name:'Own Park'}}]:[{id:30,owner,name:'Shared project',park_id:25,is_locked:true,parks:{id:25,name:'Shared Park'}}]);
+  if(table==='projects'){
+   const select=url.searchParams.get('select')||'';
+   if(select.includes('parks!projects_park_id_fkey('))hintedProjectReads++;
+   return respond(url.searchParams.has('owner')?[{id:10,owner:user.id,name:'My own project',park_id:7,parks:{id:7,name:'Own Park'}}]:[{id:30,owner,name:'Shared project',park_id:25,is_locked:true,parks:{id:25,name:'Shared Park'}}]);
+  }
   return respond([]);
  });
  await page.goto(server.url);await page.waitForFunction(()=>document.getElementById('dgStartupScreen').hidden);
@@ -40,10 +55,12 @@ try{for(const width of [360,390,430,1280]){
  assert.equal(await page.locator('#projSharedList .project-card').count(),1,'real SDK raw user response recovers shared rows');
  assert.equal(await page.locator('#mProject option[value="30"]').isDisabled(),true,'server project lock stays intact');
  assert.equal(await page.evaluate(()=>DG_MEASUREMENT_PROJECT_DIRECTORY_STATE.getState().error),null);
+ assert.ok(hintedProjectReads>=2,'owned and shared queries must choose the direct project park FK');
+ assert.equal(await page.evaluate(async()=>{const result=await sb.from('projects').select('*,parks(id,name)');return result.error?.code;}),'PGRST201','fixture reproduces the exact user-reported authenticated embed failure');
  await page.locator('#side [data-dg-view="measure"]').click();
  assert.equal(await page.locator('#v-measure').evaluate(e=>e.classList.contains('on')),true);
  assert.equal(await page.evaluate(()=>PARK_MODE),false);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
- assert.deepEqual(errors,[]);console.log(JSON.stringify({engine:engine.name(),width,realSupabaseSdk:true,initialAuthFailureOwnedVisible:true,sharedRecovered:true,locksUnchanged:true,noAutomaticScan:true}));
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({engine:engine.name(),width,realSupabaseSdk:true,initialAuthFailureOwnedVisible:true,authenticatedPgrst201Reproduced:true,explicitForeignKeyRecovery:true,sharedRecovered:true,locksUnchanged:true,noAutomaticScan:true}));
  await context.close();
 }}finally{await browser.close();await server.close();}
