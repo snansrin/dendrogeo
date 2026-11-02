@@ -19,7 +19,7 @@ test('no public backup or Oracle staging page remains addressable by a known ind
 
 test('existing frozen admin panel owns both archive and restore controls',()=>{
  const html=read('partials/shell.html');
- const start=html.indexOf('id="v-admin"'),end=html.indexOf('<!-- PARK KİMLİKLERİ',start);
+ const start=html.indexOf('id="v-admin"'),end=html.indexOf('<!-- BİLİMSEL RAPOR',start);
  assert.ok(start>=0&&end>start);
  const section=html.slice(start,end);
  assert.match(section,/data-dg-backup-action="download"/);

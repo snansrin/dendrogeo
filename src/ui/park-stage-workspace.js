@@ -77,11 +77,11 @@
    if(name==="edit"){if(!ready)return;editSource=null;editing=true;render();host.querySelector("#dgStageName")?.focus();return;}
    if(name==="revise"){if(!ready)return;const value=host.querySelector("#dgStageSelect")?.value;editSource=rows.find(row=>String(row.id)===value);if(!editSource)throw Error("Düzenlemek için kayıtlı bir etap seçin.");editing=true;draftName=String(editSource.geom_json.stage_scope.label).slice(0,65)+" · düzenleme";render();name="pick-detail";}
    if(name==="pick"||name==="pick-detail"){
-    const detailed=true,initial=editSource?root.DG_PARK_STAGE_BOUNDARY_PATHS.recover(ports.geometry(base.park),editSource.geom_json):null;
+    const detailed=true,initial=editSource?editSource.geom_json:null;
     drawing.cancel();assisted.clear();menu.hideHint();preview=null;proposals=[];freeDrawing=false;cutEditing=true;render();menu.close();const token=epoch;
     const run=name=>void action(name).catch(error=>{if(token===epoch)status(error.message);});
-    menu.showCuts({name:draftName,detailed,revision:!!editSource,onName:value=>{draftName=value;const input=host?.querySelector("#dgStageName");if(input)input.value=value;},select:index=>assisted.selectBoundary(index),selectPoint:index=>assisted.selectPoint(index),deletePoint:()=>assisted.deletePoint(),undo:()=>assisted.undo(),reset:()=>assisted.resetBoundary(),save:()=>run("save"),remove:canDelete(editSource)?()=>run("delete"):null,cancel:()=>void action("cancel")});assisted.start(initial,detailed);
-    if(editSource&&!initial)status("İki sınır hattı ayrılamadı. Başlangıç ve bitişi yeniden yerleştirin; ana park değişmez.");return;
+    menu.showCuts({name:draftName,detailed,revision:!!editSource,ringLabels:initial?[...initial.outer.map((_,i)=>"Dış sınır "+(i+1)),...(initial.inner||[]).map((_,i)=>"İç sınır "+(i+1))]:null,onName:value=>{draftName=value;const input=host?.querySelector("#dgStageName");if(input)input.value=value;},select:index=>assisted.selectBoundary(index),selectPoint:index=>assisted.selectPoint(index),deletePoint:()=>assisted.deletePoint(),undo:()=>assisted.undo(),reset:()=>assisted.resetBoundary(),save:()=>run("save"),remove:canDelete(editSource)?()=>run("delete"):null,cancel:()=>void action("cancel")});if(initial)assisted.startGeometry(initial);else assisted.start(null,detailed);
+    if(initial)status("Kaydedilmiş etap köşeleri yüklendi. Önizleme kayıtlı sınırla aynıdır; kaydedene kadar veriler değişmez.");return;
    }
    if(name==="suggest"){
     drawing.cancel();assisted.clear();menu.hideHint();menu.hideCuts();cutEditing=false;freeDrawing=false;const token=epoch;partCount=Number(host.querySelector("#dgStagePartCount")?.value||2);preview=null;proposals=[];render();setWorking(true);

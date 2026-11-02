@@ -13362,6 +13362,130 @@
           "sha256": "97bc0321a5feb5be546a3522aa5f6d0d36bd31880b2002c010d46a9a1bc0d4b1"
         }
       ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: Explicit user-requested UI changes after user confirmed project recovery: remove Park Identities from measurement administration and obsolete UI links; skip absent panel reads. Edit a stage by cloning its exact persisted outer/inner vertices into the existing Leaflet reference editor, with existing ring validity checks and unchanged explicit new-revision RPC/save/lock policy. New-stage two-cap tools remain unchanged. Both verified PNG paths use the successfully opened, still-accessible live project in its active park before the legacy grid selector, preserving per-project waypoint filtering and scientific verification gates. Regression checks compare saved vertex coordinates and downloaded waypoint pixels. No scientific formulas, species/density, GIS geometry/raster engines, theme/fonts/CSS, schema, RLS, project locks or existing production records changed. Deploy r448, retaining v3.0.1 citation.",
+      "validation": [
+        "npm run check",
+        "Chromium and WebKit stage saved-vertex restoration, insertion/drag/new revision, immutable parent and original",
+        "Downloaded verified PNG pixel checks for active project waypoints, stale grid selector and foreign-project exclusion",
+        "Admin card absence with existing badges and storage warning preserved",
+        "Full source, mobile, WebKit and GIS CI before merge"
+      ],
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "06de7707586be312afbe57a0be1f317c0b4f61f84eddec0ab751b07de7d333d2",
+          "sha256": "99f3f879881ba9de5f6ddcbde5bc8d335224b7eb41535c862da68b8973bcd8f3"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "43adf92fb12b9d0f53e5c1ba69706ddd4eb7d88f37667423999b40c27b1118f0",
+          "sha256": "5994e028bf09080757e1bb2e3559092970069a8b6906141ea40b993bbeb4b7da"
+        },
+        {
+          "path": "partials/shell.html",
+          "previous_sha256": "a9af04e1e6da5e39a9ffaa15347904da9d2a6c66a4f51b34ea3a50a16848f69c",
+          "sha256": "cfad11fd0776792ab2f1e27bc3e78221b117b5b48841730bb34c6a6e4d4f1650"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "13fb1fdfca282bfc675c28610ba38b9d0e92a19c826a6b14680703d35f2ea4a2",
+          "sha256": "b3005dd660101b8229ac6a33b11d769730e8924e3898c478282f9489abddcba8"
+        },
+        {
+          "path": "scripts/park-stage-assisted-smoke.mjs",
+          "previous_sha256": "65d691f201f4f513c642ff5a105d2409def3871e86ece79f4bc2330ad24c00bb",
+          "sha256": "72e3c93b6d6a44ea56f2843bbd8bfec113dea91c5be5fd966779ce11f723004b"
+        },
+        {
+          "path": "src/bootstrap/gis-export.js",
+          "previous_sha256": "1efc829fd8bd3625733f0bd45e65b6aeb221b7ccd539fe22ea81b158d027807a",
+          "sha256": "7bdea1396bb633bf71acfdaf7ee94d5e57fae56eb609b87da37a97030030f042"
+        },
+        {
+          "path": "src/bootstrap/park-admin-controller.js",
+          "previous_sha256": "0edee558c7b102e9c66414c74d500bf60e40ac24214bbea72b00444fbd34409a",
+          "sha256": "5b1bb09db711eefbea2a86eb8af762cc5be74c1c610c79e7c1d678c89960f023"
+        },
+        {
+          "path": "src/services/park-registry.js",
+          "previous_sha256": "38c31bf5013182692331df9c1fee3071f2401fcd956ae06f99b9de620db1f35d",
+          "sha256": "669278fbf4b0920d2041c89b99881a803cd482455d0c4c525e8de3fefcb62fa6"
+        },
+        {
+          "path": "src/ui/admin-panel-actions.js",
+          "previous_sha256": "f67cfd4e3106ac5d008d3591ac5ca4ce7353d909120861ffa638bf019c237b33",
+          "sha256": "5d7c51cb225d5d97f8522408b616ca19dd28f5420c2da9fb071feff63c8137d2"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "8206d783fa2e7b3bfeb06c8d4ed43315a5eac32dc97aef9d6774408583c05f29",
+          "sha256": "b5476c459804e36d21ea6a430f55e42eec2532549acf128619c395ab48c9cb3c"
+        },
+        {
+          "path": "src/ui/park-measurement-gate.js",
+          "previous_sha256": "81076373a09f2ed2eabc778e019ba2c710682e84ad8b181c00eb932d9ec9b421",
+          "sha256": "748f25a771ef312a374fad93ad1847858748daa0550796375a0c090c17f4757a"
+        },
+        {
+          "path": "src/ui/park-scan-card.js",
+          "previous_sha256": "5f4ee0a1d2dbed0d29c8f771a6e83eb769b8b3557d625531dc58dae04ad9dde8",
+          "sha256": "71c6e299598b62619f4c4231872fde188d95b2011c759dddf6ca9cf4ad904f51"
+        },
+        {
+          "path": "src/ui/park-stage-assisted-selection.js",
+          "previous_sha256": "cfc98de8d2bd5680138ea2b8b842d35bf58c6e3cf34795d19abee76dd858825d",
+          "sha256": "e90fa85e481cbacc6f3432543dcb5a04c00d0ff237eb52802c1fa601b70e1996"
+        },
+        {
+          "path": "src/ui/park-stage-menu.js",
+          "previous_sha256": "4110b3905c63f4de07dc3d399e809ac30282bdfacf1b9fe8da1cfbba1576ae62",
+          "sha256": "20ee3155091416e1580138a79ff7665d86a4d6893fa8117a395dbe2d3dcc26f3"
+        },
+        {
+          "path": "src/ui/park-stage-view.js",
+          "previous_sha256": "3d2dca88deb73d7bcf5ed8d0ed908ae5d9d50cbefb274ec756b9e2466cdc886f",
+          "sha256": "69bc06b3e1961642f54dfbff1a3249df92fa60c6409fab6689f33737ac1669d3"
+        },
+        {
+          "path": "src/ui/park-stage-workspace.js",
+          "previous_sha256": "067e7231e5a92eb0a96b71b016f21cd06ce642bf01a73df5e8c8c91d70017831",
+          "sha256": "82e1cf0366c801fb928b97c8d18d8c538bd9f92e3ff99c65786d8bc5db3d79a3"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "cb0eb88af5fc149fd50c58059734741c6e33fcd4908df2cc0a4b29ef9a747130",
+          "sha256": "1c1ffd3047d0092c4a0c37151ab577d8fe42a85985df35322f45bb2e5460bd83"
+        },
+        {
+          "path": "test/park-flow.test.mjs",
+          "previous_sha256": "69980fb5b1316464b9d368b1b3995e0a48a64570f075be586a192c6f676c85db",
+          "sha256": "8fc5815506720df38b6e13a16844831917bc1fe246a29361a4fa0a445867b447"
+        },
+        {
+          "path": "test/park-stage-assisted-ui.test.mjs",
+          "previous_sha256": "db628ddb31692ce0dc5e096acd55858e47c3cca707340a64514ec0be3a83dcda",
+          "sha256": "958746f22d53dc6b2a14c0748d91c146ce3e3009f6602d5c19d6b9b5161e4379"
+        },
+        {
+          "path": "test/remaining-shell-actions.test.mjs",
+          "previous_sha256": "7c64f772a749a9385eb352b6311bf4ca4740a15138a0f17f1b5d86f0e2104ac9",
+          "sha256": "1c14c3ec17e239dc17018e8022d0802e5d26caf8d0798ef1308853def8f242f2"
+        },
+        {
+          "path": "test/park-identity.test.mjs",
+          "previous_sha256": "de2823554c13b06db907da8d0d33c089e19496376fc39b7026155fd2c1cff4f5",
+          "sha256": "9df36ff0e1b428af2822bb90349b87af7f6261b10ffe41abeb979ecdd308bafe"
+        },
+        {
+          "path": "test/park-stage-workspace.test.mjs",
+          "previous_sha256": "ea593c292d8c9fe5f64b27cdb9a8b076253b144dc92c079175c81b7e13be9cde",
+          "sha256": "8fedb41e3570e314034680f1487546c9c95e17ff8419531a4c083d872c40fdcd"
+        }
+      ]
     }
   ]
 }

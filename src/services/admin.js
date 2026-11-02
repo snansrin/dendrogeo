@@ -62,7 +62,7 @@ async function loadAdmin__scroll(){
   renderMeasurements:(response,rows)=>window.DG_ADMIN_OVERVIEW_MEASUREMENTS_UI.render(response,rows,{getElement:$,escape:esc,renderTable:dgRenderFlatTable}),
   refreshBasePanels:()=>{loadStorageStats();checkBackupReminder();loadVisitStats();loadRequests();loadAdminExportFilters();},
   refreshTree:()=>{if(typeof loadAdminTree==="function")loadAdminTree();},
-  refreshParkAdmin:()=>{if(typeof loadParkAdmin==="function")loadParkAdmin();},
+  refreshParkAdmin:()=>{},
   refreshPublicationQueue:()=>{if(typeof dgLoadPublishQueue==="function")dgLoadPublishQueue();}
  });
 }

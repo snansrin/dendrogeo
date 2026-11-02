@@ -8,7 +8,6 @@
   document.addEventListener("click",event=>{
    const element=event.target?.closest?.("[data-dg-admin-panel-action]");if(!element)return;
    switch(element.dataset.dgAdminPanelAction){
-    case "reload-parks":root.loadParkAdmin();break;
     case "reload-publish-queue":root.dgLoadPublishQueue();break;
     case "toggle-closed-requests":{
      const body=document.getElementById(element.getAttribute("aria-controls"));if(!body)return;

@@ -2,6 +2,12 @@
 /* English dictionary data for the runtime translator in i18n.js. */
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"Kaydedilmiş sınırı düzenle":"Edit saved boundary",
+"Kaydedilmiş sınır köşeleri yüklendi. Numaralı noktaları sürükleyin; nokta ekleyebilir veya silebilirsiniz.":"Saved boundary vertices loaded. Drag numbered points, add points or delete points.",
+"Kaydedilmiş etap köşeleri yüklendi. Önizleme kayıtlı sınırla aynıdır; kaydedene kadar veriler değişmez.":"Saved stage vertices loaded. The preview matches the saved boundary; data stays unchanged until you save.",
+"Sınır en az üç ayrı köşeden oluşmalı ve kendi içinde kesişmemeli.":"A boundary must have at least three distinct vertices and must not intersect itself.",
+"Bu sınır için nokta sınırına ulaşıldı.":"The point limit for this boundary has been reached.",
+"Park bağlantısı olmayan proje ile yeni ölçüm kaydedilemez.":"New measurements cannot be saved to a project without a linked park.",
 "📁 Kayıtlı proje çalışma alanı":"📁 Saved project workspace",
 "Etap sınırını, ölçüm noktalarını ve kayıtlı park analizini yeniden aç.":"Reopen saved stage boundaries, waypoints and park analyses.",
 "Projelerim ve yetkili olduğum projeler":"My projects and projects I can access",

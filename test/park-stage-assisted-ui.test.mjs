@@ -1,5 +1,22 @@
 import test from 'node:test';import assert from 'node:assert/strict';import vm from 'node:vm';import{readFileSync}from'node:fs';
 function load(path,root={}){const ctx=vm.createContext({window:root});vm.runInContext(readFileSync(new URL('../'+path,import.meta.url),'utf8'),ctx);return root;}
+
+test('revision opens exact saved vertices including holes and never mutates the saved geometry',()=>{
+ const root=load('src/domain/parks/stage-geometry.js');load('src/ui/park-stage-assisted-selection.js',root);
+ const geometry={outer:[[[39,32],[39,33],[40,33],[40,32],[39,32]]],inner:[[[39.2,32.2],[39.2,32.4],[39.4,32.4],[39.4,32.2],[39.2,32.2]]]};
+ const before=JSON.stringify(geometry),layers=new Set(),events={};let preview;
+ const layer=()=>({callbacks:{},addTo(){layers.add(this);return this;},getBounds(){return{};},on(type,fn){this.callbacks[type]=fn;return this;}});
+ const marker=point=>({...layer(),point,dragging:{disable(){},enable(){}},getLatLng(){return{lat:this.point[0],lng:this.point[1]};}});
+ const document={addEventListener(){},removeEventListener(){}},container={addEventListener:(key,fn)=>{events[key]=fn;},removeEventListener:key=>delete events[key]};
+ const map={getContainer:()=>container,fitBounds(){},removeLayer:layer=>layers.delete(layer),doubleClickZoom:{enabled:()=>true,disable(){},enable(){}}};
+ const tool=root.DG_PARK_STAGE_ASSISTED_UI.create({document,leaflet:{polygon:layer,polyline:layer,layerGroup:layer,marker},getMap:()=>map,getMode:()=>true,setMode(){},getGuard:()=>false,setGuard(){},parentGeometry:()=>geometry,status(){},onInvalid(){},onProgress(){},onPreview:result=>{preview=result;},between(){throw Error('saved vertices must not be reconstructed as two caps');}});
+ tool.startGeometry(geometry);
+ assert.equal(JSON.stringify(preview.geometry),before);assert.equal([...layers].filter(l=>l.dragging).length,8);
+ const first=[...layers].find(l=>l.dragging);first.callbacks.dragstart();first.point=[39.05,32.05];first.callbacks.dragend();
+ assert.equal(preview.geometry.outer[0][0][0],39.05);assert.equal(JSON.stringify(geometry),before);
+ assert.equal(JSON.stringify(preview.geometry.inner),JSON.stringify(geometry.inner));
+ tool.clear();assert.equal(layers.size,0);assert.equal(events.click,undefined);
+});
 test('Assisted selection cancels stale previews, restores map ownership and locks draggable cut points during save',async()=>{
  const root=load('src/ui/park-stage-assisted-selection.js'),listeners={},layers=new Set(),messages=[];let mode=true,guard=false,zoom=true,release,previews=0;
  const container={addEventListener:(type,fn)=>{listeners[type]=fn;},removeEventListener:type=>delete listeners[type]};

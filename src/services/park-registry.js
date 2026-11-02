@@ -147,7 +147,7 @@ const DG_PARK_REGISTER_USE_CASE=window.DG_PARK_REGISTRATION_APPLICATION.create({
   matchRadius:dgParkMatchRadius,
   getReverseGeocode:()=>typeof reverseGeocode==="function"?reverseGeocode:null,
   notifyManualConflict:hit=>{
-    if(typeof toast==="function")toast(dgCf("ℹ Bu park daha önce elle oluşturulmuş (#")+hit.id+")"+_tpr("; aynı kimlik kullanılıyor. OSM kimliğine geçmek için: Yönetim → 🌳 Park Kimlikleri → 🔀 birleştir."),"info","🌳");
+    if(typeof toast==="function")toast(dgCf("ℹ Bu park daha önce elle oluşturulmuş (#")+hit.id+")","info","🌳");
   },
   warn:error=>console.warn("DENDROGEO · park kimliği yazılamadı:",error&&error.message),
   notifyWriteFailure:error=>toast(dgCf("Park kimliği sunucuya yazılamadı: ")+esc(error.message),"err","🌳")
@@ -553,7 +553,7 @@ const DG_PARK_ADMIN_CONTROLLER=window.DG_PARK_ADMIN_CONTROLLER.create({
   restoreScroll:typeof dgScrollRestore==="function"?dgScrollRestore:null,
   loadApplication:()=>window.DG_PARK_ADMIN_LOAD_APPLICATION.create({
     isAdmin:()=>!!PROFILE&&(PROFILE.role==="admin"||PROFILE.role==="owner"),
-    showLoading:()=>window.DG_PARK_ADMIN_STATUS_UI.parkLoading($("parkAdminBox")),
+    showLoading:()=>{},
     fetchParks:()=>window.DG_PARK_ADMIN_READ_STORE.fetchParks(sb),
     fetchProjects:()=>window.DG_PARK_ADMIN_READ_STORE.fetchProjects(sb),
     fetchMeasurements:()=>window.DG_PARK_ADMIN_READ_STORE.fetchMeasurements(sb)

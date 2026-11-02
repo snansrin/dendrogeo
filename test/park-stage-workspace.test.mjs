@@ -77,7 +77,7 @@ test('Stage view escapes user content and exposes labelled controls with explici
  const render=context.window.DG_PARK_STAGE_VIEW.render,escape=s=>String(s).replaceAll('<','&lt;').replaceAll('>','&gt;');
  const html=render({escape,baseName:'<img src=x>',rows:[{...row,geom_json:{...row.geom_json,stage_scope:{label:'<script>bad</script>'}}}],ready:true,editing:true});
  assert.doesNotMatch(html,/<img|<script>/);assert.match(render({escape,baseName:'Park',rows:[],ready:true,editing:false}),/for="dgStageSelect"/);assert.match(html,/for="dgStageName"/);assert.match(html,/Etap olarak kaydet/);assert.match(html,/role="status"/);
- const revision=render({escape,baseName:'Park',rows:[],ready:true,editing:true,revision:true});assert.doesNotMatch(revision,/data-stage-action="(?:draw|suggest|pick)"/);assert.match(revision,/başlangıç|Başlangıç/);
+ const revision=render({escape,baseName:'Park',rows:[],ready:true,editing:true,revision:true});assert.doesNotMatch(revision,/data-stage-action="(?:draw|suggest|pick)"/);assert.match(revision,/Kaydedilmiş sınırı düzenle/);
  const selection=render({escape,baseName:'Park',rows:[],ready:true,editing:false});assert.match(selection,/Seçili etapta çalış/);assert.match(selection,/Etap düzenle/);
 });
 test('Stage drawing restores detection/guard and removes temporary parent boundary on Escape',()=>{

@@ -318,7 +318,7 @@ describe('ölçüm kapısı: park algılanmadan ölçüm yok', () => {
     assert.equal(el('saveBtn').disabled, true);
     /* 2026-09-27: tarama kartından bağlama KALDIRILDI (kullanıcı isteği);
      * yönetici yolusu Yönetim → Park Kimlikleri. */
-    assert.ok(el('parkGate').innerHTML.includes('Park Kimlikleri'), 'yönetici yolu Park Kimlikleri olmalı');
+    assert.ok(!el('parkGate').innerHTML.includes('Park Kimlikleri'), 'kaldırılmış park yönetimine yönlendirilmez');
   });
 
   test('proje seçilmemişse park algılama ekranına gönderir', () => {
@@ -995,7 +995,7 @@ describe('parka bağlama yalnız yönetici — normal kullanıcı kilitli', () =
     assert.ok(el('projTable').innerHTML.includes('data-project-action="startParkScan" data-project-id="2"'), 'yönetici bağlayabilmeli');
     el('mProject').value = '2';
     run('dgParkGate()');
-    assert.ok(el('parkGate').innerHTML.includes('Park Kimlikleri'), 'yönetici kapıda Park Kimlikleri yolunu görür');
+    assert.ok(!el('parkGate').innerHTML.includes('Park Kimlikleri'), 'kaldırılmış park yönetimine yönlendirilmez');
     await run('loadParkCompare()');
     assert.ok(el('parkCompare').innerHTML.includes('data-park-comparison-action="scan"'), 'yönetici onarım düğmesini görür');
     assert.ok(!el('parkCompare').innerHTML.includes('🔐 yönetici bağlayacak'), 'yöneticiye "yönetici bağlayacak" denmez');

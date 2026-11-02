@@ -2,9 +2,11 @@
 /* Independent quick cuts or detailed cap paths; active park/analysis stay unchanged. */
 (function(root){
  function create(ports){
+  let polygonMode=null;
   let map=null,captureTarget=null,cuts=[[],[]],active=0,selected=-1,markers=[[],[]],previewLayer=null,lineLayer=null,parentLayer=null,proposalLayer=null,editLayer=null,locked=false,detailed=false,finished=[false,false],previousMode=false,previousGuard=false,previousZoom=false,epoch=0,referenceEpoch=0;
   function removePreview(){for(const layer of [previewLayer,lineLayer])if(layer&&map)map.removeLayer(layer);previewLayer=null;lineLayer=null;}
   function clear(){
+   polygonMode=null;
    ++epoch;++referenceEpoch;removePreview();
    if(map){
    captureTarget?.removeEventListener("click",capture,true);captureTarget=null;ports.document.removeEventListener("keydown",key);
@@ -22,6 +24,12 @@
   }
   async function update(){
    progress();
+   if(polygonMode){
+    const rings=cuts.map(line=>line.length?[...line.map(p=>[...p]),[...line[0]]]:[]);
+    if(!rings.every(ring=>root.DG_PARK_STAGE_GEOMETRY.validateRing(ring))){removePreview();ports.onInvalid();ports.status("Sınır en az üç ayrı köşeden oluşmalı ve kendi içinde kesişmemeli.");return;}
+    const geometry={outer:rings.slice(0,polygonMode.outerCount),inner:rings.slice(polygonMode.outerCount)};
+    const result={geometry,lines:rings,method:"saved-vertices"};drawPreview(result);ports.onPreview(result);return;
+   }
    if(!cuts.every(line=>line.length>=2)){removePreview();lineLayer=ports.leaflet.layerGroup(cuts.filter(line=>line.length>=2).map(line=>ports.leaflet.polyline(line,{color:"#f97316",weight:3,dashArray:"7 5",interactive:false}))).addTo(map);const missing=cuts.findIndex(line=>line.length<2);ports.status((missing?"Bitiş":"Başlangıç")+(detailed?" hattına en az iki nokta koyun. Hat düğmeleriyle diğer sınıra geçebilirsiniz.":" sınırı için köprü boyunca iki referans seçin."));return;}
    const token=++epoch,snapshot=cuts.map(line=>line.map(p=>[...p]));ports.status("İki sınır arasındaki park alanı hazırlanıyor…");
    try{const result=await ports.between(snapshot,{detailed});if(token!==epoch||!map)return;drawPreview(result);ports.onPreview(result);}
@@ -43,7 +51,7 @@
   }
   function add(point,index=cuts[active].length){
    if(!map||locked||(!detailed&&cuts[active].length===2))return;
-   if(cuts[active].length>=40){ports.status("Her hatta en fazla 40 nokta kullanılabilir.");return;}
+   if(cuts[active].length>=(polygonMode?1000:40)){ports.status("Bu sınır için nokta sınırına ulaşıldı.");return;}
    ++epoch;removePreview();ports.onInvalid();cuts[active].splice(index,0,point);selected=index;
    if(!detailed){finished[active]=cuts[active].length===2;if(finished[0]&&!cuts[1].length)active=1;}
    references();void update();
@@ -58,7 +66,7 @@
    const parent=ports.parentGeometry();parentLayer=ports.leaflet.polygon([...parent.outer,...(parent.inner||[])],{color:"#94a3b8",weight:2,fillOpacity:0,interactive:false}).addTo(map);
    map.fitBounds(parentLayer.getBounds(),{animate:false,padding:[24,24],paddingTopLeft:ports.padding?.()||[24,24]});ports.document.addEventListener("keydown",key);
   }
-  return Object.freeze({start(initial=null,detail=false){prepare();detailed=detail;if(initial){cuts=initial.map(line=>line.map(p=>[...p]));finished=[true,true];references();}captureTarget=map.getContainer();captureTarget.addEventListener("click",capture,true);void update();},selectPoint,deletePoint(){if(!map||locked||selected<0||!cuts[active][selected])return;++epoch;cuts[active].splice(selected,1);selected=-1;ports.onInvalid();references();void update();},finishBoundary(){if(!map||locked||!detailed)return;if(cuts[active].length<2){ports.status("Hattı tamamlamak için en az iki nokta seçin.");return;}finished[active]=true;if(!finished[1-active])active=1-active;void update();},undo(){if(!map||locked||!detailed)return;++epoch;finished[active]=false;cuts[active].pop();selected=-1;ports.onInvalid();references();void update();},resetBoundary(){if(!map||locked)return;++epoch;cuts[active]=[];selected=-1;finished[active]=false;ports.onInvalid();references();void update();},selectBoundary(index){if(!map||locked||![0,1].includes(index))return;++epoch;active=index;selected=-1;removePreview();ports.onInvalid();finished[index]=false;if(!detailed)cuts[index]=[];references();void update();},show(result){if(!map)prepare();if(proposalLayer){map.removeLayer(proposalLayer);proposalLayer=null;}drawPreview(result);},showProposals(results,select){prepare();proposalLayer=ports.leaflet.layerGroup(results.map((result,index)=>ports.leaflet.polygon([...result.geometry.outer,...result.geometry.inner],{color:"#e9a23b",weight:2,fillOpacity:.10}).on("click",()=>{if(!locked)select(index);}).bindTooltip(result.label))).addTo(map);},clear,setLocked(value){locked=value;for(const marker of markers.flat())if(value)marker.dragging.disable();else marker.dragging.enable();},isActive:()=>!!map});
+  return Object.freeze({startGeometry(geometry){prepare();polygonMode={outerCount:geometry.outer.length};detailed=true;cuts=[...geometry.outer,...(geometry.inner||[])].map(ring=>ring.slice(0,-1).map(p=>[...p]));finished=cuts.map(()=>true);references();captureTarget=map.getContainer();captureTarget.addEventListener("click",capture,true);void update();},start(initial=null,detail=false){prepare();detailed=detail;if(initial){cuts=initial.map(line=>line.map(p=>[...p]));finished=[true,true];references();}captureTarget=map.getContainer();captureTarget.addEventListener("click",capture,true);void update();},selectPoint,deletePoint(){if(!map||locked||selected<0||!cuts[active][selected])return;++epoch;cuts[active].splice(selected,1);selected=-1;ports.onInvalid();references();void update();},finishBoundary(){if(!map||locked||!detailed)return;if(cuts[active].length<2){ports.status("Hattı tamamlamak için en az iki nokta seçin.");return;}finished[active]=true;if(!finished[1-active])active=1-active;void update();},undo(){if(!map||locked||!detailed)return;++epoch;finished[active]=false;cuts[active].pop();selected=-1;ports.onInvalid();references();void update();},resetBoundary(){if(!map||locked)return;++epoch;cuts[active]=[];selected=-1;finished[active]=false;ports.onInvalid();references();void update();},selectBoundary(index){if(!map||locked||!Number.isInteger(index)||index<0||index>=cuts.length)return;++epoch;active=index;selected=-1;removePreview();ports.onInvalid();finished[index]=false;if(!detailed)cuts[index]=[];references();void update();},show(result){if(!map)prepare();if(proposalLayer){map.removeLayer(proposalLayer);proposalLayer=null;}drawPreview(result);},showProposals(results,select){prepare();proposalLayer=ports.leaflet.layerGroup(results.map((result,index)=>ports.leaflet.polygon([...result.geometry.outer,...result.geometry.inner],{color:"#e9a23b",weight:2,fillOpacity:.10}).on("click",()=>{if(!locked)select(index);}).bindTooltip(result.label))).addTo(map);},clear,setLocked(value){locked=value;for(const marker of markers.flat())if(value)marker.dragging.disable();else marker.dragging.enable();},isActive:()=>!!map});
  }
  root.DG_PARK_STAGE_ASSISTED_UI=Object.freeze({create});
 })(window);

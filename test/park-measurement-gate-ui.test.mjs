@@ -13,7 +13,7 @@ test('measurement park gate delegates scan/change/admin actions from its contain
  render('project-required');
  assert.match(box.innerHTML,/data-park-gate-action="scan"/);
  render('park-required');
- assert.match(box.innerHTML,/data-park-gate-action="admin"/);
+  assert.doesNotMatch(box.innerHTML,/data-park-gate-action="admin"|Park Kimlikleri/);
  render('linked');
  assert.match(box.innerHTML,/data-park-gate-action="change" data-project-id="8"/);
  assert.doesNotMatch(box.innerHTML,/\bonclick\s*=/i);
@@ -21,5 +21,5 @@ test('measurement park gate delegates scan/change/admin actions from its contain
   const button={dataset:{parkGateAction:action,projectId},};
   listeners.click({target:{closest:selector=>selector==='[data-park-gate-action]'?button:null}});
  }
- assert.deepEqual(JSON.parse(JSON.stringify(calls)),[['scan',{returnTo:'measure'}],['admin'],['scan',{projectId:8,returnTo:'measure'}]]);
+  assert.deepEqual(JSON.parse(JSON.stringify(calls)),[['scan',{returnTo:'measure'}],['scan',{projectId:8,returnTo:'measure'}]]);
 });

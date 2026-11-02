@@ -21,6 +21,13 @@ test('composition resolves classes and NDVI helpers after startup',()=>{
  f.state.tiers=()=>({count:9});f.state.renderer=()=>{};const sens={vegetationView:true};f.bound.standard.waitVegetation(sens,30);
  assert.equal(f.bound.wait.sens,sens);assert.equal(f.bound.wait.options.attempts,30);assert.equal(f.bound.wait.options.tiers,f.state.tiers);assert.equal(f.bound.wait.options.render,f.state.renderer);
 });
+
+test('verified map follows the opened live project even when the grid selector is stale',()=>{
+ const f=fixture();f.window.DG_LIVE_MAP_PROJECTS={activeProjectId:()=>33};
+ assert.equal(f.bound.sources.readProjectId(),33);
+ f.window.DG_LIVE_MAP_PROJECTS={activeProjectId:()=>0};
+ assert.equal(f.bound.sources.readProjectId(),7,'ordinary grid-only work keeps the established project fallback');
+});
 test('composition preserves undefined and explicitly null vegetation palette behavior',()=>{
  const f=fixture();assert.equal(f.bound.standard.getVegetationColors().dense,'#166534');assert.equal(f.bound.verified.getVegetationColors(),null);
  f.state.colors=null;assert.equal(f.bound.standard.getVegetationColors(),null);f.state.colors={dense:'custom'};assert.equal(f.bound.standard.getVegetationColors(),f.state.colors);

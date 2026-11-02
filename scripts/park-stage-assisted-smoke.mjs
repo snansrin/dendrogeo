@@ -60,11 +60,12 @@ try{for(const width of [360,390,430]){
  assert.equal(saved.writes,1);assert.match(saved.name,/Köprüler arası etap/);assert.equal(saved.hint,false);assert.equal(saved.panel,false);
  for(const anchor of preview.anchors)assert.ok(saved.geometry.flat().some(p=>Math.hypot(p[0]-anchor.point[0],p[1]-anchor.point[1])<1e-9),'saved curve retains every user control');
  for(const p of saved.geometry.flat())assert.ok(p[0]>=39-1e-10&&p[0]<=39.01+1e-10&&p[1]>=32-1e-10&&p[1]<=32.02+1e-10);
- // Edit only the two recovered caps. Inserting and dragging a numbered point
+ // Edit the exact persisted boundary vertices. Inserting and dragging a numbered point
  // must create a new stage identity, leaving the original and parent untouched.
  await summary.click();assert.equal(await summary.textContent(),'🧩 Etaplar');assert.equal(await host.locator('[data-stage-action="apply"]').textContent(),'Seçili etapta çalış');
  const original=await page.evaluate(()=>JSON.stringify(__stageFixture.rows[0]));
  await host.locator('[data-stage-action="revise"]').click();await page.waitForFunction(()=>!document.querySelector('[data-cut-action="save"]').disabled);
+ assert.deepEqual(await page.evaluate(()=>Object.values(map._layers).filter(layer=>layer.options?.icon?.options?.className?.includes('dg-stage-reference')).map(layer=>{const p=layer.getLatLng();return[p.lat,p.lng];})),await page.evaluate(()=>[...__stageFixture.rows[0].geom_json.outer,...(__stageFixture.rows[0].geom_json.inner||[])].flatMap(ring=>ring.slice(0,-1))),'saved vertices must return exactly, without reconstructing caps');
  assert.equal(await host.locator('[data-stage-action="draw"]').count(),0);assert.equal(await host.locator('[data-stage-action="suggest"]').count(),0);
  // Leaflet's logical projection can reach its target before the SVG zoom
  // transition finishes. Click the stable, painted segment, not a future pixel.

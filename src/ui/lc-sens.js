@@ -534,7 +534,7 @@ function dgSensExportGeoJson(){
 function dgSensExportPng(){
  const grid=typeof DG_GRID_SESSION!=="undefined"&&DG_GRID_SESSION.getCells().length>0;
  const points=[...(typeof LAST_WP_ROWS!=="undefined"?LAST_WP_ROWS:[]),...(typeof WP!=="undefined"?WP:[])];
- const pid=Number(document.getElementById("gridProject")?.value);
+ const pid=window.DG_LIVE_MAP_PROJECTS?.activeProjectId?.()||Number(document.getElementById("gridProject")?.value);
  const waypoints=[...new Map(points.filter(w=>Number.isFinite(Number(w.lat))&&Number.isFinite(Number(w.lon))&&(!w.project_id||Number(w.project_id)===pid)).map(w=>[String(w.project_id||pid)+":"+String(w.wp_id??w.id),w])).values()];
  const exporter=window.DG_RENDER_VERIFIED_SURFACE_MAP_EXPORT;
  if(!exporter)return;
