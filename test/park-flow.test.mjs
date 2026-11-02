@@ -352,11 +352,12 @@ describe('ölçüm kapısı: park algılanmadan ölçüm yok', () => {
     assert.equal(ins.rows.carbon_kg, 123.4);
   });
 
-  test('⭐ ölçüm sekmesi açılınca parksız proje doğrudan algılamaya yönlendirilir', () => {
+  test('⭐ ölçüm sekmesi parksız projede kalır; park algılama açık kullanıcı eylemi ister', () => {
     el('mProject').value = '2';
     W.reset();
     run('dgParkGate(true)');
-    assert.ok(GOES.includes('map'), 'park algılama ekranına gitmeli: ' + JSON.stringify(GOES));
+    assert.ok(!GOES.includes('map'), 'sekme açılışı tarama başlatmamalı: ' + JSON.stringify(GOES));
+    assert.equal(el('saveBtn').disabled,true,'park bağı olmadan kayıt açılamaz');
     assert.equal(el('parkGate').className, 'alert err');
   });
 

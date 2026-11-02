@@ -171,9 +171,12 @@ function dgProjectCard(p,isShared){
 async function loadProjects(){const _y=(typeof dgScrollKeep==="function"?dgScrollKeep():null);try{return await loadProjects__scroll.apply(this,arguments);}finally{if(typeof dgScrollRestore==="function")dgScrollRestore(_y);}}
 async function loadProjects__scroll(){
  if(!USER)return;
+ const userId=USER.id;
  await window.DG_LOAD_MEASUREMENT_PROJECT_DIRECTORY.load({
-  fetchOwned:()=>window.DG_OWNED_MEASUREMENT_PROJECTS.fetch({client:sb,userId:USER.id,onRelationError:dgParkSchemaMissing}),
-  fetchShared:owned=>window.DG_SHARED_MEASUREMENT_PROJECTS.fetch({client:sb,userId:USER.id,ownedProjects:owned,listMyParks:typeof dgMyParks==="function"?dgMyParks:undefined}),
+  scope:userId,isCurrent:()=>USER?.id===userId,
+  fetchOwned:()=>window.DG_OWNED_MEASUREMENT_PROJECTS.fetch({client:sb,userId,onRelationError:dgParkSchemaMissing}),
+  fetchShared:owned=>window.DG_SHARED_MEASUREMENT_PROJECTS.fetch({client:sb,userId,ownedProjects:owned}),
+  onError:()=>toast(_tms("Proje listesi yenilenemedi. Bağlantınızı kontrol edip Projeler ekranını yeniden açın."),"err"),
   merge:(owned,shared)=>window.DG_MERGE_MEASUREMENT_PROJECTS.merge(owned,shared),
   onState:state=>{PROJ_LIST=state.projects;},
   render:projects=>window.DG_MEASUREMENT_PROJECT_DIRECTORY_UI.render({projects,element:$,escape:esc,optionLabel:dgProjectOptionLabel,restore:dgProjectRestore,renderCard:dgProjectCard,editing:EDIT_PROJ,actions:{leave:id=>dgParkLeaveProject(id),openMeasure:dgProjectOpenMeasure,publish:id=>window.dgUserPubOpen?.(id),startParkScan:id=>startParkScan({projectId:id,returnTo:"projects"}),edit:editProject,delete:deleteProject}}),

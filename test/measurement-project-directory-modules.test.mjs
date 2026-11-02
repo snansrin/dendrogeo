@@ -26,6 +26,7 @@ test('owned project adapter retains embedded park read and schema fallback',asyn
 test('shared project adapter scopes collaborator parks and supplies missing park embeds',async()=>{
   const{window}=setup(),queries=[];
   const fixtures={
+    v_my_parks:[{id:12,role:'collaborator',name:'Owned Park'},{id:14,role:'collaborator',name:'Shared Park',city:'Bolu'},{id:15,role:'owner'}],
     park_collaborators:[{park_id:14,user_id:'member',added_at:'2026-11-01T12:00:00Z'}],
     park_invites:[{park_id:14,email:'member@example.test',status:'Kabul',invited_by:'owner-14',responded_at:'2026-11-01T12:00:00Z'}],
     projects:[{id:10,owner:'owner-14',park_id:14,name:'Ülkü Spor Tesisi - Ülkü'},
@@ -34,6 +35,7 @@ test('shared project adapter scopes collaborator parks and supplies missing park
   };
   const client={auth:{getUser:async()=>({data:{user:{id:'member',email:'member@example.test',email_confirmed_at:'2026-10-01T00:00:00Z'}}})},from(table){
     const filters=[];return{
+      then(resolve){resolve({data:fixtures[table],error:null});},
       select(columns){queries.push([table,'select',columns]);return this;},
       eq(field,value){filters.push(row=>row[field]===value);return this;},
       in(field,ids){queries.push([table,field,ids]);return{data:fixtures[table].filter(row=>ids.includes(row[field])&&filters.every(check=>check(row))),error:null};}
@@ -45,13 +47,13 @@ test('shared project adapter scopes collaborator parks and supplies missing park
   assert.ok(!rows.some(row=>row.id===8),'same display name is not proof of project ownership');
   assert.ok(queries.some(call=>call[0]==='park_collaborators'));
   assert.ok(queries.some(call=>call[0]==='park_invites'));
-  assert.equal(JSON.stringify(await window.DG_SHARED_MEASUREMENT_PROJECTS.fetch({client,userId:'member',ownedProjects:[],listMyParks:async()=>{throw Error('offline');}})),"[]");
+  assert.equal((await window.DG_SHARED_MEASUREMENT_PROJECTS.fetch({client,userId:'member',ownedProjects:[],listMyParks:async()=>[]})).length,1,'a stale invite cache cannot hide current membership');
   // An old accepted invitation cannot resurrect access after leaving/rejoining.
   fixtures.park_collaborators[0].added_at='2026-11-01T14:00:00Z';
   assert.equal((await window.DG_SHARED_MEASUREMENT_PROJECTS.fetch({client,userId:'member',ownedProjects:[],listMyParks:parks})).length,0);
   // Only an authenticated account with a verified address can receive projects.
   client.auth.getUser=async()=>({data:{user:{id:'member',email:'member@example.test'}}});
-  assert.equal((await window.DG_SHARED_MEASUREMENT_PROJECTS.fetch({client,userId:'member',ownedProjects:[],listMyParks:parks})).length,0);
+  await assert.rejects(window.DG_SHARED_MEASUREMENT_PROJECTS.fetch({client,userId:'member',ownedProjects:[],listMyParks:parks}),/oturum doğrulanamadı/);
 });
 
 test('domain merge keeps owner-first order without mutating either collection',()=>{

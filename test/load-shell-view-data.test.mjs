@@ -37,3 +37,9 @@ test('shell delegates startup and selected-view data to the application module',
  assert.match(shell,/_dgShellViewData\.load\(v\)/);
  assert.match(shell,/if\(window\.DG_SHELL_VIEW_DATA\)[\s\S]*?await startup\.start\(\)/);
 });
+
+test('project directory entry refreshes membership; navigation retains its active project',async()=>{
+ const events=[],loader=create(events);
+ await loader.load('projects');await loader.load('measure');await loader.load('nav');
+ assert.deepEqual(events,['projects','waypoints']);
+});

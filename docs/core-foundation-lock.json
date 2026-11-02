@@ -13123,7 +13123,9 @@
         "npm run check:phone",
         "GitHub Actions Chromium/WebKit and SQL migration checks before merge"
       ],
-      "added_protected_files": ["src/adapters/parks/live-map-project-account-store.js"],
+      "added_protected_files": [
+        "src/adapters/parks/live-map-project-account-store.js"
+      ],
       "files": [
         {
           "path": "index.html",
@@ -13219,6 +13221,79 @@
           "path": "sw.js",
           "previous_sha256": "b3f706fb76c3bdb930bd21fee3c669199da53d819b3e3485d483af5216151d6f",
           "sha256": "81202b33dfaf1f94fbb8299fcc0ebc2ac70467593f794fa0293123fa237a88a1"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: Explicit user-requested shared-project and New Measurement regression repair after PR #583. Only directory reads, scoped latest-request publication, selector preservation, view-entry refresh and automatic scan routing change. Fresh v_my_parks replaces stale invitation-panel cache; failed reads remain errors. Existing verified-email, membership epoch and invitation-owner restrictions are unchanged. Scan remains an explicit gate-button action. Deploy cache r446. No SQL, RLS, locks, records, scientific formulas, species/density, surface GIS, map geometry, navigation or themes changed.",
+      "validation": [
+        "node --test test/project-directory-recovery.test.mjs test/measurement-project-directory-modules.test.mjs test/measurement-park-gate-application.test.mjs test/load-shell-view-data.test.mjs",
+        "npm run check",
+        "Chromium and WebKit projects workspace including 360/390/430 px",
+        "CI source, mobile and WebKit required before merge"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "007c83b2a82cd7accf51ac571299ce1afecb4027404e45a6589fdfd469500a45",
+          "sha256": "63039fa883b9927c6ab343f408f84b8399de88805bf8a48b954007cf1d6128c1"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "81202b33dfaf1f94fbb8299fcc0ebc2ac70467593f794fa0293123fa237a88a1",
+          "sha256": "c0b058e9615d07a761ab96bc6be35ec8f0e1bdca24627f6cb667e17bdd2a274b"
+        },
+        {
+          "path": "src/adapters/trees/fetch-owned-measurement-projects.js",
+          "previous_sha256": "1e67167d735941a8d2d1829f638b1258ef88d97a3cd78ad55f5b1792637da220",
+          "sha256": "ef7aa79d57b712daec6b34195fbfd00c7c5e23f9984382b54dc6f25c991bf53d"
+        },
+        {
+          "path": "src/adapters/trees/fetch-shared-measurement-projects.js",
+          "previous_sha256": "6db51fe67fd202c057e1150ec6494c5b6186e3d73ba151582691de3481a332bf",
+          "sha256": "c43ddc8efc27beaf485880f1bd69a389e9fcedc551ff6c063280e8891dc33ef0"
+        },
+        {
+          "path": "src/application/parks/evaluate-measurement-park-gate.js",
+          "previous_sha256": "9067413d70dcae8de655690e4b842a0ad12364deb556654baa2c4d8d8aa17dab",
+          "sha256": "9cc5e236a69a0c3b9be60a140aacbd37eb87cc853e36ec1de1bd97a8c0570129"
+        },
+        {
+          "path": "src/application/trees/load-measurement-project-directory.js",
+          "previous_sha256": "e3843b41440fcd0fc135f88a4ce4de9bf39e0137dc406bc6709f1f70cfe9fb9b",
+          "sha256": "a972535e410848896e3d26309e0092c47fd73917710f3dff9835dcd7acd98882"
+        },
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "43c26ac9ebb2c61771a6963dc2452534ba9451974d4c619e67bb22b1ae8dbbd1",
+          "sha256": "eb33f098cdbc4cf4717cf00c9bf9635b957019bc2ab2718c3c5c270ae0179522"
+        },
+        {
+          "path": "src/ui/render-measurement-project-directory.js",
+          "previous_sha256": "741c5a0f72daaee26b5a2e12db8058bf2ff5dfde27e876f12df5c8d3b4e31476",
+          "sha256": "65f1cb76305d9ec266f053bba29a971707587c8c91d5ff008f0399df207c7ff7"
+        },
+        {
+          "path": "src/ui/shell-view-effects.js",
+          "previous_sha256": "34a24824de2600d0d45c7703554e423b2688337ebb2a1e1ff131274987006350",
+          "sha256": "7d55d7fd638a9a7aa8de514d93b620aea6fa9891cd5587a6555b925d7e9e3c63"
+        },
+        {
+          "path": "test/measurement-park-gate-application.test.mjs",
+          "previous_sha256": "c80862b0b90ee02b6a961517f96d4ec7eca7eef17eec35256b7137657f46d3ed",
+          "sha256": "5c560ba399f5bc18330635e6d26a367edc80a18089963b51a0ed5d294a1ff548"
+        },
+        {
+          "path": "test/park-flow.test.mjs",
+          "previous_sha256": "8fb3ce03521bbba0d6d1e5592faa87a95b5ef929a09ba27c81327ec5dc412ad3",
+          "sha256": "69980fb5b1316464b9d368b1b3995e0a48a64570f075be586a192c6f676c85db"
+        },
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "791909a00ebb0ec8445106dae45d20fcda2ddd505f8749668a5cac93c757d21d",
+          "sha256": "8e7da0668c3d705732b81de54a659500339aadaadd618385ef9034a576dbb2fa"
         }
       ]
     }

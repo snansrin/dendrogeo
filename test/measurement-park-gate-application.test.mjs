@@ -26,9 +26,9 @@ test('a project without a park is locked and offers admin-specific guidance stat
   assert.equal(result.redirect,null);
 });
 
-test('missing project is locked and redirects only when the caller allows it',()=>{
-  const evaluate=gate({getProject:()=>null});
-  assert.equal(JSON.stringify(evaluate(true)),JSON.stringify({status:'project-required',allowed:false,project:null,redirect:{returnTo:'measure'}}));
+test('missing project blocks saving without starting a park scan on view entry',()=>{
+  const evaluate=gate({getProject:()=>null,redirectAlreadyUsed:()=>{throw Error('must not consume redirect memory');}});
+  assert.equal(JSON.stringify(evaluate(true)),JSON.stringify({status:'project-required',allowed:false,project:null,redirect:null}));
   assert.equal(evaluate(false).redirect,null);
 });
 

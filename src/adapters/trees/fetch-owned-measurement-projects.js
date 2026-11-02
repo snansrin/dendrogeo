@@ -7,6 +7,7 @@ window.DG_OWNED_MEASUREMENT_PROJECTS={
     if(error){
       onRelationError("projects↔parks: "+error.message);
       const fallback=await client.from("projects").select("*").eq("owner",userId);
+      if(fallback.error)throw fallback.error;
       data=fallback.data||[];
     }
     return data||[];

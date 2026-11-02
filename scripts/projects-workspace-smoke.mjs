@@ -13,7 +13,11 @@ try{for(const width of [360,390,430,1280]){
  await isolateAccount(page);await page.goto(server.url,{waitUntil:'domcontentloaded'});
  await page.waitForFunction(()=>document.getElementById('dgStartupScreen').hidden);
  await page.locator('#side [data-dg-view="projects"]').click();
+ await page.evaluate(()=>window._dgShellViewData.load('projects'));
  await page.evaluate(()=>{
+  // This test owns static cards and delegated callbacks. Membership refresh
+  // uses the real loader in project-directory-recovery-smoke.mjs instead.
+  window._dgShellViewData={load:async()=>{}};
   const projects=[{id:1,name:'Göksu Parkı · Ağaç envanteri 2026',park_id:25,parks:{name:'Göksu Parkı',area_m2:501000},city:'Ankara',country:'Türkiye',created_at:'2026-10-15'},
    {id:2,name:'Uzun proje adı ile ortak saha çalışması',shared:true,park_id:36,parks:{name:'Gençlik Parkı'},city:'Ankara'}];
   window.__projectActions=[];
