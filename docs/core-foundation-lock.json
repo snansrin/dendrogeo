@@ -14060,6 +14060,23 @@
           "sha256": "d7908b70188e528a1fb318d5b5a1818efcb1edbeb1bdc92f223ce1955e6ad4ea"
         }
       ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: stabilize the existing WebKit stage-footer regression by capturing save-button and parent-panel rectangles in one synchronous browser task instead of separate protocol calls that can cross scroll/layout frames. Preserve the exact containment inequality, all geometry/data immutability assertions and real pointer interactions; add measured rectangles to failure diagnostics. No production stage, GIS, theme, data, scientific or database code changes in this follow-up.",
+      "validation": [
+        "Reproduced regressions fail before the fix and pass afterwards; selected-project pagination and measured-state retention; target measurement identity guard; account-switch report isolation",
+        "npm run check",
+        "Chromium/WebKit/mobile regression coverage and read-only live public-page checks"
+      ],
+      "files": [
+        {
+          "path": "scripts/park-stage-assisted-smoke.mjs",
+          "previous_sha256": "72e3c93b6d6a44ea56f2843bbd8bfec113dea91c5be5fd966779ce11f723004b",
+          "sha256": "c050375bd9acfb70fc28e19d0bbdbcb8a15c3a9ae233c1c75d3c2e324ccc0f15"
+        }
+      ]
     }
   ]
 }
