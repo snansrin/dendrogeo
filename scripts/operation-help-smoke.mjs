@@ -45,7 +45,8 @@ try{for(const width of [360,390,430,1280]){
  await page.locator('[data-dg-help-close]').click();
  const green=page.locator('#chkGreenOnly'),greenHelp=page.locator('label[for="gridClearance"] .dg-operation-help');const checked=await green.isChecked();
  await greenHelp.click();assert.equal(await green.isChecked(),checked);assert.equal(await page.evaluate(()=>__helpState()===__helpBefore),true);await page.keyboard.press('Escape');
- await auto.click();assert.equal(await page.evaluate(()=>__helpCalls),1,'original action must still fire exactly once');
+ await page.locator('#surfaceMenuBar details[data-menu-order="35"] > summary').click();
+ await auto.click();assert.equal(await page.evaluate(()=>__helpCalls),1,'original point action in its separate menu must still fire exactly once');
  await page.evaluate(()=>{__helpRender();DG_OPERATION_HELP.scan();DG_OPERATION_HELP.scan();});
  await page.waitForFunction(()=>document.querySelector('#gridSummary [data-dg-help-topic="gridResults"]'));
  assert.equal(await page.locator('#gridSummary .dg-operation-help').count(),1,'one contextual guide per group, including after rerenders');
