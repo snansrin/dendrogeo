@@ -13996,6 +13996,33 @@
           "sha256": "7d737942d484222035af96afe81f054ea0f38ebec45a04b845bfb88c8cc4c435"
         }
       ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: park-scoped export UI: show waypoint parks with the same flat park/count labels as full inventory; export all authorized projects in the selected park, retaining per-project waypoint identities. Scope Standard CSV, GeoJSON and QGIS download/preview to an explicitly selected authorized park using existing serializers. Recheck session and canonical participant access at export time. No schema, RLS, data, engines, scientific formulas, fonts or theme changes.",
+      "validation": [
+        "Focused export/project-directory authorization regression tests, including unrelated same-park project exclusion and owned-project fallback",
+        "npm run check",
+        "PR CI Chromium/WebKit/mobile coverage"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "aa804b276a1b78d13949ef6e5b8d0c039f454e1fb1d9f011a287c2c4aadb7e4f",
+          "sha256": "ac0461afb4d26ba900240e9ca54bbf9e8f59eb94db8ab999059f3c9176c76b7b"
+        },
+        {
+          "path": "src/ui/export-view-actions.js",
+          "previous_sha256": "7d737942d484222035af96afe81f054ea0f38ebec45a04b845bfb88c8cc4c435",
+          "sha256": "64ae05ce7b50c0c6507d2ee4090621c8d77a6167f55d45f5d9ef0c6b5226201e"
+        },
+        {
+          "path": "src/ui/shared-park-inventory-export.js",
+          "previous_sha256": "62f3002588ffd05be8ea58331a74a761735a2e11e0c86a782b6acd8382b44f1c",
+          "sha256": "14301bb9ac6f8df28bc77cc1389fdb0b9f0e9a996498077cb2f886f866e768b6"
+        }
+      ]
     }
   ]
 }
