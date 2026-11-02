@@ -13737,6 +13737,28 @@
           "sha256": "acd79d2367074b67ba8544541fbb4f1f59685c7b32313164f401186a6fd3b090"
         }
       ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: restrict Dışa Aktar measurement-point CSV project choices and reads to projects owned by the signed-in user. Recheck ownership before reading and export only the selected project. No scientific calculations, allometry, species/density data, domain/GIS/raster engines, grid behavior, schema/RLS/project locks, measurements, theme/fonts/CSS or production data changed.",
+      "validation": [
+        "Focused owner-only waypoint CSV export and project access tests",
+        "npm run check",
+        "PR CI browser coverage"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "853228b7d5667351f0473bf21d816e6efa4efcd23792d0e0d1914a1f0a310890",
+          "sha256": "13c8e2126b51fc99a294374a8998245cfe721032c17b363ad95e8398af7d2dc6"
+        },
+        {
+          "path": "src/ui/shared-park-inventory-export.js",
+          "previous_sha256": "acd79d2367074b67ba8544541fbb4f1f59685c7b32313164f401186a6fd3b090",
+          "sha256": "9dc42646345df90d9f7a16c082113216ff693a3923024282c09725a0c29c4abc"
+        }
+      ]
     }
   ]
 }
