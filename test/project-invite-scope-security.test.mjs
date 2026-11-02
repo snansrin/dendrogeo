@@ -1,5 +1,5 @@
 import test from'node:test';import assert from'node:assert/strict';import{readFileSync}from'node:fs';import{PGlite}from'@electric-sql/pglite';
-const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8'),baseline=JSON.parse(read('test/fixtures/security/park-invite-baseline.json')),migration=read('supabase/migrations/20261025170621_project_invite_scope_security.sql'),waypointReadMigration=read('supabase/migrations/20261102173000_scope_waypoint_reads_to_authorized_projects.sql');
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8'),baseline=JSON.parse(read('test/fixtures/security/park-invite-baseline.json')),migration=read('supabase/migrations/20261025170621_project_invite_scope_security.sql'),waypointReadMigration=read('supabase/migrations/20261102170025_scope_waypoint_reads_to_authorized_projects.sql');
 const A='11111111-1111-4111-8111-111111111111',B='22222222-2222-4222-8222-222222222222',C='33333333-3333-4333-8333-333333333333',D='44444444-4444-4444-8444-444444444444',ADMIN='99999999-9999-4999-8999-999999999999';
 const email=id=>id.slice(0,1)+'@example.invalid';
 async function fixture(){const db=new PGlite();await db.exec(`create role authenticated;create role anon;create schema auth;create schema private;

@@ -349,6 +349,16 @@ olarak doğrulandı. Danışmanda yeni bulgu oluşmadı; Logs Query, üretim ver
 reset veya toplu migration push çalıştırılmadı. Diğer sahipler için platformun
 30 Ekim geçişi ve tabloya özel açık yetki incelemesi geçerlidir.
 
+## 2 Kasım 2026 — waypoint okuma kapsamı
+
+`20261102170025_scope_waypoint_reads_to_authorized_projects` üretime uygulandı.
+Önce ve sonra yalnız `pg_policies`, `information_schema` ve migration kataloğu
+incelendi. `wp_select` artık kendi satırı, yönetici veya mevcut kabul edilmiş
+erişimi olan proje kapsamında çalışır. `wp_insert`, `wp_update` ve `wp_delete`
+politikalarının tanımları birebir aynı kaldı; RLS açık ve waypoint satırlarına
+erişilmedi. PGlite policy testi ve PR CI'daki iki yerel Supabase reseti geçti.
+Supabase Logs Query çalıştırılmadı.
+
 ## 21 Ekim 2026 — sıfırdan kurulum denetimi
 
 `node scripts/verify-supabase-replay.mjs` 31 migration'ı boş PGlite üzerinde

@@ -13847,6 +13847,33 @@
           "sha256": "bedfbbeaf2b75bc270f2149f5cace68d035827dbb8a2f5ef14090d31d56eead4"
         }
       ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: align the committed waypoint-read migration filename and test allowlists with the migration version recorded by Supabase after the already tested SELECT-only RLS change. No database behavior, waypoint write policy, or data row changes in this follow-up. No scientific calculations, allometry, species/density data, GIS/raster engines, measurements, project locks, theme/fonts/CSS or production data changed.",
+      "validation": [
+        "Waypoint RLS migration test and exact production write-policy snapshot",
+        "npm run check:core-foundation",
+        "Full PR CI was green before this migration-history-only alignment"
+      ],
+      "files": [
+        {
+          "path": "test/dbh-qa.test.mjs",
+          "previous_sha256": "08503a691a10f3c30dd68629ac3f0e389faabee3f3c2fedb770652d4c62dd6b5",
+          "sha256": "bc702e9a25550762b799d8ff2aa5ba4320b5e3939b6d51f35b16d1d57510994a"
+        },
+        {
+          "path": "test/form-qa.test.mjs",
+          "previous_sha256": "1c0508432f5930d1be6c9262e720b4178929dc0bbb58c46281d3231ba937be44",
+          "sha256": "e51e6c86d154b18b91e6036e4e795def01fd9b642ca744a44f51172d9d0d0ce4"
+        },
+        {
+          "path": "test/project-invite-scope-security.test.mjs",
+          "previous_sha256": "bedfbbeaf2b75bc270f2149f5cace68d035827dbb8a2f5ef14090d31d56eead4",
+          "sha256": "d0c53f4dda8b7ab4e431bec22ed6d7112d85faaffb31e09ee1ce775983b0da89"
+        }
+      ]
     }
   ]
 }
