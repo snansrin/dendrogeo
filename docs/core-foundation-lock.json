@@ -13621,6 +13621,100 @@
           "sha256": "ffe07434aa0c2d8831803b4740d585fe0f780e2a7eda51001d0f6f3ef7f6a86e"
         }
       ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: add project-scoped measurement-point CSV export to the existing File menu; parse Google Maps/My Maps and common GIS waypoint CSV headers, quoting, comma/semicolon/tab delimiters and WKT coordinates; re-read the selected project before import, assign collision-free IDs when absent, and protect measurement-backed waypoint coordinates. No scientific calculations, allometry, species/density data, domain/GIS/raster engines, grid behavior, schema/RLS/project locks, measurements, theme/fonts/CSS or production data changed. Release r451 and generated asset URLs only.",
+      "validation": [
+        "Focused waypoint import/export, operation-help and project-scope tests",
+        "npm run check",
+        "Chromium/WebKit and 360/390/430 px phone validation"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "33122f68fe11c289c8562c9374c0e835ad5444627abced7fe968217ababc6d07",
+          "sha256": "5cdfd007aa737147a679862f0b076058a61a0bf354303529fc22e9c2c68a28c6"
+        },
+        {
+          "path": "src/application/parks/upload-waypoint-csv.js",
+          "previous_sha256": "0c56e874e427181a42212b8ce6bacdd57ef945571a910e5e6d69448bb90c8fdb",
+          "sha256": "c9277118b4d140cdadc997f49dd75622a5a6c247e831b1f035e067e1caf806d6"
+        },
+        {
+          "path": "src/domain/parks/park-export-formats.js",
+          "previous_sha256": "b7d23ed438f5dbc78210b0f644f87129553579be8c3f85920a33518efabfb940",
+          "sha256": "2ee3a9271698fa07128f45a619144561f571e8ed5d15c2d54024d02f259578a7"
+        },
+        {
+          "path": "src/domain/parks/parse-waypoint-csv.js",
+          "previous_sha256": "f381b66ecbf16d45d99aef25b7266da04df638328dbf618a1d8e1c2f9af04383",
+          "sha256": "4e2c793070ca853be30ca892c009c2e3f5ea749a472a9e599033a54cbc06b021"
+        },
+        {
+          "path": "src/domain/parks/validate-waypoint-csv-row.js",
+          "previous_sha256": "7ec9ec705b4a9e4f4d325cc969ef6561b97e34ec617fccff724d0e3aecefbe2b",
+          "sha256": "61b7b413c18f8551a916a7de762dc1fb250ff9d06ef8f641eb0fb3531cf4f8cb"
+        },
+        {
+          "path": "src/services/map.js",
+          "previous_sha256": "8fd455af6cc8e99863a5f890c049425bf46a631e0c47b74f3de6d4a63b39b441",
+          "sha256": "0a0bd59c0d3fe139f1147209777ac6074a11e9af4055bf7289380c49fb61518f"
+        },
+        {
+          "path": "src/ui/lc-sens.js",
+          "previous_sha256": "7f1597afddd27647b0f843ce0589a06e51796464e00b80c8050b402df85884d9",
+          "sha256": "7dd8407d783eb65bb1562a6e987ce4c97b14427e835ad08c98ef3adb82be2321"
+        },
+        {
+          "path": "src/ui/park-export.js",
+          "previous_sha256": "90c0170602eaa775218971bcca07ede83777faf29fb7d4d03acfe8891ee31443",
+          "sha256": "0680ea680067e4c84d7b5d007859cca868da3c502224e1ed2b13f29fcbd597b9"
+        },
+        {
+          "path": "src/ui/render-surface-editor-menus.js",
+          "previous_sha256": "645616568420aef2424274577c0afae88ed87df42b83131d9e4d73b64dd834ec",
+          "sha256": "04700ae9bca6feecc2bd4f9c55d6906151928e9694d561da27f04cbe9053c8ca"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "3864f215699fa00f8a2261509fd707605febf80759c5b85e151f3e36bf3e4776",
+          "sha256": "2cf67a5b0561c7586b6fb9ffd4ffadd726b6a2309b246af302074c890c1a2abf"
+        },
+        {
+          "path": "test/park-export-formats.test.mjs",
+          "previous_sha256": "6baf8917d000f10b17c56320e45f7f57bd1af782cd83736fd19d38149d00f7a1",
+          "sha256": "4c652ffee0d755c588a222da7d7113a8a799466bd48c8b56b8af0d03de246f93"
+        },
+        {
+          "path": "test/waypoint-csv-upload-modules.test.mjs",
+          "previous_sha256": "90f50a8d3436c6b0524eebc797f773575e0b4e6bce563a32e62778c78830343b",
+          "sha256": "e5561f2d954a0206368b177913ae29fa8efbe114ef272e29a9c26baeab996bbe"
+        },
+        {
+          "path": "test/waypoint-field.test.mjs",
+          "previous_sha256": "af337bd24ab262ad1cc2c9b6974a4629fc571ca7148b460b89369263031f3d08",
+          "sha256": "91c2cb1a32d40eacd2c0d73fc73beb2f8229739d1f2d391c2946507aa6e59afa"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: add project-scoped measurement-point CSV export to the existing File menu; parse Google Maps/My Maps and common GIS waypoint CSV headers, quoting, comma/semicolon/tab delimiters and WKT coordinates; re-read the selected project before import, assign collision-free IDs when absent, and protect measurement-backed waypoint coordinates. No scientific calculations, allometry, species/density data, domain/GIS/raster engines, grid behavior, schema/RLS/project locks, measurements, theme/fonts/CSS or production data changed. Release r451 and generated asset URLs only.",
+      "validation": [
+        "Focused waypoint import/export, operation-help and project-scope tests",
+        "npm run check",
+        "Chromium/WebKit and 360/390/430 px phone validation"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "5cdfd007aa737147a679862f0b076058a61a0bf354303529fc22e9c2c68a28c6",
+          "sha256": "fd0a9b3d1f937dc7f857c22ecca4b4c6115f4e0dd2399a92ff67bc3a8d9e162f"
+        }
+      ]
     }
   ]
 }

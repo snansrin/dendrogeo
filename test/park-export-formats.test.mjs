@@ -27,7 +27,7 @@ test('waypoint CSV retains its header, order, and visited flag encoding',()=>{
  assert.equal(formats.waypointsCSV([
   {wp_id:1,lat:40.1,lon:32.2,visited:true},
   {wp_id:2,lat:40.3,lon:32.4,visited:false}
- ]),'wp_id,lat,lon,visited\n1,40.1,32.2,1\n2,40.3,32.4,0\n');
+ ]),'\uFEFFwp_id,lat,lon,visited\n"1","40.1","32.2","1"\n"2","40.3","32.4","0"\n');
 });
 
 test('format module loads before park export and is present in the service-worker cache',()=>{

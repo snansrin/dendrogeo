@@ -22,9 +22,8 @@
   };
  }
  function waypointsCSV(rows){
-  let csv="wp_id,lat,lon,visited\n";
-  rows.forEach(r=>{csv+=r.wp_id+","+r.lat+","+r.lon+","+(r.visited?1:0)+"\n";});
-  return csv;
+  const cell=value=>'"'+String(value??"").replace(/"/g,'""')+'"';
+  return "\uFEFFwp_id,lat,lon,visited\n"+rows.map(r=>[r.wp_id,r.lat,r.lon,r.visited?1:0].map(cell).join(",")+"\n").join("");
  }
  root.DG_PARK_EXPORT_FORMATS=Object.freeze({gridGeoJSON,waypointsCSV});
 })(window);

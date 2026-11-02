@@ -178,7 +178,7 @@ function dgSensBindEditorEvents(container){
  const module=window.DG_BIND_SURFACE_EDITOR_EVENTS;if(!module)return;
  module.bind(container,{
   menu:dgSensMenuToggle,rememberSection:dgSensRememberSection,
-  modePark:dgSensModePark,modeAnalysis:dgSensModeAnalysis,exportPng:dgSensExportPng,exportGeoJson:dgSensExportGeoJson,exportCsv:dgSensExportCsv,reset:dgSensReset,
+  modePark:dgSensModePark,modeAnalysis:dgSensModeAnalysis,exportPng:dgSensExportPng,exportGeoJson:dgSensExportGeoJson,exportCsv:dgSensExportCsv,exportWaypointsCsv:()=>window.downloadWaypointsCSV?.(),reset:dgSensReset,
   base:element=>dgSensBase(element.value),newPark:dgChooseNewPark,rawToggle:()=>dgSensRawView(!DG_SENS.rawView),
   roadWidth:()=>window.DG_PREVIEW_SURFACE_ROAD_WIDTH.update({state:DG_SENS,width:document.getElementById("dgSensRoadWidth")?.value,build:(preview,width)=>window.DG_OSM_ROAD_WIDTH_PREVIEW.build({preview,width,epsg:DG_SENS.epsg,park:DG_SENS.parkGeometry,objects:dgSurfaceObjects,geometry:dgSurfaceFeatureGeometry,clip:dgSurfaceClip,area:dgSurfaceArea,unproject:dgSurfaceUnproject}),render:result=>window.DG_SURFACE_OBJECT_PREVIEW.render({map,leaflet:L,result,colors:DG_SENS_COLORS}),remove:layer=>window.DG_SURFACE_OBJECT_PREVIEW.remove({map,layer}),renderTools:()=>{dgSensRenderPaintTools();dgSensOpenMenu("dgSensBoundaryDetails");},report:message=>toast(_tvs(message),"warn")}),
   drawType:element=>dgSensSetDrawType(element.value),objectApply:dgSensObjectApplyAndAccept,objectCancel:()=>{dgSensObjectCancel();dgSensRenderPaintTools();},objectPick:dgSensObjectPickStart,
