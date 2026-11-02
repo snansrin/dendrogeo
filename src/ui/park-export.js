@@ -71,10 +71,10 @@ function downloadGridGeoJSON(){
 }
 
 function downloadWaypointsCSV(){
-  const rows=
-    LAST_WP_ROWS.length
-      ?LAST_WP_ROWS
-      :WP;
+  const projectId=Number(window.DG_LIVE_MAP_PROJECTS?.activeProjectId?.()||document.getElementById("gridProject")?.value||document.getElementById("nProject")?.value||0);
+  if(!Number.isInteger(projectId)||projectId<=0)return toast("Önce çalışma projesi seçin","warn","📥");
+  const candidates=[typeof LAST_WP_ROWS!=="undefined"?LAST_WP_ROWS:[],typeof WP!=="undefined"?WP:[]];
+  const rows=candidates.map(list=>(list||[]).filter(row=>Number(row.project_id)===projectId)).find(list=>list.length)||[];
 
   if(
     !rows||
@@ -88,7 +88,7 @@ function downloadWaypointsCSV(){
   const csv=window.DG_PARK_EXPORT_FORMATS.waypointsCSV(rows);
 
   downloadBlob(
-    "dendrogeo_wp.csv",
+    "dendrogeo_olcum_noktalari_"+projectId+".csv",
     "text/csv",
     csv
   );

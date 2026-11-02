@@ -111,7 +111,15 @@ async function uploadWpCsv(){
  const uploader=window.DG_UPLOAD_WAYPOINT_CSV,parser=window.DG_PARSE_WAYPOINT_CSV,validator=window.DG_VALIDATE_WAYPOINT_CSV_ROW,command=window.DG_BUILD_WAYPOINT_UPSERT_COMMAND,store=window.DG_UPSERT_PROJECT_WAYPOINT;
  const pid=+$("nProject").value;if(!pid)return toast("Proje seç");
  const f=$("nCsv").files[0];if(!f)return toast("CSV seç");
- if(uploader&&parser&&validator&&command&&store){await uploader.upload({projectId:pid,file:f,owner:USER.id,parse:parser.parse,validate:validator.validate,build:command.build,upsert:input=>store.upsert({client:sb,command:input}),notify:(message,kind)=>toast(message,kind),refresh:loadWaypoints,translate:dgCf});return;}
+ if(uploader&&parser&&validator&&command&&store){
+  try{
+   const reader=window.DG_FETCH_PROJECT_WAYPOINTS;if(!reader?.fetch)throw new Error(dgCf("Mevcut noktalar doğrulanamadı"));
+   const current=await reader.fetch({client:sb,projectId:pid});if(current.error)throw current.error;
+   if(+$('nProject').value!==pid)return toast(dgCf("Proje değişti; CSV yüklenmedi."),"warn");
+   await uploader.upload({projectId:pid,file:f,owner:USER.id,parse:parser.parse,validate:validator.validate,build:command.build,upsert:input=>store.upsert({client:sb,command:input}),notify:(message,kind)=>toast(message,kind),refresh:loadWaypoints,translate:dgCf,existingWaypoints:current.data||[]});
+  }catch(error){toast(dgCf("CSV öncesi mevcut noktalar doğrulanamadı:")+" "+(error?.message||error),"err");}
+  return;
+ }
  let n=0,invalid=0;
  try{
   const lines=(await f.text()).replace(/^\uFEFF/,"").split(/\r?\n/);

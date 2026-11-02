@@ -26,8 +26,8 @@ test('grid controls, requests, backups, maps and measurement actions resolve to 
 });
 test('CSV help distinguishes exported points from grid polygons and the import column order',()=>{
  const download=content.get('pointsCsv').steps.join(' '),upload=content.get('pointUpload').steps.join(' ');
- assert.match(download,/wp_id,lat,lon,visited/);assert.match(download,/Grid karelerini indirmez/);assert.match(download,/X,Y,id/);
- assert.match(upload,/X boylam, Y enlem/);assert.match(upload,/WGS84/);
+ assert.match(download,/wp_id,lat,lon,visited/);assert.match(download,/seçili çalışma projesi/);assert.match(download,/diğer projelerin/);
+ assert.match(upload,/Google Haritalar\/My Maps/);assert.match(upload,/WKT POINT/);assert.match(upload,/virgül, noktalı virgül ve sekme/);
  assert.match(content.get('reference').steps.join(' '),/ölçeklemez/);
  assert.match(content.get('reply').steps.join(' '),/kendiniz ekleyip gönderin/);
 });

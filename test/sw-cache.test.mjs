@@ -21,7 +21,7 @@ const swKaynak = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
 test('new cache revision rotates all client asset caches without caching Supabase auth or REST', () => {
   const revision = swKaynak.match(/^const CACHE_VERSION = 'dendrogeo-sw-v2-r(\d+)';$/m);
   assert.ok(revision, 'worker cache revision must be explicit and numeric');
-  assert.equal(Number(revision[1]), 450, 'ship the separate measurement-point toolbar and accepted workspace archive');
+  assert.equal(Number(revision[1]), 451, 'ship Google Maps point CSV import and project-scoped measurement-point export');
   for (const cache of ['PRECACHE', 'RUNTIME', 'TILE_CACHE', 'API_CACHE', 'IMG_CACHE']) {
     assert.match(swKaynak, new RegExp('const ' + cache + ' = `[^`]*\\$\\{CACHE_VERSION\\}`'));
   }
