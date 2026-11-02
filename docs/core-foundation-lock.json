@@ -13759,6 +13759,28 @@
           "sha256": "9dc42646345df90d9f7a16c082113216ff693a3923024282c09725a0c29c4abc"
         }
       ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: restore Dışa Aktar measurement-point CSV choices and reads for owned projects plus projects authorized by the existing current accepted-collaboration participant scope; recheck that scope before each export. Place the controls in a full-width row within the existing export grid. No scientific calculations, allometry, species/density data, domain/GIS/raster engines, grid behavior, schema/RLS/project locks, measurements, theme/fonts/CSS or production data changed.",
+      "validation": [
+        "Focused shared/owned/revoked waypoint CSV access and export layout tests",
+        "npm run check",
+        "PR CI browser coverage"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "13c8e2126b51fc99a294374a8998245cfe721032c17b363ad95e8398af7d2dc6",
+          "sha256": "853d63f19fefaedc555f9e4e676e3caed0a65fe76bf50c9d83eb33faac6b59e6"
+        },
+        {
+          "path": "src/ui/shared-park-inventory-export.js",
+          "previous_sha256": "9dc42646345df90d9f7a16c082113216ff693a3923024282c09725a0c29c4abc",
+          "sha256": "d6581f293707a39b5f53cf5cee98f8b01394f883feb30a04a1e296a446218c5f"
+        }
+      ]
     }
   ]
 }

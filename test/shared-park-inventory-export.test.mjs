@@ -69,19 +69,24 @@ test('same-park project groups are merged without disclosing unrelated parks',()
  assert.equal(groups.get('park:13').projects.length,1);
 });
 
-test('waypoint CSV project choices contain only the signed-in owner’s projects',()=>{
- const api=app(),projects=[
+test('waypoint CSV project choices include owned and accepted shared projects, not unrelated projects',async()=>{
+ const api=app(),client=scopeClient({projects:[
   {id:25,owner:'sinan',park_id:8,name:'Saha A',parks:{name:'Göksu Parkı'}},
   {id:26,owner:'nagihan',park_id:8,name:'Saha B',parks:{name:'Göksu Parkı'}},
-  {id:30,owner:'sinan',park_id:9,name:'Saha C',parks:{name:'Başkent Parkı'}}
- ];
- const options=api.waypointProjectOptions(projects,'sinan');
+  {id:30,owner:'sinan',park_id:9,name:'Saha C',parks:{name:'Başkent Parkı'}},
+  {id:31,owner:'outsider',park_id:10,name:'İzinsiz',parks:{name:'Özel Park'}}
+ ],memberships:[{park_id:8,user_id:'sinan',added_at:'2026-10-30T10:00:00Z'}],
+ invites:[{park_id:8,invited_by:'nagihan',email:'sinan@example.org',status:'Kabul',responded_at:'2026-10-30T11:00:00Z'}],
+ profiles:[{id:'nagihan',role:'user',active:true}],
+ user:{id:'sinan',email:'sinan@example.org',email_confirmed_at:'2026-10-01T00:00:00Z'}
+ });
+ const eligible=await api.listParticipantProjects(client,{userId:'sinan',role:'user'}),options=api.waypointProjectOptions(eligible);
  assert.deepEqual(Array.from(options,entry=>[entry.project.id,entry.label]),[
-  [30,'Başkent Parkı · Saha C'],[25,'Göksu Parkı · Saha A']
+  [30,'Başkent Parkı · Saha C'],[25,'Göksu Parkı · Saha A'],[26,'Göksu Parkı · Saha B']
  ]);
 });
 
-test('waypoint CSV denies shared-owner projects and reads exactly one project owned by the signed-in user',async()=>{
+test('waypoint CSV rechecks participant access and reads exactly the selected owned or accepted shared project',async()=>{
  const api=app(),client=scopeClient({
   projects:[
    {id:25,owner:'sinan',park_id:8,name:'Saha A',parks:{name:'Göksu Parkı'}},
@@ -92,18 +97,26 @@ test('waypoint CSV denies shared-owner projects and reads exactly one project ow
   profiles:[{id:'nagihan',role:'user',active:true}],
   user:{id:'sinan',email:'sinan@example.org',email_confirmed_at:'2026-10-01T00:00:00Z'}
  });
- await assert.rejects(()=>api.buildWaypointCSV({client,userId:'sinan',role:'user',projectId:'26',
-  fetchWaypoints:{async fetch(){assert.fail('a shared owner project must not be exported here');}},
-  formats:{waypointsCSV(){return'';}}
- }),/erişimin artık yok/);
- const reads=[],result=await api.buildWaypointCSV({client,userId:'sinan',role:'user',projectId:'25',
-  fetchWaypoints:{async fetch(args){reads.push(args.projectId);return{data:[{wp_id:4,lat:39.9,lon:32.8,visited:true}],error:null};}},
+ const reads=[],fetchWaypoints={async fetch(args){reads.push(args.projectId);return{data:[{wp_id:4,lat:39.9,lon:32.8,visited:true}],error:null};}},formats={waypointsCSV(rows){return `rows=${rows.length};wp=${rows[0].wp_id}`;}};
+ const shared=await api.buildWaypointCSV({client,userId:'sinan',role:'user',projectId:'26',fetchWaypoints,formats});
+ assert.equal(shared.project.id,26);
+ const result=await api.buildWaypointCSV({client,userId:'sinan',role:'user',projectId:'25',
+  fetchWaypoints,
   formats:{waypointsCSV(rows){return `rows=${rows.length};wp=${rows[0].wp_id}`;}}
  });
  assert.equal(result.project.id,25);
  assert.equal(result.csv,'rows=1;wp=4');
  assert.equal(result.count,1);
- assert.deepEqual(reads,[25]);
+ assert.deepEqual(reads,[26,25]);
+ await assert.rejects(()=>api.buildWaypointCSV({client,userId:'sinan',role:'user',projectId:'999',fetchWaypoints,formats}),/erişimin artık yok/);
+});
+
+test('waypoint CSV controls occupy a full-width row in the existing export grid',()=>{
+ const source=readFileSync(new URL('../src/ui/shared-park-inventory-export.js',import.meta.url),'utf8');
+ assert.match(source,/find\(card=>card\.querySelector\("h3"\)\?\.textContent\.trim\(\)==="Standart CSV"\)/);
+ assert.match(source,/section\.style\.gridColumn="1 \/ -1"/);
+ assert.doesNotMatch(source,/exportGrid\.append\(card\)/);
+ assert.match(source,/exportBody\.append\(section\)/,'Park · Tam Envanter remains in its own report section');
 });
 
 test('waypoint CSV denies revoked projects and stops when there are no points',async()=>{
