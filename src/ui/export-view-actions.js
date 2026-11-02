@@ -20,7 +20,9 @@
     document.addEventListener("click",event=>{
       const element=event.target?.closest?.("[data-dg-export-action]");if(!element)return;
       const action=element.dataset.dgExportAction,handler=handlers[action];
-      if(handler){if(action!=='close-preview'&&action.endsWith('-preview'))element.focus?.({preventScroll:true});handler();}
+      if(handler){
+        if(action!=='close-preview'){const format={csv:'csv',geo:'geojson',qgis:'qgis'}[action.split('-')[0]];if(format&&root.DG_SHARED_PARK_INVENTORY_EXPORT?.measurementExport){if(action.endsWith('-preview'))element.focus?.({preventScroll:true});root.DG_SHARED_PARK_INVENTORY_EXPORT.measurementExport(format,action.endsWith('-preview'));return;}}
+        if(action!=='close-preview'&&action.endsWith('-preview'))element.focus?.({preventScroll:true});handler();}
     });
   }
   root.DG_EXPORT_VIEW_ACTIONS=Object.freeze({bind});
