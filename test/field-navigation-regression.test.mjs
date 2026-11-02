@@ -14,11 +14,11 @@ test('completion follows saved project measurement evidence, never legacy visite
   {point_id:5,girth_cm:100,height_m:0,status:'Beklemede'}
  ];
  let failure=false;
- const client={from(table){const query={select(){return query;},eq(field,value){calls.push([table,field,value]);return query;},in(){return query;},order(){return table==='waypoints'?Promise.resolve({data:points}):query;},range(start){calls.push(['range',start]);return Promise.resolve(failure?{error:{message:'denied'}}:{data:start===0?Array.from({length:1000},()=>measurements[0]):measurements});}};return query;}};
+ const client={from(table){const query={select(){return query;},eq(field,value){calls.push([table,field,value]);return query;},in(){return query;},order(){return query;},range(start){calls.push(['range',table,start]);return Promise.resolve(failure?{error:{message:'denied'}}:{data:table==='waypoints'?points:start===0?Array.from({length:1000},()=>measurements[0]):measurements});}};return query;}};
  const result=await window.DG_FETCH_PROJECT_WAYPOINTS.fetch({client,projectId:7});
  assert.deepEqual(Array.from(result.data,row=>row.visited),[false,true,false,true,false]);
  assert.equal(points[0].visited,true,'source rows must remain untouched');
- assert.deepEqual(calls.filter(row=>row[0]==='range'),[['range',0],['range',1000]]);
+ assert.deepEqual(calls.filter(row=>row[0]==='range'),[['range','waypoints',0],['range','measurements',0],['range','measurements',1000]]);
  assert.ok(calls.filter(row=>row[1]==='project_id').every(row=>row[2]===7));
  failure=true;const failed=await window.DG_FETCH_PROJECT_WAYPOINTS.fetch({client,projectId:7});
  assert.equal(failed.data,null);assert.equal(failed.error.message,'denied');

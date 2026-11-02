@@ -3,8 +3,8 @@
 window.DG_MARK_WAYPOINT_VISITED={
   async mark({client,id}){return await client.from("waypoints").update({visited:true}).eq("id",id);},
   async moveWaypoint({client,change}){
-    {
-      const evidence=await client.from("measurements").select("id").eq("project_id",change.projectId).eq("point_id",change.oldWpId).limit(1).maybeSingle();
+    for(const pointId of new Set([change.oldWpId,change.wpId])){
+      const evidence=await client.from("measurements").select("id").eq("project_id",change.projectId).eq("point_id",pointId).limit(1).maybeSingle();
       if(evidence.error)throw evidence.error;
       if(evidence.data?.id)throw Error("Ölçüm geçmişi bulunan noktanın numarası sabittir.");
     }

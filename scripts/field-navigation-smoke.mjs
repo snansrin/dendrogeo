@@ -29,7 +29,7 @@ try{for(const width of [360,390,430]){
  await page.locator('#mPhotoRemove').click();assert.equal(await page.locator('#mPhoto').inputValue(),'');
  const navigation=await page.evaluate(async()=>{
   const point={id:11,project_id:1,wp_id:34,lat:39,lon:32,visited:true};let evidence=[],writes=0;
-  sb.from=table=>{const q={select(){return q;},eq(){return q;},in(){return q;},order(){return table==='waypoints'?Promise.resolve({data:[point],error:null}):q;},range(){return Promise.resolve({data:evidence,error:null});},update(){writes++;return q;},then(resolve){resolve({data:[],error:null});}};return q;};
+  sb.from=table=>{const q={select(){return q;},eq(){return q;},in(){return q;},order(){return q;},range(){return Promise.resolve({data:table==='waypoints'?[point]:evidence,error:null});},update(){writes++;return q;},then(resolve){resolve({data:[],error:null});}};return q;};
   GPS={latitude:38.9999,longitude:32,accuracy:5};await loadWaypoints();navTarget=WP[0];manualPoint=true;document.getElementById('mPoint').value='999';
   await go('nav');await loadWaypoints();navTarget=WP[0];drawNav();await arriveWp();await loadWaypoints();
   const arrived={visited:WP[0].visited,point:document.getElementById('mPoint').value,project:document.getElementById('mProject').value,writes};
