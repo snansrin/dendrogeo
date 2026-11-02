@@ -14262,6 +14262,53 @@
           "sha256": "eafbf946acc8a8a8443518f240a6021163819068b3e870f11a88576b7b7b8c6a"
         }
       ]
+    },
+    {
+      "date": "2026-11-03",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: increase only the normal live-map viewport height, retain analysis/stage layout rules, and keep measurement photo popups within the visible map/browser intersection. Add a separate UI lifecycle module for open/scroll/resize/photo load and cleanup, preserve marker coordinates/palette/clustering and popup data, and avoid cached-image update loops. Add Chromium/WebKit scrolled-map, late portrait, landscape resize, close/reopen/ESC regression coverage plus existing full CI and five-park QA. No changes to raster/scientific calculations, data writes, RLS, project locks or accepted records.",
+      "validation": [
+        "Real Leaflet Chromium and WebKit at 360/390/430/1280px with partly scrolled map, delayed portrait photo and 780x420 viewport",
+        "Marker/chunk/presentation/palette regressions and full npm run check",
+        "Complete mobile/accessibility suites and five-park GIS QA before merge"
+      ],
+      "files": [
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "ef09d10a3f148e27129411a048fa8068a830c3c9609e5cc20e696ef07d43975c",
+          "sha256": "3d3485855e7cc279997990d2e3aa40a61056d2b3e17cea06ca0912bb266cb54d"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "de1997927416a9dc1a38b11aadf7c44c65baebfd9cf163ac9a0f7fcfea8ee195",
+          "sha256": "26e9ca23ab1d2b4d22efa34a363da64f79f1df5c0e2fbffbcc6667630f7ab649"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "260e8e6061399e14122bfcdf5ab645c42b6e2bddb61039d1747217506a1f8e75",
+          "sha256": "514973ae2eaad106435bbf2003b200b73621adaa1e8f83578ff59e1af48c2c1d"
+        },
+        {
+          "path": "scripts/check-phone.mjs",
+          "previous_sha256": "b65819e6981b8a268b8df6dbaa07db577acf9914ddf366165444542ceaf60738",
+          "sha256": "d1cb10687a875846dd6ead324481e65dd02a1a163fba0b4992dfe35c416ac855"
+        },
+        {
+          "path": "src/ui/create-measurement-map-marker.js",
+          "previous_sha256": "86d27192c4d5659cf0ff6d9160cda75e7c9d2b024c5490614e6d24f98c755c7a",
+          "sha256": "6c1c1626680b183865bbab17f8dc1983d3926654160231e75993aa6137f7344a"
+        },
+        {
+          "path": "src/ui/map-measurement-markers.js",
+          "previous_sha256": "b6a912292322ccaa10fcca3d2f2636df07406022a55ddf146a7f95142bf3bd70",
+          "sha256": "fa1560978a4127458a5769044b0f32795071f3ae4f5f36b4ce3c0f7fb9c6520b"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "2cf67a5b0561c7586b6fb9ffd4ffadd726b6a2309b246af302074c890c1a2abf",
+          "sha256": "1ec8f66238a35887166c14fcd0fe51488f5c03b79430ad892b4664f88fd83e97"
+        }
+      ]
     }
   ]
 }

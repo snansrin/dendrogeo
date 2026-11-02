@@ -1,0 +1,40 @@
+"use strict";
+/* Keep measurement popups inside the visible map, including late photo loads. */
+(function(root){
+ function attach(marker){
+  let cleanup=()=>{};
+  marker.on?.('popupopen',event=>{
+   cleanup();const popup=event.popup,element=popup.getElement?.(),container=element?.closest('.leaflet-container');if(!container)return;
+   let frame=null,closed=false;
+   const update=()=>{
+    frame=null;if(closed)return;
+    const box=container.getBoundingClientRect(),viewport=root.visualViewport;
+    const left=viewport?.offsetLeft||0,right=left+(viewport?.width||root.innerWidth),bottom=(viewport?.offsetTop||0)+(viewport?.height||root.innerHeight);
+    let top=viewport?.offsetTop||0;
+    for(const bar of root.document.querySelectorAll('#apptop,#side')){
+     const rect=bar.getBoundingClientRect(),position=root.getComputedStyle(bar).position;
+     if((position==='sticky'||position==='fixed')&&rect.width>(right-left)*.7&&rect.top<=top+1&&rect.bottom>top)top=rect.bottom;
+    }
+    const visibleWidth=Math.min(box.right,right)-Math.max(box.left,left),visibleHeight=Math.min(box.bottom,bottom)-Math.max(box.top,top);
+    if(visibleWidth<80||visibleHeight<80)return;
+    popup.options.maxWidth=Math.max(80,Math.min(280,visibleWidth-48));popup.options.minWidth=Math.min(140,popup.options.maxWidth);
+    popup.options.maxHeight=Math.max(32,Math.floor(visibleHeight-72));
+    popup.options.autoPanPaddingTopLeft=[Math.max(12,left-box.left+12),Math.max(12,top-box.top+12)];
+    popup.options.autoPanPaddingBottomRight=[Math.max(12,box.right-right+12),Math.max(12,box.bottom-bottom+12)];
+    popup.update();
+   };
+   const schedule=()=>{if(frame===null&&!closed)frame=root.requestAnimationFrame(update);};
+   const onScroll=event=>{if(event.target===root.document||event.target?.contains?.(container))schedule();};
+   root.addEventListener('resize',schedule);root.document.addEventListener('scroll',onScroll,true);
+   root.visualViewport?.addEventListener('resize',schedule);root.visualViewport?.addEventListener('scroll',schedule);
+   const imageKey=()=>Array.from(element.querySelectorAll('img'),image=>[image.currentSrc||image.src,image.naturalWidth,image.naturalHeight].join(':')).join('|');
+   let imageState=imageKey();const onImage=()=>{const next=imageKey();if(next!==imageState){imageState=next;schedule();}};
+   element.addEventListener('load',onImage,true);element.addEventListener('error',onImage,true);
+   cleanup=()=>{closed=true;if(frame!==null)root.cancelAnimationFrame(frame);root.removeEventListener('resize',schedule);root.document.removeEventListener('scroll',onScroll,true);root.visualViewport?.removeEventListener('resize',schedule);root.visualViewport?.removeEventListener('scroll',schedule);element.removeEventListener('load',onImage,true);element.removeEventListener('error',onImage,true);};
+   schedule();
+  });
+  marker.on?.('popupclose',()=>cleanup());marker.on?.('remove',()=>cleanup());
+  return marker;
+ }
+ root.DG_MAP_POPUP_VIEWPORT=Object.freeze({attach});
+})(window);

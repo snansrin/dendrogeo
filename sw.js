@@ -448,6 +448,7 @@ const CORE_ASSETS = [
     '/src/ui/render-waypoint-navigation-header.js',
     '/src/ui/map-measurement-popup.js',
     '/src/domain/map/measurement-marker-cluster-icon.js',
+    '/src/ui/map-popup-viewport.js',
     '/src/ui/create-measurement-map-marker.js',
     '/src/adapters/map/ensure-measurement-marker-layer.js',
     '/src/application/map/schedule-measurement-marker-chunks.js',
