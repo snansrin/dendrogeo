@@ -1,4 +1,4 @@
-name: GIS three-park live QA
+name: GIS five-park live QA
 
 on:
   pull_request:
@@ -150,3 +150,33 @@ jobs:
           path: /tmp/dendrogeo-park-qa/*.log
           retention-days: 14
 
+
+  large-parks:
+    name: 2026 Sentinel-2 · ${{ matrix.park }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        park: [Hyde Park, Richmond Park]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Dependencies
+        run: npm ci
+      - name: Large-park current-year GIS QA
+        env:
+          QA_PARK: ${{ matrix.park }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/dendrogeo-large-park-qa
+          node scripts/val-qa.mjs --park "$QA_PARK" --city London --s2-mode ytd 2>&1 | tee /tmp/dendrogeo-large-park-qa/park.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gis-large-park-${{ matrix.park }}
+          path: /tmp/dendrogeo-large-park-qa/*.log
+          retention-days: 14

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {checkLargeParkSurface} from './lib/large-park-surface-fixture.mjs';
 import axe from 'axe-core';
 import {serveFixture,isolateAccount} from './lib/browser-acceptance-fixture.mjs';
 import {loadChromium} from './lib/playwright-runtime.mjs';
@@ -21,4 +22,4 @@ try{for(const width of [360,390,430,1280]){
   const violations=await page.evaluate(async()=>(await axe.run(document.getElementById('dgLiveParkSearch'))).violations.map(v=>v.id));assert.deepEqual(violations,[]);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
  }
  assert.deepEqual(errors,[]);console.log(JSON.stringify({engine:engine.name(),width,disclosureKeyboard:true,persistentSearch:true,enterSearch:true,noAutomaticScan:true,themes:true,accessibility:true}));await page.close();
-}}finally{await browser.close();await server.close();}
+}await checkLargeParkSurface(browser,server);}finally{await browser.close();await server.close();}

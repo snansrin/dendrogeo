@@ -14183,6 +14183,44 @@
           "sha256": "b5eafff1cd4036b6ffcc461d499cddd2634905775fa5b1dc702171789c82ef43"
         }
       ]
+    },
+    {
+      "date": "2026-11-03",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: Hyde Park repair: focus the searched location immediately and fit detected geometry before optional OSM coverage finishes. Bound review-feature union calls to 128 operands per level to prevent Maximum call stack size exceeded for large surface previews/exports; retain every part, class area, hole and manual method. No raster classification, scientific formula, RLS, project-lock or record changes.",
+      "validation": [
+        "Delayed-coverage immediate-focus and registered/geocoded search regressions",
+        "150000-part overflow reproduction now passes; exact class totals, holes/disjoint geometry and manual methods preserved",
+        "Chromium and WebKit 360/390/430/1280px actual Leaflet surface rendering; no remote data requests",
+        "Full npm run check and CI required before release"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "208d5daceaf204ee721a017c3eae7f95a932c502d82d31c1aa057260fa241c77",
+          "sha256": "edce45399c3f5ccfdcee6e73e055551a1146641fa6e7783d3fe2d52440c80805"
+        },
+        {
+          "path": "src/application/parks/draw-selected-park.js",
+          "previous_sha256": "f27052ec1a46bf77fc158a04eefea01fcf28b159d2a1563f02e858e960c9847a",
+          "sha256": "cbfc35e1e27ba9a5fb02ee37fc82946a52476f03386413a09f16f3899735a2ab"
+        },
+        {
+          "path": "src/application/surface/merge-review-features.js",
+          "previous_sha256": "2cfbde3c3e74a6a27e8689f745eee6fd7972e019014ea54d4064155930d7070d",
+          "sha256": "4d98fe5e2f0c6a1f0d697b4feaf3a73467bfc626e8449402bb69fa13c613aa32"
+        },
+        {
+          "path": "src/services/park-registry.js",
+          "previous_sha256": "669278fbf4b0920d2041c89b99881a803cd482455d0c4c525e8de3fefcb62fa6",
+          "sha256": "c873b96e217b8f54f71b180cf373661dcc6d8450dfb4c4902e5963a2f8bd0671"
+        },
+        {
+          "path": "src/ui/park-search-result.js",
+          "previous_sha256": "753cfb8d8f036b1ba85ea6783dacd5081cf0227f4706ede302b04672e7c01a8e",
+          "sha256": "4843f5710bf272c0da4273e276de458dfc531efae8b32a596fc55936737d475f"
+        }
+      ]
     }
   ]
 }
