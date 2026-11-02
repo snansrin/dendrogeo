@@ -195,7 +195,7 @@
   reloadProjects:()=>loadProjects(),readProject:id=>store.project(id),readPark:id=>store.park(id),readParent:id=>store.parent(id),readParentByKey:key=>store.parentByKey(key),readWaypoints:id=>store.waypoints(id),
   candidate:row=>root.DG_LIVE_MAP_PROJECT_CANDIDATE.candidate(row),
   activeParkId:()=>typeof DG_PARK!=="undefined"?Number(DG_PARK?.id||0):0,
-  isEditing:()=>!!(root._dgLandCoverBusy||root.DG_LC_SENS?.state?.busy||root.DG_LC_SENS?.state?.saving||root.DG_LC_SENS?.state?.brush||root.DG_LC_SENS?.state?.draw||root.DG_LC_SENS?.state?.objectPick||root.DG_PARK_STAGES?.isDrawing()||document.querySelector('#dgUxMapTools [data-tool][aria-pressed="true"]')),
+  isEditing:()=>!!(document.getElementById("dgLiveParkSearch")?.getAttribute("aria-busy")==="true"||root._dgLandCoverBusy||root.DG_LC_SENS?.state?.busy||root.DG_LC_SENS?.state?.saving||root.DG_LC_SENS?.state?.brush||root.DG_LC_SENS?.state?.draw||root.DG_LC_SENS?.state?.objectPick||root.DG_PARK_STAGES?.isDrawing()||document.querySelector('#dgUxMapTools [data-tool][aria-pressed="true"]')),
   saveDraft:async()=>{
    const record=root.DG_LC_SENS?.state?.record;
    if(record&&typeof dgSensSave==="function"&&!(await dgSensSave()))return false;

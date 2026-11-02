@@ -145,15 +145,21 @@
 </div>
 <!-- PARK ALGILAMA EKRANI: ölçüm kapısı buraya yönlendirir (startParkScan).
      Adım adım akış + park kimliği + proje oluşturma/bağlama park-registry.js'te. -->
-<section id="dgLiveProjects" class="card dg-live-projects" aria-labelledby="dgLiveProjectsTitle" aria-busy="false">
- <div class="dg-live-projects-head"><div><strong id="dgLiveProjectsTitle">📁 Kayıtlı proje çalışma alanı</strong><p class="dg-meta">Etap sınırını, ölçüm noktalarını ve kayıtlı park analizini yeniden aç.</p></div></div>
+<details id="dgLiveProjects" class="card dg-live-projects" aria-labelledby="dgLiveProjectsTitle" aria-busy="false">
+ <summary class="dg-live-projects-head"><strong id="dgLiveProjectsTitle">📁 Kayıtlı proje çalışma alanı</strong><span class="dg-live-projects-chevron" aria-hidden="true">⌄</span></summary>
+ <p class="dg-meta">Etap sınırını, ölçüm noktalarını ve kayıtlı park analizini yeniden aç.</p>
  <div class="dg-live-projects-fields">
   <div><label class="lbl" for="dgLiveProjectSelect">Projelerim ve yetkili olduğum projeler</label><select id="dgLiveProjectSelect" class="dg-png-select"><option value="">Proje seç</option></select></div>
   <button type="button" class="btn sm blue" data-live-project-action="open">🗺️ Haritada aç</button>
   <button type="button" class="btn sm ghost" data-live-project-action="refresh">↻ Yenile</button>
  </div>
  <p id="dgLiveProjectStatus" class="dg-meta" role="status" aria-live="polite">Kayıtlı projeler yükleniyor…</p>
-</section>
+</details>
+<form id="dgLiveParkSearch" class="card dg-live-projects" aria-label="Park ara">
+ <label class="lbl" for="dgLiveParkName">Park ara</label>
+ <div class="dg-live-projects-fields"><div><input id="dgLiveParkName" class="dg-png-input" type="search" placeholder="Park adı ve şehir" required></div><button type="submit" class="btn sm blue">🔍 Park ara</button></div>
+ <p id="dgLiveParkSearchStatus" class="dg-meta" role="status" aria-live="polite">Park adıyla arayabilir veya park modunda haritaya tıklayabilirsin.</p>
+</form>
 <div id="parkScanCard" class="card" style="display:none;margin-bottom:12px;border-left:4px solid var(--green)"></div>
 <div id="mapLoad" class="alert info">⏳ Onaylı kayıtlar yükleniyor…</div>
 <!-- ↻ ELLE TAZELEME (2026-09-26): canlı harita sekmesi eskiden bir oturumda
