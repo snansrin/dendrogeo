@@ -74,6 +74,12 @@ test('Göksu project opens existing boundary and points without creating data',a
  assert.deepEqual(x.calls,['draw','points 77','select 30','remember 30']);
  assert.match(x.status.textContent,/77 kayıtlı ölçüm noktası/);
 });
+test('grid point completion refreshes only point rows without redrawing or resetting the current grid/surface',async()=>{
+ let shown;const x=uiScenario({activeParkId:()=>25,showWaypoints:(rows,project)=>{shown={rows,project};}});
+ assert.equal(await x.ui.refreshWaypoints(30),true);assert.equal(shown.project.id,30);assert.equal(shown.rows.length,77);
+ assert.deepEqual(x.calls,[],'point refresh must not draw, restore, select a project or create a workspace');
+ assert.equal(await x.ui.refreshWaypoints(33),false,'another park cannot replace the point layer');
+});
 
 test('export project identity follows only a successfully opened project in the active park',async()=>{
  const x=uiScenario();assert.equal(x.ui.activeProjectId(),0);
@@ -333,7 +339,8 @@ test('live-map bootstrap reuses existing map/waypoint tools without a second wri
  assert.match(source,/DG_GRID_WAYPOINT_LAYER\.render/);
  assert.match(source,/saveDraft:/);
  assert.match(source,/DG_PARK_SESSION\.set\(key,row\)/);
- assert.doesNotMatch(source,/\.insert\(|\.upsert\(|\.update\(|\.delete\(/);
+ assert.doesNotMatch(source,/\.insert\(|\.upsert\(|\.update\(/);
+ assert.doesNotMatch(source,/sb\.from\(/,'database operations remain in the adapters; Set.delete only manages the acceptance deduplication key');
 });
 test('saved-project selector does not add a second GIS action toolbar',()=>{
  const shell=readFileSync(new URL('../partials/shell.html',import.meta.url),'utf8');

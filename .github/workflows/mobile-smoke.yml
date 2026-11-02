@@ -26,6 +26,7 @@ jobs:
         run: |
           npm run check:phone
           node scripts/live-map-project-workspace-smoke.mjs
+          node scripts/measurement-point-toolbar-smoke.mjs
           node scripts/project-directory-recovery-smoke.mjs
           node scripts/project-directory-sdk-smoke.mjs
       - name: Klavye, odak ve erişilebilirlik

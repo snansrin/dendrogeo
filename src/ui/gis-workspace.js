@@ -7,7 +7,7 @@
  // Park controls are moved into transient details nodes by the legacy menus.
  // Their owner may remove/rebuild a details node while preserving its old
  // child references only here. Restore those EXISTING inputs, never clone them.
- const parked={grid:null,layer:null,summary:null};
+ const parked={grid:null,points:null,layer:null,summary:null};
  const $=id=>document.getElementById(id);
  const analysisLayout=window.DG_GIS_WORKSPACE_ANALYSIS_LAYOUT.create({getElement:$,el});
  const menuLayout=window.DG_GIS_WORKSPACE_MENU_POSITION.create({windowRef:window});
@@ -32,7 +32,7 @@
  function syncPark(){
   const bar=$("surfaceMenuBar");
   if(!bar)return;
-  for(const [key,id] of [["grid","parkGridTools"],["layer","parkLayerTools"],["summary","gridSummary"]]){
+  for(const [key,id] of [["grid","parkGridTools"],["points","parkWaypointTools"],["layer","parkLayerTools"],["summary","gridSummary"]]){
    const live=$(id);if(live)parked[key]=live;
   }
   // When the original park menu was reconstructed, its old moved controls
@@ -41,7 +41,7 @@
   if(!bar.querySelector('details[data-menu-owner="park"]')){
    const home=$("surfaceParkTools");
    if(home){
-    for(const key of ["grid","layer"]){
+    for(const key of ["grid","points","layer"]){
      if(!$(parked[key]?.id)&&parked[key])home.append(parked[key]);
     }
     if(!$("gridSummary")&&parked.summary)home.append(parked.summary);

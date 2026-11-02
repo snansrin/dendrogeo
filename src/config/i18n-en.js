@@ -2,6 +2,15 @@
 /* English dictionary data for the runtime translator in i18n.js. */
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"Grid oluşturma araçları":"Grid creation tools",
+"Otomatik, seçili hücreler veya haritada serbest yerleştirme":"Automatic, selected cells or free placement on the map",
+"📍 Noktaları düzenle":"📍 Edit points",
+"✓ Düzenlemeyi bitir":"✓ Finish editing",
+"＋ Haritaya nokta ekle":"＋ Add a point on the map",
+"✕ Nokta eklemeyi bitir":"✕ Finish adding points",
+"Nokta numarası":"Point number",
+"Ölçüm geçmişi bulunan noktalar sabittir.":"Points with measurement history are fixed.",
+"Gridin uygun veya elle seçilmiş hücrelerinden noktalar üretin. Haritada istediğiniz yere yeni nokta ekleyebilir, ölçümü olmayan noktaları sürükleyebilirsiniz.":"Generate points from eligible or manually selected grid cells. Add a point anywhere on the map and drag unmeasured points.",
 "Kaydedilmiş sınırı düzenle":"Edit saved boundary",
 "Kaydedilmiş sınır köşeleri yüklendi. Numaralı noktaları sürükleyin; nokta ekleyebilir veya silebilirsiniz.":"Saved boundary vertices loaded. Drag numbered points, add points or delete points.",
 "Kaydedilmiş etap köşeleri yüklendi. Önizleme kayıtlı sınırla aynıdır; kaydedene kadar veriler değişmez.":"Saved stage vertices loaded. The preview matches the saved boundary; data stays unchanged until you save.",

@@ -177,6 +177,16 @@
   document.getElementById("map")?.scrollIntoView({block:"center"});
  }
  document.addEventListener("visibilitychange",()=>{if(document.hidden&&workspaceIdentity)void saveWorkspace(workspaceIdentity.projectId,workspaceIdentity.park,{flush:true}).catch(()=>{});});
+ const archivedAcceptances=new Set();
+ root.addEventListener?.("dg:surface-accepted",event=>{
+  const projectId=root.DG_LIVE_MAP_PROJECTS?.activeProjectId?.()||Number(document.getElementById("gridProject")?.value)||0;
+  const project=(typeof PROJ_LIST!=="undefined"?PROJ_LIST:[]).find(row=>Number(row.id)===projectId);
+  const park=typeof DG_PARK!=="undefined"?DG_PARK:null;
+  if(!project||!park?.geom_json||Number(project.park_id)!==Number(park.id)||Number(event.detail?.parkId)!==Number(park.id)||!event.detail?.acceptedAt)return;
+  const key=[USER?.id,projectId,event.detail.acceptedAt].join(":");if(archivedAcceptances.has(key))return;archivedAcceptances.add(key);
+  void saveWorkspace(projectId,park,{flush:true}).then(()=>{if(Number(DG_PARK?.id)===Number(park.id)&&!workspaceIdentity)watchWorkspace(projectId,park);})
+   .catch(error=>{archivedAcceptances.delete(key);console.warn("DENDROGEO · kabul edilmiş çalışma görüntüsü kaydedilemedi:",error.message);});
+ });
  root.DG_LIVE_MAP_PROJECTS=root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI.create({
   document,projects:()=>typeof USER!=="undefined"&&USER&&typeof PROJ_LIST!=="undefined"?PROJ_LIST:[],
   translate:(template,values)=>typeof dgTf==="function"?dgTf(template,values):template,
@@ -186,7 +196,16 @@
   candidate:row=>root.DG_LIVE_MAP_PROJECT_CANDIDATE.candidate(row),
   activeParkId:()=>typeof DG_PARK!=="undefined"?Number(DG_PARK?.id||0):0,
   isEditing:()=>!!(root._dgLandCoverBusy||root.DG_LC_SENS?.state?.busy||root.DG_LC_SENS?.state?.saving||root.DG_LC_SENS?.state?.brush||root.DG_LC_SENS?.state?.draw||root.DG_LC_SENS?.state?.objectPick||root.DG_PARK_STAGES?.isDrawing()||document.querySelector('#dgUxMapTools [data-tool][aria-pressed="true"]')),
-  saveDraft:async()=>!root.DG_LC_SENS?.state?.record||typeof dgSensSave!=="function"||!!(await dgSensSave()),
+  saveDraft:async()=>{
+   const record=root.DG_LC_SENS?.state?.record;
+   if(record&&typeof dgSensSave==="function"&&!(await dgSensSave()))return false;
+   if(record&&!workspaceIdentity&&Number(record.parkId)===Number(DG_PARK?.id)&&DG_PARK?.geom_json){
+    const projectId=Number(document.getElementById("gridProject")?.value)||0;
+    const project=(typeof PROJ_LIST!=="undefined"?PROJ_LIST:[]).find(row=>Number(row.id)===projectId&&Number(row.park_id)===Number(DG_PARK.id));
+    if(project)await saveWorkspace(projectId,DG_PARK,{flush:true});
+   }
+   return true;
+  },
   saveWorkspace:async(projectId,parkId)=>{if(!projectId)return true;return saveWorkspace(projectId,DG_PARK&&Number(DG_PARK.id)===parkId?DG_PARK:null,{flush:true});},
   restoreWorkspace,watchWorkspace,focusPark,stopWatching,
   verifyBoundary:verifyActiveBoundary,activateParkAnalysis,
@@ -221,12 +240,20 @@
     await root.DG_PARK_STAGES.present({park:candidate,row});
    }
   },
-  showWaypoints:rows=>{
+  showWaypoints:(rows,openedProject)=>{
    const previous=DG_GRID_SESSION.getWaypointLayer();
-   const projectId=root.DG_LIVE_MAP_PROJECTS?.activeProjectId?.()||0;
+   const projectId=Number(openedProject?.id||root.DG_LIVE_MAP_PROJECTS?.activeProjectId?.()||0);
    const project=(typeof PROJ_LIST!=="undefined"?PROJ_LIST:[]).find(item=>Number(item.id)===Number(projectId));
    const editable=!!project&&!project.is_locked&&String(project.owner)===String(USER?.id);
-   const layer=root.DG_GRID_WAYPOINT_LAYER.render({map,previousLayer:previous,rows,leaflet:L,editable,onSave:async change=>{
+   const ownerId=USER?.id;
+   const canInteract=()=>!(root._dgLandCoverBusy||root.DG_LC_SENS?.state?.busy||root.DG_LC_SENS?.state?.saving||root.DG_LC_SENS?.state?.brush||root.DG_LC_SENS?.state?.draw||root.DG_PARK_STAGES?.isDrawing());
+   const current=()=>editable&&canInteract()&&USER?.id===ownerId&&Number(root.DG_LIVE_MAP_PROJECTS?.activeProjectId?.()||document.getElementById("gridProject")?.value)===projectId&&Number(DG_PARK?.id)===Number(project.park_id);
+   const layer=root.DG_GRID_WAYPOINT_LAYER.render({map,previousLayer:previous,rows,leaflet:L,editable,canInteract,onCreate:async position=>{
+    if(!current())throw Error("Proje değişti veya nokta ekleme izniniz yok.");
+    const wpId=Math.max(0,...rows.map(row=>Number(row.wp_id)||0))+1;
+    return root.DG_MARK_WAYPOINT_VISITED.addWaypoint({client:sb,owner:ownerId,projectId,wpId,...position});
+   },onSave:async change=>{
+    if(!current())throw Error("Proje değişti; listeyi yeniden açın.");
     if(!editable||Number(change.projectId)!==Number(projectId)||Number(DG_PARK?.id)!==Number(project.park_id))throw Error("Yalnız kilitsiz kendi projenizde düzenleme yapabilirsiniz.");
     const row=rows.find(item=>Number(item.id)===Number(change.id));if(!row||row.hasMeasurement||row.visited)throw Error("Ölçümü bulunan waypoint sabittir.");
     return root.DG_MARK_WAYPOINT_VISITED.moveWaypoint({client:sb,change});

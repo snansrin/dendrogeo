@@ -31,6 +31,12 @@ function dgRenderGridSummary({ element, size, total, measured, empty, selected, 
     `<button type="button" class="btn sm ghost" data-grid-summary-action="downloadCsv">${translate("📥 Ölçüm noktaları CSV")}</button>`+
     `</div>`+meta;
   bindGridSummaryActions(element,actions);
+  const pointActions=typeof document!=="undefined"?document.getElementById("dgWaypointGridActions"):null;
+  if(pointActions){
+    pointActions.replaceChildren();
+    element.querySelectorAll('[data-grid-summary-action="createAuto"],[data-grid-summary-action="createManual"],[data-grid-summary-action="clearSelection"]').forEach(button=>pointActions.append(button));
+    bindGridSummaryActions(pointActions,actions);
+  }
 }
 
 window.DG_GRID_SUMMARY = Object.freeze({ render: dgRenderGridSummary });
