@@ -14309,6 +14309,40 @@
           "sha256": "1ec8f66238a35887166c14fcd0fe51488f5c03b79430ad892b4664f88fd83e97"
         }
       ]
+    },
+    {
+      "date": "2026-11-03",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: increase only the normal live-map viewport height, retain analysis/stage layout rules, and keep measurement photo popups within the visible map/browser intersection. Add a separate UI lifecycle module for open/scroll/resize/photo load and cleanup, preserve marker coordinates/palette/clustering and popup data, and avoid cached-image update loops. Add Chromium/WebKit scrolled-map, late portrait, landscape resize, close/reopen/ESC regression coverage plus existing full CI and five-park QA. No changes to raster/scientific calculations, data writes, RLS, project locks or accepted records.",
+      "validation": [
+        "Real Leaflet Chromium and WebKit at 360/390/430/1280px with partly scrolled map, delayed portrait photo and 780x420 viewport",
+        "Marker/chunk/presentation/palette regressions and full npm run check",
+        "Complete mobile/accessibility suites and five-park GIS QA before merge"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "26e9ca23ab1d2b4d22efa34a363da64f79f1df5c0e2fbffbcc6667630f7ab649",
+          "sha256": "f333bb4e0bf13aeb2dc00c2f8d75a4a05757ebf14463584fc5cca04364aa900c"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-03",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: increase only the normal live-map viewport height, retain analysis/stage layout rules, and keep measurement photo popups within the visible map/browser intersection. Add a separate UI lifecycle module for open/scroll/resize/photo load and cleanup, preserve marker coordinates/palette/clustering and popup data, and avoid cached-image update loops. Add Chromium/WebKit scrolled-map, late portrait, landscape resize, close/reopen/ESC regression coverage plus existing full CI and five-park QA. No changes to raster/scientific calculations, data writes, RLS, project locks or accepted records.",
+      "validation": [
+        "Real Leaflet Chromium and WebKit at 360/390/430/1280px with partly scrolled map, delayed portrait photo and 780x420 viewport",
+        "Marker/chunk/presentation/palette regressions and full npm run check",
+        "Complete mobile/accessibility suites and five-park GIS QA before merge"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "f333bb4e0bf13aeb2dc00c2f8d75a4a05757ebf14463584fc5cca04364aa900c",
+          "sha256": "2f5cfd6aa4d58e49c05c010659a0595ff61ede08591014d1a95bcf1902d7e038"
+        }
+      ]
     }
   ]
 }
