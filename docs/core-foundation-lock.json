@@ -13296,6 +13296,44 @@
           "sha256": "8e7da0668c3d705732b81de54a659500339aadaadd618385ef9034a576dbb2fa"
         }
       ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: repair confirmed PR #584 first-load regression where shared Auth/read failure prevented successfully loaded owned projects from ever rendering. Commit independent owned/shared outcomes; preserve known rows only within the same account; distinguish one-source failure from total failure and log safe error codes without tokens. Add real shipped Supabase SDK HTTP fixture for initial Auth 503, own visibility and later sharing recovery, in Chromium/WebKit CI. No changes to any scientific calculation, GIS engine, RLS, schema, locks, records or themes. Operational cache r447 only.",
+      "validation": [
+        "node --test test/project-directory-recovery.test.mjs",
+        "node scripts/project-directory-sdk-smoke.mjs with actual vendor SDK and isolated HTTP",
+        "npm run check",
+        "Chromium/mobile and WebKit CI before any merge"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "63039fa883b9927c6ab343f408f84b8399de88805bf8a48b954007cf1d6128c1",
+          "sha256": "ee1f3a6a9406b60c6e35a94a0c0c25c604885930ae6c8e03d15f8da7278a8923"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "c0b058e9615d07a761ab96bc6be35ec8f0e1bdca24627f6cb667e17bdd2a274b",
+          "sha256": "cb0eb88af5fc149fd50c58059734741c6e33fcd4908df2cc0a4b29ef9a747130"
+        },
+        {
+          "path": "src/application/trees/load-measurement-project-directory.js",
+          "previous_sha256": "a972535e410848896e3d26309e0092c47fd73917710f3dff9835dcd7acd98882",
+          "sha256": "bf538fd30d82cee558d181d5cd275c4287bda1727ed59d383fc8963915c54477"
+        },
+        {
+          "path": "src/services/measure.js",
+          "previous_sha256": "eb33f098cdbc4cf4717cf00c9bf9635b957019bc2ab2718c3c5c270ae0179522",
+          "sha256": "366ef03870e55c2995a2e9eafd4f8015976ed1c57948bb6a08154dc6cafd61ec"
+        },
+        {
+          "path": ".github/workflows/mobile-smoke.yml",
+          "previous_sha256": "8e7da0668c3d705732b81de54a659500339aadaadd618385ef9034a576dbb2fa",
+          "sha256": "06de7707586be312afbe57a0be1f317c0b4f61f84eddec0ab751b07de7d333d2"
+        }
+      ]
     }
   ]
 }
