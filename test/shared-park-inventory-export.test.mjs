@@ -4,6 +4,9 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 
 const sources=[
+ 'src/domain/trees/merge-measurement-projects.js',
+ 'src/adapters/trees/fetch-owned-measurement-projects.js',
+ 'src/adapters/trees/fetch-shared-measurement-projects.js',
  'src/domain/export/shared-park-inventory-domain.js',
  'src/adapters/export/shared-park-inventory-store.js',
  'src/ui/shared-park-inventory-export.js'
@@ -26,16 +29,18 @@ function fixture(count=77){
  }));
 }
 function scopeClient({projects=[],memberships=[],invites=[],profiles=[],user=null}={}){
- const data={projects,park_collaborators:memberships,park_invites:invites,profiles},calls=[];
+ const data={projects,park_collaborators:memberships,park_invites:invites,profiles,
+  v_my_parks:memberships.map(row=>({id:row.park_id,role:'collaborator',name:`Park ${row.park_id}`}))},calls=[];
  return{
   calls,auth:{async getUser(){return{data:{user},error:null};}},
   from(table){assert.ok(Object.hasOwn(data,table),`unexpected read: ${table}`);return{
-   select(){const clauses=[];return{
+   select(){const clauses=[];const query={
     eq(field,value){clauses.push(row=>row[field]===value);return this;},
     in(field,values){clauses.push(row=>values.includes(row[field]));return this;},
     order(){return this;},
-    async range(from,to){calls.push({table,from,to});return{data:data[table].filter(row=>clauses.every(p=>p(row))).slice(from,to+1),error:null};}
-   };}
+    async range(from,to){calls.push({table,from,to});return{data:data[table].filter(row=>clauses.every(p=>p(row))).slice(from,to+1),error:null};},
+    then(resolve,reject){calls.push({table,from:null});return Promise.resolve({data:data[table].filter(row=>clauses.every(p=>p(row))),error:null}).then(resolve,reject);}
+   };return query;}
   };}
  };
 }
@@ -198,30 +203,29 @@ test('accepted invite older than current membership does not authorize a project
  assert.deepEqual(Array.from(await api.listParticipantProjects(client,{userId:'sinan',role:'admin'}),p=>p.id),[1]);
 });
 
-test('admin-issued accepted invitation requires an active privileged sender, and full admin export stays separate',async()=>{
+test('participant export exactly follows project-owner invite matches instead of widening a park invite to every project',async()=>{
  const api=app(),base={
-  projects:[{id:1,owner:'sinan',park_id:8},{id:2,owner:'nagihan',park_id:8},{id:3,owner:'third',park_id:9}],
+  projects:[{id:1,owner:'sinan',park_id:8,name:'Sahibim',parks:{name:'Dikmen Vadisi'}},{id:2,owner:'nagihan',park_id:8,name:'Ülkü',parks:{name:'Ülkü Spor Tesisi'}},{id:3,owner:'third',park_id:8,name:'İzinsiz proje',parks:{name:'Ülkü Spor Tesisi'}},{id:4,owner:'third',park_id:9}],
   memberships:[{park_id:8,user_id:'sinan',added_at:'2026-10-30T10:00:00Z'}],
-  invites:[{park_id:8,invited_by:'manager',email:'sinan@example.org',status:'Kabul',responded_at:'2026-10-30T10:00:00Z'}],
+  invites:[{park_id:8,invited_by:'manager',email:'sinan@example.org',status:'Kabul',responded_at:'2026-10-30T10:00:00Z'},{park_id:8,invited_by:'nagihan',email:'sinan@example.org',status:'Kabul',responded_at:'2026-10-30T10:00:00Z'}],
   user:{id:'sinan',email:'sinan@example.org',email_confirmed_at:'2026-10-01T00:00:00Z'}
  };
  const permitted=scopeClient({...base,profiles:[{id:'manager',role:'admin',active:true}]});
  assert.deepEqual(Array.from(await api.listParticipantProjects(permitted,{userId:'sinan',role:'admin'}),p=>p.id).sort(),[1,2]);
  const denied=scopeClient({...base,profiles:[{id:'manager',role:'admin',active:false}]});
- assert.deepEqual(Array.from(await api.listParticipantProjects(denied,{userId:'sinan',role:'admin'}),p=>p.id),[1]);
- assert.equal((await api.listProjects(permitted)).length,3,'administrator-only directory keeps the full accessible set');
+ assert.deepEqual(Array.from(await api.listParticipantProjects(denied,{userId:'sinan',role:'admin'}),p=>p.id).sort(),[1,2]);
+ assert.equal((await api.listProjects(permitted)).length,4,'administrator-only directory keeps the full accessible set');
 });
 
-test('large accepted project sets stay paginated and participant-scoped',async()=>{
+test('large project sets use the same current project-directory scope',async()=>{
  const api=app(),projects=Array.from({length:1005},(_,i)=>({id:i+1,owner:'partner',park_id:8,name:`Saha ${i+1}`,parks:{name:'Göksu Parkı'}}));
  const client=scopeClient({projects,memberships:[{park_id:8,user_id:'sinan',added_at:'2026-10-30T10:00:00Z'}],
-  invites:[{park_id:8,invited_by:'manager',email:'sinan@example.org',status:'Kabul',responded_at:'2026-10-30T11:00:00Z'}],
-  profiles:[{id:'manager',role:'admin',active:true}],
+  invites:[{park_id:8,invited_by:'partner',email:'sinan@example.org',status:'Kabul',responded_at:'2026-10-30T11:00:00Z'}],
   user:{id:'sinan',email:'sinan@example.org',email_confirmed_at:'2026-10-01T00:00:00Z'}
  });
  const eligible=await api.listParticipantProjects(client,{userId:'sinan',role:'admin'});
  assert.equal(eligible.length,1005);
- assert.deepEqual(client.calls.filter(call=>call.table==='projects').map(call=>call.from),[0,0,1000]);
+ assert.deepEqual(client.calls.filter(call=>call.table==='projects').map(call=>call.from),[null,null]);
  assert.ok(client.calls.every(call=>call.table!=='measurements'));
 });
 

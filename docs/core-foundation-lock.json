@@ -13847,6 +13847,84 @@
           "sha256": "bedfbbeaf2b75bc270f2149f5cace68d035827dbb8a2f5ef14090d31d56eead4"
         }
       ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: align the committed waypoint-read migration filename and test allowlists with the migration version recorded by Supabase after the already tested SELECT-only RLS change. No database behavior, waypoint write policy, or data row changes in this follow-up. No scientific calculations, allometry, species/density data, GIS/raster engines, measurements, project locks, theme/fonts/CSS or production data changed.",
+      "validation": [
+        "Waypoint RLS migration test and exact production write-policy snapshot",
+        "npm run check:core-foundation",
+        "Full PR CI was green before this migration-history-only alignment"
+      ],
+      "files": [
+        {
+          "path": "test/dbh-qa.test.mjs",
+          "previous_sha256": "08503a691a10f3c30dd68629ac3f0e389faabee3f3c2fedb770652d4c62dd6b5",
+          "sha256": "bc702e9a25550762b799d8ff2aa5ba4320b5e3939b6d51f35b16d1d57510994a"
+        },
+        {
+          "path": "test/form-qa.test.mjs",
+          "previous_sha256": "1c0508432f5930d1be6c9262e720b4178929dc0bbb58c46281d3231ba937be44",
+          "sha256": "e51e6c86d154b18b91e6036e4e795def01fd9b642ca744a44f51172d9d0d0ce4"
+        },
+        {
+          "path": "test/project-invite-scope-security.test.mjs",
+          "previous_sha256": "bedfbbeaf2b75bc270f2149f5cace68d035827dbb8a2f5ef14090d31d56eead4",
+          "sha256": "d0c53f4dda8b7ab4e431bec22ed6d7112d85faaffb31e09ee1ce775983b0da89"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: fix the confirmed mismatch where waypoint CSV and park inventory rebuilt participant access separately from the Projects directory, allowing a park-level administrator invitation to widen the selector to unrelated projects in the same park. Reuse the exact owned/shared project-directory adapters for options and download-time rechecks; preserve owned projects and surface a sharing-read failure without claiming an empty list. No scientific calculations, allometry, species/density data, GIS/raster engines, measurements, project locks, theme/fonts/CSS or production data changed.",
+      "validation": [
+        "Focused export/project-directory authorization regression tests, including unrelated same-park project exclusion and owned-project fallback",
+        "npm run check",
+        "PR CI Chromium/WebKit/mobile coverage"
+      ],
+      "files": [
+        {
+          "path": "src/ui/shared-park-inventory-export.js",
+          "previous_sha256": "9fb52ef632d38f23942593402992b620ab4e0039a9285fb1425cf94ab43f7a3b",
+          "sha256": "c79cf4e9ee63bbd03e51752b83874f8e1137c60390ac228977c966b20bd92589"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: fix the confirmed mismatch where waypoint CSV and park inventory rebuilt participant access separately from the Projects directory, allowing a park-level administrator invitation to widen the selector to unrelated projects in the same park. Reuse the exact owned/shared project-directory adapters for options and download-time rechecks; preserve owned projects and surface a sharing-read failure without claiming an empty list. No scientific calculations, allometry, species/density data, GIS/raster engines, measurements, project locks, theme/fonts/CSS or production data changed.",
+      "validation": [
+        "Focused export/project-directory authorization regression tests, including unrelated same-park project exclusion and owned-project fallback",
+        "npm run check",
+        "PR CI Chromium/WebKit/mobile coverage"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "cd34f7458db72447fadd04995609cfbd7d4408f2c79ce047c44ace978f6a2d03",
+          "sha256": "9102f3c7afb1e99805f766e2c3652cab0df023154c2e9b7e62fbe01392bc28b7"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-02",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: fix the confirmed mismatch where waypoint CSV and park inventory rebuilt participant access separately from the Projects directory, allowing a park-level administrator invitation to widen the selector to unrelated projects in the same park. Reuse the exact owned/shared project-directory adapters for options and download-time rechecks; preserve owned projects and surface a sharing-read failure without claiming an empty list. No scientific calculations, allometry, species/density data, GIS/raster engines, measurements, project locks, theme/fonts/CSS or production data changed.",
+      "validation": [
+        "Focused export/project-directory authorization regression tests, including unrelated same-park project exclusion and owned-project fallback",
+        "npm run check",
+        "PR CI Chromium/WebKit/mobile coverage"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "9102f3c7afb1e99805f766e2c3652cab0df023154c2e9b7e62fbe01392bc28b7",
+          "sha256": "05f25552f403c18e2350006d9feeaf248ab5d7b8d63ebf56d4cc49ac7bd4fd3a"
+        }
+      ]
     }
   ]
 }

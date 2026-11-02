@@ -128,7 +128,9 @@
      status("dgWaypointExportStatus",options.length?`${options.length} yetkili proje · Parklara göre gruplanmıştır; CSV tek seçili projeyi içerir.`:"Erişebildiğin proje bulunamadı.",!options.length);
    }
    const formatCount=root.document.querySelector("#v-export .export-summary-note");if(formatCount)formatCount.textContent="4 biçim";
-   status("dgSharedParkStatus",`${groups.size} sahip/ortak parkı · Yalnız sana ait veya kabul edilmiş ortaklıkla eriştiğin projeler gösterilir.`);
+   status("dgSharedParkStatus",participantProjects.sharingError
+    ?`Paylaşılan projeler yenilenemedi; yalnızca sana ait projeler gösteriliyor. ${participantProjects.sharingError.message}`
+    :`${groups.size} sahip/ortak parkı · Yalnızca Projeler ekranında listelenen erişilebilir projeler gösterilir.`,!!participantProjects.sharingError);
   }catch(error){visibleParks=new Map();loadedFor=null;el.replaceChildren(new Option("Parklar yüklenemedi", ""));if(waypointSelect)waypointSelect.replaceChildren(new Option("Projeler yüklenemedi", ""));status("dgWaypointExportStatus","Projeler yüklenemedi: "+error.message,true);status("dgSharedParkStatus","Parklar yüklenemedi: "+error.message,true);}
  }
  async function downloadWaypoints(){
