@@ -165,16 +165,20 @@
  async function preview(){
   if(busy)return;
   if(!USER?.id){status("dgSharedParkStatus","Önce oturum açmalısın.",true);return;}
-  if(loadedFor!==USER.id)await refresh();
+  const user=USER.id;
+  if(loadedFor!==user)await refresh();
+  if(USER?.id!==user)return;
   const selected=root.document.getElementById("dgSharedParkSelect")?.value;
   const group=visibleParks.get(selected);
   if(!group){status("dgSharedParkStatus","Lütfen erişebildiğin bir park seç.",true);return;}
   setBusy(true);status("dgSharedParkStatus","Ortak ölçümler alınıyor…");
   try{
    // Recheck authorization at download time: a revoked invite must not reuse a stale selection.
-   const current=groupProjects(await listParticipantProjects(sb,{userId:USER.id,role:PROFILE?.role})).get(selected);
+   const current=groupProjects(await listParticipantProjects(sb,{userId:user,role:PROFILE?.role})).get(selected);
+   if(USER?.id!==user)return;
    if(!current){visibleParks.delete(selected);status("dgSharedParkStatus","Bu park için sahiplik veya ortaklık erişimin artık yok. Parkları yenile.",true);return;}
    const rows=await readAll(sb,current.projects.map(p=>p.id));
+   if(USER?.id!==user||root.document.getElementById("dgSharedParkSelect")?.value!==selected)return;
    if(!rows.length){status("dgSharedParkStatus","Bu parkta erişilebilir ölçüm bulunamadı.",true);return;}
    const html=documentHTML([{group:current,rows}],{latin:LATIN,origin:SB_URL});
    openPreview("📄 "+current.name+" — Ortak Park Envanteri",html,slug(current.name)+"_ortak_envanter.html");
@@ -184,6 +188,7 @@
  async function admin(){
   if(busy)return;
   if(!PROFILE||!["admin","owner"].includes(PROFILE.role)){status("dgAdminParkInventoryStatus","Bu çıktı yalnız yöneticilere açıktır.",true);return;}
+  const user=USER?.id;if(!user)return;
   setBusy(true);status("dgAdminParkInventoryStatus","Filtreye uyan kayıtlar alınıyor…");
   try{
    const projects=await listProjects(sb),groups=groupProjects(projects),selected=root.document.getElementById("admExpProject")?.value;
@@ -192,6 +197,7 @@
    const filters={country:root.document.getElementById("admExpCountry")?.value,city:root.document.getElementById("admExpCity")?.value,status:root.document.getElementById("admExpStatus")?.value};
    const ids=chosen.flatMap(group=>group.projects.map(p=>p.id));
    const rows=await readAll(sb,ids,filters);
+   if(USER?.id!==user||!["admin","owner"].includes(PROFILE?.role))return;
    if(!rows.length){status("dgAdminParkInventoryStatus","Filtreye uyan kayıt yok.",true);return;}
    const grouped=chosen.map(group=>({group,rows:rows.filter(row=>group.projects.some(project=>project.id===Number(row.project_id)))})).filter(item=>item.rows.length);
    const html=documentHTML(grouped,{latin:LATIN,origin:SB_URL});

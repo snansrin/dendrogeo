@@ -3,8 +3,15 @@
 (function(root){
  const pendingByClient=new WeakMap();
  async function read({client,projectId}){
-    const response=await client.from("waypoints").select("*").eq("project_id",projectId).order("wp_id",{ascending:true});
-    if(response.error||!response.data?.length)return response;
+    const points=[];let response;
+    for(let offset=0;;offset+=1000){
+      response=await client.from("waypoints").select("*").eq("project_id",projectId).order("wp_id",{ascending:true}).range(offset,offset+999);
+      if(response.error)return{...response,data:null};
+      points.push(...(response.data||[]));
+      if((response.data||[]).length<1000)break;
+    }
+    if(!points.length)return response;
+    response={...response,data:points};
     // Read only measurement evidence for these project points, under existing RLS.
     // Pagination prevents the API row cap from turning measured points pending.
     const ids=[...new Set(response.data.map(row=>row.wp_id))],measured=new Set(),hasMeasurement=new Set();
