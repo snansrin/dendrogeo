@@ -30,6 +30,13 @@ test('waypoint CSV retains its header, order, and visited flag encoding',()=>{
  ]),'\uFEFFwp_id,lat,lon,visited\n"1","40.1","32.2","1"\n"2","40.3","32.4","0"\n');
 });
 
+test('project-scoped waypoint CSV adds stable source identity without changing the legacy format',()=>{
+ const csv=formats.waypointsCSV([{project_id:25,wp_id:7,lat:39.9,lon:32.8,visited:false}],{
+  id:25,name:'Saha "A"',parkId:8,parkName:'Göksu Parkı'
+ });
+ assert.equal(csv,'\uFEFFproject_id,project_name,park_id,park_name,wp_id,lat,lon,visited\n"25","Saha ""A""","8","Göksu Parkı","7","39.9","32.8","0"\n');
+});
+
 test('format module loads before park export and is present in the service-worker cache',()=>{
  assert.ok(index.indexOf('src/domain/parks/park-export-formats.js')<index.indexOf('src/ui/park-export.js'));
  assert.match(index,/src\/domain\/parks\/park-export-formats\.js\?v=[a-f0-9]{8}/);

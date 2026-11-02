@@ -21,9 +21,11 @@
    }))
   };
  }
- function waypointsCSV(rows){
+ function waypointsCSV(rows,source=null){
   const cell=value=>'"'+String(value??"").replace(/"/g,'""')+'"';
-  return "\uFEFFwp_id,lat,lon,visited\n"+rows.map(r=>[r.wp_id,r.lat,r.lon,r.visited?1:0].map(cell).join(",")+"\n").join("");
+  if(!source)return "\uFEFFwp_id,lat,lon,visited\n"+rows.map(r=>[r.wp_id,r.lat,r.lon,r.visited?1:0].map(cell).join(",")+"\n").join("");
+  const header="project_id,project_name,park_id,park_name,wp_id,lat,lon,visited";
+  return "\uFEFF"+header+"\n"+rows.map(r=>[r.project_id??source.id,source.name,source.parkId,source.parkName,r.wp_id,r.lat,r.lon,r.visited?1:0].map(cell).join(",")+"\n").join("");
  }
  root.DG_PARK_EXPORT_FORMATS=Object.freeze({gridGeoJSON,waypointsCSV});
 })(window);
