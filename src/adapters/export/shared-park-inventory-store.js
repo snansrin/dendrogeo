@@ -21,58 +21,19 @@
   const {data,error}=await client.auth.getUser();
   return !error&&data?.user?.id===userId;
  }
- /* Participant export must never inherit an administrator's unrestricted projects SELECT.
-    Only owned projects or projects backed by a CURRENT, verified accepted invitation
-    and collaborator membership can appear in the non-admin export selector. */
+ /* The project directory is the canonical participant scope. Reusing its two
+    readers prevents export-only role rules from widening the UI's project list
+    (in particular, one administrator-issued park invite must not add every
+    project in that park to a participant's selector). */
  async function listParticipantInventoryProjects(client,{userId,role}={}){
   if(!userId)return [];
-  const owned=await pages(()=>client.from("projects").select(PROJECT_FIELDS).eq("owner",userId).order("id",{ascending:true}));
-  const memberships=await pages(()=>client.from("park_collaborators").select("park_id,added_at").eq("user_id",userId).order("park_id",{ascending:true}));
-  if(!memberships.length)return owned;
-  const {data:auth,error:authError}=await client.auth.getUser();
-  const verified=auth?.user;
-  if(authError||verified?.id!==userId||!verified?.email||!verified.email_confirmed_at)return owned;
-  const invites=await pages(()=>client.from("park_invites").select("park_id,invited_by,responded_at").eq("status","Kabul").eq("email",verified.email.trim().toLowerCase()).order("park_id",{ascending:true}));
-  const members=new Map(memberships.map(row=>[Number(row.park_id),Date.parse(row.added_at)]));
-  const accepted=invites.filter(invite=>{
-   const joined=members.get(Number(invite.park_id)),acceptedAt=Date.parse(invite.responded_at);
-   return Number.isFinite(joined)&&Number.isFinite(acceptedAt)&&acceptedAt>=joined;
-  });
-  if(!accepted.length)return owned;
-  // RLS validates invitation issuer and owner for ordinary participants. Admins
-  // bypass that RLS, so their participant selector must check issuers explicitly.
-  const privileged=role===undefined||["admin","owner"].includes(role);
-  let senders=new Map();
-  if(privileged){
-   const ids=[...new Set(accepted.map(invite=>invite.invited_by).filter(Boolean))];
-   if(!ids.length)return owned;
-   const senderRows=await pages(()=>client.from("profiles").select("id,role,active").in("id",ids).order("id",{ascending:true}));
-   senders=new Map(senderRows.filter(row=>row.active===true).map(row=>[row.id,row]));
-  }
-  const parks=[...new Set(accepted.map(invite=>Number(invite.park_id)).filter(Boolean))];
-  const authorizedByPark=new Map();
-  for(const invite of accepted){
-   const parkId=Number(invite.park_id),access=authorizedByPark.get(parkId)||{owners:new Set(),adminShare:false};
-   if(privileged){
-    const sender=senders.get(invite.invited_by);
-    if(sender&&["admin","owner"].includes(sender.role))access.adminShare=true;
-    else if(sender)access.owners.add(invite.invited_by);
-   }
-   authorizedByPark.set(parkId,access);
-  }
-  const shared=[];
-  for(let start=0;start<parks.length;start+=100){
-   const ids=parks.slice(start,start+100);
-   const projects=await pages(()=>client.from("projects").select(PROJECT_FIELDS).in("park_id",ids).order("id",{ascending:true}));
-   for(const project of projects){
-    const access=authorizedByPark.get(Number(project.park_id));
-    // Ordinary participants still rely on project RLS for exact owner/invite
-    // authorization. Admins bypass that RLS, so the bounded lookup here mirrors
-    // the invite issuer's project ownership or explicit administrator role.
-    if(access&&(!privileged||access.adminShare||access.owners.has(project.owner)))shared.push(project);
-   }
-  }
-  return [...new Map([...owned,...shared].map(project=>[Number(project.id),project])).values()];
+  const owned=await root.DG_OWNED_MEASUREMENT_PROJECTS.fetch({client,userId,onRelationError:()=>{}});
+  let shared=[],sharingError=null;
+  try{shared=await root.DG_SHARED_MEASUREMENT_PROJECTS.fetch({client,userId,ownedProjects:owned});}
+  catch(error){sharingError=error;}
+  const projects=root.DG_MERGE_MEASUREMENT_PROJECTS.merge(owned,shared);
+  if(sharingError)Object.defineProperty(projects,"sharingError",{value:sharingError});
+  return projects;
  }
  async function readAll(client,projectIds,filters={}){
   if(!projectIds.length)return [];
