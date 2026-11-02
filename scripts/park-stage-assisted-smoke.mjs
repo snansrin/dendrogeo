@@ -53,7 +53,10 @@ try{for(const width of [360,390,430]){
  await openTools();assert.equal(await panel.locator('#dgStageCutName').inputValue(),'Kolay bölüm');await panel.locator('#dgStageCutName').fill('Köprüler arası etap');
  await page.evaluate(axe.source);assert.deepEqual(await page.evaluate(async()=>(await axe.run(document.querySelector('.dg-stage-cut-panel'))).violations.map(v=>v.id)),[]);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
- const saveBox=await panel.locator('[data-cut-action="save"]').boundingBox(),panelBox=await panel.boundingBox();assert.ok(saveBox.y>=panelBox.y&&saveBox.y+saveBox.height<=panelBox.y+panelBox.height,'save remains visible in the fixed footer');
+ // Capture both rectangles in one browser task: a scroll/layout update between
+ // two remote boundingBox calls must not compare coordinates from different frames.
+ const footerGeometry=await panel.evaluate(el=>{const save=el.querySelector('[data-cut-action="save"]').getBoundingClientRect(),box=el.getBoundingClientRect();return{saveTop:save.top,saveBottom:save.bottom,panelTop:box.top,panelBottom:box.bottom};});
+ assert.ok(footerGeometry.saveTop>=footerGeometry.panelTop&&footerGeometry.saveBottom<=footerGeometry.panelBottom,'save remains visible in the fixed footer: '+JSON.stringify(footerGeometry));
  if(process.env.DG_STAGE_SCREENSHOT_DIR)await page.locator('#surfaceMapWorkspace').screenshot({path:join(process.env.DG_STAGE_SCREENSHOT_DIR,'bagimsiz-sinirlar-'+width+'.png')});
  await panel.locator('[data-cut-action="save"]').click();await page.waitForFunction(()=>DG_PARK?.id===9002);
  const saved=await page.evaluate(()=>({id:DG_PARK.id,writes:__stageFixture.writes,geometry:PARK_POLY,name:DG_PARK.name,hint:!!document.querySelector('.dg-stage-map-hint'),panel:!!document.querySelector('.dg-stage-cut-panel')}));
