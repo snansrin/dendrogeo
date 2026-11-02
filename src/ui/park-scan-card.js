@@ -109,7 +109,7 @@ function renderParkScanCard({element:el,park,candidate:cand,showManual,scanActiv
         (admin
           ? ``
           : `<div class="dg-tree-meta">🔐 Bu ekrandan yalnızca <b>yeni proje</b> açılır. `+
-            `Mevcut projelere park atamasını yönetici <b>Yönetim → Park Kimlikleri</b>'nden yapar.</div>`)+
+            `Mevcut projenin park bağlantısı yoksa park algılayıp yeni proje oluşturun.</div>`)+
         (scanActive&&returnTo
           ? `<button class="btn sm ghost" data-park-scan-action="cancelScan">Vazgeç</button>`
           : ``)+

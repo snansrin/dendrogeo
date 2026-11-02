@@ -11,7 +11,7 @@
   getLastWaypoints:ports.getLastWaypoints,
   getParkAreaFunction:ports.getParkAreaFunction,
   getSurfaceTypes:ports.getSurfaceTypes,
-  readProjectId:()=>Number(read("gridProject")?.value)
+  readProjectId:()=>window.DG_LIVE_MAP_PROJECTS?.activeProjectId?.()||Number(read("gridProject")?.value)
  });
  const presentation=window.DG_GIS_EXPORT_PRESENTATION;
  const classes=()=>presentation.classes(ports.getClasses);

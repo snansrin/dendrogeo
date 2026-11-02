@@ -20,6 +20,7 @@
   });
 
   async function loadParkAdmin(){
+   if(!deps.element("parkAdminBox"))return;
    const result=await deps.loadApplication();
    if(result.status==="forbidden")return deps.toast("Yetki yok.","err");
    const box=deps.element("parkAdminBox");

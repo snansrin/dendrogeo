@@ -330,14 +330,14 @@ describe('migration 0005: park adı yazım düzeni (Türkçe duyarlı)', () => {
 });
 
 describe('park kimlikleri yönetim aracı (yeniden adlandır · birleştir · sil)', () => {
-  test('kart + kontroller sayfada', () => {
-    assert.match(idx, /id="parkAdminBox"/);
-    assert.match(idx, /data-dg-admin-panel-action="reload-parks"/);
-    assert.match(idx, /<h2 style="font-size:1\.2rem">Park Kimlikleri<\/h2>/);
+  test('kaldırılmış kart ve kontroller sayfada bulunmaz', () => {
+    assert.doesNotMatch(idx, /id="parkAdminBox"/);
+    assert.doesNotMatch(idx, /data-dg-admin-panel-action="reload-parks"/);
+    assert.doesNotMatch(idx, /<h2 style="font-size:1\.2rem">Park Kimlikleri<\/h2>/);
   });
 
-  test('yönetim sekmesi açılınca park kimlikleri de yüklenir', () => {
-    assert.match(readFileSync(join(ROOT, 'src/services/admin.js'), 'utf8'), /loadParkAdmin\(\)/);
+  test('yönetim sekmesi kaldırılmış park kimlikleri listesini yüklemez', () => {
+    assert.doesNotMatch(readFileSync(join(ROOT, 'src/services/admin.js'), 'utf8'), /loadParkAdmin\(\)/);
   });
 
   test('birleştirme projeleri + ölçümleri taşır, kaynağı siler', () => {

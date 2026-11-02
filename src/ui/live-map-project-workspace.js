@@ -106,7 +106,7 @@
   function entering(){if(mapView?.classList.contains("on"))refresh();}
   if(mapView&&typeof ports.observe==="function")ports.observe(mapView,entering);
   entering();
-  return Object.freeze({refresh,open});
+  return Object.freeze({refresh,open,activeProjectId(){const row=projects().find(row=>Number(row.id)===active);return row&&Number(row.park_id)===ports.activeParkId()?active:0;}});
  }
  root.DG_LIVE_MAP_PROJECT_WORKSPACE_UI=Object.freeze({create});
 })(window);

@@ -53,7 +53,7 @@ test('empty-park toggle stores state and rerenders last known project/measuremen
   assert.equal(state.getState().showEmpty,true);assert.deepEqual(renders,[[[1],[2]]]);
 });
 
-test('park admin controller fetches fresh data per invocation and keeps rows in its feature state',async()=>{
+test('removed park admin panel cannot trigger background reads',async()=>{
   const{window}=setup();let loads=0;
   window.DG_PARK_ADMIN_MUTATION_STORE={create:()=>({})};
   window.DG_SYNC_PARK_PROJECT_NAMES_ADAPTER={create:()=>async()=>({})};
@@ -65,7 +65,7 @@ test('park admin controller fetches fresh data per invocation and keeps rows in 
     translatePlain:String,prompt(){},confirm(){},clearParkSession(){},backfillGeometry(){}
   });
   await controller.loadParkAdmin();await controller.loadParkAdmin();
-  assert.equal(loads,2);assert.deepEqual(JSON.parse(JSON.stringify(controller.state.getState().rows)),[{id:2}]);
+  assert.equal(loads,0);assert.deepEqual(JSON.parse(JSON.stringify(controller.state.getState().rows)),[]);
 });
 
 test('park backfill controller stores the latest plan and delegates its rendering',async()=>{

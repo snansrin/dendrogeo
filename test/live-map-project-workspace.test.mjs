@@ -74,6 +74,15 @@ test('Göksu project opens existing boundary and points without creating data',a
  assert.deepEqual(x.calls,['draw','points 77','select 30','remember 30']);
  assert.match(x.status.textContent,/77 kayıtlı ölçüm noktası/);
 });
+
+test('export project identity follows only a successfully opened project in the active park',async()=>{
+ const x=uiScenario();assert.equal(x.ui.activeProjectId(),0);
+ x.select.value='30';assert.equal(x.ui.activeProjectId(),0,'an unconfirmed dropdown choice is not an active workspace');
+ await x.ui.open();assert.equal(x.ui.activeProjectId(),30);
+ x.select.value='33';assert.equal(x.ui.activeProjectId(),30,'pending choice must not relabel the loaded park');
+ await x.ui.open();assert.equal(x.ui.activeProjectId(),33);
+ x.projects.splice(1,1);assert.equal(x.ui.activeProjectId(),0,'revoked project is never an export target');
+});
 test('project selector stays blank until the user selects a project, then opens it',async()=>{
  const x=uiScenario({remembered:()=> '33'});
  assert.equal(x.select.value,'');assert.deepEqual(x.calls,[]);

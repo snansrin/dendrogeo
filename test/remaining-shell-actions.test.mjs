@@ -16,7 +16,7 @@ test('admin panel actions preserve service calls and accessible archive disclosu
  const click=()=>listeners.get('click')({target:{closest:()=>button}});
  click();assert.equal(body.style.display,'block');assert.equal(button.attrs['aria-expanded'],'true');
  click();assert.equal(body.style.display,'none');assert.equal(button.attrs['aria-expanded'],'false');
- assert.deepEqual(calls,['parks','queue']);
+ assert.deepEqual(calls,['queue'],'removed park identity action cannot load or mutate parks');
 });
 
 test('account recovery and world report actions route to established workflows',()=>{

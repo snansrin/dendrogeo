@@ -3,6 +3,7 @@ import {serveFixture} from './lib/browser-acceptance-fixture.mjs';
 const fieldNavigation=spawnSync(process.execPath,['scripts/field-navigation-smoke.mjs'],{stdio:'inherit'});if(fieldNavigation.status!==0)process.exit(fieldNavigation.status||1);
 const securityCsp=spawnSync(process.execPath,['scripts/security-csp-smoke.mjs'],{stdio:'inherit'});if(securityCsp.status!==0)process.exit(securityCsp.status||1);
 const mapExport=spawnSync(process.execPath,['scripts/map-only-export-smoke.mjs'],{stdio:'inherit'});if(mapExport.status!==0)process.exit(mapExport.status||1);
+const liveProjectExport=spawnSync(process.execPath,['scripts/live-project-export-waypoints-smoke.mjs'],{stdio:'inherit'});if(liveProjectExport.status!==0)process.exit(liveProjectExport.status||1);
 const parkStages=spawnSync(process.execPath,['scripts/park-stage-workspace-smoke.mjs'],{stdio:'inherit'});if(parkStages.status!==0)process.exit(parkStages.status||1);
 const assistedStages=spawnSync(process.execPath,['scripts/park-stage-assisted-smoke.mjs'],{stdio:'inherit'});if(assistedStages.status!==0)process.exit(assistedStages.status||1);
 // Each interaction script owns its server; layout scripts share one afterwards.

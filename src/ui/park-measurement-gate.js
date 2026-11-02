@@ -11,7 +11,6 @@ function bindActions(box,actions){
     const actions=actionsByBox.get(box)||{};
     if(button.dataset.parkGateAction==="scan")actions.scan?.({returnTo:"measure"});
     else if(button.dataset.parkGateAction==="change")actions.scan?.({projectId:Number(button.dataset.projectId),returnTo:"measure"});
-    else if(button.dataset.parkGateAction==="admin")actions.admin?.();
   });
 }
 function renderGate({result,box,save,escape:esc,formatArea,schemaWarningHTML,actions}){
@@ -46,12 +45,11 @@ function renderGate({result,box,save,escape:esc,formatArea,schemaWarningHTML,act
         `Park kimliği olmadan girilen ölçümler karşılaştırmada park bazında izlenemez; `+
         `bu yüzden önce park kimliği oluşturuluyor.</span>`+
         `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">`+
-          `<button class="btn sm blue" data-park-gate-action="admin">🔐 Yönetim → Park Kimlikleri</button>`+
+          `<span>Park bağlantısı olmayan proje ile yeni ölçüm kaydedilemez.</span>`+
         `</div>`
       : `<b>⛔ Bu proje parka bağlı değil — ölçüm girilemez.</b><br>`+
         `<span style="font-size:.82rem">Proje: <b>${esc(p.name)}</b>. Mevcut projeyi parka bağlama yetkisi `+
-        `<b>yalnız yöneticide</b> 🔐. İki yol: (1) yönetici park atamasını Yönetim → Park Kimlikleri'nden yapsın, `+
-        `(2) aşağıdan park algılayıp <b>yeni proje</b> aç ve ölçümlere orada devam et.</span>`+
+        `<b>yalnız yöneticide</b> 🔐. Aşağıdan park algılayıp <b>yeni proje</b> aç ve ölçümlere orada devam et.</span>`+
         `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">`+
           `<button class="btn sm blue" data-park-gate-action="scan">🌳 Park Algıla → Yeni Proje Oluştur</button>`+
         `</div>`;
