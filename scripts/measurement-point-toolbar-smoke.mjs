@@ -13,6 +13,7 @@ try{for(const width of [360,390,430]){
   window.__map=L.map('map').setView([39.001,32.001],17);window.__rows=[{id:1,project_id:7,wp_id:1,lat:39,lon:32,visited:false,hasMeasurement:false},{id:2,project_id:7,wp_id:2,lat:39.001,lon:32.001,visited:true,hasMeasurement:true}];window.__measured=JSON.stringify(__rows[1]);window.__writes=[];
   window.__layer=DG_GRID_WAYPOINT_LAYER.render({map:__map,rows:__rows,leaflet:L,editable:true,onCreate:async p=>{__writes.push({kind:'insert',...p});return{id:3,project_id:7,wp_id:3,...p,visited:false,hasMeasurement:false};},onSave:async p=>{__writes.push({kind:'edit',...p});}});
  });
+ await page.evaluate(()=>{const old=document.getElementById('dgWaypointEditor'),replacement=document.createElement('div');replacement.id=old.id;old.replaceWith(replacement);__layer.dgMountControls();});
  const menu=page.locator('details[data-menu-order="35"]');assert.equal(await menu.locator('summary').textContent(),'Ölçüm noktaları ⌄');
  await menu.locator('summary').click();await menu.locator('[data-grid-summary-action="createAuto"]').click();await menu.locator('[data-grid-summary-action="createManual"]').click();assert.deepEqual(await page.evaluate(()=>__gridActions),['auto','manual']);
  assert.equal(await page.locator('.leaflet-top .dg-png-btn').count(),0,'no detached map toolbar');

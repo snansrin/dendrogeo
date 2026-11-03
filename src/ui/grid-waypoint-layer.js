@@ -6,7 +6,7 @@ function dgRenderGridWaypointLayer({map,previousLayer,rows,leaflet,onSave,onCrea
   if(previousLayer&&map){map.removeLayer(previousLayer);if(previousLayer.dgEditControl)map.removeControl(previousLayer.dgEditControl);}
   const layer=leaflet.layerGroup().addTo(map),markers=[];
   let editing=false,adding=false,busy=false;
-  const host=typeof document.getElementById==="function"?document.getElementById("dgWaypointEditor"):null;
+  let host=typeof document.getElementById==="function"?document.getElementById("dgWaypointEditor"):null;
   const button=document.createElement("button"),add=document.createElement("button"),status=document.createElement("p");
   button.type=add.type="button";button.className=add.className="dg-png-btn sm";status.className="dg-meta";status.setAttribute("role","status");
   button.disabled=!editable||typeof onSave!=="function";add.disabled=!editable||typeof onCreate!=="function";
@@ -17,7 +17,8 @@ function dgRenderGridWaypointLayer({map,previousLayer,rows,leaflet,onSave,onCrea
   const available=()=>{if(canInteract())return true;status.textContent="Önce açık çizim veya fırça işlemini bitirin.";return false;};
   button.addEventListener("click",()=>{if(!available())return;setAdding(false);setEditing(!editing);});
   add.addEventListener("click",()=>{if(!available())return;setEditing(false);setAdding(!adding);const menu=host?.closest("details");if(adding&&menu)menu.open=false;});
-  host?.replaceChildren(button,add,status);
+  layer.dgMountControls=()=>{host=document.getElementById?.("dgWaypointEditor");host?.replaceChildren(button,add,status);};
+  layer.dgMountControls();
   const capture=async event=>{
     if(!adding||event.target.closest?.(".leaflet-control,.leaflet-marker-icon,.leaflet-popup"))return;
     if(!canInteract()){setAdding(false);available();return;}

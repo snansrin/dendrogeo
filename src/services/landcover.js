@@ -18,10 +18,12 @@ const DG_RUN_SURFACE_ANALYSIS=window.DG_SURFACE_APPLICATION.createRunSurfaceAnal
   getBbox:dgLcBboxFromGeometry,
   analyzeSource:async(src,bbox,geometry)=>{
     const source=await dgLcAnalyzeSource(src,bbox,geometry);
+    let lastYield=Date.now();
     const refine=window.DG_APPLY_OSM_SURFACE_REFINEMENT;
     return refine?refine.apply(source,{
       fetchWater:()=>dgLcFetchWaterPolygons(bbox),fetchRoads:()=>dgLcFetchRoadFeatures(bbox),
       refineWater:dgLcRefineWater,refineRoads:dgLcRefineHardByOsm,epsg:source.result?.cells?.[0]?.epsg,
+      yieldTask:()=>Date.now()-lastYield<8?Promise.resolve():new Promise(resolve=>setTimeout(()=>{lastYield=Date.now();resolve();},0)),
       warn:(...args)=>console.warn(...args)
     }):source;
   },
