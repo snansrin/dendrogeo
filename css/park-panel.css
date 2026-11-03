@@ -599,3 +599,7 @@
 @media(prefers-reduced-motion:reduce){#surfaceMenuBar>.dg-editor-menu>summary{transition:none}}
 .dg-sens-object-preview{margin:10px 0;padding:10px;border:1px solid var(--line);border-left:3px solid var(--green);border-radius:6px;background:var(--bg)}
 .dg-sens-object-preview .dg-sens-actions{margin-bottom:0}
+
+/* Active point controls share the left map-tool area without extending its height. */
+#surfaceMapTools{display:flex;align-items:flex-start;gap:4px}
+.dg-point-map-tools .dg-editor-tool{width:44px;height:44px;flex-basis:44px}

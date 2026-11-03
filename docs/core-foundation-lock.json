@@ -1152,7 +1152,16 @@
       "src/ui/park-waypoint-workspace.js",
       "src/ui/grid-waypoint-layer.js",
       "src/services/grid-engine.js",
-      "test/park-waypoint-workspace.test.mjs"
+      "test/park-waypoint-workspace.test.mjs",
+      "scripts/measurement-point-toolbar-smoke.mjs",
+      "test/grid-waypoint-layer.test.mjs"
+    ],
+    "hyde_park_coverage_recovery": [
+      "src/domain/parks/select-overpass-mirrors.js",
+      "src/services/osm-client.js",
+      "src/services/park-query.js",
+      "src/application/parks/fetch-detailed-coverage.js",
+      "test/overpass-regional-scope.test.mjs"
     ]
   },
   "sha256": {
@@ -2234,7 +2243,9 @@
     "test/fixtures/security/park-invite-baseline.json": "39162ea93ccafe37f8f222be2f962167039d9ade1b0151f06cf940b9076c9b7a",
     "src/ui/park-waypoint-workspace.js": "de3f9bdb930ad09b4b0072e7ae83f0ca19b67dad2d97a077c5ff76d543f6bd76",
     "test/park-waypoint-workspace.test.mjs": "2354d31a43c1b543690b7a8501191e26aff25edc62ca23f3046caeba1a88ff32",
-    "test/overpass-regional-scope.test.mjs": "2b43ca7714a0d7f9dd2e45be54de8259c065c8b98c4bc7175602919c9c22c14e"
+    "test/overpass-regional-scope.test.mjs": "2b43ca7714a0d7f9dd2e45be54de8259c065c8b98c4bc7175602919c9c22c14e",
+    "scripts/measurement-point-toolbar-smoke.mjs": "c04321236fc8578b10eb40466f60d87062cd9febe2c3f702ef4973052729871c",
+    "test/grid-waypoint-layer.test.mjs": "7d55ddfed15674f4e3d827c0f2bbb91fad0c23c4cc27dd752a7a6dc73927962a"
   },
   "authorized_modularizations": [
     {
@@ -14605,6 +14616,41 @@
           "path": "sw.js",
           "previous_sha256": "1ec8f66238a35887166c14fcd0fe51488f5c03b79430ad892b4664f88fd83e97",
           "sha256": "00c8adb20ae68518cf4955738a7c0b97b4898f51eed69188eea9220ac9df0975"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-03",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: continuous point placement remains active until explicit finish or Escape. Active point placement/edit controls dock beside existing left map tools, survive tool/menu remounts, and clean up when the layer is removed. Preserve measured points and all scientific/detection behavior. Explicitly group existing Hyde Park recovery hashes as protected core without changing those files.",
+      "validation": [
+        "Chromium/WebKit at 360/390/430: repeated placement, explicit finish, Escape, left edit/drag/renumber, toolbar remount, measured row unchanged",
+        "Full source/SQL/CI/mobile/accessibility and five-park GIS gates"
+      ],
+      "added_protected_files": [
+        "scripts/measurement-point-toolbar-smoke.mjs",
+        "test/grid-waypoint-layer.test.mjs"
+      ],
+      "files": [
+        {
+          "path": "css/park-panel.css",
+          "previous_sha256": "07a7b9653a267b239f5bd486f1e18ece085bab917c0e2676c830aa3feb3d10c9",
+          "sha256": "ecf5e1153df5089c959be947759d125c3e001be04298f897146b8e155e7c97b8"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "b07c2f4b2f4a76fc909290a26dbbe0268f17d5ef7ad5b741819f893f5cdc07e5",
+          "sha256": "5b5edb46997bc8681fa54f72b9a9ad59cb92b590657881d6f9294639ce8a74ef"
+        },
+        {
+          "path": "scripts/measurement-point-toolbar-smoke.mjs",
+          "previous_sha256": "c04321236fc8578b10eb40466f60d87062cd9febe2c3f702ef4973052729871c",
+          "sha256": "c04321236fc8578b10eb40466f60d87062cd9febe2c3f702ef4973052729871c"
+        },
+        {
+          "path": "src/ui/grid-waypoint-layer.js",
+          "previous_sha256": "70589a469ff55d3c8be5fe3181d50db12bf886f35afc040c3045b676720f4cdc",
+          "sha256": "6a6232244a9d0a8ddf74f5e78df254ec0b53327e10d222a17e31f77ebe8989af"
         }
       ]
     }
