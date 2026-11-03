@@ -22,6 +22,7 @@ const DG_RUN_SURFACE_ANALYSIS=window.DG_SURFACE_APPLICATION.createRunSurfaceAnal
     return refine?refine.apply(source,{
       fetchWater:()=>dgLcFetchWaterPolygons(bbox),fetchRoads:()=>dgLcFetchRoadFeatures(bbox),
       refineWater:dgLcRefineWater,refineRoads:dgLcRefineHardByOsm,epsg:source.result?.cells?.[0]?.epsg,
+      yieldTask:()=>new Promise(resolve=>setTimeout(resolve,0)),
       warn:(...args)=>console.warn(...args)
     }):source;
   },

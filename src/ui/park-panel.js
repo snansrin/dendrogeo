@@ -235,12 +235,15 @@ function dgBindParkInfoEvents(container){
 }
 function dgParkMountMenus(){
  dgBindParkInfoEvents(document.getElementById("v-map")||document.getElementById("parkInfo"));
- return window.DG_PARK_MENU_UI.mount({
+ const result=window.DG_PARK_MENU_UI.mount({
   document,clearMenus:dgEditorClearMenus,arrangeMenus:dgEditorArrangeMenus,
   translate:value=>typeof dgCf==="function"?dgCf(value):value,
   escape:value=>typeof esc==="function"?esc(value):value,
   editorUi:window.DG_EDITOR_UI
  });
+ DG_GRID_SESSION.getWaypointLayer()?.dgMountControls?.();
+ if(DG_GRID_SESSION.getCells().length){const counts=window.DG_GRID_CELL_STATES.count(DG_GRID_SESSION.getCells());updateGridSummary(counts.measured,counts.empty);}
+ return result;
 }
 function dgEditorClearMenus(owner){return window.DG_PARK_MENU_UI.clear({document,owner});}
 function dgEditorArrangeMenus(){return window.DG_PARK_MENU_UI.arrange({document});}

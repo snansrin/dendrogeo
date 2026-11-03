@@ -14424,6 +14424,43 @@
           "sha256": "86c56586e6183f42bba7cacdd799d61f2356090b641100cfa28d8bd92e41ba64"
         }
       ]
+    },
+    {
+      "date": "2026-11-03",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: remount active waypoint controls when park menus are rebuilt; restore current grid action summary without rebuilding grid geometry. Yield between unchanged OSM refinement batches while preserving cell order, all aggregates, raw evidence, saved measurements and access rules.",
+      "validation": [
+        "Waypoint menu host reconstruction with add, drag and renumber at 360/390/430px",
+        "Yielding and synchronous refinement produce identical cells and totals",
+        "Full repository checks and mobile/WebKit/GIS CI"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "86c56586e6183f42bba7cacdd799d61f2356090b641100cfa28d8bd92e41ba64",
+          "sha256": "1e888454b2a27ef02c8fd222d38ade715c262964cbd5b62db2c3e17317103941"
+        },
+        {
+          "path": "src/application/surface/apply-osm-surface-refinement.js",
+          "previous_sha256": "010c264f4378545e0e20c732ebfd4fd56d137442157e1c95b15b30d6fcc6fa3e",
+          "sha256": "cdbbcacdd0875ec19f1e6e3be6ccbd9ce3914b841fb381f210271961960d1f0b"
+        },
+        {
+          "path": "src/services/landcover.js",
+          "previous_sha256": "3e1a5d1b4ffc0a031326f0dbb484d69649d9a52fa118913886033d909813fb6a",
+          "sha256": "93d0df1467f7fea970b68b4b905a9f227d69c7d1dff732b7c63f644ff506ba6e"
+        },
+        {
+          "path": "src/ui/grid-waypoint-layer.js",
+          "previous_sha256": "31ecc6fb670ddfc6db657893888b2fa905112b06e599eb5b9385c04038ad1eb7",
+          "sha256": "70589a469ff55d3c8be5fe3181d50db12bf886f35afc040c3045b676720f4cdc"
+        },
+        {
+          "path": "src/ui/park-panel.js",
+          "previous_sha256": "ad90368e373c99011729a5f39a8cfd8b1cb48267d8f623cc34010d9c17ef266b",
+          "sha256": "e1cde93c5b09d0bdc605516397c008fae063ba1474dbb4cb65dc4cae603ded54"
+        }
+      ]
     }
   ]
 }
