@@ -5,19 +5,32 @@ function dgRenderGridWaypointLayer({map,previousLayer,rows,leaflet,onSave,onCrea
   previousLayer?.dgDispose?.();
   if(previousLayer&&map){map.removeLayer(previousLayer);if(previousLayer.dgEditControl)map.removeControl(previousLayer.dgEditControl);}
   const layer=leaflet.layerGroup().addTo(map),markers=[];
-  let editing=false,adding=false,busy=false;
+  let editing=false,adding=false,busy=false,disposed=false;
+  const dock=document.createElement("div");dock.className="dg-editor-rail dg-point-map-tools";dock.setAttribute("role","group");dock.setAttribute("aria-label","Ölçüm noktaları");
+  const rail=document.getElementById?.("surfaceMapTools");
+  function placeControls(){
+    const active=(adding||editing)&&!disposed,target=disposed?null:(active&&rail?dock:(host?.dgWaypointOwner===layer?host:null));
+    if(active&&rail&&dock.parentNode!==rail)rail.append(dock);
+    for(const [control,symbol] of [[button,editing?"✓":"📍"],[add,adding?"✕":"＋"]]){
+      const label=control===button?(editing?"✓ Düzenlemeyi bitir":"📍 Noktaları düzenle"):(adding?"✕ Nokta eklemeyi bitir":"＋ Haritaya nokta ekle");
+      control.className=active&&rail?"dg-png-btn ghost sm dg-editor-tool":"dg-png-btn sm";control.textContent=active&&rail?symbol:label;control.setAttribute("aria-label",label);control.title=label;
+      if(target&&control.parentNode!==target)target.append(control);
+    }
+    if(!active)dock.remove?.();
+    if(!disposed&&host?.dgWaypointOwner===layer&&status.parentNode!==host)host.append(status);
+  }
   let host=typeof document.getElementById==="function"?document.getElementById("dgWaypointEditor"):null;
   const button=document.createElement("button"),add=document.createElement("button"),status=document.createElement("p");
   button.type=add.type="button";button.className=add.className="dg-png-btn sm";status.className="dg-meta";status.setAttribute("role","status");
   button.disabled=!editable||typeof onSave!=="function";add.disabled=!editable||typeof onCreate!=="function";
   add.textContent="＋ Haritaya nokta ekle";
-  function setEditing(value){editing=!!value&&editable;button.textContent=editing?"✓ Düzenlemeyi bitir":"📍 Noktaları düzenle";button.setAttribute("aria-pressed",String(editing));for(const item of markers)if(item.editable){editing&&!item.pending?item.marker.dragging.enable():item.marker.dragging.disable();}}
-  function setAdding(value){adding=!!value&&editable&&!busy;add.setAttribute("aria-pressed",String(adding));add.textContent=adding?"✕ Nokta eklemeyi bitir":"＋ Haritaya nokta ekle";status.textContent=adding?"Haritada noktayı yerleştirmek istediğiniz yere tıklayın. Kaydedilen yeni noktayı sürükleyebilirsiniz.":"Ölçüm geçmişi bulunan noktalar sabittir.";}
+  function setEditing(value){editing=!!value&&editable;button.textContent=editing?"✓ Düzenlemeyi bitir":"📍 Noktaları düzenle";button.setAttribute("aria-pressed",String(editing));for(const item of markers)if(item.editable){editing&&!item.pending?item.marker.dragging.enable():item.marker.dragging.disable();}placeControls();}
+  function setAdding(value){adding=!!value&&editable&&!busy;add.setAttribute("aria-pressed",String(adding));add.textContent=adding?"✕ Nokta eklemeyi bitir":"＋ Haritaya nokta ekle";status.textContent=adding?"Haritada noktayı yerleştirmek istediğiniz yere tıklayın. Kaydedilen yeni noktayı sürükleyebilirsiniz.":"Ölçüm geçmişi bulunan noktalar sabittir.";placeControls();}
   setEditing(false);setAdding(false);
   const available=()=>{if(canInteract())return true;status.textContent="Önce açık çizim veya fırça işlemini bitirin.";return false;};
-  button.addEventListener("click",()=>{if(!available())return;setAdding(false);setEditing(!editing);});
+  button.addEventListener("click",()=>{if(!available())return;setAdding(false);setEditing(!editing);const menu=host?.closest("details");if(editing&&menu)menu.open=false;});
   add.addEventListener("click",()=>{if(!available())return;setEditing(false);setAdding(!adding);const menu=host?.closest("details");if(adding&&menu)menu.open=false;});
-  layer.dgMountControls=()=>{host=document.getElementById?.("dgWaypointEditor");host?.replaceChildren(button,add,status);};
+  layer.dgMountControls=()=>{host=document.getElementById?.("dgWaypointEditor");if(host){host.dgWaypointOwner=layer;host.replaceChildren(status);}placeControls();};
   layer.dgMountControls();
   const capture=async event=>{
     if(!adding||event.target.closest?.(".leaflet-control,.leaflet-marker-icon,.leaflet-popup"))return;
@@ -25,13 +38,14 @@ function dgRenderGridWaypointLayer({map,previousLayer,rows,leaflet,onSave,onCrea
     event.preventDefault();event.stopImmediatePropagation();if(busy)return;busy=true;add.disabled=button.disabled=true;
     try{const position=map.mouseEventToLatLng(event),row=await onCreate({lat:position.lat,lon:position.lng});rows.push(row);drawRow(row);setEditing(true);status.textContent="Yeni nokta kaydedildi: P"+row.wp_id+". Sürükleyerek yerini değiştirebilirsiniz.";}
     catch(error){status.textContent="Nokta eklenemedi: "+(error.message||"İzin veya bağlantıyı kontrol edin.");}
-    finally{busy=false;adding=false;add.setAttribute("aria-pressed","false");add.textContent="＋ Haritaya nokta ekle";add.disabled=!editable;button.disabled=!editable;}
+    finally{busy=false;add.disabled=!editable||typeof onCreate!=="function";button.disabled=!editable||typeof onSave!=="function";placeControls();}
   };
   const container=map.getContainer?.(),attach=()=>{container?.addEventListener("click",capture,true);document.addEventListener?.("keydown",key);button.disabled=!editable||typeof onSave!=="function";add.disabled=!editable||typeof onCreate!=="function";};
   const detach=()=>{setAdding(false);setEditing(false);container?.removeEventListener("click",capture,true);document.removeEventListener?.("keydown",key);button.disabled=add.disabled=true;};
   const key=event=>{if(event.key==="Escape"){setAdding(false);setEditing(false);}};
+  const observer=rail&&typeof MutationObserver!=="undefined"?new MutationObserver(()=>{if((adding||editing)&&!disposed)placeControls();}):null;observer?.observe(rail,{childList:true});
   attach();layer.on?.("add",attach);layer.on?.("remove",detach);
-  layer.dgDispose=()=>{detach();layer.off?.("add",attach);layer.off?.("remove",detach);document.removeEventListener?.("keydown",key);};
+  layer.dgDispose=()=>{disposed=true;observer?.disconnect();detach();dock.remove?.();button.remove?.();add.remove?.();status.remove?.();layer.off?.("add",attach);layer.off?.("remove",detach);document.removeEventListener?.("keydown",key);};
   layer.setEditing=setEditing;
   layer.isEditing=()=>editing||adding||busy;
   function drawRow(row){
