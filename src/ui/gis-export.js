@@ -5,7 +5,7 @@
   getToast:()=>typeof toast==="function"?toast:null,
   getLandcover:()=>window.DG_LANDCOVER?.getLast?.(),
   getGridSession:()=>typeof DG_GRID_SESSION!=="undefined"?DG_GRID_SESSION:undefined,
-  hasWaypoints:()=>typeof WP!=="undefined",getWaypoints:()=>WP,
+  hasWaypoints:()=>typeof WP!=="undefined"||!!window.DG_PARK_WAYPOINT_WORKSPACE?.rows().length,getWaypoints:()=>[...(typeof WP!=="undefined"?WP:[]),...(window.DG_PARK_WAYPOINT_WORKSPACE?.rows()||[])],
   getLastWaypoints:()=>typeof LAST_WP_ROWS!=="undefined"?LAST_WP_ROWS:[],
   getParkAreaFunction:()=>typeof parkAreaHa!=="undefined"?parkAreaHa:undefined,
   getSurfaceTypes:()=>window.DG_SURFACE_REVIEW?.types,

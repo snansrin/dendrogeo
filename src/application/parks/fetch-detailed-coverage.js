@@ -29,7 +29,7 @@ window.DG_PARK_COVERAGE_FETCH_APPLICATION = {
       const previous=completed.get(boundary),policy=window.DG_OSM_SURFACE_QUERY;
       let json=previous&&Date.now()-previous.time<600000?previous.json:null;
       let triedFallback=false;
-      if(!json&&queryFallback&&preferFallback()){triedFallback=true;try{json=await queryFallback(bbox);}catch(error){}}
+      if(!json&&queryFallback&&preferFallback(policy.build(bbox))){triedFallback=true;try{json=await queryFallback(bbox);}catch(error){}}
       if(!valid(json))try{json=await queryOsm(policy.build(bbox),"yüzey+su",{maxAttempts:1,deadline});}catch(error){}
       if(!valid(json)&&queryFallback&&!triedFallback)try{json=await queryFallback(bbox);}catch(error){}
       if(!valid(json)){

@@ -114,6 +114,7 @@ function toggleGridVis(){
   return window.DG_MAP_LAYER_VISIBILITY_UI.toggle({map,layer:DG_GRID_SESSION.getGridLayer(),control:$("togGrid")});
 }
 function toggleWpVis(){
+  window.DG_PARK_WAYPOINT_WORKSPACE?.setVisible($("togWp")?.checked!==false);
   if(!DG_GRID_SESSION.getWaypointLayer())return;
   return window.DG_MAP_LAYER_VISIBILITY_UI.toggle({map,layer:DG_GRID_SESSION.getWaypointLayer(),control:$("togWp")});
 }
@@ -151,4 +152,7 @@ const DG_GRID_WAYPOINT_CONTROLLER=window.DG_GRID_WAYPOINT_CONTROLLER_UI.create({
   loadWaypoints:()=>loadWaypoints(),notify:(...args)=>toast(...args),clearSelection:clearCellSelection
  }),translate:_tgr,notify:(...args)=>toast(...args)
 });
-async function createWaypointsFromGrid(mode){return DG_GRID_WAYPOINT_CONTROLLER(mode);}
+async function createWaypointsFromGrid(mode){
+ if(window.DG_PARK_WAYPOINT_WORKSPACE){try{return window.DG_PARK_WAYPOINT_WORKSPACE.addGrid(mode);}catch(error){return toast(_tgr(error.message),"warn");}}
+ return DG_GRID_WAYPOINT_CONTROLLER(mode);
+}

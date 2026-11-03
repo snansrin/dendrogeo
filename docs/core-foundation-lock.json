@@ -517,7 +517,8 @@
       "test/waypoint-gps-overlay-modules.test.mjs",
       "test/waypoint-load-modules.test.mjs",
       "test/waypoint-navigation-actions.test.mjs",
-      "test/park-export-lazy-class-bridge.test.mjs"
+      "test/park-export-lazy-class-bridge.test.mjs",
+      "test/overpass-regional-scope.test.mjs"
     ],
     "modular_measurement_analysis_safeguards": [
       ".github/workflows/ci.yml",
@@ -1146,6 +1147,12 @@
       "supabase/migrations/20261025170621_project_invite_scope_security.sql",
       "test/project-invite-scope-security.test.mjs",
       "test/fixtures/security/park-invite-baseline.json"
+    ],
+    "park_measurement_point_engine": [
+      "src/ui/park-waypoint-workspace.js",
+      "src/ui/grid-waypoint-layer.js",
+      "src/services/grid-engine.js",
+      "test/park-waypoint-workspace.test.mjs"
     ]
   },
   "sha256": {
@@ -2224,7 +2231,10 @@
     "test/app-runtime-package.test.mjs": "ca953ec66585ae23e6c6ab93f78dc15bdbc7d6c6413b6cbaa4bc034c7ce63a33",
     "supabase/migrations/20261025170621_project_invite_scope_security.sql": "c7c56a880d34bcf68660344e0d3f2dcde45bd97fe0b53370f426c17536ff46dd",
     "test/project-invite-scope-security.test.mjs": "c8ac9a2489621799e5b60c10651a95b2c7a5e836bb855d96b6abd05107a9fbcc",
-    "test/fixtures/security/park-invite-baseline.json": "39162ea93ccafe37f8f222be2f962167039d9ade1b0151f06cf940b9076c9b7a"
+    "test/fixtures/security/park-invite-baseline.json": "39162ea93ccafe37f8f222be2f962167039d9ade1b0151f06cf940b9076c9b7a",
+    "src/ui/park-waypoint-workspace.js": "de3f9bdb930ad09b4b0072e7ae83f0ca19b67dad2d97a077c5ff76d543f6bd76",
+    "test/park-waypoint-workspace.test.mjs": "2354d31a43c1b543690b7a8501191e26aff25edc62ca23f3046caeba1a88ff32",
+    "test/overpass-regional-scope.test.mjs": "2b43ca7714a0d7f9dd2e45be54de8259c065c8b98c4bc7175602919c9c22c14e"
   },
   "authorized_modularizations": [
     {
@@ -14511,6 +14521,90 @@
           "path": "src/services/landcover.js",
           "previous_sha256": "93d0df1467f7fea970b68b4b905a9f227d69c7d1dff732b7c63f644ff506ba6e",
           "sha256": "3376f186be80add607066f865933e37af3ddb82e41214f82e26e7ba751111b98"
+        }
+      ]
+    },
+    {
+      "date": "2026-11-03",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: park/etap polygon alone enables planning points without a project. Keep session plans account/geometry scoped, editable and exportable without database writes; preserve all measured/persisted waypoints. Protect the point workspace as a core tool. Restore Hyde Park coverage through a geographically restricted Europe provider verified under browser CORS/CSP; preserve all classification/query families and global providers. Fix undefined Service Worker fallback responses. Prefer native API recovery only when every query-eligible mirror is unhealthy, so a failed global mirror cannot preempt a healthy regional source.",
+      "validation": [
+        "Project-free park workspace scope and stale edit rejection",
+        "Chromium 360/390/430 map interaction and measured-point protection",
+        "Direct browser Hyde full coverage: 3,811 elements, no proxy, no error",
+        "SW valid response and exact/unversioned cache fallback regressions",
+        "Full source, mobile/WebKit and five-park GIS checks"
+      ],
+      "added_protected_files": [
+        "src/ui/park-waypoint-workspace.js",
+        "test/park-waypoint-workspace.test.mjs",
+        "test/overpass-regional-scope.test.mjs"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "60b25704a6d3b611ffa082582f1d7d6da885a1f71bd186a24af0262c3f152848",
+          "sha256": "b07c2f4b2f4a76fc909290a26dbbe0268f17d5ef7ad5b741819f893f5cdc07e5"
+        },
+        {
+          "path": "partials/head.html",
+          "previous_sha256": "514973ae2eaad106435bbf2003b200b73621adaa1e8f83578ff59e1af48c2c1d",
+          "sha256": "b1cf4ed267c380e9685c9dbcfc27b3d27b5c94bf8967ef099590b314c422b236"
+        },
+        {
+          "path": "src/application/parks/fetch-detailed-coverage.js",
+          "previous_sha256": "a7cfcd35eea840c0e1ecd4d52c0c2721aa0f1e14f371955980334ef960bba026",
+          "sha256": "745139040f2df01ddc34a5962338c9e4cecfd4869d32f58ab1e97b073e4bc85c"
+        },
+        {
+          "path": "src/domain/parks/select-overpass-mirrors.js",
+          "previous_sha256": "9535d3d2da3a3c5ef39245728e495c98308556fa4d7684848d4f47b410fd1664",
+          "sha256": "1986e9852f19cb8ebd08bfacf3c5c993433330c70ba0d36fab855ee0997540dc"
+        },
+        {
+          "path": "src/services/grid-engine.js",
+          "previous_sha256": "d7e9d02d5370446559de0b54e469b8379a696d5016d0459eec64fb6123b7a9ee",
+          "sha256": "146c46dff1de2bf56ac9554f65b20fb072fce0876e874ddb03091768e32507b6"
+        },
+        {
+          "path": "src/services/osm-client.js",
+          "previous_sha256": "af40b7898bf1b485da24f3217bf70c61969110a0bb464a031120f53e3ab1c3e6",
+          "sha256": "63a03190c74cfd812561760790b1c307187c267b0912b4bf7d1809ebcdba71ce"
+        },
+        {
+          "path": "src/services/park-query.js",
+          "previous_sha256": "08487de70b34b6a81c6398e3ac9fa3d850c05e156da93ec7f25c12c4e0473a3e",
+          "sha256": "c38508f72fab951b29bbb901019d0cebdc19697c35b69f7d12004d743c65f0b8"
+        },
+        {
+          "path": "src/ui/gis-export-verified-layers.js",
+          "previous_sha256": "716f9cb4a6aec6fd1dd91a5534c463f5853af824c86022d55c1c38a4c53d8d68",
+          "sha256": "78683f38e96b158bfee4fd5c48dd0a6ad0c0c43a4c4f65d294f5ef554728f923"
+        },
+        {
+          "path": "src/ui/gis-export.js",
+          "previous_sha256": "e27293dfd3e83cb70c56fa4252b228f2ed71a6dde038b3723017c9e485a9e629",
+          "sha256": "e6c6ffe494010e4a97d893c020d21aaa28a3f039d621a50d3bee76dba34b7f4e"
+        },
+        {
+          "path": "src/ui/park-export.js",
+          "previous_sha256": "0680ea680067e4c84d7b5d007859cca868da3c502224e1ed2b13f29fcbd597b9",
+          "sha256": "7929a538fa7205fdb9afba814de7420cd4284ae5a4463988044bdee87804dedb"
+        },
+        {
+          "path": "src/ui/park-info-panel.js",
+          "previous_sha256": "f051211a928fed6330c03216eff5cae2ad31e942bc70d75c65f8bcaf3171d1f4",
+          "sha256": "4743beb692a55fff891551e04a1b7aebf5621a03f14ea2924680cbcb3ecf6aed"
+        },
+        {
+          "path": "src/ui/park-panel.js",
+          "previous_sha256": "35a18768ad54eb90dd8cb54c7e911c09c51c6ed503cb7ee32b9595d9ca75b345",
+          "sha256": "e24131f92f0462a9bff451dffe31c936e2a9730d8dce41ff7b5961a223ef223f"
+        },
+        {
+          "path": "sw.js",
+          "previous_sha256": "1ec8f66238a35887166c14fcd0fe51488f5c03b79430ad892b4664f88fd83e97",
+          "sha256": "00c8adb20ae68518cf4955738a7c0b97b4898f51eed69188eea9220ac9df0975"
         }
       ]
     }

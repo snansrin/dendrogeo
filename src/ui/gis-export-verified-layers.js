@@ -26,7 +26,7 @@
    const pid=readProjectId();
    const points=[...getLastWaypoints(),...getWaypoints()];
    const unique=new Map(points.filter(w=>Number.isFinite(Number(w.lat))&&Number.isFinite(Number(w.lon))&&(!w.project_id||Number(w.project_id)===pid))
-    .map(w=>[String(w.project_id||pid)+":"+String(w.wp_id??w.id),w]));
+    .map(w=>[(w.draft?"park-draft":String(w.project_id||pid))+":"+String(w.wp_id??w.id),w]));
    canvasApi.drawVerifiedWaypoints(g,pr,[...unique.values()],INK);
   }
   g.restore();

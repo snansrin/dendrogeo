@@ -259,6 +259,7 @@
     return root.DG_MARK_WAYPOINT_VISITED.moveWaypoint({client:sb,change});
    }});
    DG_GRID_SESSION.setWaypointLayer(layer);LAST_WP_ROWS=rows;
+   root.DG_PARK_WAYPOINT_WORKSPACE?.mount();
   },
   clearWaypoints:()=>{const layer=DG_GRID_SESSION.getWaypointLayer();if(layer&&map)map.removeLayer(layer);DG_GRID_SESSION.setWaypointLayer(null);LAST_WP_ROWS=[];},
   selectProject:setSelect,openWaypoints,

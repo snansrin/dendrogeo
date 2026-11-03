@@ -210,6 +210,17 @@ describe('trimCache — while döngüsü ve FIFO', () => {
 });
 
 describe('staleWhileRevalidate — çevrimdışı PRECACHE yedeği', () => {
+  test('failed external OSM fetch returns a valid 503 response when neither cache has evidence',async()=>{
+    const api=yukle({agCalisiyor:false});
+    const response=await api.staleWhileRevalidate(REQ('https://api.openstreetmap.org/api/0.6/map?bbox=1,2,3,4'),api.RUNTIME);
+    assert.equal(response.status,503);assert.equal(response.body,'Network unavailable');
+  });
+  test('failed versioned request awaits the unversioned precache fallback',async()=>{
+    const api=yukle({agCalisiyor:false}),pre=await openCache(api,api.PRECACHE);
+    await pre.add(ORIGIN+'/offline-module.js');
+    const response=await api.staleWhileRevalidate(REQ(ORIGIN+'/offline-module.js?v=1'),api.RUNTIME);
+    assert.equal(response.url,ORIGIN+'/offline-module.js');
+  });
   test('ağ yok + RUNTIME boş + PRECACHE’te sabit URL var → precache döner', async () => {
     const api = yukle({ agCalisiyor: false });
     const pre = await openCache(api, api.PRECACHE);

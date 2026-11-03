@@ -688,6 +688,7 @@ const CORE_ASSETS = [
     '/src/ui/grid-selection.js',
     '/src/ui/grid-summary.js',
     '/src/ui/grid-waypoint-layer.js',
+    '/src/ui/park-waypoint-workspace.js',
     '/src/services/grid-engine.js',
     '/src/ui/editor-ui.js',
     '/src/ui/park-reference-area.js',
@@ -1369,7 +1370,8 @@ async function staleWhileRevalidate(request, cacheName) {
             // CORE_ASSETS'te tam URL'leriyle durduğu için bu yedek çalışır.
             const url = new URL(request.url);
             const pre = await caches.open(PRECACHE);
-            return pre.match(request) || pre.match(new Request(url.origin + url.pathname));
+            return (await pre.match(request)) || (await pre.match(new Request(url.origin + url.pathname))) ||
+                new Response('Network unavailable', { status: 503 });
         });
     return cached || fetchPromise;
 }

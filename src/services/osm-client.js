@@ -51,9 +51,10 @@ async function overpassRun(query,label="OSM",options={}){
 
   try{
     const now=Date.now();
+    const urls=window.DG_SELECT_OVERPASS_MIRRORS?.forQuery?.(query,OVERPASS_URLS)||OVERPASS_URLS;
     const ordered=typeof window!=="undefined"&&window.DG_SELECT_OVERPASS_MIRRORS
-      ?window.DG_SELECT_OVERPASS_MIRRORS.select(OVERPASS_URLS,OVERPASS_HEALTH,now)
-      :OVERPASS_URLS
+      ?window.DG_SELECT_OVERPASS_MIRRORS.select(urls,OVERPASS_HEALTH,now)
+      :urls
       .map((url,index)=>{
         const h=OVERPASS_HEALTH.get(url)||{};
         return {url,index,badUntil:h.badUntil||0,lastOk:h.lastOk||0};
