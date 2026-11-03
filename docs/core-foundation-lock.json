@@ -14409,6 +14409,21 @@
           "sha256": "529fedb07ed015900ae454e6ff5df99465d4d0b7c7c76a36198492df70d7e1fc"
         }
       ]
+    },
+    {
+      "date": "2026-11-03",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: increase normal live-map height to 82dvh desktop and 78dvh mobile, retain separate surface editor and stage layout.",
+      "validation": [
+        "Chromium popup viewport smoke at phone and desktop widths"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "529fedb07ed015900ae454e6ff5df99465d4d0b7c7c76a36198492df70d7e1fc",
+          "sha256": "86c56586e6183f42bba7cacdd799d61f2356090b641100cfa28d8bd92e41ba64"
+        }
+      ]
     }
   ]
 }

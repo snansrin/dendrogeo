@@ -22,8 +22,8 @@ summary.dg-live-projects-head::-webkit-details-marker{display:none}
 .dg-live-projects[open]>.dg-live-projects-head>.dg-live-projects-chevron{transform:rotate(180deg)}
 #dgLiveParkName{width:100%;min-width:0}
 
-#v-map #map:not(.surface-review-map){height:clamp(480px,65dvh,760px)}
+#v-map #map:not(.surface-review-map){height:clamp(640px,82dvh,1100px)}
 .dg-measurement-popup .leaflet-popup-content{overflow-wrap:anywhere;overscroll-behavior:contain}
 .dg-measurement-popup img{display:block;max-width:100%;max-height:min(220px,30dvh);height:auto;object-fit:contain}
-@media(max-width:900px){#v-map #map:not(.surface-review-map){height:clamp(360px,60dvh,620px)}}
-@media(max-height:500px){#v-map #map:not(.surface-review-map){height:clamp(200px,60dvh,300px)}}
+@media(max-width:900px){#v-map #map:not(.surface-review-map){height:clamp(480px,78dvh,900px)}}
+@media(max-height:500px){#v-map #map:not(.surface-review-map){height:clamp(240px,75dvh,420px)}}
