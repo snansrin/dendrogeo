@@ -14377,6 +14377,38 @@
           "sha256": "aeefb3e362e2e6b2191ef5aff1ea5fb04ea10e945eebf67e12ce3f6fad6ea5a2"
         }
       ]
+    },
+    {
+      "date": "2026-11-03",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: targeted repair for the reproduced Hyde Park OSM coverage failure: accept large counts of genuine polygon relations, exclude tagged non-area transit/site relations from polygon geometry recovery, hydrate missing OSM relation members, and flatten nested multipolygon rings while preserving outer/inner roles. Keep park boundary identity, surface classification, raster/scientific calculations, acceptance rules, saved records, RLS, project locks, and UI theme unchanged.",
+      "validation": [
+        "Hyde Park public OSM map and required relation hydration completed with source=osm-api; 3,808 decoded features from the exact Hyde boundary bbox",
+        "Synthetic regression matching 34 area relations, unrelated nested transit relation, missing relation members, and nested outer/inner topology",
+        "Targeted park, network recovery, provider, coverage, and OSM regressions"
+      ],
+      "files": [
+        {
+          "path": "src/adapters/parks/load-osm-map-coverage.js",
+          "previous_sha256": "8fbb0ca15f33901ec356af8ced42f7047d4688bdda0928f8eb7a655b037fbc49",
+          "sha256": "c15b6771747863921ca34fe012b3cdb424ff2d20a5c61fb95008a8ebc41715bd"
+        },
+        {
+          "path": "src/domain/parks/decode-osm-map-geometry.js",
+          "previous_sha256": "bb575231ae592727b77c07ece3655fd4111b03eaced0b503605aec1816a1225c",
+          "sha256": "b0fbb73852a812260a23ebdf2eca9751f3cc5de35c02908e23544b8864fbc2a8"
+        },
+        {
+          "path": "test/osm-coverage-recovery.test.mjs",
+          "previous_sha256": "e6f1ccda894443a0704b3552181fbf7f43e59a07e933d61af6dbbbdf20bd5d03",
+          "sha256": "59212cad19ff30babe6f90b3df066b5aa4cdf9561ab95d4b8a8fa56f2e65f177"
+        },
+        {
+          "path": "index.html",
+          "previous_sha256": "aeefb3e362e2e6b2191ef5aff1ea5fb04ea10e945eebf67e12ce3f6fad6ea5a2",
+          "sha256": "529fedb07ed015900ae454e6ff5df99465d4d0b7c7c76a36198492df70d7e1fc"
+        }
+      ]
     }
   ]
 }
