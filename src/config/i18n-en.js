@@ -2,6 +2,12 @@
 /* English dictionary data for the runtime translator in i18n.js. */
 /* ---- EN sözlüğü: anahtar = TR dizenin trim'lenmiş hâli ---- */
 const DG_I18N_EN={
+"Park taslağına ölçüm noktaları eklendi. CSV ile indirebilirsiniz.":"Measurement points added to the park plan. You can download them as CSV.",
+"Park/etap taslağı proje seçmeden çalışır. Bu oturumdaki noktaları CSV ile indirebilirsiniz; kayıtlı ölçümler değişmez.":"Park/stage planning works without a project. Download this session's points as CSV; saved measurements are preserved.",
+"Park değişti veya başka bir harita işlemi sürüyor.":"The park changed or another map operation is active.",
+"Bu nokta taslağa ait değil veya ölçülmüş.":"This point is outside the plan or has measurement history.",
+"Nokta numarası zaten kullanılıyor.":"The point number is already in use.",
+"Uygun veya seçilmiş hücre yok.":"No eligible or selected cells.",
 "Grid oluşturma araçları":"Grid creation tools",
 "Otomatik, seçili hücreler veya haritada serbest yerleştirme":"Automatic, selected cells or free placement on the map",
 "📍 Noktaları düzenle":"📍 Edit points",

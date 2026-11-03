@@ -27,5 +27,13 @@ try{for(const width of [360,390,430]){
  assert.equal(await page.evaluate(()=>JSON.stringify(__rows[1])===__measured),true,'measured row is byte-for-byte fixed');
  assert.equal(await page.evaluate(()=>__layer.getLayers().find(m=>m.options.title.startsWith('P2')).dragging.enabled()),false);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);assert.deepEqual(errors,[]);
- console.log(JSON.stringify({engine:process.env.DG_UI_BROWSER||'chromium',width,separateToolbar:true,gridActions:true,freePlacement:true,drag:true,renumber:true,measuredUnchanged:true}));await page.close();
+ await page.addScriptTag({url:server.url+'/src/ui/park-waypoint-workspace.js'});
+ await page.evaluate(()=>{window.__draft=DG_PARK_WAYPOINT_WORKSPACE_UI.create({key:()=> 'account-a:park-a',canInteract:()=>true,render:options=>DG_GRID_WAYPOINT_LAYER.render({map:__map,leaflet:L,...options}),removeLayer:layer=>__map.removeLayer(layer),addLayer:layer=>__map.addLayer(layer),grid:()=>({cells:[{id:1,lat:39.001,lon:32.001}],selection:new Set([1]),current:true}),selectCells:cells=>cells,buildRows:(cells,n)=>cells.map(c=>({...c,wp_id:n++,visited:false}))});__draft.mount();document.querySelector('details[data-menu-order="35"]').open=true;});
+ await menu.getByRole('button',{name:'＋ Haritaya nokta ekle',exact:true}).click();await page.locator('#map').scrollIntoViewIfNeeded();
+ const draftPoint=await page.evaluate(()=>{const p=__map.latLngToContainerPoint([39.0015,32.0004]),r=__map.getContainer().getBoundingClientRect();return{x:r.left+p.x,y:r.top+p.y};});await page.mouse.click(draftPoint.x,draftPoint.y);await page.waitForFunction(()=>__draft.rows().length===1);
+ assert.equal(await page.evaluate(()=>__draft.rows()[0].project_id==null),true);
+ await page.evaluate(()=>__draft.addGrid('auto'));assert.equal(await page.evaluate(()=>__draft.rows().length),2);
+ assert.equal(await page.evaluate(()=>JSON.stringify(__rows[1])===__measured),true);
+ assert.deepEqual(errors,[]);
+ console.log(JSON.stringify({engine:process.env.DG_UI_BROWSER||'chromium',width,separateToolbar:true,gridActions:true,freePlacement:true,drag:true,renumber:true,measuredUnchanged:true,projectFreeParkDraft:true}));await page.close();
 }}finally{await browser.close();await server.close();}

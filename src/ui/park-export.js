@@ -71,6 +71,8 @@ function downloadGridGeoJSON(){
 }
 
 function downloadWaypointsCSV(){
+  const draft=window.DG_PARK_WAYPOINT_WORKSPACE?.rows();
+  if(draft?.length)return downloadBlob("dendrogeo_park_olcum_noktalari.csv","text/csv",window.DG_PARK_EXPORT_FORMATS.waypointsCSV(draft));
   const projectId=Number(window.DG_LIVE_MAP_PROJECTS?.activeProjectId?.()||document.getElementById("gridProject")?.value||document.getElementById("nProject")?.value||0);
   if(!Number.isInteger(projectId)||projectId<=0)return toast("Önce çalışma projesi seçin","warn","📥");
   const candidates=[typeof LAST_WP_ROWS!=="undefined"?LAST_WP_ROWS:[],typeof WP!=="undefined"?WP:[]];

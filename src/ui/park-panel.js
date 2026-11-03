@@ -181,7 +181,7 @@ const DG_PARK_RESET_CONTROLLER=window.DG_PARK_RESET_CONTROLLER_UI.create({
  cleanupReview:()=>{if(window.DG_LC_SENS&&typeof window.DG_LC_SENS.cleanup==="function")window.DG_LC_SENS.cleanup();},
  resetSurface:()=>{WATER_RINGS=[];WATER_LINES=[];IMP_RINGS=[];IMP_LINES=[];GRID_BLOCK_LINES=[];}
 });
-function clearPark(){window.DG_PARK_STAGES?.clear();DG_ACCEPTED_PARK_SURFACE.clear();return DG_PARK_RESET_CONTROLLER();}
+function clearPark(){window.DG_PARK_WAYPOINT_WORKSPACE?.suspend();window.DG_PARK_STAGES?.clear();DG_ACCEPTED_PARK_SURFACE.clear();return DG_PARK_RESET_CONTROLLER();}
 
 function switchPark(i){
   const p=PARK_CANDS[i];
@@ -241,7 +241,15 @@ function dgParkMountMenus(){
   escape:value=>typeof esc==="function"?esc(value):value,
   editorUi:window.DG_EDITOR_UI
  });
- DG_GRID_SESSION.getWaypointLayer()?.dgMountControls?.();
+ if(!window.DG_PARK_WAYPOINT_WORKSPACE&&window.DG_PARK_WAYPOINT_WORKSPACE_UI)window.DG_PARK_WAYPOINT_WORKSPACE=window.DG_PARK_WAYPOINT_WORKSPACE_UI.create({
+  key:()=>PARK_POLY?.length?JSON.stringify([typeof USER!=="undefined"?USER?.id||"guest":"guest",typeof DG_PARK!=="undefined"?DG_PARK?.id||null:null,PARK_POLY,PARK_HOLES||[]]):null,
+  canInteract:()=>!(window._dgLandCoverBusy||window.DG_LC_SENS?.state?.busy||window.DG_LC_SENS?.state?.saving||window.DG_LC_SENS?.state?.brush||window.DG_LC_SENS?.state?.draw||window.DG_PARK_STAGES?.isDrawing()),
+  render:options=>window.DG_GRID_WAYPOINT_LAYER.render({map,leaflet:L,...options}),removeLayer:layer=>map?.removeLayer(layer),addLayer:layer=>map?.addLayer(layer),
+  grid:()=>({cells:DG_GRID_SESSION.getCells(),selection:DG_GRID_SESSION.getSelection(),current:DG_GRID_SESSION.getSource()===dgGridReviewSignature()}),
+  selectCells:window.DG_GRID_WAYPOINT_SELECTION.select,buildRows:window.DG_GRID_WAYPOINT_ROWS.build,
+  changed:()=>toast(_tgr("Park taslağına ölçüm noktaları eklendi. CSV ile indirebilirsiniz."),"ok")
+ });
+ window.DG_PARK_WAYPOINT_WORKSPACE?.mount();
  if(DG_GRID_SESSION.getCells().length){const counts=window.DG_GRID_CELL_STATES.count(DG_GRID_SESSION.getCells());updateGridSummary(counts.measured,counts.empty);}
  return result;
 }

@@ -45,7 +45,11 @@ const DG_PARK_COVERAGE_FETCH=window.DG_PARK_COVERAGE_FETCH_APPLICATION.create({
   getParkPolygon:()=>PARK_POLY,
   queryOsm:(query,label,options)=>overpassRequest(query,label,options),
   queryFallback:window.DG_LOAD_OSM_MAP_COVERAGE?.load,
-  preferFallback:()=>[...OVERPASS_HEALTH.values()].some(health=>Math.max(health.badUntil||0,health.degradedUntil||0)>Date.now())
+  preferFallback:query=>{
+   const configured=typeof OVERPASS_URLS!=="undefined"?OVERPASS_URLS:[];if(!configured.length)return false;
+   const urls=window.DG_SELECT_OVERPASS_MIRRORS?.forQuery?.(query,configured)||configured;
+   return urls.every(url=>{const health=OVERPASS_HEALTH.get(url)||{};return Math.max(health.badUntil||0,health.degradedUntil||0)>Date.now();});
+  }
 });
 
 function queryDetailedCoverage(){

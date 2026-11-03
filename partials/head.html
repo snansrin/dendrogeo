@@ -8,7 +8,7 @@
 <!-- Script bodies are hash-authorized by the build; provider origins are scoped
      to their resource type. Realtime keeps an explicit wss connect-src.
      frame-ancestors requires a real hosting response header, not a meta tag. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com __DG_SCRIPT_HASHES__; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://orcid.org https://*.tile.openstreetmap.org https://*.supabase.co https://server.arcgisonline.com https://*.tile.opentopomap.org https://maps.mail.ru; font-src 'self' https://fonts.gstatic.com; worker-src 'self' blob:; frame-src 'self' blob: https://challenges.cloudflare.com; media-src 'self' data: blob: https://*.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; connect-src 'self' data: blob: https://*.supabase.co wss://*.supabase.co https://nominatim.openstreetmap.org https://api.openstreetmap.org https://*.tile.openstreetmap.org https://challenges.cloudflare.com https://maps.mail.ru https://overpass-api.de https://lz4.overpass-api.de https://z.overpass-api.de https://overpass.osm.ch https://server.arcgisonline.com https://*.tile.opentopomap.org https://planetarycomputer.microsoft.com https://*.blob.core.windows.net https://*.s3.us-west-2.amazonaws.com">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com __DG_SCRIPT_HASHES__; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://orcid.org https://*.tile.openstreetmap.org https://*.supabase.co https://server.arcgisonline.com https://*.tile.opentopomap.org https://maps.mail.ru; font-src 'self' https://fonts.gstatic.com; worker-src 'self' blob:; frame-src 'self' blob: https://challenges.cloudflare.com; media-src 'self' data: blob: https://*.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; connect-src 'self' data: blob: https://*.supabase.co wss://*.supabase.co https://nominatim.openstreetmap.org https://api.openstreetmap.org https://*.tile.openstreetmap.org https://challenges.cloudflare.com https://maps.mail.ru https://overpass-api.de https://lz4.overpass-api.de https://z.overpass-api.de https://overpass.osm.ch https://ovp.dresel.systems https://server.arcgisonline.com https://*.tile.opentopomap.org https://planetarycomputer.microsoft.com https://*.blob.core.windows.net https://*.s3.us-west-2.amazonaws.com">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>DendroGeo — Ağaç Envanteri ve Karbon Hesaplama</title>
 
@@ -900,6 +900,7 @@
 <script src="src/ui/grid-selection.js?v=00000000" defer></script>
 <script src="src/ui/grid-summary.js?v=00000000" defer></script>
 <script src="src/ui/grid-waypoint-layer.js?v=00000000" defer></script>
+<script src="src/ui/park-waypoint-workspace.js?v=00000000" defer></script>
 <script src="src/services/grid-engine.js?v=c91d2900" defer></script>
 <script src="src/ui/editor-ui.js?v=a31c1799" defer></script>
 <script src="src/ui/park-reference-area.js?v=00000000" defer></script>
