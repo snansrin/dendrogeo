@@ -7,7 +7,8 @@ window.DG_CREATE_MEASUREMENT_MAP_MARKER={
     const marker=leaflet.marker([row.lat,row.lon],{
       icon:leaflet.divIcon({className:'tree-marker',html:`<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)"></div>`,iconSize:[18,18],iconAnchor:[9,9]})
     });
-    marker.bindPopup(popupHTML(row));
+    marker.bindPopup(popupHTML(row),{className:"dg-measurement-popup",keepInView:true,maxHeight:320,maxWidth:280});
+    window.DG_MAP_POPUP_VIEWPORT?.attach(marker);
     return marker;
   }
 };

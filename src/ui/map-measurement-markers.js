@@ -39,7 +39,8 @@
             iconSize:[18,18],iconAnchor:[9,9]
           })
         });
-        marker.bindPopup(popupHTML(row));
+        marker.bindPopup(popupHTML(row),{className:"dg-measurement-popup",keepInView:true,maxHeight:320,maxWidth:280});
+    window.DG_MAP_POPUP_VIEWPORT?.attach(marker);
         map._cluster.addLayer(marker);
       }
       if(i<rows.length)setTimer(step,16);
