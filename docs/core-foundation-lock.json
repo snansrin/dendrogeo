@@ -14487,6 +14487,32 @@
           "sha256": "35a18768ad54eb90dd8cb54c7e911c09c51c6ed503cb7ee32b9595d9ca75b345"
         }
       ]
+    },
+    {
+      "date": "2026-11-03",
+      "audit_chain": "sha256-v1",
+      "scope": "User-authorized release follow-up: budget UI yields to approximately 8ms of work and bypass empty-evidence batching to avoid unnecessary waiting; keep exact refinement arithmetic and ordering.",
+      "validation": [
+        "Yielding/synchronous result equivalence and network-budget regressions",
+        "Browser workload with 26,387 cells and 300 roads"
+      ],
+      "files": [
+        {
+          "path": "index.html",
+          "previous_sha256": "1b2aaa838393b51884dbedaff49944f9f0c0be58424965cd9d775054d012c3cd",
+          "sha256": "60b25704a6d3b611ffa082582f1d7d6da885a1f71bd186a24af0262c3f152848"
+        },
+        {
+          "path": "src/application/surface/apply-osm-surface-refinement.js",
+          "previous_sha256": "cdbbcacdd0875ec19f1e6e3be6ccbd9ce3914b841fb381f210271961960d1f0b",
+          "sha256": "d6f265494566c656e5c0f5e7ab071db7838846c03194b589885fb9ee8a06ea60"
+        },
+        {
+          "path": "src/services/landcover.js",
+          "previous_sha256": "93d0df1467f7fea970b68b4b905a9f227d69c7d1dff732b7c63f644ff506ba6e",
+          "sha256": "3376f186be80add607066f865933e37af3ddb82e41214f82e26e7ba751111b98"
+        }
+      ]
     }
   ]
 }

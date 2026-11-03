@@ -10,7 +10,7 @@
       rawCounts:{...(original.rawCounts||{})},rawAreas:{...(original.rawAreas||{})}
     };
     async function refine(fn,evidence){
-      if(typeof yieldTask!=="function"||!copy.cells.length)return Number(fn(copy,evidence,epsg))||0;
+      if(typeof yieldTask!=="function"||!copy.cells.length||(Array.isArray(evidence)&&!evidence.length))return Number(fn(copy,evidence,epsg))||0;
       const cells=copy.cells;let changed=0;
       try{for(let i=0;i<cells.length;i+=32){copy.cells=cells.slice(i,i+32);changed+=Number(fn(copy,evidence,epsg))||0;await yieldTask();}}
       finally{copy.cells=cells;}
