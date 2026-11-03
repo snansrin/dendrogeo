@@ -222,7 +222,7 @@ function dgBindParkInfoEvents(container){
   const control=event.target?.closest?.("[data-park-action]");
   if(!control||!container.contains(control)||control.disabled)return;
   const actions={buildGrid,landCoverAnalysis:()=>window.runLandCoverAnalysis?.(),clearGrid,
-   retryRegister:()=>window.dgRetryRegister?.()};
+   retryRegister:()=>window.dgRetryRegister?.(),openProjectWorkspace:()=>{const workspace=document.getElementById("dgLiveProjects");if(workspace){workspace.open=true;workspace.scrollIntoView({block:"nearest"});document.getElementById("dgLiveProjectSelect")?.focus({preventScroll:true});}}};
   actions[control.dataset.parkAction]?.(control,event);
  });
  container.addEventListener("change",event=>{

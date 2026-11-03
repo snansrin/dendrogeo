@@ -71,8 +71,8 @@
       `<div id="parkWaypointTools" class="dg-png-card">`+
         `<div class="dg-png-title">📍 Ölçüm noktaları</div>`+
         `<p class="dg-meta">Gridin uygun veya elle seçilmiş hücrelerinden noktalar üretin. Haritada istediğiniz yere yeni nokta ekleyebilir, ölçümü olmayan noktaları sürükleyebilirsiniz.</p>`+
-        `<div id="dgWaypointGridActions"></div>`+
-        `<div id="dgWaypointEditor"></div>`+
+        `<div id="dgWaypointGridActions"><p class="dg-meta">Otomatik veya seçili hücrelerden nokta üretmek için Grid menüsünden gridi oluşturun.</p></div>`+
+        `<div id="dgWaypointEditor"><p class="dg-meta">Kayıtlı noktaları düzenlemek veya haritaya serbest nokta eklemek için çalışma projenizi haritada açın.</p><button type="button" class="dg-png-btn sm" data-park-action="openProjectWorkspace">📁 Çalışma projesini seç</button></div>`+
       `</div>`+
       `<div id="parkSurfaceAction" class="dg-png-card">`+
         `<div class="dg-png-head">`+
