@@ -88,3 +88,33 @@ test('failed geometry application rolls back objects and cannot leave a complete
  await w.DG_APPLY_AUTO_SURFACE_WATER_OBJECTS.apply({record,objects:[{type:'water',method:'osm-boundary',osmId:'new'}],epoch:1,getEpoch:()=>1,getRecord:()=>record,repartition:async()=>false,dirty:()=>assert.fail('failed geometry must not become a dirty new result')});
  assert.equal(record.objectFeatures,old);assert.equal(record.osmCoverage.status,'unavailable');
 });
+
+test('Hyde-sized OSM fallback keeps 34 area relations, ignores tagged transit relations, and hydrates only missing members',async()=>{
+ const elements=[];for(let id=1;id<=34;id++)elements.push({type:'relation',id,tags:{building:'yes',type:'multipolygon'},members:[{type:'way',ref:id<=4?9000+id:1000+id,role:'outer'}]});
+ elements.push({type:'relation',id:15698797,tags:{building:'transportation',type:'public_transport'},members:[{type:'relation',ref:8108227,role:''}]});
+ elements.push({type:'relation',id:900,tags:{waterway:'riverbank',type:'waterway'},members:[{type:'way',ref:1900,role:''}]});
+ elements.push({type:'relation',id:901,tags:{building:'transportation',type:'public_transport'},members:[]});
+ elements.push({type:'relation',id:8108227,tags:{type:'multipolygon'},members:[{type:'way',ref:1910,role:'outer'}]});
+ for(let id=1005;id<=1034;id++)elements.push({type:'way',id,nodes:[]});
+ elements.push({type:'way',id:1900,nodes:[]},{type:'way',id:1910,nodes:[]});
+ const makeNode=element=>({nodeName:element.type,getAttribute:key=>String(element[key]??''),children:[...Object.entries(element.tags||{}).map(([k,v])=>({nodeName:'tag',getAttribute:name=>name==='k'?k:name==='v'?v:null})),...(element.nodes||[]).map(ref=>({nodeName:'nd',getAttribute:()=>String(ref)})),...(element.members||[]).map(member=>({nodeName:'member',getAttribute:name=>name==='type'?member.type:name==='ref'?String(member.ref):name==='role'?member.role:''}))]});
+ let responseElements=elements;const window={DG_OSM_SURFACE_QUERY:{relevant:e=>!!(e.tags?.building||e.tags?.waterway)},DG_DECODE_OSM_MAP_GEOMETRY:{decode:({candidates})=>candidates}};
+ const context=vm.createContext({window,DOMParser:class{parseFromString(){return{querySelector:()=>null,documentElement:{nodeName:'osm',children:responseElements.map(makeNode)}};}},AbortController,setTimeout,clearTimeout,Date,Map});
+ vm.runInContext(read('src/adapters/parks/load-osm-map-coverage.js'),context);
+ const hydrated=[];const load=window.DG_LOAD_OSM_MAP_COVERAGE.create({relevant:window.DG_OSM_SURFACE_QUERY.relevant,decode:window.DG_DECODE_OSM_MAP_GEOMETRY.decode,fetch:async url=>{
+  if(url.includes('/map?'))return{ok:true,text:async()=>'<osm/>'};
+  const id=Number(url.match(/relation\/(\d+)\/full/)[1]);hydrated.push(id);responseElements=[{type:'relation',id,tags:{building:'yes',type:'multipolygon'},members:[{type:'way',ref:9000+id,role:'outer'}]},{type:'way',id:9000+id,nodes:[]}];return{ok:true,text:async()=>'<osm/>'};
+ }});
+ const result=await load('51.5013452,-0.1753251,51.5134842,-0.1507785');
+ assert.equal(result?.complete,true);assert.equal(result.elements.length,34);assert.equal(hydrated.length,4);assert.deepEqual(hydrated,[1,2,3,4]);
+});
+
+test('nested multipolygon members retain outer and inner topology in native OSM recovery',()=>{
+ const context=vm.createContext({window:{}});vm.runInContext(read('src/domain/parks/decode-osm-map-geometry.js'),context);
+ const nodes=[{type:'node',id:1,lat:0,lon:0},{type:'node',id:2,lat:1,lon:0},{type:'node',id:3,lat:1,lon:1},{type:'node',id:4,lat:0,lon:1},{type:'node',id:5,lat:.2,lon:.2},{type:'node',id:6,lat:.8,lon:.2},{type:'node',id:7,lat:.8,lon:.8},{type:'node',id:8,lat:.2,lon:.8}];
+ const ways=[{type:'way',id:10,nodes:[1,2,3]},{type:'way',id:11,nodes:[4,1]},{type:'way',id:12,nodes:[5,6,7,8]}];
+ const relations=[{type:'relation',id:20,members:[{type:'way',ref:10,role:'outer'},{type:'way',ref:11,role:'outer'},{type:'relation',ref:21,role:'inner'}]},{type:'relation',id:21,members:[{type:'way',ref:12,role:'outer'}]}];
+ const decoded=context.window.DG_DECODE_OSM_MAP_GEOMETRY.decode({elements:[...nodes,...ways,...relations],candidates:['relation/20']})[0];
+ assert.deepEqual([...decoded.members.map(member=>member.role)],['outer','outer','inner']);assert.equal(decoded.members[2].geometry.length,4);
+ assert.throws(()=>context.window.DG_DECODE_OSM_MAP_GEOMETRY.decode({elements:[...nodes,...ways,{type:'relation',id:30,members:[{type:'relation',ref:30,role:'outer'}]}],candidates:['relation/30']}),/döngüsü/);
+});
